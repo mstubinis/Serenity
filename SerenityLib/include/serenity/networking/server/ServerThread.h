@@ -10,8 +10,8 @@ namespace Engine::Networking {
 };
 
 #include <serenity/utils/Utils.h>
+#include <serenity/system/Macros.h>
 #include <vector>
-#include <unordered_map>
 #include <memory>
 #include <string>
 
@@ -24,23 +24,20 @@ namespace Engine::Networking {
             mutable ClientContainer  m_HashedServerClients;
         public:
             ServerThread() = default;
-            ServerThread(const ServerThread&)            = delete;
-            ServerThread& operator=(const ServerThread&) = delete;
-            ServerThread(ServerThread&&) noexcept;
-            ServerThread& operator=(ServerThread&&) noexcept;
+            ServerThread(const ServerThread&)                = delete;
+            ServerThread& operator=(const ServerThread&)     = delete;
+            ServerThread(ServerThread&&) noexcept            = default;
+            ServerThread& operator=(ServerThread&&) noexcept = default;
 
             void clearAllClients();
-            bool remove_client(std::string_view hash);
-            bool add_client(std::string_view hash, ServerClient* client);
-            [[nodiscard]] inline bool has(std::string_view hash) const noexcept { return m_HashedServerClients.contains(hash); }
+            bool removeClient(std::string_view hash);
+            bool addClient(std::string_view hash, ServerClient* client);
+            [[nodiscard]] inline bool hasClient(std::string_view hash) const noexcept { return m_HashedServerClients.contains(hash); }
 
-            [[nodiscard]] inline size_t num_clients() const noexcept { return m_HashedServerClients.size(); }
-            [[nodiscard]] inline ClientContainer& clients() const noexcept { return m_HashedServerClients; }
+            [[nodiscard]] inline size_t getNumClients() const noexcept { return m_HashedServerClients.size(); }
+            [[nodiscard]] inline ClientContainer& getClients() const noexcept { return m_HashedServerClients; }
 
-            inline ClientContainer::iterator begin() noexcept { return m_HashedServerClients.begin(); }
-            inline ClientContainer::iterator end() noexcept { return m_HashedServerClients.end(); }
-            inline ClientContainer::const_iterator begin() const noexcept { return m_HashedServerClients.begin(); }
-            inline ClientContainer::const_iterator end() const noexcept { return m_HashedServerClients.end(); }
+            BUILD_BEGIN_END_ITR_CLASS_MEMBERS(ClientContainer, m_HashedServerClients)
     };
 
     class ServerThreadContainer {
@@ -62,10 +59,7 @@ namespace Engine::Networking {
             [[nodiscard]] inline constexpr size_t getNumClients() const noexcept { return m_NumClients; }
             [[nodiscard]] ServerThread* getNextAvailableClientThread();
 
-            inline ThreadContainer::iterator begin() noexcept { return m_Threads.begin(); }
-            inline ThreadContainer::iterator end() noexcept { return m_Threads.end(); }
-            inline ThreadContainer::const_iterator begin() const noexcept { return m_Threads.begin(); }
-            inline ThreadContainer::const_iterator end() const noexcept { return m_Threads.end(); }
+            BUILD_BEGIN_END_ITR_CLASS_MEMBERS(ThreadContainer, m_Threads)
     };
 };
 

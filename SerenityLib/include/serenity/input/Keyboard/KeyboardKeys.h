@@ -3,10 +3,11 @@
 #define ENGINE_EVENTS_KEYBOARD_KEYS_H
 
 #include <string>
+#include <cstdint>
 
 class KeyboardKey final {
     public:
-        enum Key : unsigned int {
+        enum Key : uint32_t {
             A = 0,
             B,
             C,

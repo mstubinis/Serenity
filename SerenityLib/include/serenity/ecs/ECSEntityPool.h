@@ -25,13 +25,13 @@ namespace Engine::priv {
             ECSEntityPool& operator=(ECSEntityPool&&) noexcept = delete;
             ~ECSEntityPool() = default;
 
-            void init(const SceneOptions& options);
+            void init(const SceneOptions&);
 
-            bool isEntityVersionDifferent(Entity entity) const noexcept;
+            bool isEntityVersionDifferent(Entity) const noexcept;
 
             void destroyFlaggedEntity(uint32_t entityID);
 
-            [[nodiscard]] Entity createEntity(const Scene& scene) noexcept;
+            [[nodiscard]] Entity createEntity(const Scene&) noexcept;
             [[nodiscard]] Entity getEntityFromID(uint32_t entityID) const noexcept;
 
 

@@ -10,12 +10,6 @@ class Window;
 
 #define GLASSERT(x) if((!x)) __debugbreak();
 
-#if defined(ENGINE_GL_DEBUG)
-    #define GLCall(x) GLClearErrors(); x; GLASSERT(GLLogCall(#x, __FILE__, __LINE__))
-#else
-    #define GLCall(x) x;
-#endif
-
 static void GLClearErrors() {
     GLenum error = glGetError(); //will infinetly return error 1282 if called once opengl context is destroyed
     while (error != GL_NO_ERROR) {

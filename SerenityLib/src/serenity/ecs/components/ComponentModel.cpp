@@ -117,7 +117,7 @@ ComponentModel::ComponentModel(ComponentModel&& other) noexcept
     : m_ModelInstances { std::move(other.m_ModelInstances) }
     , m_RadiusBox      { std::move(other.m_RadiusBox) }
     , m_Radius         { std::move(other.m_Radius) }
-    , m_Owner          { std::move(other.m_Owner) }
+    , m_Owner          { std::exchange(other.m_Owner, Entity{}) }
 {
     if (other.isRegistered(EventType::ResourceLoaded)) {
         registerEvent(EventType::ResourceLoaded);
@@ -128,7 +128,7 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
     m_ModelInstances = std::move(other.m_ModelInstances);
     m_RadiusBox      = std::move(other.m_RadiusBox);
     m_Radius         = std::move(other.m_Radius);
-    m_Owner          = std::move(other.m_Owner);
+    m_Owner          = std::exchange(other.m_Owner, Entity{});
 
     if (other.isRegistered(EventType::ResourceLoaded) && &other != this) {
         registerEvent(EventType::ResourceLoaded);

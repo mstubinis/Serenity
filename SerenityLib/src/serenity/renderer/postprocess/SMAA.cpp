@@ -21,8 +21,8 @@ Engine::priv::SMAA::SMAA() {
     m_Fragment_Shaders_Code.resize(PassStage::_TOTAL, "");
 }
 Engine::priv::SMAA::~SMAA() {
-    GLCall(glDeleteTextures(1, &SearchTexture));
-    GLCall(glDeleteTextures(1, &AreaTexture));
+    glDeleteTextures(1, &SearchTexture);
+    glDeleteTextures(1, &AreaTexture);
 }
 void Engine::priv::SMAA::internal_init_edge_vertex_code(const std::string& common) {
     STATIC_SMAA.m_Vertex_Shaders_Code[PassStage::Edge] = common + R"(
@@ -552,12 +552,12 @@ void main(){
 
     const TextureType textureType = TextureType::Texture2D;
     Engine::Renderer::genAndBindTexture(textureType, STATIC_SMAA.AreaTexture);
-    GLCall(glTexImage2D(textureType.toGLType(), 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, SMAA_areaTexBytes));
+    glTexImage2D(textureType.toGLType(), 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, SMAA_areaTexBytes);
     Texture::setFilter(textureType, TextureFilter::Linear);
     TextureBaseClass::setWrapping(textureType, TextureWrap::ClampToBorder);
 
     Engine::Renderer::genAndBindTexture(textureType, STATIC_SMAA.SearchTexture);
-    GLCall(glTexImage2D(textureType.toGLType(), 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes));
+    glTexImage2D(textureType.toGLType(), 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes);
     Texture::setFilter(textureType, TextureFilter::Linear);
     TextureBaseClass::setWrapping(textureType, TextureWrap::ClampToBorder);
 

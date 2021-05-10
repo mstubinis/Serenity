@@ -96,14 +96,9 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
 
         btVector3 internal_activate_and_get_vector(decimal x, decimal y, decimal z, bool local) noexcept;
         void internal_update_misc() noexcept;
-
         void internal_set_matrix(glm_mat4);
-        void internal_setPosition(decimal x, decimal y, decimal z);
-        void internal_setRotation(float x, float y, float z, float w);
-        void internal_setScale(float x, float y, float z);
 
-        inline void internal_setPosition(const glm_vec3& position) noexcept { internal_setPosition(position.x, position.y, position.z); }
-        inline void internal_setRotation(const glm::quat& rotation) noexcept { internal_setRotation(rotation.x, rotation.y, rotation.z, rotation.w); }
+        void internal_setScale(float x, float y, float z);
         inline void internal_setScale(const glm::vec3& scale) noexcept { internal_setScale(scale.x, scale.y, scale.z); }
 
         void internal_calculate_mass();
@@ -111,7 +106,7 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
         glm_vec3 internal_getPosition();
         glm::quat internal_getRotation();
     public:
-        ComponentRigidBody(Entity entity);
+        ComponentRigidBody(Entity);
         ComponentRigidBody(const ComponentRigidBody&)            = delete;
         ComponentRigidBody& operator=(const ComponentRigidBody&) = delete;
         ComponentRigidBody(ComponentRigidBody&&) noexcept;
@@ -129,16 +124,13 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
             [[nodiscard]] inline const std::string& getName() const noexcept { return m_BulletRigidBody->getName(); }
         #endif
 
-        template<class FUNC> inline void setCollisionFunctor(const FUNC& functor) noexcept { m_CollisionFunctor = functor; }
-        template<class FUNC> inline void setCollisionFunctor(FUNC&& functor) noexcept { m_CollisionFunctor = std::move(functor); }
+        template<class FUNC> inline void setCollisionFunctor(FUNC&& functor) noexcept { m_CollisionFunctor = std::forward<FUNC>(functor); }
 
-        void collisionResponse(RigidCollisionCallbackEventData& data) const;
+        void collisionResponse(RigidCollisionCallbackEventData&) const;
 
         bool rebuildRigidBody(bool addBodyToPhysicsWorld = true);
         bool removePhysicsFromWorld();
         bool addPhysicsToWorld();
-
-        //void setInternalPhysicsUserPointer();
 
         [[nodiscard]] inline int getBTObjectUserIndex() const noexcept { return m_BulletRigidBody->getUserIndex(); }
         [[nodiscard]] inline int getBTObjectUserIndex2() const noexcept { return m_BulletRigidBody->getUserIndex2(); }

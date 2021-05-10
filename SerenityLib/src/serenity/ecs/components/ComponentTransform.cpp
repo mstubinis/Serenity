@@ -21,11 +21,13 @@ ComponentTransform::ComponentTransform(ComponentTransform&& other) noexcept
     , m_Forward          { std::move(other.m_Forward) }
     , m_Right            { std::move(other.m_Right) }
     , m_Up               { std::move(other.m_Up) }
-    , m_Owner            { std::move(other.m_Owner) }
     , m_UserPointer      { std::exchange(other.m_UserPointer, nullptr) }
     , m_UserPointer1     { std::exchange(other.m_UserPointer1, nullptr) }
     , m_UserPointer2     { std::exchange(other.m_UserPointer2, nullptr) }
-{}
+    , m_Owner            { std::exchange(other.m_Owner, Entity{}) }
+{
+    //Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+}
 ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) noexcept {
     m_Position         = std::move(other.m_Position);
     m_Rotation         = std::move(other.m_Rotation);
@@ -34,10 +36,12 @@ ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) no
     m_Forward          = std::move(other.m_Forward);
     m_Right            = std::move(other.m_Right);
     m_Up               = std::move(other.m_Up);
-    m_Owner            = std::move(other.m_Owner);
     m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
     m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
     m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
+    m_Owner            = std::exchange(other.m_Owner, Entity{});
+
+    //Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
     return *this;
 }
 decimal ComponentTransform::getDistance(Entity other) const {
@@ -49,13 +53,13 @@ decimal ComponentTransform::getDistance(Entity other) const {
 uint64_t ComponentTransform::getDistanceLL(Entity other) const {
     return static_cast<uint64_t>(getDistance(other));
 }
-void ComponentTransform::alignTo(decimal dirX, decimal dirY, decimal dirZ) {
-    m_Rotation = Engine::Math::alignTo((float)dirX, (float)dirY, (float)dirZ);
+void ComponentTransform::alignTo(float dirX, float dirY, float dirZ) {
+    m_Rotation = Engine::Math::alignTo(dirX, dirY, dirZ);
     Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
 }
-void ComponentTransform::alignTo(const glm_vec3& direction) {
+void ComponentTransform::alignTo(const glm::vec3& direction) {
     auto norm_dir = glm::normalize(direction);
-    ComponentTransform::alignTo(norm_dir.x, norm_dir.y, norm_dir.z);
+    alignTo(norm_dir.x, norm_dir.y, norm_dir.z);
 }
 void ComponentTransform::translate(decimal x, decimal y, decimal z, bool local) {
     glm_vec3 offset{ x, y, z };
@@ -65,6 +69,7 @@ void ComponentTransform::translate(decimal x, decimal y, decimal z, bool local) 
     ComponentTransform::setPosition(m_Position + offset);
 }
 void ComponentTransform::rotate(float pitch, float yaw, float roll, bool local) {
+    //TODO: implement local parameter
     Engine::Math::rotate(m_Rotation, pitch, yaw, roll);
     Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
 }
@@ -133,16 +138,15 @@ glm_vec3 ComponentTransform::getWorldPosition() const {
     return Engine::Math::getMatrixPosition(matrix);
 }
 glm::quat ComponentTransform::getWorldRotation() const {
-    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-    auto& system = ecs.getSystem<SystemBodyParentChild>();
+    auto& worldMatrix = getWorldMatrix();
 #if defined(ENGINE_HIGH_PRECISION)
-    return glm::quat_cast( glm::mat4(system.m_WorldTransforms[m_Owner.id() - 1]) * glm::mat4_cast(m_Rotation) );
+    //return glm::quat_cast( glm::mat4{ worldMatrix } * glm::mat4_cast(m_Rotation) );
+    return glm::quat_cast(glm::mat4{ worldMatrix });
 #else
-    return glm::quat_cast(system.m_WorldTransforms[m_Owner.id() - 1] * glm::mat4_cast(m_Rotation));
+    //return glm::quat_cast(worldMatrix * glm::mat4_cast(m_Rotation));
+    return glm::quat_cast(worldMatrix);
 #endif
 }
-
-
 glm::vec3 ComponentTransform::getScreenCoordinates(bool clampToEdge) const {
 	return Engine::Math::getScreenCoordinates(getPosition(), *m_Owner.scene()->getActiveCamera(), clampToEdge);
 }
@@ -190,7 +194,6 @@ const glm_mat4& ComponentTransform::getLocalMatrix() const noexcept {
     auto& system = ecs.getSystem<SystemBodyParentChild>();
     return system.m_LocalTransforms[m_Owner.id() - 1];
 }
-
 /*
 void ComponentTransform::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     glm_vec3 offset{ x, y, z };

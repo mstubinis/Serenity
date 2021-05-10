@@ -64,9 +64,9 @@ namespace Engine::priv {
     class SkyboxImplInterface final {
         friend class Skybox;
         static void bindDataToGPU() noexcept {
-            GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Buffer));
-            GLCall(glEnableVertexAttribArray(0));
-            GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0));
+            glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
         }
         static void buildVAO() noexcept {
             Engine::Renderer::deleteVAO(m_VAO);
@@ -80,9 +80,9 @@ namespace Engine::priv {
             if (m_Buffer != 0U) {
                 return;
             }
-            GLCall(glGenBuffers(1, &m_Buffer));
-            GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Buffer));
-            GLCall(glBufferData(GL_ARRAY_BUFFER, VERTICES.size() * sizeof(glm::vec3), &VERTICES[0], GL_STATIC_DRAW));
+            glGenBuffers(1, &m_Buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
+            glBufferData(GL_ARRAY_BUFFER, VERTICES.size() * sizeof(glm::vec3), &VERTICES[0], GL_STATIC_DRAW);
             Engine::priv::SkyboxImplInterface::buildVAO();
         }
     };
@@ -116,11 +116,11 @@ void Skybox::bindMesh() {
     Engine::priv::SkyboxImplInterface::initMesh();
     if(m_VAO){
         Engine::Renderer::bindVAO(m_VAO);
-        GLCall(glDrawArrays( GL_TRIANGLES, 0, (GLsizei)VERTICES.size() ));
+        glDrawArrays( GL_TRIANGLES, 0, (GLsizei)VERTICES.size() );
     }else{
         Engine::priv::SkyboxImplInterface::bindDataToGPU();
-        GLCall(glDrawArrays( GL_TRIANGLES, 0, (GLsizei)VERTICES.size() ));
-        GLCall(glDisableVertexAttribArray(0));
+        glDrawArrays( GL_TRIANGLES, 0, (GLsizei)VERTICES.size() );
+        glDisableVertexAttribArray(0);
     }
 }
 void Skybox::onEvent(const Event& e) {

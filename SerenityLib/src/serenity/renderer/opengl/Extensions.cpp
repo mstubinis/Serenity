@@ -50,7 +50,7 @@ bool OpenGLExtensions::checkOpenGLExtension(const char* e) noexcept {
 }
 void OpenGLExtensions::printAllAvailableExtensions() noexcept {
     GLint n = 0;
-    GLCall(glGetIntegerv(GL_NUM_EXTENSIONS, &n));
+    glGetIntegerv(GL_NUM_EXTENSIONS, &n);
     std::string output;
     for (GLint i = 0; i < n; ++i) {
         const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);

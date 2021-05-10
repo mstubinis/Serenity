@@ -5,12 +5,10 @@
 #include <serenity/input/Joystick/JoystickAxises.h>
 
 namespace Engine::priv {
-    class JoystickModule {
+    class JoystickModule final {
         private:
 
         public:
-            JoystickModule();
-            virtual ~JoystickModule();
     };
 }
 

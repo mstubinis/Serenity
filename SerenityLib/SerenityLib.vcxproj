@@ -1009,7 +1009,6 @@
     <ClInclude Include="include\serenity\utils\Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
     <None Include="include\serenity\ecs\entity\Entity.inl" />
     <None Include="include\serenity\ecs\systems\SystemBaseClass.inl" />
   </ItemGroup>

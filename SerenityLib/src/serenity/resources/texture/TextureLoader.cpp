@@ -342,5 +342,5 @@ void TextureLoader::Resize(Texture& texture, Engine::priv::FramebufferObject& fb
     imageData.m_Mipmaps[0].width  = w;
     imageData.m_Mipmaps[0].height = h;
 
-    GLCall(glTexImage2D(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLint)imageData.m_InternalFormat, w, h, 0, (GLenum)imageData.m_PixelFormat, (GLenum)imageData.m_PixelType, NULL));
+    glTexImage2D(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLint)imageData.m_InternalFormat, w, h, 0, (GLenum)imageData.m_PixelFormat, (GLenum)imageData.m_PixelType, NULL);
 }

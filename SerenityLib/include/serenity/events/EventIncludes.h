@@ -222,12 +222,12 @@ enum class EventType : uint32_t {
     ServerShutdowned,
     ClientConnected,
     ClientDisconnected,
-
+        /*
     PacketSent,
     PacketSentCustom,
     PacketReceived,
     PacketReceivedCustom,
-
+        */
     WindowRequestedToBeClosed,
     WindowHasClosed,
     GameEnded,

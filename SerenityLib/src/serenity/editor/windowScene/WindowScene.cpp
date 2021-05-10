@@ -72,14 +72,13 @@ void Engine::priv::EditorWindowScene::internal_render_network() {
                 if (udpSocket->getNumPartialPackets() > 0) {
                     if (ImGui::TreeNode("Partial Packets")) {
                         for (const auto& packetInfo : udpSocket->m_PartialPackets) {
-                            auto& Packet = *static_cast<Engine::Networking::Packet*>(packetInfo.sfmlPacket.get());
-                            ImGui::Text(("Valid:           " + std::string(Packet.m_Valid ? "true" : "false")).c_str());
-                            ImGui::Text(("Timestamp:       " + std::to_string(Packet.m_Timestamp)).c_str());
-                            ImGui::Text(("Type:            " + std::to_string(Packet.m_PacketType)).c_str());
-                            ImGui::Text(("Ack:             " + std::to_string(Packet.m_Ack)).c_str());
-                            ImGui::Text(("Ack Bitfield:    " + std::to_string(Packet.m_AckBitfield)).c_str());
-                            ImGui::Text(("Sequence Number: " + std::to_string(Packet.m_SequenceNumber)).c_str());
-                            ImGui::Text(("Data Size Bytes: " + std::to_string(Packet.getDataSize())).c_str());
+                            ImGui::Text(("Valid:           " + std::string(packetInfo.packet.m_Valid ? "true" : "false")).c_str());
+                            ImGui::Text(("Timestamp:       " + std::to_string(packetInfo.packet.m_Timestamp)).c_str());
+                            ImGui::Text(("Type:            " + std::to_string(packetInfo.packet.m_PacketType)).c_str());
+                            ImGui::Text(("Ack:             " + std::to_string(packetInfo.packet.m_Ack)).c_str());
+                            ImGui::Text(("Ack Bitfield:    " + std::to_string(packetInfo.packet.m_AckBitfield)).c_str());
+                            ImGui::Text(("Sequence Number: " + std::to_string(packetInfo.packet.m_SequenceNumber)).c_str());
+                            ImGui::Text(("Data Size Bytes: " + std::to_string(packetInfo.packet.getDataSize())).c_str());
                         }
                         ImGui::TreePop();
                         ImGui::Separator();

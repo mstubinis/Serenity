@@ -8,8 +8,6 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/ecs/ECS.h>
 
-#pragma region ComponentRigidBody
-
 ComponentRigidBody::ComponentRigidBody(Entity entity) {
     m_Owner = entity;
     rebuildRigidBody(false);
@@ -128,26 +126,6 @@ MaskType ComponentRigidBody::getCollisionFlags() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return static_cast<MaskType>(m_BulletRigidBody->getCollisionFlags());
 }
-void ComponentRigidBody::internal_setPosition(decimal x, decimal y, decimal z) {
-    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
-    btTransform tr;
-    tr.setOrigin(btVector3{ (btScalar)x, (btScalar)y, (btScalar)z });
-    tr.setRotation(m_BulletRigidBody->getOrientation());
-
-    if (collisionShape && collisionShape->isStaticTriangleType()) {
-        auto BTShape = collisionShape->getBtShape();
-        m_BulletRigidBody->setCollisionShape(BTShape); //yes this is needed
-        Engine::Physics::removeRigidBodyThreadSafe(getBtBody());
-    }
-    m_BulletMotionState.setWorldTransform(tr);
-    m_BulletRigidBody->setMotionState(&m_BulletMotionState); //is this needed?
-    m_BulletRigidBody->setWorldTransform(tr);
-    m_BulletRigidBody->setCenterOfMassTransform(tr);
-    if (collisionShape && collisionShape->isStaticTriangleType()) {
-        Engine::Physics::addRigidBodyThreadSafe(getBtBody(), m_Group, m_Mask);
-    }
-}
 void ComponentRigidBody::internal_calculate_mass() {
     if (m_Mass != 0.0f) {
         return;
@@ -164,19 +142,13 @@ void ComponentRigidBody::forcePhysicsSync() noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     auto transform = m_Owner.getComponent<ComponentTransform>();
     if (transform) {
-        auto pos = transform->getPosition();
-        auto rot = transform->getRotation();
-        auto scl = transform->getScale();
-        internal_setPosition(pos.x, pos.y, pos.z);
-        internal_setRotation(rot.x, rot.y, rot.z, rot.w);
-        internal_setScale(scl.x, scl.y, scl.z);
+        internal_set_matrix(transform->getWorldMatrix());
     }
 }
 void ComponentRigidBody::setGravity(decimal x, decimal y, decimal z) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setGravity(btVector3{ (btScalar)x, (btScalar)y, (btScalar)z });
 }
-
 void ComponentRigidBody::internal_set_matrix(glm_mat4 matrix) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     auto localScale = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(matrix);
@@ -190,36 +162,24 @@ void ComponentRigidBody::internal_set_matrix(glm_mat4 matrix) {
         collisionShape->internal_setScale((float)localScale.x, (float)localScale.y, (float)localScale.z);
     }
 }
-void ComponentRigidBody::internal_setRotation(float x, float y, float z, float w) {
-    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    btQuaternion quat{ (btScalar)x, (btScalar)y, (btScalar)z, (btScalar)w };
-    quat = quat.normalize();
-    btTransform tr;
-    tr.setOrigin(m_BulletRigidBody->getWorldTransform().getOrigin());
-    tr.setRotation(quat);
-    m_BulletRigidBody->setWorldTransform(tr);
-    m_BulletRigidBody->setCenterOfMassTransform(tr);
-    m_BulletMotionState.setWorldTransform(tr);
-}
 void ComponentRigidBody::internal_setScale(float x, float y, float z) {
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
     if (collisionShape) {
         collisionShape->internal_setScale(x, y, z);
     }
 }
-
 glm_vec3 ComponentRigidBody::internal_getPosition() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    //btTransform tr;
-    //m_BulletRigidBody->getMotionState()->getWorldTransform(tr);
-    auto& tr = m_BulletRigidBody->getWorldTransform();
+    btTransform tr;
+    m_BulletRigidBody->getMotionState()->getWorldTransform(tr);
+    //auto& tr = m_BulletRigidBody->getWorldTransform();
     return Engine::Math::toGLM(tr.getOrigin());
 }
 glm::quat ComponentRigidBody::internal_getRotation() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    //btTransform tr;
-    //m_BulletRigidBody->getMotionState()->getWorldTransform(tr);
-    auto& tr = m_BulletRigidBody->getWorldTransform();
+    btTransform tr;
+    m_BulletRigidBody->getMotionState()->getWorldTransform(tr);
+    //auto& tr = m_BulletRigidBody->getWorldTransform();
     return Engine::Math::toGLM(tr.getRotation());
 }
 glm_vec3 ComponentRigidBody::getLinearVelocity() const {
@@ -377,4 +337,3 @@ void ComponentRigidBody::setMass(float mass) {
     }
     m_BulletRigidBody->updateInertiaTensor();
 }
-#pragma endregion

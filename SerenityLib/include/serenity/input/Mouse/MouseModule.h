@@ -7,62 +7,21 @@
 #include <array>
 
 namespace Engine::priv {
-    class MouseModule {
+    class MouseModule final {
         private:
-            std::array<bool, MouseButton::_TOTAL>  m_MouseStatus;
+            std::array<bool, MouseButton::_TOTAL>  m_MouseStatus            = { 0 };
             uint32_t                               m_CurrentMouseButton     = (uint32_t)MouseButton::Unknown;
             uint32_t                               m_PreviousMouseButton    = (uint32_t)MouseButton::Unknown;
-            uint32_t                               m_NumPressedMouseButtons = 0U;
+            uint32_t                               m_NumPressedMouseButtons = 0;
         public:
-            MouseModule() {
-                m_MouseStatus.fill(false);
-            }
-            virtual ~MouseModule() = default;
-
-            constexpr void onButtonPressed(uint32_t button) noexcept {
-                if (button == MouseButton::Unknown) {
-                    return;
-                }
-                m_PreviousMouseButton = m_CurrentMouseButton;
-                m_CurrentMouseButton  = button;
-                if (!m_MouseStatus[button]) {
-                    m_MouseStatus[button] = true;
-                }
-            }
-            constexpr void onButtonReleased(uint32_t button) noexcept {
-                if (button == MouseButton::Unknown) {
-                    return;
-                }
-                m_PreviousMouseButton = (uint32_t)MouseButton::Unknown;
-                m_CurrentMouseButton  = (uint32_t)MouseButton::Unknown;
-                if (m_MouseStatus[button]) {
-                    m_MouseStatus[button] = false;
-                }
-            }
-            constexpr void postUpdate() noexcept {
-                m_PreviousMouseButton    = (uint32_t)MouseButton::Unknown;
-                m_CurrentMouseButton     = (uint32_t)MouseButton::Unknown;
-                m_NumPressedMouseButtons = 0U;
-            }
-            void onClearEvents() noexcept {
-                m_MouseStatus.fill(false);
-                m_PreviousMouseButton    = (uint32_t)MouseButton::Unknown;
-                m_CurrentMouseButton     = (uint32_t)MouseButton::Unknown;
-                m_NumPressedMouseButtons = 0U;
-            }
-            [[nodiscard]] constexpr MouseButton::Button getCurrentPressedButton() const noexcept {
-                return (MouseButton::Button)m_CurrentMouseButton;
-            }
-            [[nodiscard]] constexpr uint32_t getNumPressedButtons() const noexcept {
-                return m_NumPressedMouseButtons;
-            }
-            [[nodiscard]] constexpr bool isButtonDown(uint32_t button) noexcept {
-                return (m_MouseStatus[button] == true);
-            }
-            [[nodiscard]] constexpr bool isButtonDownOnce(uint32_t button) noexcept {
-                const bool res = isButtonDown(button);
-                return res && m_CurrentMouseButton == button && m_CurrentMouseButton != m_PreviousMouseButton;
-            }
+            void onButtonPressed(uint32_t button) noexcept;
+            void onButtonReleased(uint32_t button) noexcept;
+            void postUpdate() noexcept;
+            void onClearEvents() noexcept;
+            [[nodiscard]] inline constexpr MouseButton::Button getCurrentPressedButton() const noexcept { return (MouseButton::Button)m_CurrentMouseButton; }
+            [[nodiscard]] inline constexpr uint32_t getNumPressedButtons() const noexcept { return m_NumPressedMouseButtons; }
+            [[nodiscard]] inline constexpr bool isButtonDown(uint32_t button) noexcept { return m_MouseStatus[button]; }
+            [[nodiscard]] bool isButtonDownOnce(uint32_t button) noexcept;
     };
 }
 

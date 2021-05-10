@@ -38,7 +38,7 @@ namespace Engine::priv {
             mutable std::mutex              m_Mutex;
 
             void internal_update_emitters(const float dt);
-            void internal_update_particles(const float dt, Camera& camera);
+            void internal_update_particles(const float dt, Camera&);
         public:
 
 #define ENGINE_PARTICLES_HALF_SIZE //use this to reduce particle data size at the cost of precision. this small size uses 16 bytes per particle
@@ -83,21 +83,21 @@ namespace Engine::priv {
                     , MatID{ MatID_ }
                     , PackedColor{ PackedColor_ }
                 {}
-                ParticleDOD(const ParticleDOD& other)                = delete;
-                ParticleDOD& operator=(const ParticleDOD& other)     = delete;
-                ParticleDOD(ParticleDOD&& other) noexcept            = default;
-                ParticleDOD& operator=(ParticleDOD&& other) noexcept = default;
+                ParticleDOD(const ParticleDOD&)                = delete;
+                ParticleDOD& operator=(const ParticleDOD&)     = delete;
+                ParticleDOD(ParticleDOD&&) noexcept            = default;
+                ParticleDOD& operator=(ParticleDOD&&) noexcept = default;
                 ~ParticleDOD() = default;
             };
 
-            Engine::partial_vector_pod<ParticleDOD>                  ParticlesDOD;
+            Engine::partial_vector_pod<ParticleDOD>          ParticlesDOD;
 
-            std::unordered_map<Material*, uint32_t>              MaterialToIndex;
-            std::unordered_map<uint32_t, Material*>              MaterialToIndexReverse;
+            std::unordered_map<Material*, uint32_t>          MaterialToIndex;
+            std::unordered_map<uint32_t, Material*>          MaterialToIndexReverse;
             std::unordered_map<uint32_t, uint32_t>           MaterialIDToIndex;
 
             //for the threads...
-            std::vector<std::vector<ParticleDOD>>                    THREAD_PART_1;
+            std::vector<std::vector<ParticleDOD>>                THREAD_PART_1;
             std::vector<std::unordered_map<Material*, uint32_t>> THREAD_PART_4;
             std::vector<std::unordered_map<uint32_t, Material*>> THREAD_PART_5;
         public:
@@ -107,16 +107,16 @@ namespace Engine::priv {
             ParticleSystem(ParticleSystem&&) noexcept            = delete;
             ParticleSystem& operator=(ParticleSystem&&) noexcept = delete;
 
-            ParticleEmitter* add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent);
+            ParticleEmitter* add_emitter(ParticleEmissionProperties&, Scene&, float lifetime, Entity parent);
 
-            bool add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
-            bool add_particle(ParticleEmitter& emitter);
+            bool add_particle(ParticleEmitter&, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
+            bool add_particle(ParticleEmitter&);
 
             inline std::vector<ParticleEmitter>& getParticleEmitters() noexcept { return m_ParticleEmitters; }
             inline std::vector<Particle>& getParticles() noexcept { return m_Particles; }
 
-            void update(const float dt, Camera& camera);
-            void render(Viewport& viewport, Camera& camera, Handle program, RenderModule& renderer);
+            void update(const float dt, Camera&);
+            void render(Viewport&, Camera&, Handle program, RenderModule&);
         };
 };
 

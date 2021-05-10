@@ -15,6 +15,7 @@ namespace Engine::Networking {
 }
 #include <SFML/Network/IpAddress.hpp>
 #include <serenity/networking/ISocket.h>
+#include <serenity/networking/Packet.h>
 #include <serenity/events/EventModule.h>
 
 namespace Engine::priv {
@@ -56,13 +57,6 @@ namespace Engine::priv {
         EventClient() = default;
         EventClient(Engine::Networking::ServerClient& client_) 
             : client{ &client_ }
-        {}
-    };
-    struct EventPacket final {
-        sf::Packet* packet = nullptr;
-        EventPacket() = default;
-        EventPacket(sf::Packet* packet_) 
-            : packet{ packet_ }
         {}
     };
     struct EventResource final {
@@ -226,12 +220,12 @@ struct Event final{
         Engine::priv::EventSceneChanged               eventSceneChanged;
         Engine::priv::EventResource                   eventResource;
 
-        Engine::priv::EventPacket                     eventPacket;
         Engine::priv::EventSocket                     eventSocket;
         Engine::priv::EventServer                     eventServer;
         Engine::priv::EventClient                     eventClient;
     };
     Event() = delete;
+    ~Event() {}
     Event(EventType type_) 
         : type{ type_ }
     {}
@@ -306,11 +300,6 @@ struct Event final{
         : Event{ type_ }
     {
         eventResource = std::move(eventResource_);
-    }
-    Event(EventType type_, Engine::priv::EventPacket&& eventPacket_)
-        : Event{ type_ }
-    {
-        eventPacket = std::move(eventPacket_);
     }
     Event(EventType type_, Engine::priv::EventSocket&& eventSocket_)
         : Event{ type_ }

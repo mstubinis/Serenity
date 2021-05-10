@@ -165,7 +165,7 @@ glm::vec2 Math::rotate2DPoint(const glm::vec2& point, float angle, const glm::ve
     };
 }
 
-void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection, std::array<glm::vec4, 6>& outPlanes){
+void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection, std::array<glm::vec4, 6>& outPlanes) {
     glm::vec4 rows[4];
     for (uint32_t i = 0; i < 4; ++i) {
         rows[i] = glm::row(inViewProjection, i);
@@ -178,19 +178,19 @@ void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProject
     }
     //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
 }
-glm::quat Math::toGLM(const btQuaternion& BTquat){
-    return glm::quat((float)BTquat.getW(), (float)BTquat.getX(), (float)BTquat.getY(), (float)BTquat.getZ() );
+glm::quat Math::toGLM(const btQuaternion& BTquat) {
+    return glm::quat{ (float)BTquat.getW(), (float)BTquat.getX(), (float)BTquat.getY(), (float)BTquat.getZ() };
 }
-btQuaternion Math::toBT(const glm::quat& quat){
+btQuaternion Math::toBT(const glm::quat& quat) {
     return btQuaternion{ quat.x, quat.y, quat.z, quat.w };
 }
-glm::vec3 Math::toGLM(const aiVector3D& aiVec){
+glm::vec3 Math::toGLM(const aiVector3D& aiVec) {
     return glm::vec3{ aiVec.x, aiVec.y, aiVec.z };
 }
-glm::mat4 Math::toGLM(const aiMatrix4x4& aiMat){
+glm::mat4 Math::toGLM(const aiMatrix4x4& aiMat) {
     return glm::mat4{ aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1, aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2, aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3, aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4 };
 }
-glm::mat3 Math::toGLM(const aiMatrix3x3& aiMat){
+glm::mat3 Math::toGLM(const aiMatrix3x3& aiMat) {
     return glm::mat3{ aiMat.a1, aiMat.b1, aiMat.c1, aiMat.a2, aiMat.b2, aiMat.c2, aiMat.a3, aiMat.b3, aiMat.c3 };
 }
 glm::quat Math::toGLM(const aiQuaternion& aiQuat) {
@@ -361,8 +361,9 @@ float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bo
     return angle;
 }
 glm::quat Math::alignTo(float x, float y, float z) noexcept {
-    glm::quat outQuat{ 1.0, 0.0, 0.0, 0.0 };
-    outQuat = glm::normalize(glm::conjugate(glm::toQuat(glm::lookAt(glm::vec3{ 0.0f }, -glm::vec3{ x, y, z }, glm::vec3{ 0.0f, 1.0f, 0.0f }))));
+    auto lookat       = glm::lookAt(glm::vec3{ 0.0f }, -glm::vec3{ x, y, z }, glm::vec3{ 0.0f, 1.0f, 0.0f });
+    glm::quat outQuat = glm::conjugate(glm::toQuat(lookat));
+    outQuat           = glm::normalize(outQuat);
     return outQuat;
 }
 

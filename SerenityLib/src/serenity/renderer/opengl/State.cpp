@@ -103,7 +103,7 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_t w
         textureUnits.emplace_back();
     }
 
-    GLCall(glGetIntegerv(GL_MAX_DRAW_BUFFERS, &int_value));
+    glGetIntegerv(GL_MAX_DRAW_BUFFERS, &int_value);
     enabledState.blendState.reserve((size_t)int_value);
     blendEquationState.reserve((size_t)int_value);
     for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
@@ -113,7 +113,7 @@ void OpenGLState::GL_INIT_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_t w
         blendEquationState.emplace_back();
     }
 
-    GLCall(glGetIntegerv(GL_MAX_VIEWPORTS, &int_value));
+    glGetIntegerv(GL_MAX_VIEWPORTS, &int_value);
     enabledState.scissorState.reserve((size_t)int_value);
     for (size_t i = 0; i < enabledState.scissorState.capacity(); ++i) {
         enabledState.scissorState.emplace_back();
@@ -128,7 +128,7 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_
     currentActiveTextureUnit = 0;
 
     //TODO: might need to gen and bind a dummy vao
-    GLCall(glActiveTexture(GL_TEXTURE0)); //this was said to be needed for some drivers
+    glActiveTexture(GL_TEXTURE0); //this was said to be needed for some drivers
 
     GL_glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     GL_glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -195,26 +195,26 @@ void OpenGLState::GL_RESTORE_DEFAULT_STATE_MACHINE(uint32_t windowWidth, uint32_
     }
 }
 void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
-    GLCall(glActiveTexture(currentActiveTextureUnit));
-    GLCall(glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a));
-    GLCall(glColorMask(colorMaskState.r, colorMaskState.g, colorMaskState.b, colorMaskState.a));
-    GLCall(glClearDepth(clearDepth.depth));
-    GLCall(glClearDepthf(clearDepth.depthf));
-    GLCall(glClearStencil(clearStencil.stencil));
-    GLCall(glStencilMaskSeparate(GL_FRONT, stencilMask.front_mask));
-    GLCall(glStencilMaskSeparate(GL_BACK, stencilMask.back_mask));
-    GLCall(glStencilOpSeparate(GL_FRONT, stencilOp.sFail_front, stencilOp.dpFail_front, stencilOp.dpPass_front));
-    GLCall(glStencilOpSeparate(GL_FRONT, stencilOp.sFail_back, stencilOp.dpFail_back, stencilOp.dpPass_back));
-    GLCall(glUseProgram(useProgram.program));
-    GLCall(glBindVertexArray(vaoState.vao));
-    GLCall(glViewport(viewportState.x, viewportState.y, viewportState.width, viewportState.height));
-    GLCall(glCullFace(cullFaceState.mode));
-    GLCall(glFrontFace(frontFaceState.mode));
-    GLCall(glDepthFunc(depthFuncState.func));
-    GLCall(glPixelStorei(GL_PACK_ALIGNMENT, pixelStoreiState.pack_alignment));
-    GLCall(glPixelStorei(GL_UNPACK_ALIGNMENT, pixelStoreiState.unpack_alignment));
-    GLCall(glStencilFuncSeparate(GL_FRONT, stencilFuncState.func_front, stencilFuncState.ref_front, stencilFuncState.mask_front));
-    GLCall(glStencilFuncSeparate(GL_BACK, stencilFuncState.func_back, stencilFuncState.ref_back, stencilFuncState.mask_back));
+    glActiveTexture(currentActiveTextureUnit);
+    glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    glColorMask(colorMaskState.r, colorMaskState.g, colorMaskState.b, colorMaskState.a);
+    glClearDepth(clearDepth.depth);
+    glClearDepthf(clearDepth.depthf);
+    glClearStencil(clearStencil.stencil);
+    glStencilMaskSeparate(GL_FRONT, stencilMask.front_mask);
+    glStencilMaskSeparate(GL_BACK, stencilMask.back_mask);
+    glStencilOpSeparate(GL_FRONT, stencilOp.sFail_front, stencilOp.dpFail_front, stencilOp.dpPass_front);
+    glStencilOpSeparate(GL_FRONT, stencilOp.sFail_back, stencilOp.dpFail_back, stencilOp.dpPass_back);
+    glUseProgram(useProgram.program);
+    glBindVertexArray(vaoState.vao);
+    glViewport(viewportState.x, viewportState.y, viewportState.width, viewportState.height);
+    glCullFace(cullFaceState.mode);
+    glFrontFace(frontFaceState.mode);
+    glDepthFunc(depthFuncState.func);
+    glPixelStorei(GL_PACK_ALIGNMENT, pixelStoreiState.pack_alignment);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, pixelStoreiState.unpack_alignment);
+    glStencilFuncSeparate(GL_FRONT, stencilFuncState.func_front, stencilFuncState.ref_front, stencilFuncState.mask_front);
+    glStencilFuncSeparate(GL_BACK, stencilFuncState.func_back, stencilFuncState.ref_back, stencilFuncState.mask_back);
 
     //glenable stuff
     for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
@@ -256,18 +256,18 @@ void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
     enabledState.gl_texture_cube_map_seamless == GL_TRUE ? glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS) : glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     enabledState.gl_program_point_size == GL_TRUE ? glEnable(GL_PROGRAM_POINT_SIZE) : glDisable(GL_PROGRAM_POINT_SIZE);
 
-    GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferState.framebuffer_read));
-    GLCall(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferState.framebuffer_draw));
-    GLCall(glBindRenderbuffer(GL_RENDERBUFFER, framebufferState.renderbuffer));
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferState.framebuffer_read);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferState.framebuffer_draw);
+    glBindRenderbuffer(GL_RENDERBUFFER, framebufferState.renderbuffer);
 
     for (size_t i = 0; i < blendEquationState.capacity(); ++i) {
-        GLCall(glBlendEquationi((GLuint)i, blendEquationState[i].mode));
+        glBlendEquationi((GLuint)i, blendEquationState[i].mode);
     }
 }
 bool OpenGLState::GL_glActiveTexture(GLenum textureUnit) {
     currentActiveTextureUnit = textureUnit;
     currentActiveTextureUnit = std::min(currentActiveTextureUnit, (GLuint)(textureUnits.capacity() - 1U));
-    GLCall(glActiveTexture(GL_TEXTURE0 + currentActiveTextureUnit));
+    glActiveTexture(GL_TEXTURE0 + currentActiveTextureUnit);
     return true;
 }
 bool OpenGLState::GL_glUnbindTexture(GLenum textureUnit, GLenum textureTarget) {
@@ -303,7 +303,7 @@ bool OpenGLState::GL_glBindTextureForRendering(GLenum textureTarget, GLuint text
     uint32_t index                    = internal_get_enum_index_from_gl_texture_type(textureTarget);
     currentBoundUnit.openglIDs[index] = textureObject;    
     if (index > 0) {
-        GLCall(glBindTexture(textureTarget, textureObject));
+        glBindTexture(textureTarget, textureObject);
     }
     return (bool)index;
 }
@@ -316,7 +316,7 @@ bool OpenGLState::GL_glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
     if (r == clearColor.r && g == clearColor.g && b == clearColor.b && a == clearColor.a) {
         return false;
     }
-    GLCall(glClearColor(r, g, b, a));
+    glClearColor(r, g, b, a);
     clearColor.r = r;
     clearColor.g = g;
     clearColor.b = b;
@@ -327,7 +327,7 @@ bool OpenGLState::GL_glColorMask(GLboolean r, GLboolean g, GLboolean b, GLboolea
     if (r == colorMaskState.r && g == colorMaskState.g && b == colorMaskState.b && a == colorMaskState.a) {
         return false;
     }
-    GLCall(glColorMask(r, g, b, a));
+    glColorMask(r, g, b, a);
     colorMaskState.r = r;
     colorMaskState.g = g;
     colorMaskState.b = b;
@@ -341,7 +341,7 @@ bool OpenGLState::GL_glClearDepth(GLdouble depth) {
         return false;
     }
     clearDepth.depth = depth;
-    GLCall(glClearDepth(depth));
+    glClearDepth(depth);
     return true;
 }
 bool OpenGLState::GL_glClearDepthf(GLfloat depth_float) {
@@ -351,7 +351,7 @@ bool OpenGLState::GL_glClearDepthf(GLfloat depth_float) {
         return false;
     }
     clearDepth.depthf = depth_float;
-    GLCall(glClearDepthf(depth_float));
+    glClearDepthf(depth_float);
     return true;
 }
 bool OpenGLState::GL_glClearStencil(GLint stencil) {
@@ -359,14 +359,14 @@ bool OpenGLState::GL_glClearStencil(GLint stencil) {
         return false;
     }
     clearStencil.stencil = stencil;
-    GLCall(glClearStencil(stencil));
+    glClearStencil(stencil);
     return true;
 }
 bool OpenGLState::GL_glStencilMaskSeparate(GLenum face, GLuint mask) {
     switch (face) {
         case GL_FRONT: {
             if (stencilMask.front_mask != mask) {
-                GLCall(glStencilMaskSeparate(GL_FRONT, mask));
+                glStencilMaskSeparate(GL_FRONT, mask);
                 stencilMask.front_mask = mask;
                 return true;
             }
@@ -374,7 +374,7 @@ bool OpenGLState::GL_glStencilMaskSeparate(GLenum face, GLuint mask) {
         }
         case GL_BACK: {
             if (stencilMask.back_mask != mask) {
-                GLCall(glStencilMaskSeparate(GL_BACK, mask));
+                glStencilMaskSeparate(GL_BACK, mask);
                 stencilMask.back_mask = mask;
                 return true;
             }
@@ -382,7 +382,7 @@ bool OpenGLState::GL_glStencilMaskSeparate(GLenum face, GLuint mask) {
         }
         case GL_FRONT_AND_BACK: {
             if (stencilMask.back_mask != mask || stencilMask.front_mask != mask) {
-                GLCall(glStencilMaskSeparate(GL_FRONT_AND_BACK, mask));
+                glStencilMaskSeparate(GL_FRONT_AND_BACK, mask);
                 stencilMask.front_mask = mask;
                 stencilMask.back_mask = mask;
                 return true;
@@ -394,7 +394,7 @@ bool OpenGLState::GL_glStencilMaskSeparate(GLenum face, GLuint mask) {
 }
 bool OpenGLState::GL_glStencilMask(GLuint mask) {
     if (stencilMask.back_mask != mask || stencilMask.front_mask != mask) {
-        GLCall(glStencilMask(mask));
+        glStencilMask(mask);
         stencilMask.front_mask = mask;
         stencilMask.back_mask = mask;
         return true;
@@ -403,7 +403,7 @@ bool OpenGLState::GL_glStencilMask(GLuint mask) {
 }
 bool OpenGLState::GL_glStencilOp(GLenum sfail, GLenum dpfail, GLenum dppass) {
     if (stencilOp.sFail_back != sfail || stencilOp.sFail_front != sfail || stencilOp.dpPass_back != dppass || stencilOp.dpPass_front != dppass || stencilOp.dpFail_back != dpfail || stencilOp.dpFail_front != dpfail) {
-        GLCall(glStencilOp(sfail, dpfail, dppass));
+        glStencilOp(sfail, dpfail, dppass);
         stencilOp.dpFail_back = dpfail;
         stencilOp.dpPass_back = dppass;
         stencilOp.sFail_back = sfail;
@@ -418,7 +418,7 @@ bool OpenGLState::GL_glStencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfai
     switch (face) {
         case GL_FRONT: {
             if (stencilOp.sFail_front != sfail || stencilOp.dpPass_front != dppass || stencilOp.dpFail_front != dpfail) {
-                GLCall(glStencilOpSeparate(GL_FRONT, sfail, dpfail, dppass));
+                glStencilOpSeparate(GL_FRONT, sfail, dpfail, dppass);
                 stencilOp.dpFail_front = dpfail;
                 stencilOp.dpPass_front = dppass;
                 stencilOp.sFail_front = sfail;
@@ -427,7 +427,7 @@ bool OpenGLState::GL_glStencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfai
             break;
         }case GL_BACK: {
             if (stencilOp.sFail_back != sfail || stencilOp.dpPass_back != dppass || stencilOp.dpFail_back != dpfail) {
-                GLCall(glStencilOpSeparate(GL_BACK, sfail, dpfail, dppass));
+                glStencilOpSeparate(GL_BACK, sfail, dpfail, dppass);
                 stencilOp.dpFail_back = dpfail;
                 stencilOp.dpPass_back = dppass;
                 stencilOp.sFail_back = sfail;
@@ -439,7 +439,7 @@ bool OpenGLState::GL_glStencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfai
             break;
         }case GL_FRONT_AND_BACK: {
             if (stencilOp.sFail_back != sfail || stencilOp.sFail_front != sfail || stencilOp.dpPass_back != dppass || stencilOp.dpPass_front != dppass || stencilOp.dpFail_back != dpfail || stencilOp.dpFail_front != dpfail) {
-                GLCall(glStencilOpSeparate(GL_FRONT_AND_BACK, sfail, dpfail, dppass));
+                glStencilOpSeparate(GL_FRONT_AND_BACK, sfail, dpfail, dppass);
                 stencilOp.dpFail_back = dpfail;
                 stencilOp.dpPass_back = dppass;
                 stencilOp.sFail_back = sfail;
@@ -449,15 +449,13 @@ bool OpenGLState::GL_glStencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfai
                 return true;
             }
             break;
-        }default: {
-            break;
         }
     }
     return false;
 }
 bool OpenGLState::GL_glUseProgram(GLuint program) {
     if (useProgram.program != program) {
-        GLCall(glUseProgram(program));
+        glUseProgram(program);
         useProgram.program = program;
         return true;
     }
@@ -465,7 +463,7 @@ bool OpenGLState::GL_glUseProgram(GLuint program) {
 }
 bool OpenGLState::GL_glBindVertexArray(GLuint vao) {
     if (vaoState.vao != vao) {
-        GLCall(glBindVertexArray(vao));
+        glBindVertexArray(vao);
         vaoState.vao = vao;
         return true;
     }
@@ -476,7 +474,7 @@ bool OpenGLState::GL_glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
     if (x == viewportState.x && y == viewportState.y && width == viewportState.width && height == viewportState.height) {
         return false;
     }
-    GLCall(glViewport(x, y, width, height));
+    glViewport(x, y, width, height);
     viewportState.x = x;
     viewportState.y = y;
     viewportState.width = width;
@@ -485,7 +483,7 @@ bool OpenGLState::GL_glViewport(GLint x, GLint y, GLsizei width, GLsizei height)
 }
 bool OpenGLState::GL_glCullFace(GLenum mode) {
     if (cullFaceState.mode != mode) {
-        GLCall(glCullFace(mode));
+        glCullFace(mode);
         cullFaceState.mode = mode;
         return true;
     }
@@ -493,7 +491,7 @@ bool OpenGLState::GL_glCullFace(GLenum mode) {
 }
 bool OpenGLState::GL_glFrontFace(GLenum mode) {
     if (frontFaceState.mode != mode) {
-        GLCall(glFrontFace(mode));
+        glFrontFace(mode);
         frontFaceState.mode = mode;
         return true;
     }
@@ -501,7 +499,7 @@ bool OpenGLState::GL_glFrontFace(GLenum mode) {
 }
 bool OpenGLState::GL_glDepthFunc(GLenum func) {
     if (depthFuncState.func != func) {
-        GLCall(glDepthFunc(func));
+        glDepthFunc(func);
         depthFuncState.func = func;
         return true;
     }
@@ -514,19 +512,17 @@ bool OpenGLState::GL_glPixelStorei(GLenum pname, GLint param) {
     switch (pname) {
         case GL_PACK_ALIGNMENT: {
             if (pixelStoreiState.pack_alignment != param) {
-                GLCall(glPixelStorei(GL_PACK_ALIGNMENT, param));
+                glPixelStorei(GL_PACK_ALIGNMENT, param);
                 pixelStoreiState.pack_alignment = param;
                 return true;
             }
             break;
         }case GL_UNPACK_ALIGNMENT: {
             if (pixelStoreiState.unpack_alignment != param) {
-                GLCall(glPixelStorei(GL_UNPACK_ALIGNMENT, param));
+                glPixelStorei(GL_UNPACK_ALIGNMENT, param);
                 pixelStoreiState.unpack_alignment = param;
                 return true;
             }
-            break;
-        }default: {
             break;
         }
     }
@@ -536,7 +532,7 @@ bool OpenGLState::GL_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, 
     switch (face) {
         case GL_FRONT: {
             if (stencilFuncState.func_front != func || stencilFuncState.ref_front != ref || stencilFuncState.mask_front != mask) {
-                GLCall(glStencilFuncSeparate(face, func, ref, mask));
+                glStencilFuncSeparate(face, func, ref, mask);
                 stencilFuncState.func_front = func;
                 stencilFuncState.ref_front = ref;
                 stencilFuncState.mask_front = mask;
@@ -545,7 +541,7 @@ bool OpenGLState::GL_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, 
             break;
         }case GL_BACK: {
             if (stencilFuncState.func_back != func || stencilFuncState.ref_back != ref || stencilFuncState.mask_back != mask) {
-                GLCall(glStencilFuncSeparate(face, func, ref, mask));
+                glStencilFuncSeparate(face, func, ref, mask);
                 stencilFuncState.func_back = func;
                 stencilFuncState.ref_back = ref;
                 stencilFuncState.mask_back = mask;
@@ -554,7 +550,7 @@ bool OpenGLState::GL_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, 
             break;
         }case GL_FRONT_AND_BACK: {
             if (stencilFuncState.func_front != func || stencilFuncState.ref_front != ref || stencilFuncState.mask_front != mask || stencilFuncState.func_back != func || stencilFuncState.ref_back != ref || stencilFuncState.mask_back != mask) {
-                GLCall(glStencilFuncSeparate(face, func, ref, mask));
+                glStencilFuncSeparate(face, func, ref, mask);
                 stencilFuncState.func_back = func;
                 stencilFuncState.ref_back = ref;
                 stencilFuncState.mask_back = mask;
@@ -564,15 +560,13 @@ bool OpenGLState::GL_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, 
                 return true;
             }
             break;
-        }default: {
-            break;
         }
     }
     return false;
 }
 bool OpenGLState::GL_glStencilFunc(GLenum func, GLint ref, GLuint mask) {
     if (stencilFuncState.func_front != func || stencilFuncState.ref_front != ref || stencilFuncState.mask_front != mask || stencilFuncState.func_back != func || stencilFuncState.ref_back != ref || stencilFuncState.mask_back != mask) {
-        GLCall(glStencilFunc(func, ref, mask));
+        glStencilFunc(func, ref, mask);
         stencilFuncState.func_back = func;
         stencilFuncState.ref_back = ref;
         stencilFuncState.mask_back = mask;
@@ -588,210 +582,210 @@ bool OpenGLState::GL_glEnable(GLenum capability) {
     switch (capability) {
         case GL_MULTISAMPLE: {
             if (enabledState.gl_multisample != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_multisample = boolean;
                 return true;
             }
             break;
         }case GL_DITHER: {
             if (enabledState.gl_dither != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_dither = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE1: {
             if (enabledState.gl_clip_distance_1 != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_clip_distance_1 = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE2: {
             if (enabledState.gl_clip_distance_2 != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_clip_distance_2 = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE3: {
             if (enabledState.gl_clip_distance_3 != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_clip_distance_3 = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE4: {
             if (enabledState.gl_clip_distance_4 != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_clip_distance_4 = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE5: {
             if (enabledState.gl_clip_distance_5 != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_clip_distance_5 = boolean;
                 return true;
             }
             break;
         }case GL_COLOR_LOGIC_OP: {
             if (enabledState.gl_color_logic_op != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_color_logic_op = boolean;
                 return true;
             }
             break;
         }case GL_CULL_FACE: {
             if (enabledState.gl_cull_face != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_cull_face = boolean;
                 return true;
             }
             break;
         }case GL_DEBUG_OUTPUT: {
             if (enabledState.gl_debug_output != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_debug_output = boolean;
                 return true;
             }
             break;
         }case GL_DEBUG_OUTPUT_SYNCHRONOUS: {
             if (enabledState.gl_debug_output_syncronous != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_debug_output_syncronous = boolean;
                 return true;
             }
             break;
         }case GL_DEPTH_CLAMP: {
             if (enabledState.gl_depth_clamp != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_depth_clamp = boolean;
                 return true;
             }
             break;
         }case GL_DEPTH_TEST: {
             if (enabledState.gl_depth_test != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_depth_test = boolean;
                 return true;
             }
             break;
         }case GL_FRAMEBUFFER_SRGB: {
             if (enabledState.gl_framebuffer_srgb != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_framebuffer_srgb = boolean;
                 return true;
             }
             break;
         }case GL_LINE_SMOOTH: {
             if (enabledState.gl_line_smooth != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_line_smooth = boolean;
                 return true;
             }
             break;
         }case GL_POLYGON_OFFSET_FILL: {
             if (enabledState.gl_polygon_offset_fill != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_polygon_offset_fill = boolean;
                 return true;
             }
             break;
         }case GL_POLYGON_OFFSET_LINE: {
             if (enabledState.gl_polygon_offset_line != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_polygon_offset_line = boolean;
                 return true;
             }
             break;
         }case GL_POLYGON_OFFSET_POINT: {
             if (enabledState.gl_polygon_offset_point != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_polygon_offset_point = boolean;
                 return true;
             }
             break;
         }case GL_POLYGON_SMOOTH: {
             if (enabledState.gl_polygon_smooth != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_polygon_smooth = boolean;
                 return true;
             }
             break;
         }case GL_PRIMITIVE_RESTART: {
             if (enabledState.gl_primitive_restart != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_primitive_restart = boolean;
                 return true;
             }
             break;
         }case GL_PRIMITIVE_RESTART_FIXED_INDEX: {
             if (enabledState.gl_primitive_restart_fixed_index != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_primitive_restart_fixed_index = boolean;
                 return true;
             }
             break;
         }case GL_RASTERIZER_DISCARD: {
             if (enabledState.gl_rasterizer_discard != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_rasterizer_discard = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_ALPHA_TO_COVERAGE: {
             if (enabledState.gl_sample_alpha_to_coverage != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_sample_alpha_to_coverage = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_ALPHA_TO_ONE: {
             if (enabledState.gl_sample_alpha_to_one != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_sample_alpha_to_one = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_COVERAGE: {
             if (enabledState.gl_sample_coverage != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_sample_coverage = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_SHADING: {
             if (enabledState.gl_sample_shading != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_sample_shading = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_MASK: {
             if (enabledState.gl_sample_mask != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_sample_mask = boolean;
                 return true;
             }
             break;
         }case GL_STENCIL_TEST: {
             if (enabledState.gl_stencil_test != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_stencil_test = boolean;
                 return true;
             }
             break;
         }case GL_TEXTURE_CUBE_MAP_SEAMLESS: {
             if (enabledState.gl_texture_cube_map_seamless != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_texture_cube_map_seamless = boolean;
                 return true;
             }
             break;
         }case GL_PROGRAM_POINT_SIZE: {
             if (enabledState.gl_program_point_size != boolean) {
-                GLCall(glEnable(capability));
+                glEnable(capability);
                 enabledState.gl_program_point_size = boolean;
                 return true;
             }
@@ -800,7 +794,7 @@ bool OpenGLState::GL_glEnable(GLenum capability) {
             for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
                 auto& blend = enabledState.blendState[i];
                 if (blend.gl_blend != boolean) {
-                    GLCall(glEnablei(capability, (GLuint)i));
+                    glEnablei(capability, (GLuint)i);
                     blend.gl_blend = boolean;
                 }
             }
@@ -809,13 +803,11 @@ bool OpenGLState::GL_glEnable(GLenum capability) {
             for (size_t i = 0; i < enabledState.scissorState.capacity(); ++i) {
                 auto& scissor = enabledState.scissorState[i];
                 if (scissor.gl_scissor_test != boolean) {
-                    GLCall(glEnablei(capability, (GLuint)i));
+                    glEnablei(capability, (GLuint)i);
                     scissor.gl_scissor_test = boolean;
                 }
             }
             return true;
-        }default: {
-            break;
         }
     }
     return false;
@@ -825,210 +817,210 @@ bool OpenGLState::GL_glDisable(GLenum capability) {
     switch (capability) {
         case GL_MULTISAMPLE: {
             if (enabledState.gl_multisample != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_multisample = boolean;
                 return true;
             }
             break;
         }case GL_DITHER: {
             if (enabledState.gl_dither != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_dither = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE1: {
             if (enabledState.gl_clip_distance_1 != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_clip_distance_1 = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE2: {
             if (enabledState.gl_clip_distance_2 != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_clip_distance_2 = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE3: {
             if (enabledState.gl_clip_distance_3 != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_clip_distance_3 = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE4: {
             if (enabledState.gl_clip_distance_4 != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_clip_distance_4 = boolean;
                 return true;
             }
             break;
         }case GL_CLIP_DISTANCE5: {
             if (enabledState.gl_clip_distance_5 != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_clip_distance_5 = boolean;
                 return true;
             }
             break;
         }case GL_COLOR_LOGIC_OP: {
             if (enabledState.gl_color_logic_op != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_color_logic_op = boolean;
                 return true;
             }
             break;
         }case GL_CULL_FACE: {
             if (enabledState.gl_cull_face != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_cull_face = boolean;
                 return true;
             }
             break;
         }case GL_DEBUG_OUTPUT: {
             if (enabledState.gl_debug_output != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_debug_output = boolean;
                 return true;
             }
             break;
         }case GL_DEBUG_OUTPUT_SYNCHRONOUS: {
             if (enabledState.gl_debug_output_syncronous != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_debug_output_syncronous = boolean;
                 return true;
             }
             break;
         }case GL_DEPTH_CLAMP: {
             if (enabledState.gl_depth_clamp != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_depth_clamp = boolean;
                 return true;
             }
             break;
         }case GL_DEPTH_TEST: {
             if (enabledState.gl_depth_test != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_depth_test = boolean;
                 return true;
             }
             break;
         }case GL_FRAMEBUFFER_SRGB: {
             if (enabledState.gl_framebuffer_srgb != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_framebuffer_srgb = boolean;
                 return true;
             }
             break;
         }case GL_LINE_SMOOTH: {
             if (enabledState.gl_line_smooth != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_line_smooth = boolean;
                 return true;
             }
             break;
         }case GL_POLYGON_OFFSET_FILL: {
             if (enabledState.gl_polygon_offset_fill != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_polygon_offset_fill = boolean;
                 return true;
             }
             break;
         }case GL_POLYGON_OFFSET_LINE: {
             if (enabledState.gl_polygon_offset_line != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_polygon_offset_line = boolean;
                 return true;
             }
             break;
         }case GL_POLYGON_OFFSET_POINT: {
             if (enabledState.gl_polygon_offset_point != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_polygon_offset_point = boolean;
                 return true;
             }
             break;
         }case GL_POLYGON_SMOOTH: {
             if (enabledState.gl_polygon_smooth != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_polygon_smooth = boolean;
                 return true;
             }
             break;
         }case GL_PRIMITIVE_RESTART: {
             if (enabledState.gl_primitive_restart != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_primitive_restart = boolean;
                 return true;
             }
             break;
         }case GL_PRIMITIVE_RESTART_FIXED_INDEX: {
             if (enabledState.gl_primitive_restart_fixed_index != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_primitive_restart_fixed_index = boolean;
                 return true;
             }
             break;
         }case GL_RASTERIZER_DISCARD: {
             if (enabledState.gl_rasterizer_discard != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_rasterizer_discard = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_ALPHA_TO_COVERAGE: {
             if (enabledState.gl_sample_alpha_to_coverage != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_sample_alpha_to_coverage = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_ALPHA_TO_ONE: {
             if (enabledState.gl_sample_alpha_to_one != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_sample_alpha_to_one = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_COVERAGE: {
             if (enabledState.gl_sample_coverage != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_sample_coverage = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_SHADING: {
             if (enabledState.gl_sample_shading != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_sample_shading = boolean;
                 return true;
             }
             break;
         }case GL_SAMPLE_MASK: {
             if (enabledState.gl_sample_mask != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_sample_mask = boolean;
                 return true;
             }
             break;
         }case GL_STENCIL_TEST: {
             if (enabledState.gl_stencil_test != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_stencil_test = boolean;
                 return true;
             }
             break;
         }case GL_TEXTURE_CUBE_MAP_SEAMLESS: {
             if (enabledState.gl_texture_cube_map_seamless != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_texture_cube_map_seamless = boolean;
                 return true;
             }
             break;
         }case GL_PROGRAM_POINT_SIZE: {
             if (enabledState.gl_program_point_size != boolean) {
-                GLCall(glDisable(capability));
+                glDisable(capability);
                 enabledState.gl_program_point_size = boolean;
                 return true;
             }
@@ -1037,7 +1029,7 @@ bool OpenGLState::GL_glDisable(GLenum capability) {
             for (size_t i = 0; i < enabledState.blendState.capacity(); ++i) {
                 auto& blend = enabledState.blendState[i];
                 if (blend.gl_blend != boolean) {
-                    GLCall(glDisablei(capability, (GLuint)i));
+                    glDisablei(capability, (GLuint)i);
                     blend.gl_blend = boolean;
                 }
             }
@@ -1047,13 +1039,11 @@ bool OpenGLState::GL_glDisable(GLenum capability) {
             for (size_t i = 0; i < enabledState.scissorState.capacity(); ++i) {
                 auto& scissor = enabledState.scissorState[i];
                 if (scissor.gl_scissor_test != boolean) {
-                    GLCall(glDisablei(capability, (GLuint)i));
+                    glDisablei(capability, (GLuint)i);
                     scissor.gl_scissor_test = boolean;
                 }
             }
             return true;
-            break;
-        }default: {
             break;
         }
     }
@@ -1065,7 +1055,7 @@ bool OpenGLState::GL_glEnablei(GLenum capability, GLuint index) {
         case GL_BLEND: {
             auto& blendState = enabledState.blendState[index];
             if (blendState.gl_blend != boolean) {
-                GLCall(glEnablei(capability, index));
+                glEnablei(capability, index);
                 blendState.gl_blend = boolean;
                 return true;
             }
@@ -1073,12 +1063,10 @@ bool OpenGLState::GL_glEnablei(GLenum capability, GLuint index) {
         }case GL_SCISSOR_TEST: {
             auto& scissorState = enabledState.scissorState[index];
             if (scissorState.gl_scissor_test != boolean) {
-                GLCall(glEnablei(capability, index));
+                glEnablei(capability, index);
                 scissorState.gl_scissor_test = boolean;
                 return true;
             }
-            break;
-        }default: {
             break;
         }
     }
@@ -1090,7 +1078,7 @@ bool OpenGLState::GL_glDisablei(GLenum capability, GLuint index) {
         case GL_BLEND: {
             auto& blendState = enabledState.blendState[index];
             if (blendState.gl_blend != boolean) {
-                GLCall(glDisablei(capability, index));
+                glDisablei(capability, index);
                 blendState.gl_blend = boolean;
                 return true;
             }
@@ -1098,12 +1086,10 @@ bool OpenGLState::GL_glDisablei(GLenum capability, GLuint index) {
         }case GL_SCISSOR_TEST: {
             auto& scissorState = enabledState.scissorState[index];
             if (scissorState.gl_scissor_test != boolean) {
-                GLCall(glDisablei(capability, index));
+                glDisablei(capability, index);
                 scissorState.gl_scissor_test = boolean;
                 return true;
             }
-            break;
-        }default: {
             break;
         }
     }
@@ -1113,14 +1099,14 @@ bool OpenGLState::GL_glBindFramebuffer(GLenum target, GLuint framebuffer) {
     switch (target) {
         case GL_READ_FRAMEBUFFER: {
             if (framebufferState.framebuffer_read != framebuffer) {
-                GLCall(glBindFramebuffer(target, framebuffer));
+                glBindFramebuffer(target, framebuffer);
                 framebufferState.framebuffer_read = framebuffer;
                 return true;
             }
             break;
         }case GL_DRAW_FRAMEBUFFER: {
             if (framebufferState.framebuffer_draw != framebuffer) {
-                GLCall(glBindFramebuffer(target, framebuffer));
+                glBindFramebuffer(target, framebuffer);
                 framebufferState.framebuffer_draw = framebuffer;
                 return true;
             }
@@ -1128,12 +1114,12 @@ bool OpenGLState::GL_glBindFramebuffer(GLenum target, GLuint framebuffer) {
         }case GL_FRAMEBUFFER: {
             bool success = false;
             if (framebufferState.framebuffer_read != framebuffer) {
-                GLCall(glBindFramebuffer(target, framebuffer));
+                glBindFramebuffer(target, framebuffer);
                 framebufferState.framebuffer_read = framebuffer;
                 success = true;
             }
             if (framebufferState.framebuffer_draw != framebuffer) {
-                GLCall(glBindFramebuffer(target, framebuffer));
+                glBindFramebuffer(target, framebuffer);
                 framebufferState.framebuffer_draw = framebuffer;
                 success = true;
             }
@@ -1147,7 +1133,7 @@ bool OpenGLState::GL_glBindFramebuffer(GLenum target, GLuint framebuffer) {
 }
 bool OpenGLState::GL_glBindRenderbuffer(GLuint renderBuffer) {
     if (framebufferState.renderbuffer != renderBuffer) {
-        GLCall(glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer));
+        glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
         framebufferState.renderbuffer = renderBuffer;
         return true;
     }
@@ -1157,7 +1143,7 @@ bool OpenGLState::GL_glBlendEquation(GLenum mode) {
     unsigned int buf = 0;
     for (auto& state : blendEquationState) {
         if (state.mode != mode) {
-            GLCall(glBlendEquationi(buf, mode));
+            glBlendEquationi(buf, mode);
             state.mode = mode;
         }
         ++buf;
@@ -1167,7 +1153,7 @@ bool OpenGLState::GL_glBlendEquation(GLenum mode) {
 bool OpenGLState::GL_glBlendEquationi(GLuint buf, GLenum mode) {
     auto& state = blendEquationState[buf];
     if (state.mode != mode) {
-        GLCall(glBlendEquationi(buf, mode));
+        glBlendEquationi(buf, mode);
         state.mode = mode;
         return true;
     }
@@ -1180,7 +1166,5 @@ std::string OpenGLState::getHighestGLSLVersion() noexcept {
         VERSION_MAP = POPULATE_VERSION_MAP();
     }
     std::string version = std::to_string(Engine::priv::OpenGLState::constants.MAJOR_VERSION) + "." + std::to_string(Engine::priv::OpenGLState::constants.MINOR_VERSION);
-
-    std::string res = VERSION_MAP.contains(version) ? VERSION_MAP.at(version) : "";
-    return res;
+    return VERSION_MAP.contains(version) ? VERSION_MAP.at(version) : "";
 }

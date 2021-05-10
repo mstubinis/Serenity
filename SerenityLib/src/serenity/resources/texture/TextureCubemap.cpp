@@ -125,7 +125,7 @@ void TextureCubemap::setMaxFilter(TextureFilter filter) {
     internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
 
     const auto glType = filter.toGLType(false);
-    GLCall(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, glType));
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, glType);
 }
 void TextureCubemap::setFilter(TextureFilter filter) {
     if (*this == false) {

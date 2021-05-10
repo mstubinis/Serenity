@@ -68,13 +68,10 @@ inline sf::Packet& operator >>(sf::Packet& packet, std::array<T, size>& data) no
 
 namespace Engine::Networking {
     class Packet : public sf::Packet {
-        using SendFP = std::function<void(Engine::Networking::Packet* packet)>;
         public:
             template<class T> static inline constexpr bool sequence_greater_than(T s1, T s2) noexcept {
                 return ((s1 > s2) && (s1 - s2 <= std::numeric_limits<T>().max())) || ((s1 < s2) && (s2 - s1 > std::numeric_limits<T>().max()));
             }
-        private:
-            SendFP m_OnSendFunction = [](Engine::Networking::Packet* packet) {};
         public:
             uint32_t           m_PacketType     = 0;
             PacketTimestamp    m_Timestamp      = 0;
@@ -87,40 +84,41 @@ namespace Engine::Networking {
             Packet(uint32_t PacketType)
                 : m_PacketType { PacketType }
             {}
-            Packet(sf::Packet& inSFMLPacket)           = delete;
+            Packet(sf::Packet&)                  = delete;
 
-            Packet& operator=(const Packet& other)     = default;
-            Packet(const Packet& other)                = default;
-            Packet(Packet&& other) noexcept            = default;
-            Packet& operator=(Packet&& other) noexcept = default;
+            Packet& operator=(const Packet&)     = default;
+            Packet(const Packet&)                = default;
+            Packet(Packet&&) noexcept            = default;
+            Packet& operator=(Packet&&) noexcept = default;
             virtual ~Packet() {}
 
             inline constexpr bool isNull() const noexcept { return m_Timestamp == 0 || m_PacketType == 0 || m_Valid == false; }
 
+            /*
             void initialize(Engine::Networking::Packet& inPacket) noexcept {        
                 m_PacketType     = inPacket.m_PacketType;
                 m_Timestamp      = inPacket.m_Timestamp;
                 m_AckBitfield    = inPacket.m_AckBitfield;
                 m_SequenceNumber = inPacket.m_SequenceNumber;
                 m_Ack            = inPacket.m_Ack;
-                if (!inPacket.endOfPacket()) {
-                    unpack(inPacket);
-                }
+                //if (!inPacket.endOfPacket()) {
+                //    unpack(inPacket);
+                //}
             }
+            */
+            /*
             void initialize(sf::Packet& inSFMLPacket) noexcept {
-                if (!inSFMLPacket.endOfPacket()){
-                    unpack(inSFMLPacket);
-                }
+                //if (!inSFMLPacket.endOfPacket()){
+                //    unpack(inSFMLPacket);
+                //}
             }
-
-            template<class FUNCTION>
-            inline void setOnSendFunction(FUNCTION&& function) noexcept {
-                m_OnSendFunction = std::forward<FUNCTION>(function);
-            }
-
+            */
+            /*
             virtual Engine::Networking::Packet* clone() {
                 return NEW Engine::Networking::Packet(*this);
             }
+            */
+            /*
             virtual bool unpack(sf::Packet& inSFMLPacket) {
                 m_Valid = true;
                 return true;
@@ -128,34 +126,44 @@ namespace Engine::Networking {
             virtual bool build(sf::Packet& inSFMLPacket) {
                 return true;
             }
+            */
+            /*
             virtual const void* onSend(std::size_t& size) override {
-                clear();
-                m_OnSendFunction(this);
+                sf::Packet::clear();
                 using cast          = std::chrono::milliseconds;
                 m_Timestamp         = (PacketTimestamp)std::chrono::duration_cast<cast>(std::chrono::system_clock::now().time_since_epoch()).count();
-                bool initial_build  = (*this 
-                    << m_PacketType 
-                    << m_Timestamp 
+                initial_build();
+                //build(*this);
+                return sf::Packet::onSend(size);
+            }
+            */
+            /*
+            virtual void onReceive(const void* data, std::size_t size) override {
+                sf::Packet::onReceive(data, size);
+                initial_unpack();
+                if (!sf::Packet::endOfPacket()) {
+                    unpack(*this);
+                }
+            }
+            */
+            void initial_build() {
+                bool initial_build = (*this
+                    << m_PacketType
+                    << m_Timestamp
                     << m_AckBitfield
                     << m_SequenceNumber
                     << m_Ack
                 );
-                build(*this);
-                return sf::Packet::onSend(size);
             }
-            virtual void onReceive(const void* data, std::size_t size) override {
-                sf::Packet::onReceive(data, size);
-                if (!endOfPacket()) {
-                    bool initial_unpack = (*this 
+            void initial_unpack() {
+                if (!sf::Packet::endOfPacket()) {
+                    m_Valid = (*this
                         >> m_PacketType
                         >> m_Timestamp
                         >> m_AckBitfield
                         >> m_SequenceNumber
                         >> m_Ack
                     );
-                }
-                if (!endOfPacket()) {
-                    unpack(*this);
                 }
             }
     };

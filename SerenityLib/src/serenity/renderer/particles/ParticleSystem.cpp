@@ -162,7 +162,7 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
         if (particle.isActive() && (glm::distance2(pos, camPos) <= (comparison * comparison)) && sphereTest > 0) {
             //its just pretty expensive in general...
             if (!THREAD_PART_4[k].contains(particle.m_Material)) {
-                THREAD_PART_4[k].try_emplace(particle.m_Material,       particle.m_Material->getID());
+                THREAD_PART_4[k].try_emplace(particle.m_Material,          particle.m_Material->getID());
                 THREAD_PART_5[k].try_emplace(particle.m_Material->getID(), particle.m_Material);
             }
             ///////////////////////////////////////////
@@ -187,8 +187,8 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
 
     //merge the thread collections into the main collections
     for (auto& _1 : THREAD_PART_1) { 
-        for (auto& item : _1) {
-            ParticlesDOD.push(std::move(item));
+        for (auto& itemPod : _1) {
+            ParticlesDOD.push(std::move(itemPod));
         }
         //ParticlesDOD.insert(ParticlesDOD.end(), std::make_move_iterator(_1.begin()), std::make_move_iterator(_1.end())); 
     }

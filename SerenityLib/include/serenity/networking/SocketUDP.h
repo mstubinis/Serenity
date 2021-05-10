@@ -18,17 +18,17 @@ namespace Engine::Networking {
         friend class Engine::priv::EditorWindowScene;
         public:
             struct UDPPacketInfo final {
-                std::unique_ptr<sf::Packet> sfmlPacket;
+                Engine::Networking::Packet  packet;
                 sf::IpAddress               ip           = sf::IpAddress::LocalHost;
                 uint16_t                    port         = 0;
    
-                UDPPacketInfo(uint16_t inPort, sf::IpAddress&& inAddress, sf::Packet* inSFMLPacket)
+                UDPPacketInfo(uint16_t inPort, sf::IpAddress&& inAddress, Engine::Networking::Packet& packet_)
                     : port{ inPort }
                     , ip{ std::move(inAddress) }
-                    , sfmlPacket{ std::unique_ptr<sf::Packet>(inSFMLPacket) }
+                    , packet{ packet_ }
                 {}
-                UDPPacketInfo(const UDPPacketInfo& other)            = delete;
-                UDPPacketInfo& operator=(const UDPPacketInfo& other) = delete;
+                UDPPacketInfo(const UDPPacketInfo&)            = delete;
+                UDPPacketInfo& operator=(const UDPPacketInfo&) = delete;
             };
         private:
             sf::UdpSocket               m_SocketUDP;
@@ -38,7 +38,6 @@ namespace Engine::Networking {
 
             SocketUDP() = delete;
 
-
             SocketStatus::Status internal_send_partial_packets_loop();
             SocketStatus::Status internal_send_packet(UDPPacketInfo& packetInfoUDP);
 
@@ -46,7 +45,7 @@ namespace Engine::Networking {
         public:
             SocketUDP(const SocketUDP&) = delete;
             SocketUDP& operator=(const SocketUDP&) = delete;
-            SocketUDP(uint16_t port, sf::IpAddress ip = sf::IpAddress::LocalHost);
+            SocketUDP(uint16_t port, sf::IpAddress = sf::IpAddress::LocalHost);
             ~SocketUDP();
 
             void clearPartialPackets();
@@ -61,22 +60,17 @@ namespace Engine::Networking {
             void                   unbind();
             void                   changePort(uint16_t newPort);
            
-            SocketStatus::Status   receive(sf::Packet& packet, sf::IpAddress& ip, uint16_t& port);
             SocketStatus::Status   receive(Engine::Networking::Packet& packet, sf::IpAddress& ip, uint16_t& port);
             SocketStatus::Status   receive(void* data, size_t size, size_t& received, sf::IpAddress& ip, uint16_t& port);
 
             SocketStatus::Status   send(Engine::Networking::Packet& packet, sf::IpAddress ip);
-            SocketStatus::Status   send(sf::Packet& packet, sf::IpAddress ip);
             SocketStatus::Status   send(const void* data, size_t size, sf::IpAddress ip);
             SocketStatus::Status   send(uint16_t port, Engine::Networking::Packet& packet, sf::IpAddress ip);
-            SocketStatus::Status   send(uint16_t port, sf::Packet& packet, sf::IpAddress ip);
             SocketStatus::Status   send(uint16_t port, const void* data, size_t size, sf::IpAddress ip);
 
             inline SocketStatus::Status send(Engine::Networking::Packet& packet) noexcept { return send(m_Port, packet, m_IP); }
-            inline SocketStatus::Status send(sf::Packet& sfpacket) noexcept { return send(m_Port, sfpacket, m_IP); }
             inline SocketStatus::Status send(const void* data, size_t size) noexcept { return send(data, size, m_IP); }
             inline SocketStatus::Status send(uint16_t port, Engine::Networking::Packet& packet) noexcept { return send(port, packet, m_IP); }
-            inline SocketStatus::Status send(uint16_t port, sf::Packet& sfpacket) noexcept { return send(port, sfpacket, m_IP); }
             inline SocketStatus::Status send(uint16_t port, const void* data, size_t size) noexcept { return send(port, data, size, m_IP); }
     };
 };

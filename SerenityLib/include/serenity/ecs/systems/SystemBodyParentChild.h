@@ -3,6 +3,8 @@
 #define ENGINE_ECS_SYSTEM_BODY_PARENT_CHILD_H
 
 class  ComponentTransform;
+class  ComponentRigidBody;
+class  ComponentCollisionShape;
 
 #include <serenity/ecs/systems/SystemBaseClass.h>
 #include <cstdint>
@@ -47,6 +49,7 @@ class SystemBodyParentChild final : public SystemCRTP<SystemBodyParentChild, Com
         SystemBodyParentChild(Engine::priv::ECS& ecs);
 
         void computeAllParentChildWorldTransforms();
+        void computeRigidBodyMatrices(ComponentRigidBody*, ComponentCollisionShape*, Entity);
 
         [[nodiscard]] Entity getParentEntity(Entity) const;
 };

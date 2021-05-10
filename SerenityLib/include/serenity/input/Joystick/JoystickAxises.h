@@ -3,23 +3,25 @@
 #define ENGINE_EVENTS_JOYSTICK_AXISES_H
 
 #include <string>
+#include <cstdint>
 
-struct JoystickAxis final {
-    enum Axis : unsigned int {
-        X = 0,
-        Y,
-        Z,
-        R,
-        U,
-        V,
-        PovX,
-        PovY,
+class JoystickAxis final {
+    public:
+        enum Axis : uint32_t {
+            X = 0,
+            Y,
+            Z,
+            R,
+            U,
+            V,
+            PovX,
+            PovY,
 
-        _TOTAL,
-        Unknown = 4294967295, //-1
-    };
-    [[nodiscard]] static std::string toString(JoystickAxis::Axis joystick_axis);
-    [[nodiscard]] static const char* toCharArray(JoystickAxis::Axis joystick_axis);
+            _TOTAL,
+            Unknown = 4294967295, //-1
+        };
+        [[nodiscard]] static const char* toCharArray(JoystickAxis::Axis);
+        [[nodiscard]] static std::string toString(JoystickAxis::Axis);
 };
 
 #endif

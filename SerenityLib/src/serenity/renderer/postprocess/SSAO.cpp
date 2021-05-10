@@ -19,7 +19,7 @@ using namespace Engine::priv;
 Engine::priv::SSAO Engine::priv::SSAO::STATIC_SSAO;
 
 Engine::priv::SSAO::~SSAO() {
-    GLCall(glDeleteTextures(1, &m_ssao_noise_texture));
+    glDeleteTextures(1, &m_ssao_noise_texture);
 }
 void Engine::priv::SSAO::internal_generate_kernel(std::uniform_real_distribution<float>& rand_dist, std::default_random_engine& gen) noexcept {
     for (uint32_t i = 0; i < SSAO_MAX_KERNEL_SIZE; ++i) {

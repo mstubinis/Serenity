@@ -1499,17 +1499,17 @@ void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera,
 
     PublicScene::RenderForwardOpaque(m_Renderer, scene, &viewport, &camera);
 
-    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for (uint32_t i = 0; i < 4; ++i) {
         Engine::Renderer::GLEnablei(GL_BLEND, i);
     }
     if (!depthPrepass) {
-        GLCall(glDepthMask(GL_TRUE));
+        glDepthMask(GL_TRUE);
     }
     PublicScene::RenderForwardTransparent(m_Renderer, scene, &viewport, &camera);
     PublicScene::RenderForwardTransparentTrianglesSorted(m_Renderer, scene, &viewport, &camera);
     if (!depthPrepass) {
-        GLCall(glDepthMask(GL_FALSE));
+        glDepthMask(GL_FALSE);
     }
     PublicScene::RenderDecals(m_Renderer, scene, &viewport, &camera);
     PublicScene::RenderForwardParticles(m_Renderer, scene, &viewport, &camera);
@@ -1832,7 +1832,7 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
     //Engine::Renderer::GLEnable(GL_BLEND);
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
 
-    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     //sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
     //sendUniform1Safe("TransparencyMaskActive", (int)viewport.isTransparencyMaskActive());
@@ -1884,22 +1884,22 @@ void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport,
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
     if (mainRenderFunc && viewport.getRenderFlags().has(ViewportRenderingFlag::PhysicsDebug)) {
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
-            if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
+           if (m_Renderer.m_DrawPhysicsDebug && &camera == scene.getActiveCamera()) {
         #endif
                 Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-                GLCall(glDepthMask(GL_FALSE));
+                glDepthMask(GL_FALSE);
                 m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::BulletPhysics].get<ShaderProgram>());
                 Core::m_Engine->m_PhysicsModule.render(scene, camera);
         #ifndef ENGINE_FORCE_PHYSICS_DEBUG_DRAW
-            }
+           }
         #endif
     }
 }
 void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth) {
     m_GBuffer.bindBackbuffer(viewport);
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
-    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-    GLCall(glDepthMask(GL_TRUE));
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_TRUE);
     if (mainRenderFunc) {
         if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
             Engine::Renderer::Settings::clear(false, clearDepth, false); //clear depth only

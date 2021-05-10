@@ -32,11 +32,11 @@ namespace Engine::Networking {
             update_func    m_CustomUpdateFunction        = [](const float dt, bool serverActive) {};
             on_udp_func    m_CustomOnReceiveUDPFunction  = [](sf::Packet& sf_packet, std::string& ip, uint16_t port) {};
 
-            void internal_send_to_all_tcp(const ServerClient* exclusion, sf::Packet& packet);
-            void internal_send_to_all_udp(const ServerClient* exclusion, sf::Packet& packet);
-
-            bool internal_add_client(const std::string& hash, ServerClient* client);
-
+            void internal_send_to_all_clients_tcp(Engine::Networking::Packet&);
+            void internal_send_to_all_clients_udp(Engine::Networking::Packet&);
+            void internal_send_to_all_clients_but_one_tcp(const ServerClient* const exclusion, Engine::Networking::Packet&);
+            void internal_send_to_all_clients_but_one_udp(const ServerClient* const exclusion, Engine::Networking::Packet&);
+            bool internal_add_client(const std::string& hash, ServerClient*);
             void internal_on_receive_udp_packet(Engine::Networking::Packet&, sf::IpAddress, uint16_t port);
 
             Server() = delete;
@@ -58,7 +58,7 @@ namespace Engine::Networking {
             inline explicit operator bool() const noexcept { return isActive(); }
 
             //override this function with your own custom client class that inherits from Engine::Networking::ServerClient
-            virtual ServerClient* add_new_client(const std::string& hash, sf::IpAddress clientIP, uint16_t clientPort, SocketTCP*);
+            virtual ServerClient* addNewClient(const std::string& hash, sf::IpAddress clientIP, uint16_t clientPort, SocketTCP*);
             virtual void onEvent(const Event& e) override {}
             virtual bool startup(uint16_t port, std::string ip_restriction = "");
             virtual bool shutdown();
@@ -68,7 +68,7 @@ namespace Engine::Networking {
             [[nodiscard]] inline constexpr uint16_t getPort() const noexcept { return m_Port; }
             [[nodiscard]] inline SocketUDP& getUDPSocket() const noexcept { return *m_UdpSocket.get(); }
             [[nodiscard]] inline constexpr ServerType getType() const noexcept { return m_ServerType; }
-            [[nodiscard]] inline size_t num_clients() const noexcept { return m_Clients.size(); }
+            [[nodiscard]] inline size_t getNumClients() const noexcept { return m_Clients.size(); }
 
             template<class FUNC> inline void setCustomClientHashFunction(FUNC&& func) noexcept { m_CustomClientHashFunction = std::forward<FUNC>(func); }
             template<class FUNC> inline void setCustomServerUpdateFunction(FUNC&& func) noexcept { m_CustomUpdateFunction = std::forward<FUNC>(func); }
@@ -76,24 +76,21 @@ namespace Engine::Networking {
 
             void update(const float dt);
 
-            void remove_client(ServerClient&);
-            void remove_client_immediately(ServerClient&);
+            void removeClient(ServerClient&);
+            void removeClientImmediately(ServerClient&);
 
             //tcp
-            virtual SocketStatus::Status send_tcp_to_client(ServerClient*, sf::Packet&);
-            virtual void send_tcp_to_all_but_client(const ServerClient* exclusion, sf::Packet&);
-            virtual void send_tcp_to_all(sf::Packet&);
+            virtual SocketStatus::Status sendTcp(ServerClient*, Engine::Networking::Packet&);
+            virtual void sendTcpToAllButOne(const ServerClient* const exclusion, Engine::Networking::Packet&);
+            virtual void sendTcpToAll(Engine::Networking::Packet&);
 
             //udp
-            virtual SocketStatus::Status send_udp_to_client(ServerClient*, sf::Packet&);
-            virtual void send_udp_to_all_but_client(const ServerClient* exclusion, sf::Packet& packet);
-            virtual void send_udp_to_all(sf::Packet&);
-            virtual SocketStatus::Status send_udp_to_client_important(ServerClient*, Engine::Networking::Packet&);
-            virtual void send_udp_to_all_but_client_important(const ServerClient* exclusion, Engine::Networking::Packet&);
-            virtual void send_udp_to_all_important(Engine::Networking::Packet&);
+            virtual SocketStatus::Status sendUdp(ServerClient*, Engine::Networking::Packet&);
+            virtual void sendUdpToAllButOne(const ServerClient* const exclusion, Engine::Networking::Packet&);
+            virtual void sendUdpToAll(Engine::Networking::Packet&);
 
             //per frame update methods
-            std::pair<Engine::Networking::Packet, SocketStatus::Status> onUpdateReceiveUDPPackets();
+            SocketStatus::Status onUpdateReceiveUDPPackets();
             void onUpdateReceiveTCPPackets(const float dt);
             void onUpdateProcessTCPListeners();
     };

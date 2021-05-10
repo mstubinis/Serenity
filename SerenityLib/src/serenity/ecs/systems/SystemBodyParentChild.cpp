@@ -2,6 +2,9 @@
 #include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentRigidBody.h>
 #include <serenity/ecs/components/ComponentModel.h>
+#include <serenity/ecs/components/ComponentCollisionShape.h>
+#include <serenity/ecs/components/ComponentName.h>
+#include <serenity/math/Engine_Math.h>
 
 #include <serenity/utils/Utils.h>
 
@@ -12,40 +15,22 @@ SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
         auto& system = (SystemBodyParentChild&)inSystem;
 
         // compute local matrices and apply starting world matrices as locals
-        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* system, Entity entity, ComponentTransform* transform) {
+        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* systemPC, Entity entity, ComponentTransform* transform) {
             auto entityIndex  = entity.id() - 1;
-            auto& localMatrix = system->m_LocalTransforms[entityIndex];
-            auto& worldMatrix = system->m_WorldTransforms[entityIndex];
-#if defined(ENGINE_HIGH_PRECISION)
-            localMatrix       = glm::translate(transform->m_Position) * glm_mat4(glm::mat4_cast(transform->m_Rotation)) * glm_mat4(glm::scale(transform->m_Scale));
-#else
-            localMatrix       = glm::translate(transform->m_Position) * glm::mat4_cast(transform->m_Rotation) * glm::scale(transform->m_Scale);
-#endif
-            worldMatrix       = localMatrix;
+            auto& localMatrix = systemPC->m_LocalTransforms[entityIndex];
+            auto& worldMatrix = systemPC->m_WorldTransforms[entityIndex];
+            Engine::Math::setFinalModelMatrix(localMatrix, transform->m_Position, transform->m_Rotation, transform->m_Scale);
+            worldMatrix = localMatrix;
         }, &system, SystemExecutionPolicy::ParallelWait);
 
         // traverse parent child relationships and build the proper world matrices
         system.computeAllParentChildWorldTransforms();
 
         //finalize bullet rigid body positions by giving them their true world locations and rotations. TODO: move to separate system?
-        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* system, Entity entity, ComponentTransform* transform) {
-            auto rigidBody = entity.getComponent<ComponentRigidBody>();
-            if (rigidBody) {
-                const auto entityIndex  = entity.id() - 1;
-                auto& worldMatrix       = system->m_WorldTransforms[entityIndex];
-                const uint32_t parentID = system->m_Parents[entityIndex];
-                rigidBody->internal_setPosition(worldMatrix[3][0], worldMatrix[3][1], worldMatrix[3][2]);
-                if (parentID == 0) {
-                    rigidBody->internal_setRotation(transform->m_Rotation.x, transform->m_Rotation.y, transform->m_Rotation.z, transform->m_Rotation.w);
-                }else{
-#if defined(ENGINE_HIGH_PRECISION)
-                    auto worldRotation  = glm::quat_cast( system->m_WorldTransforms[parentID - 1] * glm_mat4(glm::mat4_cast(transform->m_Rotation)) );
-#else
-                    auto worldRotation = glm::quat_cast(system->m_WorldTransforms[parentID - 1] * glm::mat4_cast(transform->m_Rotation));
-#endif
-                    rigidBody->internal_setRotation((float)worldRotation.x, (float)worldRotation.y, (float)worldRotation.z, (float)worldRotation.w);
-                }
-            }
+        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* systemPC, Entity entity, ComponentTransform* transform) {
+            auto rigidBody      = entity.getComponent<ComponentRigidBody>();
+            auto collisionShape = entity.getComponent<ComponentCollisionShape>();
+            systemPC->computeRigidBodyMatrices(rigidBody, collisionShape, entity);
         }, &system, SystemExecutionPolicy::ParallelWait);
     });
     setComponentAddedToEntityFunction([](SystemBaseClass& inSystem, void* component, Entity entity) {
@@ -82,12 +67,12 @@ void SystemBodyParentChild::computeAllParentChildWorldTransforms() {
     for (size_t i = 0; i < m_Order.size(); ++i) {
         const uint32_t entityID = m_Order[i];
         if (entityID > 0) {
-            const uint32_t entityIndex = entityID - 1U;
+            const uint32_t entityIndex = entityID - 1;
             const uint32_t parentID    = m_Parents[entityIndex];
             if (parentID == 0) {
                 m_WorldTransforms[entityIndex] = m_LocalTransforms[entityIndex];
             }else{
-                const uint32_t parentIndex = parentID - 1U;
+                const uint32_t parentIndex = parentID - 1;
                 m_WorldTransforms[entityIndex] = m_WorldTransforms[parentIndex] * m_LocalTransforms[entityIndex];
             }
         }else{
@@ -95,7 +80,19 @@ void SystemBodyParentChild::computeAllParentChildWorldTransforms() {
         }
     }
 }
-
+void SystemBodyParentChild::computeRigidBodyMatrices(ComponentRigidBody* rigidBody, ComponentCollisionShape* collisionShape, Entity entity) {
+    if (rigidBody) {
+        const auto& thisWorldMatrix = m_WorldTransforms[entity.id() - 1];
+        if (collisionShape && collisionShape->isChildShape()) {
+            auto parentWorldMatrix  = m_WorldTransforms[collisionShape->getParent().id() - 1];
+            auto localMatrix        = glm::inverse(parentWorldMatrix) * thisWorldMatrix;
+            const auto localScale   = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(localMatrix);
+            collisionShape->updateChildShapeTransform(localMatrix);
+        } else {
+            rigidBody->internal_set_matrix(thisWorldMatrix);
+        }
+    }
+}
 
 #pragma region ParentChildVector
 

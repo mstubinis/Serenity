@@ -3,31 +3,34 @@
 #define ENGINE_EVENTS_MOUSE_BUTTONS_H
 
 #include <string>
+#include <cstdint>
 
-struct MouseButton final {
-    enum Button : unsigned int {
-        Left = 0,
-        Right,
-        Middle,
-        XButton1,
-        XButton2,
+class MouseButton final {
+    public:
+        enum Button : uint32_t {
+            Left = 0,
+            Right,
+            Middle,
+            XButton1,
+            XButton2,
 
-        _TOTAL,
-        Unknown = 4294967295, //-1
-    };
-    [[nodiscard]] static const char* toCharArray(MouseButton::Button mouse_button);
-    [[nodiscard]] static std::string toString(MouseButton::Button mouse_button);
+            _TOTAL,
+            Unknown = 4294967295, //-1
+        };
+        [[nodiscard]] static const char* toCharArray(MouseButton::Button mouse_button);
+        [[nodiscard]] static std::string toString(MouseButton::Button mouse_button);
 };
-struct MouseWheel final {
-    enum Wheel : unsigned int {
-        VerticalWheel = 0,
-        HorizontalWheel,
+class MouseWheel final {
+    public:
+        enum Wheel : uint32_t {
+            VerticalWheel = 0,
+            HorizontalWheel,
 
-        _TOTAL,
-        Unknown = 4294967295, //-1
-    };
-    [[nodiscard]] static const char* toCharArray(MouseWheel::Wheel mouse_wheel);
-    [[nodiscard]] static std::string toString(MouseWheel::Wheel mouse_wheel);
+            _TOTAL,
+            Unknown = 4294967295, //-1
+        };
+        [[nodiscard]] static const char* toCharArray(MouseWheel::Wheel mouse_wheel);
+        [[nodiscard]] static std::string toString(MouseWheel::Wheel mouse_wheel);
 };
 
 #endif

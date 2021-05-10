@@ -33,7 +33,7 @@ void main(){
         vec3 x = max(vec3(0), lighting - vec3(0.004));
         lighting = (x * (vec3(6.20) * x + vec3(0.5))) / (x * (vec3(6.2) * x + vec3(1.7)) + vec3(0.06));
     }else if(HDRInfo.w == 3.0){ // Exposure tone mapping
-        lighting = ConstantOneVec3 - exp(-lighting * HDRInfo.x);
+        lighting = ConstantOneVec3 - exp(-lighting * (HDRInfo.x * 0.5));
     }else if(HDRInfo.w == 4.0){ // Uncharted tone mapping
         const float A = 0.15; 
         const float B = 0.5; 

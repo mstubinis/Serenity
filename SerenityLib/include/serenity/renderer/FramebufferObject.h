@@ -122,7 +122,7 @@ namespace Engine::priv {
                 FramebufferTexture& fbTexture = *static_cast<FramebufferTexture*>(m_Attatchments.at((uint32_t)attatchment).get());
                 for (const auto fbo : m_FBOs) {
                     Engine::Renderer::bindFBO(fbo);
-                    GLCall(glFramebufferTexture2D(GL_FRAMEBUFFER, fbTexture.attatchment(), fbTexture.m_Texture->getTextureType().toGLType(), fbTexture.m_Texture->address(), 0));
+                    glFramebufferTexture2D(GL_FRAMEBUFFER, fbTexture.attatchment(), fbTexture.m_Texture->getTextureType().toGLType(), fbTexture.m_Texture->address(), 0);
                 }
                 Engine::Renderer::unbindFBO();
                 return &fbTexture;
@@ -137,8 +137,8 @@ namespace Engine::priv {
                 for (const auto fbo : m_FBOs) {
                     Engine::Renderer::bindFBO(fbo);
                     Engine::Renderer::bindRBO(*rbo);
-                    GLCall(glRenderbufferStorage(GL_RENDERBUFFER, rbo->internalFormat(), width(), height()));
-                    GLCall(glFramebufferRenderbuffer(GL_FRAMEBUFFER, rbo->internalFormat(), GL_RENDERBUFFER, rbo->address()));
+                    glRenderbufferStorage(GL_RENDERBUFFER, rbo->internalFormat(), width(), height());
+                    glFramebufferRenderbuffer(GL_FRAMEBUFFER, rbo->internalFormat(), GL_RENDERBUFFER, rbo->address());
                     Engine::Renderer::unbindRBO();
                 }
                 m_Attatchments.emplace(std::piecewise_construct, std::forward_as_tuple(rbo->attatchment()), std::forward_as_tuple(rbo));

@@ -1728,6 +1728,5 @@
     <None Include="include\serenity\ecs\entity\Entity.inl">
       <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
     </None>
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

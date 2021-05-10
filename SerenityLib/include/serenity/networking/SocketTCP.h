@@ -18,19 +18,18 @@ namespace Engine::Networking {
         friend class Engine::priv::SocketManager;
         friend class Engine::Networking::ListenerTCP;
         private:
-            sf::TcpSocket             m_SocketTCP;
-            std::queue<sf::Packet>    m_PartialPackets;
-            sf::IpAddress             m_IP;
-            uint16_t                  m_Port     = 0;
+            sf::TcpSocket                             m_SocketTCP;
+            std::queue<Engine::Networking::Packet>    m_PartialPackets;
+            sf::IpAddress                             m_IP;
+            uint16_t                                  m_Port     = 0;
 
             SocketStatus::Status internal_send_partial_packets_loop();
-            SocketStatus::Status internal_send_packet(sf::Packet& sfPacket);
-            SocketStatus::Status internal_send_packet(Engine::Networking::Packet& packet);
+            SocketStatus::Status internal_send_packet(Engine::Networking::Packet&);
 
             void update(const float dt) override;
         public: 
             SocketTCP();
-            SocketTCP(uint16_t port, sf::IpAddress ip);
+            SocketTCP(uint16_t port, sf::IpAddress);
             SocketTCP(const SocketTCP&)                 = delete;
             SocketTCP& operator=(const SocketTCP&)      = delete;
             ~SocketTCP();
@@ -45,14 +44,14 @@ namespace Engine::Networking {
             [[nodiscard]] uint16_t localPort() const override { return m_SocketTCP.getLocalPort(); }
 
             SocketStatus::Status connect(uint16_t timeout = 0);
-            SocketStatus::Status send(sf::Packet& packet);
+            SocketStatus::Status send(Engine::Networking::Packet&);
 
             //TODO: handle this case automatically
             //DO NOT use this send function if your socket is NON BLOCKING, use the one with the sent parameter instead
             SocketStatus::Status send(const void* data, size_t size);
             SocketStatus::Status send(const void* data, size_t size, size_t& sent);
 
-            SocketStatus::Status receive(sf::Packet& packet);
+            SocketStatus::Status receive(Engine::Networking::Packet&);
             SocketStatus::Status receive(void* data, size_t size, size_t& received);
     };
 };

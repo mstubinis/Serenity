@@ -25,16 +25,12 @@ ServerClient::ServerClient(const std::string& hash, Server& server, SocketTCP* t
     registerEvent(EventType::ClientDisconnected);
     registerEvent(EventType::ServerStarted);
     registerEvent(EventType::ServerShutdowned);
-    registerEvent(EventType::PacketSent);
-    registerEvent(EventType::PacketReceived);
 }
 ServerClient::~ServerClient() {
     unregisterEventImmediate(EventType::ClientConnected);
     unregisterEventImmediate(EventType::ClientDisconnected);
     unregisterEventImmediate(EventType::ServerStarted);
     unregisterEventImmediate(EventType::ServerShutdowned);
-    unregisterEventImmediate(EventType::PacketSent);
-    unregisterEventImmediate(EventType::PacketReceived);
 }
 uint32_t ServerClient::generate_nonce() const noexcept {
     return Engine::Networking::NetworkingHelpers::generate_nonce();
@@ -60,17 +56,17 @@ void ServerClient::disconnect() noexcept {
 bool ServerClient::disconnected() const noexcept {
     return (m_ConnectionState == ConnectionState::Disconnected || m_Timeout_Timer >= m_Timeout_Timer_Limit || (m_TcpSocket && m_TcpSocket->localPort() == 0));
 }
-SocketStatus::Status ServerClient::send_tcp(sf::Packet& packet) noexcept {
+SocketStatus::Status ServerClient::sendTcp(Engine::Networking::Packet& packet) noexcept {
     return m_TcpSocket->send(packet);
 }
-SocketStatus::Status ServerClient::receive_tcp(sf::Packet& packet) noexcept {
+SocketStatus::Status ServerClient::receiveTcp(Engine::Networking::Packet& packet) noexcept {
     return m_TcpSocket->receive(packet);
 }
-SocketStatus::Status ServerClient::send_udp(sf::Packet& sfPacket) noexcept {
-    return m_Server.send_udp_to_client(this, sfPacket);
+SocketStatus::Status ServerClient::sendUdp(Engine::Networking::Packet& sfPacket) noexcept {
+    return m_Server.sendUdp(this, sfPacket);
 }
 
-void ServerClient::internal_on_receive_udp(sf::Packet& packet) noexcept {
+void ServerClient::internal_on_receive_udp(Engine::Networking::Packet& packet) noexcept {
     internal_on_received_data();
     ServerClient::m_On_Received_UDP_Function(packet);
 }
@@ -79,7 +75,7 @@ void ServerClient::internal_update_receive_tcp_packet() noexcept {
         return;
     }
     Engine::Networking::Packet packet;
-    auto status = receive_tcp(packet);
+    auto status = receiveTcp(packet);
     switch (status) {
         case SocketStatus::Done: {
             internal_on_received_data();

@@ -6,31 +6,24 @@
 #include <serenity/system/Engine.h>
 #include <serenity/utils/Utils.h>
 
-using namespace Engine;
-using namespace Engine::priv;
-
-Networking::SocketTCP::SocketTCP() {
-    Core::m_Engine->m_NetworkingModule.m_SocketManager.add_tcp_socket(this);
+Engine::Networking::SocketTCP::SocketTCP() {
+    Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.add_tcp_socket(this);
 }
-Networking::SocketTCP::SocketTCP(uint16_t port, sf::IpAddress ip)
+Engine::Networking::SocketTCP::SocketTCP(uint16_t port, sf::IpAddress ip)
     : Networking::SocketTCP::SocketTCP{}
 {
     m_IP    = std::move(ip);
     m_Port  = port;
 }
-Networking::SocketTCP::~SocketTCP() { 
-    Core::m_Engine->m_NetworkingModule.m_SocketManager.remove_tcp_socket(this);
+Engine::Networking::SocketTCP::~SocketTCP() {
+    Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.remove_tcp_socket(this);
     disconnect();
 }
 
-SocketStatus::Status Networking::SocketTCP::internal_send_packet(sf::Packet& packet) {
+SocketStatus::Status Engine::Networking::SocketTCP::internal_send_packet(Engine::Networking::Packet& packet) {
     auto status = m_SocketTCP.send(packet);
     switch (status) {
         case sf::Socket::Status::Done: {
-            EventPacket e(&packet);
-            Event ev(EventType::PacketSent);
-            ev.eventPacket = e;
-            Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
             break;
         }case sf::Socket::Status::Disconnected: {
             break;
@@ -44,7 +37,7 @@ SocketStatus::Status Networking::SocketTCP::internal_send_packet(sf::Packet& pac
     }
     return SocketStatus::map_status(status);
 }
-SocketStatus::Status Networking::SocketTCP::internal_send_partial_packets_loop() {
+SocketStatus::Status Engine::Networking::SocketTCP::internal_send_partial_packets_loop() {
     SocketStatus::Status status = SocketStatus::Error;
     if (!m_PartialPackets.empty()) {
         status = internal_send_packet(m_PartialPackets.front());
@@ -65,52 +58,44 @@ SocketStatus::Status Networking::SocketTCP::internal_send_partial_packets_loop()
     }
     return status;
 }
-void Networking::SocketTCP::update(const float dt) {
+void Engine::Networking::SocketTCP::update(const float dt) {
     if (isConnected()) {
         auto status = internal_send_partial_packets_loop();
     }
 }
-void Networking::SocketTCP::disconnect() {
+void Engine::Networking::SocketTCP::disconnect() {
     if (isConnected()) {
-        EventSocket e = EventSocket(m_SocketTCP.getLocalPort(), m_SocketTCP.getRemotePort(), m_SocketTCP.getRemoteAddress(), SocketType::TCP);
         Event ev(EventType::SocketDisconnected);
-        ev.eventSocket = std::move(e);
+        ev.eventSocket = Engine::priv::EventSocket(m_SocketTCP.getLocalPort(), m_SocketTCP.getRemotePort(), m_SocketTCP.getRemoteAddress(), SocketType::TCP);
 
         m_SocketTCP.disconnect();
 
-        Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     }
 }
-SocketStatus::Status Networking::SocketTCP::connect(uint16_t timeout) {
+SocketStatus::Status Engine::Networking::SocketTCP::connect(uint16_t timeout) {
     auto status = m_SocketTCP.connect(m_IP, m_Port, sf::seconds(timeout));
     if (status == sf::Socket::Status::Done) {
-        EventSocket e = EventSocket(m_SocketTCP.getLocalPort(), m_SocketTCP.getRemotePort(), m_SocketTCP.getRemoteAddress(), SocketType::TCP);
         Event ev(EventType::SocketConnected);
-        ev.eventSocket = std::move(e);
-        Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+        ev.eventSocket = Engine::priv::EventSocket(m_SocketTCP.getLocalPort(), m_SocketTCP.getRemotePort(), m_SocketTCP.getRemoteAddress(), SocketType::TCP);
+        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
     }
     return SocketStatus::map_status(status);
 }
-SocketStatus::Status Networking::SocketTCP::send(sf::Packet& packet) {
+SocketStatus::Status Engine::Networking::SocketTCP::send(Engine::Networking::Packet& packet) {
     m_PartialPackets.push(packet);
     return internal_send_partial_packets_loop();
 }
-SocketStatus::Status Networking::SocketTCP::send(const void* data, size_t size) {
+SocketStatus::Status Engine::Networking::SocketTCP::send(const void* data, size_t size) {
     return SocketStatus::map_status(m_SocketTCP.send(data, size));
 }
-SocketStatus::Status Networking::SocketTCP::send(const void* data, size_t size, size_t& sent) {
+SocketStatus::Status Engine::Networking::SocketTCP::send(const void* data, size_t size, size_t& sent) {
     return SocketStatus::map_status(m_SocketTCP.send(data, size, sent));
 }
-SocketStatus::Status Networking::SocketTCP::receive(sf::Packet& packet) {
+SocketStatus::Status Engine::Networking::SocketTCP::receive(Engine::Networking::Packet& packet) {
     auto status = m_SocketTCP.receive(packet);
-    if (status == sf::Socket::Status::Done) {
-        EventPacket e(&packet);
-        Event ev(EventType::PacketReceived);
-        ev.eventPacket = e;
-        Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
-    }
     return SocketStatus::map_status(status);
 }
-SocketStatus::Status Networking::SocketTCP::receive(void* data, size_t size, size_t& received) {
+SocketStatus::Status Engine::Networking::SocketTCP::receive(void* data, size_t size, size_t& received) {
     return SocketStatus::map_status(m_SocketTCP.receive(data, size, received));
 }

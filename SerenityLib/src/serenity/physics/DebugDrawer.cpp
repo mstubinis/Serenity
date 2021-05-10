@@ -39,9 +39,9 @@ void Engine::priv::PhysicsDebugDrawcallback::processTriangle(btVector3* triangle
 void Engine::priv::GLDebugDrawer::init() {
     m_LineVertices.resize(C_MAX_POINTS);
 
-    GLCall(glGenBuffers(1, &m_VertexBuffer));
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * m_LineVertices.size(), &m_LineVertices[0], GL_DYNAMIC_DRAW));
+    glGenBuffers(1, &m_VertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(LineVertex) * m_LineVertices.size(), &m_LineVertices[0], GL_DYNAMIC_DRAW);
 
     //support vao's
     buildVAO();
@@ -49,26 +49,26 @@ void Engine::priv::GLDebugDrawer::init() {
     registerEvent(EventType::WindowFullscreenChanged);
 }
 void Engine::priv::GLDebugDrawer::destruct() {
-    GLCall(glDeleteBuffers(1, &m_VertexBuffer));
+    glDeleteBuffers(1, &m_VertexBuffer);
     Engine::Renderer::deleteVAO(m_VAO);
 }
 void Engine::priv::GLDebugDrawer::bindDataToGPU() {
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer));
-    GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0));
-    GLCall(glEnableVertexAttribArray(1));
-    GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex, color))));
+    glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(LineVertex), (void*)(offsetof(LineVertex, color)));
 }
 void Engine::priv::GLDebugDrawer::render() {
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
-        GLCall(glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_PerFrameCount)));
+        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_PerFrameCount));
         Engine::Renderer::bindVAO(0);
     }else{
         bindDataToGPU();
-        GLCall(glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_PerFrameCount)));
-        GLCall(glDisableVertexAttribArray(0));
-        GLCall(glDisableVertexAttribArray(1));
+        glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(m_PerFrameCount));
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
     }
 }
 void Engine::priv::GLDebugDrawer::buildVAO() {
@@ -87,8 +87,8 @@ Engine::priv::GLDebugDrawer::~GLDebugDrawer() {
 }
 void Engine::priv::GLDebugDrawer::drawAccumulatedLines() {
     if (m_PerFrameCount > 0) {
-        GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer));
-        GLCall(glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * m_PerFrameCount, &m_LineVertices[0]));
+        glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(LineVertex) * m_PerFrameCount, &m_LineVertices[0]);
         render();
     }
 }

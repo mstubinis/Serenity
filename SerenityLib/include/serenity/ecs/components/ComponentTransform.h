@@ -69,8 +69,8 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
         [[nodiscard]] inline void* getUserPointer1() const noexcept { return m_UserPointer1; }
         [[nodiscard]] inline void* getUserPointer2() const noexcept { return m_UserPointer2; }
 
-        void alignTo(decimal dirX, decimal dirY, decimal dirZ);
-        void alignTo(const glm_vec3& direction);
+        void alignTo(float dirX, float dirY, float dirZ);
+        void alignTo(const glm::vec3& direction);
 
         inline void translate(const glm_vec3& translation, bool local = true) noexcept { translate(translation.x, translation.y, translation.z, local); }
         inline void translate(decimal translation, bool local = true) noexcept { translate(translation, translation, translation, local); }
@@ -119,7 +119,7 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
         [[nodiscard]] inline const glm::vec3& getUp() const noexcept { return m_Up; }
         
         //[[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_LinearVelocity; }
-        [[nodiscard]] inline glm::mat4 getWorldMatrixRendering() const noexcept { return glm::mat4(getWorldMatrix()); }
+        [[nodiscard]] inline glm::mat4 getWorldMatrixRendering() const noexcept { return glm::mat4{ getWorldMatrix() }; }
         [[nodiscard]] const glm_mat4& getWorldMatrix() const noexcept;
         [[nodiscard]] const glm_mat4& getLocalMatrix() const noexcept;
 

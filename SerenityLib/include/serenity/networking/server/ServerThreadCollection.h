@@ -28,15 +28,12 @@ namespace Engine::Networking {
             void setBlocking(bool blocking);
             void setBlocking(std::string_view hash, bool blocking);
 
-            [[nodiscard]] bool has(std::string_view hash) noexcept {
+            [[nodiscard]] bool hasClient(std::string_view hash) noexcept {
                 for (auto& thread : m_ServerClientThreads) {
-                    if (thread.has(hash)) {
-                        return true;
-                    }
+                    if (thread.hasClient(hash)) { return true; }
                 }
                 return false;
             }
-
             bool addClient(std::string_view hash, ServerClient*);
             bool removeClient(std::string_view hash);
             inline void clear() { m_ServerClientThreads.clear(); }

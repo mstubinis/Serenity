@@ -94,10 +94,10 @@ namespace Engine::Math {
     template<class QUAT> [[nodiscard]] inline glm::vec3 getUp(const QUAT& q) noexcept { return glm::normalize(q * glm::vec3{ 0.0f, 1.0f, 0.0f }); }
 
 
-    [[nodiscard]] glm::vec3 getColumnVector(const btRigidBody& b, uint32_t column);
-    [[nodiscard]] glm::vec3 getForward(const btRigidBody& b);
-    [[nodiscard]] glm::vec3 getRight(const btRigidBody& b);
-    [[nodiscard]] glm::vec3 getUp(const btRigidBody& b);
+    [[nodiscard]] glm::vec3 getColumnVector(const btRigidBody&, uint32_t column);
+    [[nodiscard]] glm::vec3 getForward(const btRigidBody&);
+    [[nodiscard]] glm::vec3 getRight(const btRigidBody&);
+    [[nodiscard]] glm::vec3 getUp(const btRigidBody&);
 
     template<class F, class R, class U> void recalculateForwardRightUp(const glm::quat& quat, F& f, R& r, U& u) noexcept {
         f = getForward(quat);

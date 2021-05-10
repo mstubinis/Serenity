@@ -6,7 +6,7 @@
 using namespace Engine;
 using namespace Engine::Networking;
 
-bool ServerThread::remove_client(std::string_view hash) {
+bool ServerThread::removeClient(std::string_view hash) {
     bool has_client_hash = m_HashedServerClients.contains(hash);
     if (has_client_hash) {
         Engine::erase(m_HashedServerClients, m_HashedServerClients.find(hash));
@@ -17,7 +17,7 @@ bool ServerThread::remove_client(std::string_view hash) {
     }
     return false;
 }
-bool ServerThread::add_client(std::string_view hash, ServerClient* serverClient) {
+bool ServerThread::addClient(std::string_view hash, ServerClient* serverClient) {
     bool has_client_hash = m_HashedServerClients.contains(hash);
     if (!has_client_hash) {
         m_HashedServerClients.emplace(
@@ -35,17 +35,6 @@ bool ServerThread::add_client(std::string_view hash, ServerClient* serverClient)
 void ServerThread::clearAllClients() {
     m_HashedServerClients.clear();
 }
-ServerThread::ServerThread(ServerThread&& other) noexcept {
-    m_HashedServerClients = std::move(other.m_HashedServerClients);
-}
-ServerThread& ServerThread::operator=(ServerThread&& other) noexcept {
-    if (&other != this) {
-        m_HashedServerClients = std::move(other.m_HashedServerClients);
-    }
-    return *this;
-}
-
-
 
 
 
@@ -71,7 +60,7 @@ void ServerThreadContainer::setBlocking(std::string_view hash, bool blocking) {
 bool ServerThreadContainer::addClient(std::string_view hash, ServerClient* client) {
     auto next_thread = getNextAvailableClientThread();
     if (next_thread) {
-        bool result = next_thread->add_client(hash, client);
+        bool result = next_thread->addClient(hash, client);
         if (result) {
             ++m_NumClients;
         }
@@ -93,7 +82,7 @@ bool ServerThreadContainer::removeClient(std::string_view hash) {
     for (auto& thread : m_Threads) {
         for (auto&[name, client] : thread.m_HashedServerClients) {
             if (name == hash) {
-                result   = thread.remove_client(hash);
+                result   = thread.removeClient(hash);
                 if (result) {
                     --m_NumClients;
                 }
@@ -110,7 +99,7 @@ bool ServerThreadContainer::removeClient(std::string_view hash) {
 ServerThread* ServerThreadContainer::getNextAvailableClientThread() {
     Engine::Networking::ServerThread* leastThread = nullptr;
     for (auto& clientThread : m_Threads) {
-        if (!leastThread || (leastThread && leastThread->num_clients() < clientThread.num_clients())) {
+        if (!leastThread || (leastThread && leastThread->getNumClients() < clientThread.getNumClients())) {
             leastThread = &clientThread;
         }
     }

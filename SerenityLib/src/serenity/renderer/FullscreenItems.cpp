@@ -10,10 +10,10 @@ void Engine::priv::FullscreenTriangle::init() {
     auto winSize = glm::vec2(Engine::Resources::getWindowSize());
 
     m_Buffers.emplace_back(0);
-    GLCall(glGenBuffers(1, &m_Buffers[0]));
+    glGenBuffers(1, &m_Buffers[0]);
 
     m_Buffers.emplace_back(0);
-    GLCall(glGenBuffers(1, &m_Buffers[1]));
+    glGenBuffers(1, &m_Buffers[1]);
 
     m_Indices.emplace_back(0);
     m_Indices.emplace_back(1);
@@ -21,11 +21,11 @@ void Engine::priv::FullscreenTriangle::init() {
 
     changeDimensions(winSize.x, winSize.y);
 
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataFullscreen), &m_Vertices[0], GL_STATIC_DRAW));
+    glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]);
+    glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataFullscreen), &m_Vertices[0], GL_STATIC_DRAW);
 
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW);
 
     //vao's
     buildVAO();
@@ -33,7 +33,7 @@ void Engine::priv::FullscreenTriangle::init() {
 }
 Engine::priv::FullscreenTriangle::~FullscreenTriangle(){
     for (size_t i = 0; i < m_Buffers.size(); ++i) {
-        GLCall(glDeleteBuffers(1, &m_Buffers[i]));
+        glDeleteBuffers(1, &m_Buffers[i]);
     }
     Engine::Renderer::deleteVAO(m_VAO);
 }
@@ -56,8 +56,8 @@ void Engine::priv::FullscreenTriangle::changeDimensions(float width, float heigh
     m_Vertices.emplace_back(v2);
     m_Vertices.emplace_back(v3);
 
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataFullscreen), &m_Vertices[0], GL_STATIC_DRAW));
+    glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]);
+    glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataFullscreen), &m_Vertices[0], GL_STATIC_DRAW);
 }
 void Engine::priv::FullscreenTriangle::buildVAO() {
     Engine::Renderer::deleteVAO(m_VAO);
@@ -68,25 +68,25 @@ void Engine::priv::FullscreenTriangle::buildVAO() {
     }
 }
 void Engine::priv::FullscreenTriangle::bindToGPU() {
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]));
+    glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]);
 
-    GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)0));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)0);
 
-    GLCall(glEnableVertexAttribArray(1));
-    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)offsetof(MeshVertexDataFullscreen, uv)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)offsetof(MeshVertexDataFullscreen, uv));
 
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
 }
 void Engine::priv::FullscreenTriangle::render(){
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
-        GLCall(glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0));
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0);
     }else{
         bindToGPU();
-        GLCall(glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0));
-        GLCall(glDisableVertexAttribArray(0));
-        GLCall(glDisableVertexAttribArray(1));
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0);
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
     }
 }
 void Engine::priv::FullscreenTriangle::onEvent(const Event& e) {
@@ -105,9 +105,9 @@ void Engine::priv::FullscreenQuad::init() {
     auto winSize = glm::vec2(Engine::Resources::getWindowSize());
 
     m_Buffers.emplace_back(0);
-    GLCall(glGenBuffers(1, &m_Buffers[0]));
+    glGenBuffers(1, &m_Buffers[0]);
     m_Buffers.emplace_back(0);
-    GLCall(glGenBuffers(1, &m_Buffers[1]));
+    glGenBuffers(1, &m_Buffers[1]);
 
     m_Indices.emplace_back(0);
     m_Indices.emplace_back(1);
@@ -119,8 +119,8 @@ void Engine::priv::FullscreenQuad::init() {
 
     changeDimensions(winSize.x, winSize.y);
 
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]));
-    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW);
 
     //vao's
     buildVAO();
@@ -128,7 +128,7 @@ void Engine::priv::FullscreenQuad::init() {
 }
 Engine::priv::FullscreenQuad::~FullscreenQuad(){
     for (size_t i = 0; i < m_Buffers.size(); ++i) {
-        GLCall(glDeleteBuffers(1, &m_Buffers[i]));
+        glDeleteBuffers(1, &m_Buffers[i]);
     }
     Engine::Renderer::deleteVAO(m_VAO);
 }
@@ -154,8 +154,8 @@ void Engine::priv::FullscreenQuad::changeDimensions(float width, float height) {
     m_Vertices.emplace_back(v3);
     m_Vertices.emplace_back(v4);
 
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]));
-    GLCall(glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataFullscreen), &m_Vertices[0], GL_STATIC_DRAW));
+    glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]);
+    glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataFullscreen), &m_Vertices[0], GL_STATIC_DRAW);
 }
 void Engine::priv::FullscreenQuad::buildVAO() {
     Engine::Renderer::deleteVAO(m_VAO);
@@ -166,22 +166,22 @@ void Engine::priv::FullscreenQuad::buildVAO() {
     }
 }
 void Engine::priv::FullscreenQuad::bindToGPU() {
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]));
-    GLCall(glEnableVertexAttribArray(0));
-    GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)0));
-    GLCall(glEnableVertexAttribArray(1));
-    GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)offsetof(MeshVertexDataFullscreen, uv)));
-    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]));
+    glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[0]);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(MeshVertexDataFullscreen), (void*)offsetof(MeshVertexDataFullscreen, uv));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
 }
 void Engine::priv::FullscreenQuad::render(){
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
-        GLCall(glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0));
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0);
     }else{
         bindToGPU();
-        GLCall(glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0));
-        GLCall(glDisableVertexAttribArray(0));
-        GLCall(glDisableVertexAttribArray(1));
+        glDrawElements(GL_TRIANGLES, (GLsizei)m_Indices.size(), GL_UNSIGNED_SHORT, 0);
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
     }
 }
 void Engine::priv::FullscreenQuad::onEvent(const Event& e) {

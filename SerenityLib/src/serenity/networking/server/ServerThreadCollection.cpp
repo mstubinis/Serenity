@@ -7,13 +7,13 @@ Engine::Networking::ServerThreadCollection::ServerThreadCollection(size_t thread
 }
 void Engine::Networking::ServerThreadCollection::setBlocking(bool blocking) {
     for (auto& thread : m_ServerClientThreads) {
-        for (const auto& [hash, client] : thread) {
+        for (const auto& [name, client] : thread) {
             client->socket()->setBlocking(blocking);
         }
     }
 }
 void Engine::Networking::ServerThreadCollection::setBlocking(std::string_view hash, bool blocking) {
-    for (auto& thread : m_ServerClientThreads) {
+    for (const auto& thread : m_ServerClientThreads) {
         if (thread.m_HashedServerClients.contains(hash)) {
             thread.m_HashedServerClients.find(hash)->second->socket()->setBlocking(blocking);
             return;
@@ -23,7 +23,7 @@ void Engine::Networking::ServerThreadCollection::setBlocking(std::string_view ha
 bool Engine::Networking::ServerThreadCollection::addClient(std::string_view hash, ServerClient* client) {
     auto next_thread = getNextAvailableClientThread();
     if (next_thread) {
-        bool result = next_thread->add_client(hash, client);
+        bool result = next_thread->addClient(hash, client);
         if (result) {
             ++m_NumClients;
         }
@@ -39,7 +39,7 @@ bool Engine::Networking::ServerThreadCollection::removeClient(std::string_view h
     for (auto& thread : m_ServerClientThreads) {
         for (const auto& [name, client] : thread) {
             if (name == hash) {
-                result = thread.remove_client(hash);
+                result = thread.removeClient(hash);
                 if (result) {
                     --m_NumClients;
                 }
@@ -56,7 +56,7 @@ bool Engine::Networking::ServerThreadCollection::removeClient(std::string_view h
 Engine::Networking::ServerThread* Engine::Networking::ServerThreadCollection::getNextAvailableClientThread() {
     Engine::Networking::ServerThread* leastThread = nullptr;
     for (auto& clientThread : m_ServerClientThreads) {
-        if (!leastThread || (leastThread && leastThread->num_clients() < clientThread.num_clients())) {
+        if (!leastThread || (leastThread && leastThread->getNumClients() < clientThread.getNumClients())) {
             leastThread = &clientThread;
         }
     }
