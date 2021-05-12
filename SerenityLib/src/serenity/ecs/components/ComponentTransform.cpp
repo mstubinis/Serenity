@@ -10,8 +10,22 @@
 
 ComponentTransform::ComponentTransform(Entity entity) 
     : m_Owner{ entity }
+{}
+ComponentTransform::ComponentTransform(Entity entity, const glm_vec3& pos, const glm::quat& rot, const glm::vec3& scl)
+    : m_Owner{ entity }
+    , m_Position{ pos }
+    , m_Rotation{ rot }
+    , m_Scale{ scl }
 {
-    //Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
+    auto& system      = ecs.getSystem<SystemTransformParentChild>();
+    auto entityIndex  = entity.id() - 1;
+    system.acquireMoreMemory(entity.id());
+    auto& localMatrix = system.m_LocalTransforms[entityIndex];
+    auto& worldMatrix = system.m_WorldTransforms[entityIndex];
+    Engine::Math::setFinalModelMatrix(localMatrix, m_Position, m_Rotation, m_Scale);
+    worldMatrix = localMatrix;
 }
 ComponentTransform::ComponentTransform(ComponentTransform&& other) noexcept
     : m_Position         { std::move(other.m_Position) }
@@ -25,9 +39,7 @@ ComponentTransform::ComponentTransform(ComponentTransform&& other) noexcept
     , m_UserPointer1     { std::exchange(other.m_UserPointer1, nullptr) }
     , m_UserPointer2     { std::exchange(other.m_UserPointer2, nullptr) }
     , m_Owner            { std::exchange(other.m_Owner, Entity{}) }
-{
-    //Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
-}
+{}
 ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) noexcept {
     m_Position         = std::move(other.m_Position);
     m_Rotation         = std::move(other.m_Rotation);
@@ -132,10 +144,7 @@ glm_vec3 ComponentTransform::getPosition() const {
     return Engine::Math::getMatrixPosition(matrix);
 }
 glm_vec3 ComponentTransform::getWorldPosition() const {
-    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-    auto& system = ecs.getSystem<SystemTransformParentChild>();
-    auto& matrix = system.m_WorldTransforms[m_Owner.id() - 1];
-    return Engine::Math::getMatrixPosition(matrix);
+    return getPosition();
 }
 glm::quat ComponentTransform::getWorldRotation() const {
     auto& worldMatrix = getWorldMatrix();

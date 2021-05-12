@@ -162,7 +162,6 @@ void EngineCore::internal_pre_update(Scene& scene, Window& window, const float d
     if (Engine::priv::PublicScene::IsSkipRenderThisFrame(scene)) {
         scene.m_SkipRenderThisFrame = false;
     }
-    m_PhysicsModule.preUpdate(scene, dt);
     Game::onPreUpdate(dt);
     scene.preUpdate(dt);
 }

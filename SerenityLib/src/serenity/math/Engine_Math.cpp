@@ -75,7 +75,6 @@ glm::vec3 Math::polynomial_interpolate_cubic(const std::vector<glm::vec3>& point
     boost::math::cubic_b_spline<float> z_spline{ z_vals.data(), n, 0.0f, step };
     return glm::vec3{ x_spline(time), y_spline(time), z_spline(time) };
 }
-
 bool Math::IsNear(float v1, float v2, float threshold) noexcept {
     return (std::abs(v1 - v2) < threshold);
 }
@@ -100,7 +99,6 @@ bool Math::IsSpecialFloat(const glm::vec3& v) noexcept {
     if (boost::math::isinf(v.x) || boost::math::isinf(v.y) || boost::math::isinf(v.z)) return true;
     return false;
 }
-
 bool Math::rect_fully_contained(const glm::vec4& bigger, const glm::vec4& smaller) noexcept {
     return ((smaller.x >= bigger.x && smaller.x + smaller.z <= bigger.x + bigger.z) && (smaller.y >= bigger.y && smaller.y + smaller.w <= bigger.y + bigger.w));
 }
@@ -117,7 +115,6 @@ glm::vec4 Math::rect_union(const glm::vec4& bigger, const glm::vec4& smaller) no
     }
     return glm::vec4{ x, y, std::abs(z - x), std::abs(w - y) };
 }
-
 void Math::Float32From16(float* out, const uint16_t* in, uint32_t arraySize) noexcept {
     for (uint32_t i = 0; i < arraySize; ++i) {
         Math::Float32From16(&(out[i]), in[i]);
@@ -164,7 +161,6 @@ glm::vec2 Math::rotate2DPoint(const glm::vec2& point, float angle, const glm::ve
         s* (point.x - origin.x) + c * (point.y - origin.y) + origin.x
     };
 }
-
 void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection, std::array<glm::vec4, 6>& outPlanes) {
     glm::vec4 rows[4];
     for (uint32_t i = 0; i < 4; ++i) {
@@ -196,7 +192,6 @@ glm::mat3 Math::toGLM(const aiMatrix3x3& aiMat) {
 glm::quat Math::toGLM(const aiQuaternion& aiQuat) {
     return glm::quat{ aiQuat.w, aiQuat.x, aiQuat.y, aiQuat.z };
 }
-
 glm_vec3 Math::toGLM(const btVector3& btvector){
     return glm_vec3{ btvector.x(), btvector.y(), btvector.z() };
 }
@@ -216,8 +211,6 @@ glm_vec3 Math::getMatrixPosition(const glm_mat4& matrix) {
 glm::vec3 Math::getMatrixPosition(const glm::mat4& matrix) {
     return glm::vec3{ matrix[3][0], matrix[3][1], matrix[3][2] };
 }
-
-
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point, float fovRadians){
     glm::vec3 diff = glm::normalize(point - conePos);
     float t        = glm::dot(coneVector, diff);
@@ -323,9 +316,6 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& objPos, const Camera& came
     glm::vec4 viewport{ 0.0f, 0.0f, winSize.x, winSize.y };
     return Math::getScreenCoordinates(objPos, camera, viewport, clampToEdge);
 }
-
-
-
 void Math::translate(const btRigidBody& BTRigidBody, btVector3& vec, bool local) noexcept {
     if (local) {
         btQuaternion quat = BTRigidBody.getWorldTransform().getRotation().normalize();
@@ -366,8 +356,6 @@ glm::quat Math::alignTo(float x, float y, float z) noexcept {
     outQuat           = glm::normalize(outQuat);
     return outQuat;
 }
-
-
 void Math::setColor(glm::vec3& c, float r, float g, float b){
     if(r > 1.0f) r /= 255.0f;
     if(g > 1.0f) g /= 255.0f;

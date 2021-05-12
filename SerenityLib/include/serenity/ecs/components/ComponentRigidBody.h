@@ -103,6 +103,7 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
 
         glm_vec3 internal_getPosition();
         glm::quat internal_getRotation();
+        btTransform internal_get_bt_transform() const;
     public:
         ComponentRigidBody(Entity);
         ComponentRigidBody(const ComponentRigidBody&)            = delete;

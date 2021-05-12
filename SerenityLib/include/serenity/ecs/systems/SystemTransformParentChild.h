@@ -36,6 +36,7 @@ class SystemTransformParentChild final : public SystemCRTP<SystemTransformParent
         void clear_all();
         void clear_and_shrink_all();
 
+        void acquireMoreMemory(uint32_t entityID);
         void resize(size_t size);
         void reserve(size_t size);
 

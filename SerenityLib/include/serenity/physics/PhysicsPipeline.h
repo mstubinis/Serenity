@@ -53,8 +53,6 @@ namespace Engine::priv {
 
             void cleanup();
 
-            void update(const float dt);
-
             void setPreTickCallback(btInternalTickCallback preTicCallback);
             void setPostTickCallback(btInternalTickCallback postTickCallback);
     };

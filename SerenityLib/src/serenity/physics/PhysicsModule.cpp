@@ -112,7 +112,6 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
     }
     return true;
 }
-
 Engine::priv::PhysicsModule::PhysicsModule(){
     PHYSICS_MANAGER       = this;
     gContactAddedCallback = CustomMaterialContactAddedCallback;
@@ -120,46 +119,29 @@ Engine::priv::PhysicsModule::PhysicsModule(){
 void Engine::priv::PhysicsModule::init(){
     m_Pipeline.m_DebugDrawer.init();
 }
-bool add_rigid_body(Engine::priv::PhysicsPipeline& pipeline, btRigidBody* inRigidBody, MaskType group, MaskType mask, bool doGroupAndMask) noexcept {
+
+bool add_rigid_body(Engine::priv::PhysicsPipeline& pipeline, btRigidBody* inRigidBody, MaskType group, MaskType mask) noexcept {
     ASSERT(inRigidBody, __FUNCTION__ << "(): rigidBody was nullptr!");
-    if (!inRigidBody) {
+    if (!inRigidBody || (inRigidBody && inRigidBody->isInWorld())) {
         return false;
     }
-    auto& physicsWorld = *pipeline.m_World;
-    /*
-    int numColObjects = physicsWorld.getNumCollisionObjects();
-    for (int i = 0; i < numColObjects; ++i) {
-        auto btRigidBodyUpCast = btRigidBody::upcast(physicsWorld.getCollisionObjectArray()[i]);
-        if (btRigidBodyUpCast && btRigidBodyUpCast == inRigidBody) { //btRigidBodyUpCast != nullptr check might not be needed
-            return false;
-        }
-    }
-    int numNonStaticRigidBodies = physicsWorld.getNonStaticRigidBodies().size();
-    for (int i = 0; i < numNonStaticRigidBodies; ++i) {
-        auto RigidBody = physicsWorld.getNonStaticRigidBodies()[i];
-        if (RigidBody && RigidBody == inRigidBody) { //RigidBody != nullptr check might not be needed
-            return false;
-        }
-    }
-    */
-    if (inRigidBody->isInWorld()) {
-        return false;
-    }
-    (doGroupAndMask) ? physicsWorld.addRigidBody(inRigidBody, group, mask) : physicsWorld.addRigidBody(inRigidBody);
+    pipeline.m_World->addRigidBody(inRigidBody, group, mask);
     return true;
 }
-void Engine::priv::PhysicsModule::preUpdate(Scene& scene, const float dt) noexcept {
-    Engine::Physics::updateDiscreteCollisionDetection();
+bool add_rigid_body(Engine::priv::PhysicsPipeline& pipeline, btRigidBody* inRigidBody) noexcept {
+    ASSERT(inRigidBody, __FUNCTION__ << "(): rigidBody was nullptr!");
+    if (!inRigidBody || (inRigidBody && inRigidBody->isInWorld())) {
+        return false;
+    }
+    pipeline.m_World->addRigidBody(inRigidBody);
+    return true;
 }
 void Engine::priv::PhysicsModule::update(Scene& scene, const float dt, int maxSubSteps, float fixedTimeStep){
     if (m_Paused) {
         return;
     }
-    m_Pipeline.update(dt);
     m_Pipeline.m_World->stepSimulation((btScalar)dt, maxSubSteps, (btScalar)fixedTimeStep);
-
-    int numManifolds = m_Pipeline.m_Dispatcher->getNumManifolds();
-    for (int i = 0; i < numManifolds; ++i) {
+    for (int i = 0; i < m_Pipeline.m_Dispatcher->getNumManifolds(); ++i) {
         auto& contactMnifld = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
         for (int j = 0; j < contactMnifld.getNumContacts(); ++j) {
             auto& cp = contactMnifld.getContactPoint(j);
@@ -184,13 +166,11 @@ void Engine::Physics::cleanProxyFromPairs(btRigidBody* BTRigidBody) {
 }
 void Engine::Physics::updateDiscreteCollisionDetection() noexcept {
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->performDiscreteCollisionDetection();
-    //Engine::Physics::updateAABBs();
-    //Engine::Physics::recalculateOverlappingPairs();
 }
 void Engine::Physics::updateAABBs() noexcept {
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->updateAabbs();
 }
-void Engine::Physics::recalculateOverlappingPairs() noexcept {
+void Engine::Physics::calculateOverlappingPairs() noexcept {
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_Broadphase->calculateOverlappingPairs(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_Dispatcher.get());
 }
 void Engine::Physics::setNumberOfStepsPerFrame(uint32_t numSteps) {
@@ -209,49 +189,16 @@ void Engine::Physics::setGravity(float x, float y, float z){
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->setGravity(btVector3(x,y,z));
 }
 bool Engine::Physics::addRigidBody(btRigidBody* rigidBody, MaskType group, MaskType mask){
-    return add_rigid_body(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline, rigidBody, group, mask, true);
+    return add_rigid_body(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline, rigidBody, group, mask);
 }
 bool Engine::Physics::addRigidBody(btRigidBody* rigidBody){
-    return add_rigid_body(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline, rigidBody, 0, 0, false);
+    return add_rigid_body(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline, rigidBody);
 }
 bool Engine::Physics::removeRigidBody(btRigidBody* rigidBody){
-    if (!rigidBody) {
+    if (!rigidBody || (rigidBody && !rigidBody->isInWorld())) {
         return false;
     }
-    if (!rigidBody->isInWorld()) {
-        return false;
-    }
-    auto& physicsWorld = *Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World;
-    /*
-    int numCollisions  = physicsWorld.getNumCollisionObjects();
-    for (int i = 0; i < numCollisions; ++i) {
-        btRigidBody* btRigidBodyUpCast = btRigidBody::upcast(physicsWorld.getCollisionObjectArray()[i]);
-        if (btRigidBodyUpCast && btRigidBodyUpCast == rigidBody) {
-            int numConstraintRefs = btRigidBodyUpCast->getNumConstraintRefs();
-            for (int i = numConstraintRefs - 1; i >= 0; --i) {
-                btTypedConstraint* constraint = btRigidBodyUpCast->getConstraintRef(i);
-                physicsWorld.removeConstraint(constraint);
-            }
-            physicsWorld.removeCollisionObject(rigidBody);
-            return true;
-        }
-    }
-    int numRigidBodies = physicsWorld.getNonStaticRigidBodies().size();
-    for (int i = 0; i < numRigidBodies; ++i) {
-        btRigidBody* btRigidBodyUpCast = btRigidBody::upcast(physicsWorld.getNonStaticRigidBodies()[i]);
-        if (btRigidBodyUpCast && btRigidBodyUpCast == rigidBody) {
-            int numConstraintRefs = btRigidBodyUpCast->getNumConstraintRefs();
-            for (int i = numConstraintRefs - 1; i >= 0; --i) {
-                btTypedConstraint* constraint = btRigidBodyUpCast->getConstraintRef(i);
-                physicsWorld.removeConstraint(constraint);
-            }
-            physicsWorld.removeRigidBody(rigidBody);
-            return true;
-        }
-    }
-    */
-
-    physicsWorld.removeRigidBody(rigidBody);
+    Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->removeRigidBody(rigidBody);
     return true;
 }
 bool Engine::Physics::removeCollisionObject(btCollisionObject* object) {
@@ -281,33 +228,26 @@ bool Engine::Physics::removeCollisionObjectThreadSafe(btCollisionObject* object)
     std::lock_guard lock{ Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Mutex };
     return Engine::Physics::removeCollisionObject(object);
 }
-
 void debugDrawRaycastLine(const btVector3& start, const btVector3& end, float r, float g, float b, float a) {
     #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
         Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->getDebugDrawer()->drawLine(start, end, btVector4(r, g, b, a));
     #endif
 }
-
 Engine::RayCastResult internal_ray_cast_nearest(const btVector3& start, const btVector3& end, MaskType group, MaskType mask) {
     btCollisionWorld::ClosestRayResultCallback RayCallback{ start, end };
     RayCallback.m_collisionFilterGroup = group;
     RayCallback.m_collisionFilterMask  = mask;
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->rayTest(start, end, RayCallback);
-
     debugDrawRaycastLine(start, end, 1.0f, 0.5f, 0.0f, 1.0f);
-
     Engine::RayCastResult result{ RayCallback };
     return result;
 }
 std::vector<Engine::RayCastResult> internal_ray_cast(const btVector3& start, const btVector3& end, MaskType group, MaskType mask) {
     btCollisionWorld::AllHitsRayResultCallback AllHitsRayCallback{ start, end };
-
     AllHitsRayCallback.m_collisionFilterGroup = group;
     AllHitsRayCallback.m_collisionFilterMask  = mask;
-
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->rayTest(start, end, AllHitsRayCallback);
     debugDrawRaycastLine(start, end, 1.0f, 0.5f, 0.0f, 1.0f);
-
     std::vector<Engine::RayCastResult> result;
     if (AllHitsRayCallback.hasHit()) {
         auto& pts = AllHitsRayCallback.m_hitPointWorld;
@@ -338,13 +278,13 @@ std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& sta
     }
     return result;
  }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredEntity, MaskType group, MaskType mask){
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end, Entity ignoredEntity, MaskType group, MaskType mask){
     btVector3 start_ = Engine::Math::toBT(start);
     btVector3 end_   = Engine::Math::toBT(end);
     if (ignoredEntity) {
-        auto rigid = ignoredEntity->getComponent<ComponentRigidBody>();
-        if (rigid) {
-            return Engine::Physics::rayCast(start_, end_, rigid, group, mask);
+        auto rigidBody = ignoredEntity.getComponent<ComponentRigidBody>();
+        if (rigidBody) {
+            return Engine::Physics::rayCast(start_, end_, rigidBody, group, mask);
         }
     }
     return Engine::Physics::rayCast(start_, end_, nullptr, group, mask);
@@ -381,11 +321,11 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, co
     }
     return result;
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity* ignoredEntity, MaskType group, MaskType mask) {
+Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity ignoredEntity, MaskType group, MaskType mask) {
     btVector3 start_ = Engine::Math::toBT(start);
     btVector3 end_   = Engine::Math::toBT(end);
     if (ignoredEntity) {
-        auto rigid = ignoredEntity->getComponent<ComponentRigidBody>();
+        auto rigid = ignoredEntity.getComponent<ComponentRigidBody>();
         if (rigid) {
             return Engine::Physics::rayCastNearest(start_, end_, rigid, group, mask);
         }

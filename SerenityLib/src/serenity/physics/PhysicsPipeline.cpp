@@ -53,15 +53,15 @@ void Engine::priv::PhysicsPipeline::drawLine(const glm::vec3& start, const glm::
 void Engine::priv::PhysicsPipeline::cleanup() {
     int collisionObjCount = m_World->getNumCollisionObjects();
     for (int i = 0; i < collisionObjCount; ++i) {
-        btCollisionObject* obj = m_World->getCollisionObjectArray()[i];
-        if (obj) {
-            btRigidBody* body = btRigidBody::upcast(obj);
-            if (body) {
-                auto motionState = body->getMotionState();
+        btCollisionObject* BTCollisionObj = m_World->getCollisionObjectArray()[i];
+        if (BTCollisionObj) {
+            btRigidBody* BTRigidBody = btRigidBody::upcast(BTCollisionObj);
+            if (BTRigidBody) {
+                auto motionState = BTRigidBody->getMotionState();
                 SAFE_DELETE(motionState);
             }
-            m_World->removeCollisionObject(obj);
-            SAFE_DELETE(obj);
+            m_World->removeCollisionObject(BTCollisionObj);
+            SAFE_DELETE(BTCollisionObj);
         }
     }
 }
@@ -73,16 +73,4 @@ void Engine::priv::PhysicsPipeline::setPostTickCallback(btInternalTickCallback p
     m_PostTickCallback = postTickCallback;
     m_World->setInternalTickCallback(m_PostTickCallback, (void*)m_World.get(), false);
 }
-void Engine::priv::PhysicsPipeline::update(const float dt) {
-    /*
-    //Test performance here
-    if (Engine::isKeyDownOnce(KeyboardKey::M)) {
-        m_TaskScheduler->m_DoConcurrency = true;
-    }
-    if (Engine::isKeyDownOnce(KeyboardKey::N)) {
-        m_TaskScheduler->m_DoConcurrency = false;
-    }
-    */
-}
-
 #pragma endregion

@@ -71,6 +71,7 @@ class Scene: public Observer {
         bool                                        m_SkipRenderThisFrame = false;
         bool                                        m_WasJustSwappedTo    = false;
 
+        void internal_register_lights();
         void internal_register_components();
         void internal_register_systems();
         void preUpdate(const float dt);

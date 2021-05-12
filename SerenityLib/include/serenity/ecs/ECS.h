@@ -117,15 +117,16 @@ namespace Engine::priv {
 
             template<class COMPONENT, class ... ARGS> bool addComponent(Entity entity, ARGS&&... args) noexcept {
                 COMPONENT* addedComponent = nullptr;
+                bool result = false;
                 {
                     std::lock_guard lock{ m_MutexRecursive };
                     addedComponent = getComponentPool<COMPONENT>().addComponent(entity, std::forward<ARGS>(args)...);
+                    if (addedComponent) {
+                        m_SystemPool.onComponentAddedToEntity(COMPONENT::TYPE_ID, addedComponent, entity);
+                        result = true;
+                    }
                 }
-                if (addedComponent) {
-                    m_SystemPool.onComponentAddedToEntity(COMPONENT::TYPE_ID, addedComponent, entity);
-                    return true;
-                }
-                return false;
+                return result;
             }
             template<class COMPONENT> bool removeComponent(Entity entity) noexcept {
                 bool didRemove  = false;

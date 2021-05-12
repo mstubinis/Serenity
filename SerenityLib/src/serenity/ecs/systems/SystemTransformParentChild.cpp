@@ -23,13 +23,7 @@ SystemTransformParentChild::SystemTransformParentChild(Engine::priv::ECS& ecs)
     });
     setComponentAddedToEntityFunction([](SystemBaseClass& inSystem, void* component, Entity entity) {
         auto& system  = (SystemTransformParentChild&)inSystem;
-        const auto id = entity.id();
-        if (system.m_Parents.capacity() < id) {
-            system.reserve(id + 50);
-        }
-        if (system.m_Parents.size() < id) {
-            system.resize(id);
-        }
+        system.acquireMoreMemory(entity.id());
         auto model = entity.getComponent<ComponentModel>();
         if (model) {
             Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
@@ -85,7 +79,7 @@ void SystemTransformParentChild::syncRigidToTransform(ComponentRigidBody* rigidB
 #pragma region ParentChildVector
 
 void SystemTransformParentChild::resize(size_t size) {
-    m_Parents.resize(size, 0U);
+    m_Parents.resize(size, 0);
     m_WorldTransforms.resize(size, glm_mat4{ 1.0 });
     m_LocalTransforms.resize(size, glm_mat4{ 1.0 });
 }
@@ -93,6 +87,14 @@ void SystemTransformParentChild::reserve(size_t size) {
     m_Parents.reserve(size);
     m_WorldTransforms.reserve(size);
     m_LocalTransforms.reserve(size);
+}
+void SystemTransformParentChild::acquireMoreMemory(uint32_t entityID) {
+    if (m_Parents.capacity() < entityID) {
+        reserve(entityID + 50);
+    }
+    if (m_Parents.size() < entityID) {
+        resize(entityID);
+    }
 }
 void SystemTransformParentChild::internal_reserve_from_insert(uint32_t parentID, uint32_t childID) {
     if (m_Parents.capacity() < parentID || m_Parents.capacity() < childID) {

@@ -14,6 +14,7 @@ namespace Engine::priv {
 };
 
 #include <serenity/physics/PhysicsPipeline.h>
+#include <serenity/ecs/entity/Entity.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/types/ViewPointer.h>
 #include <serenity/system/TypeDefs.h>
@@ -47,30 +48,29 @@ namespace Engine{
             public:
                 Engine::priv::PhysicsPipeline    m_Pipeline;
                 std::mutex                       m_Mutex;
-                bool                             m_Paused                = false;
                 uint32_t                         m_NumberOfStepsPerFrame = 1;
+                bool                             m_Paused                = false;
             public:
                 PhysicsModule();
 
                 void init();
 
-                void preUpdate(Scene&, const float dt) noexcept;
-                void update(Scene&, const float dt, int maxSubSteps = 1, float fixedTimeStep = 0.0166666f);
-                void render(Scene&, const Camera& camera);
+                void update(Scene&, const float dt, int maxSubSteps = 1, float fixedTimeStep = 0.01666666666666666f);
+                void render(Scene&, const Camera&);
         };
     };
     namespace Physics{
         std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
         std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
-        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, Entity ignoredObject = Entity{}, MaskType group = -1, MaskType mask = -1);
         std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
 
         RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
         RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
-        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity ignoredObject = Entity{}, MaskType group = -1, MaskType mask = -1);
         RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
 
         void setNumberOfStepsPerFrame(uint32_t numSteps);
@@ -79,7 +79,7 @@ namespace Engine{
         void cleanProxyFromPairs(btRigidBody*);
         void updateDiscreteCollisionDetection() noexcept;
         void updateAABBs() noexcept;
-        void recalculateOverlappingPairs() noexcept;
+        void calculateOverlappingPairs() noexcept;
 
         void setGravity(float x, float y, float z);
         inline void setGravity(const glm::vec3& gravity) noexcept { setGravity(gravity.x, gravity.y, gravity.z); }
@@ -89,13 +89,13 @@ namespace Engine{
         bool addRigidBody(btRigidBody*, MaskType group, MaskType mask);
         bool addRigidBody(btRigidBody*);
         bool removeRigidBody(btRigidBody*);
-        bool removeCollisionObject(btCollisionObject* object);
+        bool removeCollisionObject(btCollisionObject*);
         void updateRigidBody(btRigidBody*);
 
         bool addRigidBodyThreadSafe(btRigidBody*, MaskType group, MaskType mask);
         bool addRigidBodyThreadSafe(btRigidBody*);
         bool removeRigidBodyThreadSafe(btRigidBody*);
-        bool removeCollisionObjectThreadSafe(btCollisionObject* object);
+        bool removeCollisionObjectThreadSafe(btCollisionObject*);
         void updateRigidBodyThreadSafe(btRigidBody*);
     };
 };
