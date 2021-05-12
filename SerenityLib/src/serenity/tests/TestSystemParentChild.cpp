@@ -1,13 +1,13 @@
 
 #include <serenity/ecs/ECS.h>
-#include <serenity/ecs/systems/SystemBodyParentChild.h>
+#include <serenity/ecs/systems/SystemTransformParentChild.h>
 
 #include <catch.hpp>
 
 TEST_CASE("SystemParentChild tests") {
 
     Engine::priv::ECS ecs;
-    SystemBodyParentChild s{ ecs };
+    SystemTransformParentChild s{ ecs };
     REQUIRE(s.size() == 0);
 
     s.addChild(5, 3);

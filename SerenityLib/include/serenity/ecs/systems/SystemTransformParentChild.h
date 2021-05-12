@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENGINE_ECS_SYSTEM_BODY_PARENT_CHILD_H
-#define ENGINE_ECS_SYSTEM_BODY_PARENT_CHILD_H
+#ifndef ENGINE_ECS_SYSTEM_TRANSFORM_PARENT_CHILD_H
+#define ENGINE_ECS_SYSTEM_TRANSFORM_PARENT_CHILD_H
 
 class  ComponentTransform;
 class  ComponentRigidBody;
@@ -10,7 +10,7 @@ class  ComponentCollisionShape;
 #include <cstdint>
 #include <serenity/dependencies/glm.h>
 
-class SystemBodyParentChild final : public SystemCRTP<SystemBodyParentChild, ComponentTransform> {
+class SystemTransformParentChild final : public SystemCRTP<SystemTransformParentChild, ComponentTransform> {
     friend class  ComponentTransform;
     private:
         static inline constexpr const uint32_t NULL_INDEX = std::numeric_limits<uint32_t>().max();
@@ -46,10 +46,10 @@ class SystemBodyParentChild final : public SystemCRTP<SystemBodyParentChild, Com
         [[nodiscard]] inline size_t size() const noexcept { return m_Order.size(); }
         [[nodiscard]] inline size_t capacity() const noexcept { return m_Order.capacity(); }
     public:
-        SystemBodyParentChild(Engine::priv::ECS& ecs);
+        SystemTransformParentChild(Engine::priv::ECS& ecs);
 
         void computeAllParentChildWorldTransforms();
-        void computeRigidBodyMatrices(ComponentRigidBody*, ComponentCollisionShape*, Entity);
+        void syncRigidToTransform(ComponentRigidBody*, ComponentCollisionShape*, Entity);
 
         [[nodiscard]] Entity getParentEntity(Entity) const;
 };

@@ -3,7 +3,7 @@
 #include <serenity/system/Engine.h>
 #include <serenity/ecs/components/Components.h>
 
-#include <serenity/ecs/systems/SystemBodyParentChild.h>
+#include <serenity/ecs/systems/SystemTransformParentChild.h>
 
 using namespace Engine::priv;
 
@@ -45,7 +45,7 @@ std::vector<Entity> Entity::getChildren() const noexcept {
     std::vector<Entity> output;
     if (body) {
         auto& ecs = *Engine::priv::PublicEntity::GetECS(*this);
-        auto& pcs = ecs.getSystem<SystemBodyParentChild>();
+        auto& pcs = ecs.getSystem<SystemTransformParentChild>();
         for (uint32_t i = 0; i < (uint32_t)pcs.m_Parents.size(); ++i) {
             const auto parentID = pcs.m_Parents[i];
             if (parentID == m_ID) {

@@ -5,10 +5,10 @@
 struct SceneOptions;
 class  ComponentModel;
 class  ComponentTransform;
-class  SystemComponentBody;
-class  SystemBodyParentChild;
-class  SystemRigidTransformSync;
-class  SystemResolveTransformDirty;
+class  SystemComponentTransform;
+class  SystemTransformParentChild;
+class  SystemSyncRigidToTransform;
+class  SystemSyncTransformToRigid;
 namespace Engine::priv {
     class  sparse_set_base;
     class  EditorWindowScene;
@@ -22,10 +22,10 @@ namespace Engine::priv {
 
 class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
     friend class  ComponentModel;
-    friend class  SystemComponentBody;
-    friend class  SystemBodyParentChild;
-    friend class  SystemRigidTransformSync;
-    friend class  SystemResolveTransformDirty;
+    friend class  SystemComponentTransform;
+    friend class  SystemTransformParentChild;
+    friend class  SystemSyncRigidToTransform;
+    friend class  SystemSyncTransformToRigid;
     friend class  Engine::priv::EditorWindowScene;
     private:
         glm_vec3    m_Position          = glm_vec3{ 0.0 };

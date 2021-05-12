@@ -9,11 +9,10 @@ class  ComponentTransform;
 class  btCollisionObject;
 class  btRigidBody;
 class  btRigidBodyEnhanced;
-class  SystemComponentBody;
 class  SystemComponentRigidBody;
-class  SystemBodyParentChild;
-class  SystemRigidTransformSync;
-class  SystemResolveTransformDirty;
+class  SystemTransformParentChild;
+class  SystemSyncTransformToRigid;
+class  SystemSyncRigidToTransform;
 namespace Engine::priv {
     class  sparse_set_base;
 };
@@ -76,11 +75,10 @@ struct RigidCollisionCallbackEventData final {
 
 class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
     friend class  ComponentModel;
-    friend class  SystemComponentBody;
     friend class  SystemComponentRigidBody;
-    friend class  SystemBodyParentChild;
-    friend class  SystemRigidTransformSync;
-    friend class  SystemResolveTransformDirty;
+    friend class  SystemTransformParentChild;
+    friend class  SystemSyncTransformToRigid;
+    friend class  SystemSyncRigidToTransform;
     using CollisionCallbackFPRigid = void(*)(RigidCollisionCallbackEventData&);
     private:
         CollisionCallbackFPRigid              m_CollisionFunctor  = [](RigidCollisionCallbackEventData&) {};

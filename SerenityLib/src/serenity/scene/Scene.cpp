@@ -17,10 +17,10 @@
 #include <serenity/ecs/systems/SystemComponentRigidBody.h>
 #include <serenity/ecs/systems/SystemAddRigidBodies.h>
 #include <serenity/ecs/systems/SystemRemoveRigidBodies.h>
-#include <serenity/ecs/systems/SystemResolveTransformDirty.h>
+#include <serenity/ecs/systems/SystemSyncTransformToRigid.h>
 #include <serenity/ecs/systems/SystemStepPhysics.h>
-#include <serenity/ecs/systems/SystemRigidTransformSync.h>
-#include <serenity/ecs/systems/SystemBodyParentChild.h>
+#include <serenity/ecs/systems/SystemSyncRigidToTransform.h>
+#include <serenity/ecs/systems/SystemTransformParentChild.h>
 #include <serenity/ecs/systems/SystemCompoundChildTransforms.h>
 #include <serenity/ecs/systems/SystemComponentTransformDebugDraw.h>
 #include <serenity/ecs/systems/SystemComponentCamera.h>
@@ -260,47 +260,9 @@ Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options)
     m_LightsModule.registerLightType<RodLight>();
     m_LightsModule.registerLightType<ProjectionLight>();
 
-    //register components
-    m_ECS.registerComponent<ComponentLogic>();
-    m_ECS.registerComponent<ComponentTransform>();
-    m_ECS.registerComponent<ComponentRigidBody>();
-    m_ECS.registerComponent<ComponentCollisionShape>();
-    m_ECS.registerComponent<ComponentLogic1>();
-    m_ECS.registerComponent<ComponentModel>();
-    m_ECS.registerComponent<ComponentLogic2>();
-    m_ECS.registerComponent<ComponentCamera>();
-    m_ECS.registerComponent<ComponentLogic3>();
-    m_ECS.registerComponent<ComponentName>();
+    internal_register_components();
+    internal_register_systems();
 
-    Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
-    //register systems
-    m_ECS.registerSystemOrdered<SystemAddRigidBodies, std::tuple<>>(10'000);
-
-    m_ECS.registerSystemOrdered<SystemResolveTransformDirty, std::tuple<>, ComponentTransform, ComponentRigidBody>(20'000);
-    m_ECS.registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(30'000);
-    m_ECS.registerSystemOrdered<SystemRigidTransformSync, std::tuple<>, ComponentTransform, ComponentRigidBody>(40'000);
-
-    m_ECS.registerSystemOrdered<SystemGameUpdate, std::tuple<>>(50'000);
-    m_ECS.registerSystemOrdered<SystemSceneUpdate, std::tuple<>>(60'000);
-
-    m_ECS.registerSystemOrdered<SystemComponentLogic, std::tuple<>, ComponentLogic>(70'000);
-    m_ECS.registerSystemOrdered<SystemComponentTransform, std::tuple<>, ComponentTransform>(80'000);
-    m_ECS.registerSystemOrdered<SystemComponentRigidBody, std::tuple<>, ComponentRigidBody>(90'000);
-    m_ECS.registerSystemOrdered<SystemComponentLogic1, std::tuple<>, ComponentLogic1>(100'000);
-    m_ECS.registerSystemOrdered<SystemComponentModel, std::tuple<>, ComponentModel>(110'000);
-
-    m_ECS.registerSystemOrdered<SystemBodyParentChild, std::tuple<>, ComponentTransform>(120'000);
-    m_ECS.registerSystemOrdered<SystemCompoundChildTransforms, std::tuple<>, ComponentCollisionShape>(130'000);
-
-    m_ECS.registerSystemOrdered<SystemComponentLogic2, std::tuple<>, ComponentLogic2>(140'000);
-    m_ECS.registerSystemOrdered<SystemComponentCamera, std::tuple<>, ComponentCamera>(150'000);
-    m_ECS.registerSystemOrdered<SystemComponentLogic3, std::tuple<>, ComponentLogic3>(160'000);
-
-    m_ECS.registerSystemOrdered<SystemSceneChanging, std::tuple<>>(170'000);
-    m_ECS.registerSystemOrdered<SystemRemoveRigidBodies, std::tuple<>>(180'000);
-
-    m_ECS.registerSystemOrdered<SystemComponentTransformDebugDraw, std::tuple<>, ComponentTransform, ComponentModel>(190'000);
-    //
     m_ID = id;
     setName(name);
 
@@ -313,6 +275,47 @@ Scene::~Scene() {
     SAFE_DELETE(m_Skybox);
     SAFE_DELETE_VECTOR(m_Cameras);
     unregisterEvent(EventType::SceneChanged);
+}
+void Scene::internal_register_components() {
+    registerComponent<ComponentLogic>();
+    registerComponent<ComponentTransform>();
+    registerComponent<ComponentRigidBody>();
+    registerComponent<ComponentCollisionShape>();
+    registerComponent<ComponentLogic1>();
+    registerComponent<ComponentModel>();
+    registerComponent<ComponentLogic2>();
+    registerComponent<ComponentCamera>();
+    registerComponent<ComponentLogic3>();
+    registerComponent<ComponentName>();
+
+    Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
+}
+void Scene::internal_register_systems() {
+    registerSystemOrdered<SystemAddRigidBodies, std::tuple<>>(10'000);
+
+    registerSystemOrdered<SystemSyncRigidToTransform, std::tuple<>, ComponentTransform, ComponentRigidBody>(20'000);
+    registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(30'000);
+    registerSystemOrdered<SystemSyncTransformToRigid, std::tuple<>, ComponentTransform, ComponentRigidBody>(40'000);
+
+    registerSystemOrdered<SystemGameUpdate, std::tuple<>>(50'000);
+    registerSystemOrdered<SystemSceneUpdate, std::tuple<>>(60'000);
+
+    registerSystemOrdered<SystemComponentLogic, std::tuple<>, ComponentLogic>(70'000);
+    registerSystemOrdered<SystemComponentTransform, std::tuple<>, ComponentTransform>(80'000);
+    registerSystemOrdered<SystemComponentRigidBody, std::tuple<>, ComponentRigidBody>(90'000);
+    registerSystemOrdered<SystemComponentLogic1, std::tuple<>, ComponentLogic1>(100'000);
+    registerSystemOrdered<SystemComponentModel, std::tuple<>, ComponentModel>(110'000);
+
+    registerSystemOrdered<SystemTransformParentChild, std::tuple<>, ComponentTransform>(120'000);
+    registerSystemOrdered<SystemCompoundChildTransforms, std::tuple<>, ComponentCollisionShape>(130'000);
+
+    registerSystemOrdered<SystemComponentLogic2, std::tuple<>, ComponentLogic2>(140'000);
+    registerSystemOrdered<SystemComponentCamera, std::tuple<>, ComponentCamera>(150'000);
+    registerSystemOrdered<SystemComponentLogic3, std::tuple<>, ComponentLogic3>(160'000);
+
+    registerSystemOrdered<SystemSceneChanging, std::tuple<>>(170'000);
+    registerSystemOrdered<SystemRemoveRigidBodies, std::tuple<>>(180'000);
+    registerSystemOrdered<SystemComponentTransformDebugDraw, std::tuple<>, ComponentTransform, ComponentModel>(190'000);
 }
 size_t Scene::getNumLights() const noexcept {
     size_t count = 0;

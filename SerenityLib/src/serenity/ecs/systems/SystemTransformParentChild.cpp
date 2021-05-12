@@ -1,4 +1,4 @@
-#include <serenity/ecs/systems/SystemBodyParentChild.h>
+#include <serenity/ecs/systems/SystemTransformParentChild.h>
 #include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentRigidBody.h>
 #include <serenity/ecs/components/ComponentModel.h>
@@ -8,33 +8,21 @@
 
 #include <serenity/utils/Utils.h>
 
-SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
+SystemTransformParentChild::SystemTransformParentChild(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
-        auto& system = (SystemBodyParentChild&)inSystem;
-
-        // compute local matrices and apply starting world matrices as locals
-        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* systemPC, Entity entity, ComponentTransform* transform) {
-            auto entityIndex  = entity.id() - 1;
-            auto& localMatrix = systemPC->m_LocalTransforms[entityIndex];
-            auto& worldMatrix = systemPC->m_WorldTransforms[entityIndex];
-            Engine::Math::setFinalModelMatrix(localMatrix, transform->m_Position, transform->m_Rotation, transform->m_Scale);
-            worldMatrix = localMatrix;
-        }, &system, SystemExecutionPolicy::ParallelWait);
-
-        // traverse parent child relationships and build the proper world matrices
+        auto& system = (SystemTransformParentChild&)inSystem;
         system.computeAllParentChildWorldTransforms();
 
-        //finalize bullet rigid body positions by giving them their true world locations and rotations. TODO: move to separate system?
-        system.forEach<SystemBodyParentChild*>([](SystemBodyParentChild* systemPC, Entity entity, ComponentTransform* transform) {
+        system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArg, Entity entity, ComponentTransform*) {
             auto rigidBody      = entity.getComponent<ComponentRigidBody>();
             auto collisionShape = entity.getComponent<ComponentCollisionShape>();
-            systemPC->computeRigidBodyMatrices(rigidBody, collisionShape, entity);
+            pcsArg->syncRigidToTransform(rigidBody, collisionShape, entity);
         }, &system, SystemExecutionPolicy::ParallelWait);
     });
     setComponentAddedToEntityFunction([](SystemBaseClass& inSystem, void* component, Entity entity) {
-        auto& system  = (SystemBodyParentChild&)inSystem;
+        auto& system  = (SystemTransformParentChild&)inSystem;
         const auto id = entity.id();
         if (system.m_Parents.capacity() < id) {
             system.reserve(id + 50);
@@ -48,7 +36,7 @@ SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
         }
     });
     setComponentRemovedFromEntityFunction([](SystemBaseClass& inSystem, Entity entity) {
-        auto& system         = (SystemBodyParentChild&)inSystem;
+        auto& system         = (SystemTransformParentChild&)inSystem;
         const auto id        = entity.id();
         const auto thisIndex = id - 1;
         if (system.m_Parents[thisIndex] > 0) {
@@ -56,14 +44,14 @@ SystemBodyParentChild::SystemBodyParentChild(Engine::priv::ECS& ecs)
         }
     });
 }
-Entity SystemBodyParentChild::getParentEntity(Entity entity) const {
+Entity SystemTransformParentChild::getParentEntity(Entity entity) const {
     auto parent = m_Parents[entity.id() - 1];
     if (parent > 0) {
         return getEntity(parent);
     }
     return Entity{};
 }
-void SystemBodyParentChild::computeAllParentChildWorldTransforms() {
+void SystemTransformParentChild::computeAllParentChildWorldTransforms() {
     for (size_t i = 0; i < m_Order.size(); ++i) {
         const uint32_t entityID = m_Order[i];
         if (entityID > 0) {
@@ -71,16 +59,16 @@ void SystemBodyParentChild::computeAllParentChildWorldTransforms() {
             const uint32_t parentID    = m_Parents[entityIndex];
             if (parentID == 0) {
                 m_WorldTransforms[entityIndex] = m_LocalTransforms[entityIndex];
-            }else{
+            } else {
                 const uint32_t parentIndex = parentID - 1;
                 m_WorldTransforms[entityIndex] = m_WorldTransforms[parentIndex] * m_LocalTransforms[entityIndex];
             }
-        }else{
+        } else {
             break;
         }
     }
 }
-void SystemBodyParentChild::computeRigidBodyMatrices(ComponentRigidBody* rigidBody, ComponentCollisionShape* collisionShape, Entity entity) {
+void SystemTransformParentChild::syncRigidToTransform(ComponentRigidBody* rigidBody, ComponentCollisionShape* collisionShape, Entity entity) {
     if (rigidBody) {
         const auto& thisWorldMatrix = m_WorldTransforms[entity.id() - 1];
         if (collisionShape && collisionShape->isChildShape()) {
@@ -96,17 +84,17 @@ void SystemBodyParentChild::computeRigidBodyMatrices(ComponentRigidBody* rigidBo
 
 #pragma region ParentChildVector
 
-void SystemBodyParentChild::resize(size_t size) {
+void SystemTransformParentChild::resize(size_t size) {
     m_Parents.resize(size, 0U);
     m_WorldTransforms.resize(size, glm_mat4{ 1.0 });
     m_LocalTransforms.resize(size, glm_mat4{ 1.0 });
 }
-void SystemBodyParentChild::reserve(size_t size) {
+void SystemTransformParentChild::reserve(size_t size) {
     m_Parents.reserve(size);
     m_WorldTransforms.reserve(size);
     m_LocalTransforms.reserve(size);
 }
-void SystemBodyParentChild::internal_reserve_from_insert(uint32_t parentID, uint32_t childID) {
+void SystemTransformParentChild::internal_reserve_from_insert(uint32_t parentID, uint32_t childID) {
     if (m_Parents.capacity() < parentID || m_Parents.capacity() < childID) {
         reserve(std::max(parentID, childID) + 50);
     }
@@ -114,7 +102,7 @@ void SystemBodyParentChild::internal_reserve_from_insert(uint32_t parentID, uint
         resize(std::max(parentID, childID));
     }
 }
-void SystemBodyParentChild::addChild(uint32_t parentID, uint32_t childID) {
+void SystemTransformParentChild::addChild(uint32_t parentID, uint32_t childID) {
     internal_reserve_from_insert(parentID, childID);
     if (getParent(childID) == parentID) {
         return;
@@ -151,7 +139,7 @@ void SystemBodyParentChild::addChild(uint32_t parentID, uint32_t childID) {
     getParent(childID) = parentID;
     getWorld(childID)  = getWorld(parentID) * getLocal(childID);
 }
-void SystemBodyParentChild::removeChild(uint32_t parentID, uint32_t childID) {
+void SystemTransformParentChild::removeChild(uint32_t parentID, uint32_t childID) {
     if (getParent(childID) != parentID) {
         return;
     }
@@ -176,7 +164,7 @@ void SystemBodyParentChild::removeChild(uint32_t parentID, uint32_t childID) {
     }
     getParent(childID) = 0;
 }
-std::pair<uint32_t, uint32_t> SystemBodyParentChild::getBlockIndices(uint32_t ID) {
+std::pair<uint32_t, uint32_t> SystemTransformParentChild::getBlockIndices(uint32_t ID) {
     std::pair<uint32_t, uint32_t> ret = std::make_pair(NULL_INDEX, NULL_INDEX);
     //find first index
     for (uint32_t i = 0; i < m_Order.size(); ++i) {
@@ -199,11 +187,11 @@ std::pair<uint32_t, uint32_t> SystemBodyParentChild::getBlockIndices(uint32_t ID
     }
     return ret;
 }
-void SystemBodyParentChild::clear_all() {
+void SystemTransformParentChild::clear_all() {
     m_Parents.clear();
     m_Order.clear();
 }
-void SystemBodyParentChild::clear_and_shrink_all() {
+void SystemTransformParentChild::clear_and_shrink_all() {
     clear_all();
     m_Parents.shrink_to_fit();
     m_Order.shrink_to_fit();

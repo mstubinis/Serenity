@@ -554,7 +554,6 @@
     <ClCompile Include="src\serenity\ecs\entity\EntityBodyRigid.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemAddRigidBodies.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp" />
-    <ClCompile Include="src\serenity\ecs\systems\SystemBodyParentChild.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransform.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransformDebugDraw.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentRigidBody.cpp" />
@@ -567,11 +566,12 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemCompoundChildTransforms.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemGameUpdate.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemRemoveRigidBodies.cpp" />
-    <ClCompile Include="src\serenity\ecs\systems\SystemResolveTransformDirty.cpp" />
-    <ClCompile Include="src\serenity\ecs\systems\SystemRigidTransformSync.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemSceneChanging.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemSceneUpdate.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemStepPhysics.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemSyncRigidToTransform.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemSyncTransformToRigid.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemTransformParentChild.cpp" />
     <ClCompile Include="src\serenity\editor\core\EditorCore.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui-SFML.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui.cpp" />
@@ -800,7 +800,6 @@
     <ClInclude Include="include\serenity\ecs\entity\EntityRAIIBodyRigid.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemAddRigidBodies.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h" />
-    <ClInclude Include="include\serenity\ecs\systems\SystemBodyParentChild.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransform.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransformDebugDraw.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentRigidBody.h" />
@@ -813,11 +812,12 @@
     <ClInclude Include="include\serenity\ecs\systems\SystemCompoundChildTransforms.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemGameUpdate.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemRemoveRigidBodies.h" />
-    <ClInclude Include="include\serenity\ecs\systems\SystemResolveTransformDirty.h" />
-    <ClInclude Include="include\serenity\ecs\systems\SystemRigidTransformSync.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemSceneChanging.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemSceneUpdate.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemStepPhysics.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemSyncRigidToTransform.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemSyncTransformToRigid.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemTransformParentChild.h" />
     <ClInclude Include="include\serenity\editor\core\EditorCore.h" />
     <ClInclude Include="include\serenity\editor\imgui\imconfig-SFML.h" />
     <ClInclude Include="include\serenity\editor\imgui\imconfig.h" />
