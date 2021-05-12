@@ -101,9 +101,8 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
 
         void internal_calculate_mass();
 
-        glm_vec3 internal_getPosition();
-        glm::quat internal_getRotation();
         btTransform internal_get_bt_transform() const;
+        btTransform internal_get_bt_transform_motion_state() const;
     public:
         ComponentRigidBody(Entity);
         ComponentRigidBody(const ComponentRigidBody&)            = delete;
@@ -124,6 +123,13 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
         #endif
 
         template<class FUNC> inline void setCollisionFunctor(FUNC&& functor) noexcept { m_CollisionFunctor = std::forward<FUNC>(functor); }
+
+        glm_vec3 getPosition() const;
+        glm::quat getRotation() const;
+        glm_vec3 getPositionMotionState() const;
+        glm::quat getRotationMotionState() const;
+        glm_mat4 getWorldMatrix() const;
+        glm_mat4 getWorldMatrixMotionState() const;
 
         void collisionResponse(RigidCollisionCallbackEventData&) const;
 

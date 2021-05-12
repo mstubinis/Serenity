@@ -170,19 +170,47 @@ void ComponentRigidBody::internal_setScale(float x, float y, float z) {
 }
 btTransform ComponentRigidBody::internal_get_bt_transform() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    btTransform tr;
-    m_BulletRigidBody->getMotionState()->getWorldTransform(tr);
-    //auto& tr = m_BulletRigidBody->getWorldTransform();
+    auto& tr = m_BulletRigidBody->getWorldTransform();
     return tr;
 }
-glm_vec3 ComponentRigidBody::internal_getPosition() {
+btTransform ComponentRigidBody::internal_get_bt_transform_motion_state() const {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    btTransform tr;
+    m_BulletRigidBody->getMotionState()->getWorldTransform(tr);
+    return tr;
+}
+glm_vec3 ComponentRigidBody::getPosition() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return Engine::Math::toGLM(internal_get_bt_transform().getOrigin());
 }
-glm::quat ComponentRigidBody::internal_getRotation() {
+glm::quat ComponentRigidBody::getRotation() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return Engine::Math::toGLM(internal_get_bt_transform().getRotation());
 }
+
+glm_vec3 ComponentRigidBody::getPositionMotionState() const {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    return Engine::Math::toGLM(internal_get_bt_transform_motion_state().getOrigin());
+}
+glm::quat ComponentRigidBody::getRotationMotionState() const {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    return Engine::Math::toGLM(internal_get_bt_transform_motion_state().getRotation());
+}
+glm_mat4 ComponentRigidBody::getWorldMatrix() const {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    glm_mat4 matrix;
+    const auto& tr = internal_get_bt_transform();
+    tr.getOpenGLMatrix(glm::value_ptr(matrix));
+    return matrix;
+}
+glm_mat4 ComponentRigidBody::getWorldMatrixMotionState() const {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    glm_mat4 matrix;
+    const auto& tr = internal_get_bt_transform_motion_state();
+    tr.getOpenGLMatrix(glm::value_ptr(matrix));
+    return matrix;
+}
+
 glm_vec3 ComponentRigidBody::getLinearVelocity() const {
     return Engine::Math::toGLM(m_BulletRigidBody->getLinearVelocity());
 }

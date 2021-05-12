@@ -12,8 +12,8 @@ SystemSyncTransformToRigid::SystemSyncTransformToRigid(Engine::priv::ECS& ecs)
         auto& system = (SystemSyncTransformToRigid&)inSystem;
         system.forEach([](Entity entity, ComponentTransform* transform, ComponentRigidBody* rigidBody) {
             if (!transform->hasParent()) {
-                transform->m_Position = rigidBody->internal_getPosition();
-                transform->m_Rotation = rigidBody->internal_getRotation();
+                transform->m_Position = rigidBody->getPosition();
+                transform->m_Rotation = rigidBody->getRotation();
                 Engine::Math::recalculateForwardRightUp(*rigidBody->getBtBody(), transform->m_Forward, transform->m_Right, transform->m_Up);
             }
         }, SystemExecutionPolicy::ParallelWait);

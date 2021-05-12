@@ -286,24 +286,25 @@ void Scene::internal_register_components() {
     Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
 }
 void Scene::internal_register_systems() {
-    registerSystemOrdered<SystemAddRigidBodies, std::tuple<>>(1'000);
+    registerSystemOrdered<SystemAddRigidBodies, std::tuple<>>(10'000);
 
-    registerSystemOrdered<SystemGameUpdate, std::tuple<>>(10'000);
-    registerSystemOrdered<SystemSceneUpdate, std::tuple<>>(20'000);
+    registerSystemOrdered<SystemSyncRigidToTransform, std::tuple<>, ComponentTransform, ComponentRigidBody>(20'000);
+    registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(30'000);
+    registerSystemOrdered<SystemSyncTransformToRigid, std::tuple<>, ComponentTransform, ComponentRigidBody>(40'000);
 
-    registerSystemOrdered<SystemComponentLogic, std::tuple<>, ComponentLogic>(30'000);
-    registerSystemOrdered<SystemComponentTransform, std::tuple<>, ComponentTransform>(35'000);
-    registerSystemOrdered<SystemComponentRigidBody, std::tuple<>, ComponentRigidBody>(50'000);
-    registerSystemOrdered<SystemComponentLogic1, std::tuple<>, ComponentLogic1>(60'000);
-    registerSystemOrdered<SystemComponentModel, std::tuple<>, ComponentModel>(70'000);
+    registerSystemOrdered<SystemGameUpdate, std::tuple<>>(50'000);
+    registerSystemOrdered<SystemSceneUpdate, std::tuple<>>(60'000);
+
+    registerSystemOrdered<SystemComponentLogic, std::tuple<>, ComponentLogic>(70'000);
+
+    registerSystemOrdered<SystemComponentTransform, std::tuple<>, ComponentTransform>(80'000);
+    registerSystemOrdered<SystemComponentRigidBody, std::tuple<>, ComponentRigidBody>(90'000);
+    registerSystemOrdered<SystemComponentLogic1, std::tuple<>, ComponentLogic1>(100'000);
+    registerSystemOrdered<SystemComponentModel, std::tuple<>, ComponentModel>(110'000);
 
 
     registerSystemOrdered<SystemTransformParentChild, std::tuple<>, ComponentTransform>(120'000);
     registerSystemOrdered<SystemCompoundChildTransforms, std::tuple<>, ComponentCollisionShape>(130'000);
-
-    registerSystemOrdered<SystemSyncRigidToTransform, std::tuple<>, ComponentTransform, ComponentRigidBody>(131'000);
-    registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(132'000);
-    registerSystemOrdered<SystemSyncTransformToRigid, std::tuple<>, ComponentTransform, ComponentRigidBody>(133'000);
 
     registerSystemOrdered<SystemComponentLogic2, std::tuple<>, ComponentLogic2>(140'000);
     registerSystemOrdered<SystemComponentCamera, std::tuple<>, ComponentCamera>(150'000);
