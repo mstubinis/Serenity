@@ -312,7 +312,8 @@ void Scene::internal_register_systems() {
 
     registerSystemOrdered<SystemSceneChanging, std::tuple<>>(170'000);
     registerSystemOrdered<SystemRemoveRigidBodies, std::tuple<>>(180'000);
-    registerSystemOrdered<SystemComponentTransformDebugDraw, std::tuple<>, ComponentTransform, ComponentModel>(190'000);
+
+    registerSystemOrdered<SystemComponentTransformDebugDraw, std::tuple<>, ComponentTransform, ComponentModel>(1'000'000);
 }
 size_t Scene::getNumLights() const noexcept {
     size_t count = 0;

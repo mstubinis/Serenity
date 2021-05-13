@@ -103,6 +103,9 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
 
         btTransform internal_get_bt_transform() const;
         btTransform internal_get_bt_transform_motion_state() const;
+
+        bool removePhysicsFromWorldImmediate();
+        bool addPhysicsToWorldImmediate();
     public:
         ComponentRigidBody(Entity);
         ComponentRigidBody(const ComponentRigidBody&)            = delete;

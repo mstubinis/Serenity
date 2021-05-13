@@ -97,6 +97,14 @@ bool ComponentRigidBody::rebuildRigidBody(bool addBodyToPhysicsWorld) {
     }
     return (collisionShape != nullptr);
 }
+bool ComponentRigidBody::removePhysicsFromWorldImmediate() {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    return Engine::Physics::removeRigidBody(getBtBody());
+}
+bool ComponentRigidBody::addPhysicsToWorldImmediate() {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    return Engine::Physics::addRigidBody(getBtBody(), m_Group, m_Mask);
+}
 bool ComponentRigidBody::removePhysicsFromWorld() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     auto& ecs          = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
@@ -224,27 +232,27 @@ void ComponentRigidBody::setDamping(decimal linearFactor, decimal angularFactor)
 }
 void ComponentRigidBody::setCollisionGroup(MaskType group) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorld();
+    removePhysicsFromWorldImmediate();
     m_Group = group;
-    addPhysicsToWorld();
+    addPhysicsToWorldImmediate();
 }
 void ComponentRigidBody::setCollisionMask(MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorld();
+    removePhysicsFromWorldImmediate();
     m_Mask = mask;
-    addPhysicsToWorld();
+    addPhysicsToWorldImmediate();
 }
 void ComponentRigidBody::addCollisionGroup(MaskType group) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorld();
+    removePhysicsFromWorldImmediate();
     m_Group |= group;
-    addPhysicsToWorld();
+    addPhysicsToWorldImmediate();
 }
 void ComponentRigidBody::addCollisionMask(MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorld();
+    removePhysicsFromWorldImmediate();
     m_Mask |= mask;
-    addPhysicsToWorld();
+    addPhysicsToWorldImmediate();
 }
 void ComponentRigidBody::setCollisionFlag(MaskType flag) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
@@ -256,15 +264,15 @@ void ComponentRigidBody::addCollisionFlag(MaskType flag) {
 }
 void ComponentRigidBody::removeCollisionGroup(MaskType group) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorld();
+    removePhysicsFromWorldImmediate();
     m_Group &= ~group;
-    addPhysicsToWorld();
+    addPhysicsToWorldImmediate();
 }
 void ComponentRigidBody::removeCollisionMask(MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorld();
+    removePhysicsFromWorldImmediate();
     m_Mask &= ~mask;
-    addPhysicsToWorld();
+    addPhysicsToWorldImmediate();
 }
 void ComponentRigidBody::removeCollisionFlag(MaskType flag) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
@@ -272,10 +280,10 @@ void ComponentRigidBody::removeCollisionFlag(MaskType flag) {
 }
 void ComponentRigidBody::setCollisionGroupAndMask(MaskType group, MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorld();
+    removePhysicsFromWorldImmediate();
     m_Group = group;
     m_Mask  = mask;
-    addPhysicsToWorld();
+    addPhysicsToWorldImmediate();
 }
 
 //TODO: reconsider how this works
