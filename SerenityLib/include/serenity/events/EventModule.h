@@ -16,7 +16,6 @@ namespace Engine::priv {
     class EventModule final {
         public:
             EventDispatcher   m_EventDispatcher;
-
             KeyboardModule    m_KeyboardModule;
             MouseModule       m_MouseModule;
             JoystickModule    m_JoystickModule;
@@ -26,7 +25,6 @@ namespace Engine::priv {
             EventModule& operator=(const EventModule&)     = delete;
             EventModule(EventModule&&) noexcept            = delete;
             EventModule& operator=(EventModule&&) noexcept = delete;
-            ~EventModule() = default;
 
             void onEventKeyPressed(uint32_t key);
             void onEventKeyReleased(uint32_t key);
@@ -41,19 +39,23 @@ namespace Engine{
     [[nodiscard]] uint32_t getNumPressedKeys();
     [[nodiscard]] uint32_t getNumPressedMouseButtons();
 
-    [[nodiscard]] bool isKeyDown(KeyboardKey::Key key);
-    [[nodiscard]] bool isKeyDownOnce(KeyboardKey::Key key);
-    [[nodiscard]] bool isKeyDownOnce(KeyboardKey::Key first, KeyboardKey::Key second);
-    [[nodiscard]] bool isKeyDownOnce(KeyboardKey::Key first, KeyboardKey::Key second, KeyboardKey::Key third);
-    [[nodiscard]] bool isKeyDownOnce();
+    [[nodiscard]] bool isKeyDown(KeyboardKey::Key);
+    [[nodiscard]] bool isKeyDownOnce(KeyboardKey::Key);
+    [[nodiscard]] bool isKeyDownOnce(KeyboardKey::Key, KeyboardKey::Key);
+    [[nodiscard]] bool isKeyDownOnce(KeyboardKey::Key, KeyboardKey::Key, KeyboardKey::Key);
+    [[nodiscard]] bool isKeyUp(KeyboardKey::Key);
+    [[nodiscard]] bool isKeyDown(uint32_t key);
+    [[nodiscard]] bool isKeyDownOnce(uint32_t key);
+    [[nodiscard]] bool isKeyDownOnce(uint32_t first, uint32_t second);
+    [[nodiscard]] bool isKeyDownOnce(uint32_t first, uint32_t second, uint32_t third);
+    [[nodiscard]] bool isKeyUp(uint32_t key);
 
-    [[nodiscard]] bool isKeyUp(KeyboardKey::Key key);
-
-    [[nodiscard]] KeyboardKey::Key getPressedKey();
     [[nodiscard]] MouseButton::Button getPressedButton();
 
     [[nodiscard]] bool isMouseButtonDown(MouseButton::Button);
     [[nodiscard]] bool isMouseButtonDownOnce(MouseButton::Button);
+    [[nodiscard]] bool isMouseButtonDown(uint32_t button);
+    [[nodiscard]] bool isMouseButtonDownOnce(uint32_t button);
 
     [[nodiscard]] const glm::vec2& getMouseDifference();
     [[nodiscard]] const glm::vec2& getMousePositionPrevious();

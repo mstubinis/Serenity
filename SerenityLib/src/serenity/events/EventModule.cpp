@@ -19,7 +19,6 @@ void EventModule::onEventMouseButtonReleased(uint32_t mouseButton){
     m_MouseModule.onButtonReleased(mouseButton);
 }
 void EventModule::postUpdate(){
-    m_KeyboardModule.postUpdate();
     m_MouseModule.postUpdate();
     m_EventDispatcher.postUpdate();
 }
@@ -29,8 +28,8 @@ void EventModule::onClearEvents() {
 }
 
 #pragma region Keyboard
-KeyboardKey::Key Engine::getPressedKey() {
-    return EVENT_MODULE->m_KeyboardModule.getCurrentPressedKey();
+uint32_t Engine::getNumPressedKeys() {
+    return EVENT_MODULE->m_KeyboardModule.getNumPressedKeys();
 }
 void EventModule::onEventKeyPressed(uint32_t key) {
     m_KeyboardModule.onKeyPressed(key);
@@ -41,16 +40,9 @@ void EventModule::onEventKeyReleased(uint32_t key) {
 bool Engine::isKeyDown(KeyboardKey::Key key) {
     return EVENT_MODULE->m_KeyboardModule.isKeyDown(key);
 }
-bool Engine::isKeyDownOnce() {
-    return EVENT_MODULE->m_KeyboardModule.isKeyDownOnce();
-}
-uint32_t Engine::getNumPressedKeys() {
-    return EVENT_MODULE->m_KeyboardModule.getNumPressedKeys();
-}
 bool Engine::isKeyDownOnce(KeyboardKey::Key key) {
     return EVENT_MODULE->m_KeyboardModule.isKeyDownOnce(key);
 }
-
 bool Engine::isKeyDownOnce(KeyboardKey::Key first, KeyboardKey::Key second) {
     return EVENT_MODULE->m_KeyboardModule.isKeyDownOnce(first, second);
 }
@@ -60,6 +52,22 @@ bool Engine::isKeyDownOnce(KeyboardKey::Key first, KeyboardKey::Key second, Keyb
 bool Engine::isKeyUp(KeyboardKey::Key key) {
     return !Engine::isKeyDown(key);
 }
+bool Engine::isKeyDown(uint32_t key) {
+    return Engine::isKeyDown((KeyboardKey::Key)key);
+}
+bool Engine::isKeyDownOnce(uint32_t key) {
+    return Engine::isKeyDownOnce((KeyboardKey::Key)key);
+}
+bool Engine::isKeyDownOnce(uint32_t first, uint32_t second) {
+    return Engine::isKeyDownOnce((KeyboardKey::Key)first, (KeyboardKey::Key)second);
+}
+bool Engine::isKeyDownOnce(uint32_t first, uint32_t second, uint32_t third) {
+    return Engine::isKeyDownOnce((KeyboardKey::Key)first, (KeyboardKey::Key)second, (KeyboardKey::Key)third);
+}
+bool Engine::isKeyUp(uint32_t key) {
+    return Engine::isKeyUp((KeyboardKey::Key)key);
+}
+
 #pragma endregion
 
 #pragma region Mouse
@@ -68,12 +76,6 @@ MouseButton::Button Engine::getPressedButton() {
 }
 uint32_t Engine::getNumPressedMouseButtons() {
     return EVENT_MODULE->m_MouseModule.getNumPressedButtons();
-}
-bool Engine::isMouseButtonDown(MouseButton::Button button){
-    return EVENT_MODULE->m_MouseModule.isButtonDown(button);
-}
-bool Engine::isMouseButtonDownOnce(MouseButton::Button button){
-    return EVENT_MODULE->m_MouseModule.isButtonDownOnce(button);
 }
 const glm::vec2& Engine::getMouseDifference() {
     return Engine::getMouseDifference(Engine::Resources::getWindow());
@@ -127,4 +129,17 @@ void Engine::setMousePosition(const glm::vec2& pos, bool resetDifference, bool r
 void Engine::setMousePosition(const glm::uvec2& pos, bool resetDifference, bool resetPreviousPosition) {
     Engine::setMousePosition(Engine::Resources::getWindow(), pos, resetDifference, resetPreviousPosition);
 }
+bool Engine::isMouseButtonDown(MouseButton::Button button) {
+    return EVENT_MODULE->m_MouseModule.isButtonDown(button);
+}
+bool Engine::isMouseButtonDownOnce(MouseButton::Button button) {
+    return EVENT_MODULE->m_MouseModule.isButtonDownOnce(button);
+}
+bool Engine::isMouseButtonDown(uint32_t button) {
+    return Engine::isMouseButtonDown((MouseButton::Button)button);
+}
+bool Engine::isMouseButtonDownOnce(uint32_t button) {
+    return Engine::isMouseButtonDownOnce((MouseButton::Button)button);
+}
+
 #pragma endregion

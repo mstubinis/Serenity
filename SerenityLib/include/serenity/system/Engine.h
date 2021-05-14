@@ -38,17 +38,18 @@ namespace Engine::priv {
         friend class Window;
         friend class Engine::priv::WindowData;
         private:
-            void internal_init_os_specific(const EngineOptions& options);
+            void internal_init_os_specific(const EngineOptions&);
             void internal_cleanup_os_specific();
 
-            void internal_pre_update(Scene& scene, Window& window, const float dt);
-            void internal_post_update(Scene& scene, Window& window, const float dt);
+            void internal_pre_input_update(Window&);
+            void internal_pre_update(Scene&, Window&, const float dt);
+            void internal_post_update(Scene&, Window&, const float dt);
 
-            void internal_update_logic(Scene& scene, Window& window, const float dt);
-            void internal_update_sounds(Scene& scene, Window& window, const float dt);
-            //void internal_update_physics(Scene& scene, Window& window, const float dt);
-            void internal_render(Scene& scene, Window& window, const float dt, const double alpha);
-            void internal_cleanup(Window& window, const float dt);
+            void internal_update_logic(Scene&, Window&, const float dt);
+            void internal_update_sounds(Scene&, Window&, const float dt);
+            //void internal_update_physics(Scene&, Window&, const float dt);
+            void internal_render(Scene&, Window&, const float dt, const double alpha);
+            void internal_cleanup(Window&, const float dt);
         public:
             class FPSTimer final {
                 private:

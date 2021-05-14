@@ -28,3 +28,17 @@ const char* MouseButton::toCharArray(MouseButton::Button mouse_button) {
 const char* MouseWheel::toCharArray(MouseWheel::Wheel mouse_wheel) {
     return (mouse_wheel == MouseWheel::Unknown) ? "Unknown Mouse Button" : MOUSE_WHEEL_NAMES[mouse_wheel];
 }
+
+
+const char* MouseButton::toCharArray(uint32_t mouse_button) {
+    return MouseButton::toCharArray((MouseButton::Button)mouse_button);
+}
+std::string MouseButton::toString(uint32_t mouse_button) {
+    return MouseButton::toString((MouseButton::Button)mouse_button);
+}
+const char* MouseWheel::toCharArray(uint32_t mouse_wheel) {
+    return MouseWheel::toCharArray((MouseWheel::Wheel)mouse_wheel);
+}
+std::string MouseWheel::toString(uint32_t mouse_wheel) {
+    return MouseWheel::toString((MouseWheel::Wheel)mouse_wheel);
+}

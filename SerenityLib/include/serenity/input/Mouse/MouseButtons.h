@@ -17,8 +17,10 @@ class MouseButton final {
             _TOTAL,
             Unknown = 4294967295, //-1
         };
-        [[nodiscard]] static const char* toCharArray(MouseButton::Button mouse_button);
-        [[nodiscard]] static std::string toString(MouseButton::Button mouse_button);
+        [[nodiscard]] static const char* toCharArray(MouseButton::Button);
+        [[nodiscard]] static std::string toString(MouseButton::Button);
+        [[nodiscard]] static const char* toCharArray(uint32_t mouse_button);
+        [[nodiscard]] static std::string toString(uint32_t mouse_button);
 };
 class MouseWheel final {
     public:
@@ -29,8 +31,10 @@ class MouseWheel final {
             _TOTAL,
             Unknown = 4294967295, //-1
         };
-        [[nodiscard]] static const char* toCharArray(MouseWheel::Wheel mouse_wheel);
-        [[nodiscard]] static std::string toString(MouseWheel::Wheel mouse_wheel);
+        [[nodiscard]] static const char* toCharArray(MouseWheel::Wheel);
+        [[nodiscard]] static std::string toString(MouseWheel::Wheel);
+        [[nodiscard]] static const char* toCharArray(uint32_t mouse_wheel);
+        [[nodiscard]] static std::string toString(uint32_t mouse_wheel);
 };
 
 #endif

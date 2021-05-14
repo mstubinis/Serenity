@@ -121,3 +121,12 @@ bool KeyboardKey::isModifierKey(KeyboardKey::Key key) {
         key == KeyboardKey::RightAlt
     );
 }
+const char* KeyboardKey::toCharArray(uint32_t key) {
+    return KeyboardKey::toCharArray((KeyboardKey::Key)key);
+}
+std::string KeyboardKey::toString(uint32_t key) {
+    return KeyboardKey::toString((KeyboardKey::Key)key);
+}
+bool KeyboardKey::isModifierKey(uint32_t key) {
+    return KeyboardKey::isModifierKey((KeyboardKey::Key)key);
+}

@@ -75,9 +75,6 @@
     } while (false)
 #endif
 
-#endif
-
-
 #pragma region EnvironmentDefines
 
 #if _WIN32 || _WIN64
@@ -239,3 +236,5 @@
     inline typename const TYPE::const_iterator cend() const noexcept { return VAR.cend(); }
 
 #pragma endregion
+
+#endif

@@ -140,6 +140,9 @@ void EngineCore::init(const EngineOptions& options) {
     //m_PhysicsModule.update(scene, timeStep, 100, fixed_time_step);
     //m_DebugManager.calculate_physics();
 //}
+void EngineCore::internal_pre_input_update(Window& window) {
+    m_EventModule.m_KeyboardModule.update();
+}
 void EngineCore::internal_update_logic(Scene& scene, Window& window, const float dt){
     m_DebugManager.stop_clock();
     window.internal_on_dynamic_resize();
@@ -225,6 +228,7 @@ void EngineCore::run() {
         for (const auto& window_itr : m_ResourceManager.m_Windows) {
             auto& window = *window_itr;
             auto& scene = *Engine::Resources::getCurrentScene();
+            internal_pre_input_update(window);
             m_EngineEventHandler.poll_events(window);
             internal_pre_update(scene, window, timeElasped);
             m_Editor.update(window, timeElasped);

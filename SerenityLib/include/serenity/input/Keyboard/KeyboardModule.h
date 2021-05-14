@@ -8,20 +8,18 @@
 
 namespace Engine::priv {
     class KeyboardModule final {
+        using KeyStatusArray = std::array<bool, KeyboardKey::_TOTAL>;
         private:
-            std::array<bool, KeyboardKey::_TOTAL>  m_KeyboardKeyStatus   = { 0 };
-            uint32_t                               m_CurrentKeyboardKey  = (uint32_t)KeyboardKey::Unknown;
-            uint32_t                               m_PreviousKeyboardKey = (uint32_t)KeyboardKey::Unknown;
-            uint32_t                               m_NumPressedKeys      = 0;
+            KeyStatusArray  m_CurrKeyboardKeyStatus = { 0 };
+            KeyStatusArray  m_PrevKeyboardKeyStatus = { 0 };
+            uint32_t        m_NumPressedKeys        = 0;
         public:
             void onKeyPressed(uint32_t key) noexcept;
             void onKeyReleased(uint32_t key) noexcept;
-            void postUpdate() noexcept;
+            void update() noexcept;
             void onClearEvents() noexcept;
-            [[nodiscard]] inline constexpr KeyboardKey::Key getCurrentPressedKey() const noexcept { return (KeyboardKey::Key)m_CurrentKeyboardKey; }
             [[nodiscard]] inline constexpr uint32_t getNumPressedKeys() const noexcept { return m_NumPressedKeys; }
-            [[nodiscard]] inline constexpr bool isKeyDown(uint32_t key) const noexcept { return m_KeyboardKeyStatus[key]; }
-            [[nodiscard]] inline constexpr bool isKeyDownOnce() const noexcept { return m_CurrentKeyboardKey != m_PreviousKeyboardKey; }
+            [[nodiscard]] inline constexpr bool isKeyDown(uint32_t key) const noexcept { return m_CurrKeyboardKeyStatus[key]; }
             [[nodiscard]] bool isKeyDownOnce(uint32_t key) noexcept;
             [[nodiscard]] bool isKeyDownOnce(uint32_t key1, uint32_t key2) noexcept;
             [[nodiscard]] bool isKeyDownOnce(uint32_t key1, uint32_t key2, uint32_t key3) noexcept;
