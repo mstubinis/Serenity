@@ -8,14 +8,14 @@
 class MouseButton final {
     public:
         enum Button : uint32_t {
-            Left = 0,
+            Unknown = 0,
+            Left = 1,
             Right,
             Middle,
             XButton1,
             XButton2,
 
             _TOTAL,
-            Unknown = 4294967295, //-1
         };
         [[nodiscard]] static const char* toCharArray(MouseButton::Button);
         [[nodiscard]] static std::string toString(MouseButton::Button);
@@ -25,11 +25,11 @@ class MouseButton final {
 class MouseWheel final {
     public:
         enum Wheel : uint32_t {
-            VerticalWheel = 0,
+            Unknown = 0,
+            VerticalWheel = 1,
             HorizontalWheel,
 
             _TOTAL,
-            Unknown = 4294967295, //-1
         };
         [[nodiscard]] static const char* toCharArray(MouseWheel::Wheel);
         [[nodiscard]] static std::string toString(MouseWheel::Wheel);

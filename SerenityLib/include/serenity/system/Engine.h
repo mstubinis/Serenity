@@ -47,7 +47,6 @@ namespace Engine::priv {
 
             void internal_update_logic(Scene&, Window&, const float dt);
             void internal_update_sounds(Scene&, Window&, const float dt);
-            //void internal_update_physics(Scene&, Window&, const float dt);
             void internal_render(Scene&, Window&, const float dt, const double alpha);
             void internal_cleanup(Window&, const float dt);
         public:
@@ -95,10 +94,10 @@ namespace Engine::priv {
             ThreadingModule     m_ThreadingModule;
             EngineEventHandler  m_EngineEventHandler;
 
-            EngineCore(const EngineOptions& options);
+            EngineCore(const EngineOptions&);
             ~EngineCore();
 
-            void init(const EngineOptions& options);
+            void init(const EngineOptions&);
             void run();
     };
     class Core final {

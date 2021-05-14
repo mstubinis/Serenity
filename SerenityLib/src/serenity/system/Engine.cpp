@@ -134,14 +134,9 @@ void EngineCore::init(const EngineOptions& options) {
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
-//void EngineCore::internal_update_physics(Scene& scene, Window& window, const float timeStep) {
-    //m_DebugManager.stop_clock();
-    //float fixed_time_step = PHYSICS_MIN_STEP / (float)Physics::getNumberOfStepsPerFrame();
-    //m_PhysicsModule.update(scene, timeStep, 100, fixed_time_step);
-    //m_DebugManager.calculate_physics();
-//}
 void EngineCore::internal_pre_input_update(Window& window) {
     m_EventModule.m_KeyboardModule.update();
+    m_EventModule.m_MouseModule.update();
 }
 void EngineCore::internal_update_logic(Scene& scene, Window& window, const float dt){
     m_DebugManager.stop_clock();

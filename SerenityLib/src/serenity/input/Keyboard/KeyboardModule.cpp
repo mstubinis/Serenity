@@ -21,6 +21,7 @@ void Engine::priv::KeyboardModule::onKeyReleased(uint32_t key) noexcept {
 }
 void Engine::priv::KeyboardModule::update() noexcept {
     m_PrevKeyboardKeyStatus = m_CurrKeyboardKeyStatus;
+    m_CurrKeyboardKeyStatus[(uint32_t)KeyboardKey::Unknown] = true;
 }
 void Engine::priv::KeyboardModule::onClearEvents() noexcept {
     m_NumPressedKeys = 0;

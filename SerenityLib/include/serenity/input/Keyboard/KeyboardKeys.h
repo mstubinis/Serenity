@@ -8,7 +8,8 @@
 class KeyboardKey final {
     public:
         enum Key : uint32_t {
-            A = 0,
+            Unknown = 0,
+            A = 1,
             B,
             C,
             D,
@@ -111,7 +112,6 @@ class KeyboardKey final {
             Pause,
 
             _TOTAL,
-            Unknown = 4294967295, //-1
         };
         [[nodiscard]] static const char* toCharArray(KeyboardKey::Key);
         [[nodiscard]] static std::string toString(KeyboardKey::Key);

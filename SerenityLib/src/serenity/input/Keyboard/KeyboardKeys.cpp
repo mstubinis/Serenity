@@ -2,6 +2,7 @@
 #include <array>
 
 constexpr std::array<const char*, KeyboardKey::_TOTAL> KEYBOARD_KEY_NAMES { {
+    "Unknown",
     "A",
     "B",
     "C",
@@ -106,10 +107,10 @@ constexpr std::array<const char*, KeyboardKey::_TOTAL> KEYBOARD_KEY_NAMES { {
 } };
 
 const char* KeyboardKey::toCharArray(KeyboardKey::Key keyboard_key) {
-    return (keyboard_key == KeyboardKey::Unknown) ? "Unknown Keyboard Key" : KEYBOARD_KEY_NAMES[keyboard_key];
+    return KEYBOARD_KEY_NAMES[keyboard_key];
 }
 std::string KeyboardKey::toString(KeyboardKey::Key keyboard_key) {
-    return (keyboard_key == KeyboardKey::Unknown) ? "Unknown Keyboard Key" : KEYBOARD_KEY_NAMES[keyboard_key];
+    return KEYBOARD_KEY_NAMES[keyboard_key];
 }
 bool KeyboardKey::isModifierKey(KeyboardKey::Key key) {
     return (

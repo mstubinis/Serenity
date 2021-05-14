@@ -19,7 +19,6 @@ void EventModule::onEventMouseButtonReleased(uint32_t mouseButton){
     m_MouseModule.onButtonReleased(mouseButton);
 }
 void EventModule::postUpdate(){
-    m_MouseModule.postUpdate();
     m_EventDispatcher.postUpdate();
 }
 void EventModule::onClearEvents() {
@@ -71,9 +70,6 @@ bool Engine::isKeyUp(uint32_t key) {
 #pragma endregion
 
 #pragma region Mouse
-MouseButton::Button Engine::getPressedButton() {
-    return EVENT_MODULE->m_MouseModule.getCurrentPressedButton();
-}
 uint32_t Engine::getNumPressedMouseButtons() {
     return EVENT_MODULE->m_MouseModule.getNumPressedButtons();
 }
