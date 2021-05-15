@@ -9,6 +9,8 @@ namespace Engine::priv {
         private:
 
         public:
+            void onWindowLostFocus() noexcept;
+            void onWindowGainedFocus() noexcept;
     };
 }
 

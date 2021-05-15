@@ -32,7 +32,8 @@ namespace Engine::priv {
             void onEventMouseButtonReleased(uint32_t mouseButton);
 
             void postUpdate();
-            void onClearEvents();
+            void onWindowLostFocus();
+            void onWindowGainedFocus();
         };
 };
 namespace Engine{
@@ -49,8 +50,6 @@ namespace Engine{
     [[nodiscard]] bool isKeyDownOnce(uint32_t first, uint32_t second);
     [[nodiscard]] bool isKeyDownOnce(uint32_t first, uint32_t second, uint32_t third);
     [[nodiscard]] bool isKeyUp(uint32_t key);
-
-    [[nodiscard]] MouseButton::Button getPressedButton();
 
     [[nodiscard]] bool isMouseButtonDown(MouseButton::Button);
     [[nodiscard]] bool isMouseButtonDownOnce(MouseButton::Button);

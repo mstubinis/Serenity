@@ -25,11 +25,9 @@ void EngineEventHandler::internal_dispatch_event(Event&& inEvent) noexcept {
 }
 
 void EngineEventHandler::internal_on_event_resize(Window& window, uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize) {
-    m_EventModule.onClearEvents();
     m_RenderModule._resize(newWindowWidth, newWindowHeight);
-
     if (saveSize) {
-        window.m_Data.m_VideoMode.width = newWindowWidth;
+        window.m_Data.m_VideoMode.width  = newWindowWidth;
         window.m_Data.m_VideoMode.height = newWindowHeight;
     }
     //resize cameras and viewports here
@@ -58,12 +56,12 @@ void EngineEventHandler::internal_on_event_window_requested_closed(Window& windo
     window.close();
 }
 void EngineEventHandler::internal_on_event_lost_focus(Window& window) {
-    m_EventModule.onClearEvents();
+    m_EventModule.onWindowLostFocus();
     Game::onLostFocus(window);
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowLostFocus);
 }
 void EngineEventHandler::internal_on_event_gained_focus(Window& window) {
-    m_EventModule.onClearEvents();
+    m_EventModule.onWindowGainedFocus();
     Game::onGainedFocus(window);
     window.m_Data.internal_on_reset_events(0.0f);
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowGainedFocus);

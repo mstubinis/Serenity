@@ -18,12 +18,18 @@ void EventModule::onEventMouseButtonPressed(uint32_t mouseButton){
 void EventModule::onEventMouseButtonReleased(uint32_t mouseButton){
     m_MouseModule.onButtonReleased(mouseButton);
 }
+void EventModule::onWindowLostFocus() {
+    m_KeyboardModule.onWindowLostFocus();
+    m_MouseModule.onWindowLostFocus();
+    m_JoystickModule.onWindowLostFocus();
+}
+void EventModule::onWindowGainedFocus() {
+    m_KeyboardModule.onWindowGainedFocus();
+    m_MouseModule.onWindowGainedFocus();
+    m_JoystickModule.onWindowGainedFocus();
+}
 void EventModule::postUpdate(){
     m_EventDispatcher.postUpdate();
-}
-void EventModule::onClearEvents() {
-    m_KeyboardModule.onClearEvents();
-    m_MouseModule.onClearEvents();
 }
 
 #pragma region Keyboard

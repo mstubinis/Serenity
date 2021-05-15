@@ -227,7 +227,6 @@ void EngineCore::run() {
             m_EngineEventHandler.poll_events(window);
             internal_pre_update(scene, window, timeElasped);
             m_Editor.update(window, timeElasped);
-            //internal_update_physics(scene, window, timeElasped);
             internal_update_logic(scene, window, timeElasped);
             internal_update_sounds(scene, window, timeElasped);
             internal_post_update(scene, window, timeElasped);

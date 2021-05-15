@@ -14,10 +14,11 @@ namespace Engine::priv {
             KeyStatusArray  m_PrevKeyboardKeyStatus = { 0 };
             uint32_t        m_NumPressedKeys        = 0;
         public:
+            void onWindowLostFocus() noexcept;
+            void onWindowGainedFocus() noexcept;
             void onKeyPressed(uint32_t key) noexcept;
             void onKeyReleased(uint32_t key) noexcept;
             void update() noexcept;
-            void onClearEvents() noexcept;
             [[nodiscard]] inline constexpr uint32_t getNumPressedKeys() const noexcept { return m_NumPressedKeys; }
             [[nodiscard]] inline constexpr bool isKeyDown(uint32_t key) const noexcept { return m_CurrKeyboardKeyStatus[key]; }
             [[nodiscard]] bool isKeyDownOnce(uint32_t key) noexcept;

@@ -1,3 +1,8 @@
 #include <serenity/input/Joystick/JoystickModule.h>
 
-using namespace Engine::priv;
+void Engine::priv::JoystickModule::onWindowLostFocus() noexcept {
+
+}
+void Engine::priv::JoystickModule::onWindowGainedFocus() noexcept {
+
+}
