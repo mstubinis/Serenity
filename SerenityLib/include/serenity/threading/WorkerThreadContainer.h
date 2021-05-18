@@ -23,13 +23,13 @@ namespace Engine::priv {
 
             [[nodiscard]] inline size_t size() const noexcept { return m_WorkerThreads.size(); }
 
-            template<typename FUNCTION>
-            Engine::view_ptr<std::jthread> add_thread(FUNCTION&& function) noexcept {
+            template<class FUNC>
+            Engine::view_ptr<std::jthread> add_thread(FUNC&& func) noexcept {
                 if (m_WorkerThreads.size() >= m_WorkerThreads.capacity()) {
                     ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_WorkerThreads reached its capacity!")
                     return nullptr;
                 }
-                auto& worker = m_WorkerThreads.emplace_back(std::move(function));
+                auto& worker = m_WorkerThreads.emplace_back(std::forward<FUNC>(func));
                 m_WorkerThreadsHashed.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(worker.get_id()),

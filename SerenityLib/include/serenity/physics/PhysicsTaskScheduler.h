@@ -10,27 +10,27 @@
 namespace Engine::priv {
     class PhysicsTaskScheduler final : public btITaskScheduler {
         friend class PhysicsPipeline;
-    protected:
-        bool                   m_DoConcurrency = false;
-        const char*            m_name;
-        bool                   m_isActive = true;
-        std::atomic<btScalar>  m_sumRes;
-    public:
-        PhysicsTaskScheduler(const char* name);
-        ~PhysicsTaskScheduler();
+        protected:
+            std::atomic<btScalar>  m_sumRes;
+            const char*            m_name;
+            bool                   m_DoConcurrency = false;
+            bool                   m_isActive      = true;
+        public:
+            PhysicsTaskScheduler(const char* name);
+            ~PhysicsTaskScheduler();
 
-        inline const char* getName() const noexcept { return m_name; }
+            inline const char* getName() const noexcept { return m_name; }
 
-        int getMaxNumThreads() const override;
-        int getNumThreads() const override;
-        void setNumThreads(int numThreads) override;
-        void parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody&) override;
-        btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody&) override;
-        void sleepWorkerThreadsHint() override {}
+            int getMaxNumThreads() const override;
+            int getNumThreads() const override;
+            void setNumThreads(int numThreads) override;
+            void parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody&) override;
+            btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody&) override;
+            void sleepWorkerThreadsHint() override {}
 
-        // internal use only
-        void activate() override { m_isActive = true; }
-        void deactivate() override { m_isActive = false; }
+            // internal use only
+            void activate() override { m_isActive = true; }
+            void deactivate() override { m_isActive = false; }
     };
 }
 

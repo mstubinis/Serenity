@@ -11,20 +11,18 @@
 #include <serenity/ecs/components/ComponentCamera.h>
 #include <serenity/editor/core/EditorCore.h>
 
-using namespace Engine::priv;
-
-EngineEventHandler::EngineEventHandler(EditorCore& editorCore, EventModule& eventModule, RenderModule& renderModule, ResourceManager& resourceManager)
+Engine::priv::EngineEventHandler::EngineEventHandler(EditorCore& editorCore, EventModule& eventModule, RenderModule& renderModule, ResourceManager& resourceManager)
     : m_EditorCore      { editorCore }
     , m_EventModule     { eventModule }
     , m_RenderModule    { renderModule }
     , m_ResourceManager { resourceManager }
 {}
 
-void EngineEventHandler::internal_dispatch_event(Event&& inEvent) noexcept {
+void Engine::priv::EngineEventHandler::internal_dispatch_event(Event&& inEvent) noexcept {
     m_EventModule.m_EventDispatcher.dispatchEvent(std::move(inEvent));
 }
 
-void EngineEventHandler::internal_on_event_resize(Window& window, uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize) {
+void Engine::priv::EngineEventHandler::internal_on_event_resize(Window& window, uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize) {
     m_RenderModule._resize(newWindowWidth, newWindowHeight);
     if (saveSize) {
         window.m_Data.m_VideoMode.width  = newWindowWidth;
@@ -41,36 +39,36 @@ void EngineEventHandler::internal_on_event_resize(Window& window, uint32_t newWi
     Game::onResize(window, newWindowWidth, newWindowHeight);
     internal_dispatch_event(Event{ EventType::WindowResized, EventWindowResized{ newWindowWidth, newWindowHeight } });
 }
-void EngineEventHandler::internal_on_event_game_ended() {
+void Engine::priv::EngineEventHandler::internal_on_event_game_ended() {
     Game::onGameEnded();
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::GameEnded);
 }
-void EngineEventHandler::internal_on_event_window_closed(Window& window) {
+void Engine::priv::EngineEventHandler::internal_on_event_window_closed(Window& window) {
     Game::onWindowClosed(window);
     window.m_Data.internal_on_close();
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowHasClosed);
 }
-void EngineEventHandler::internal_on_event_window_requested_closed(Window& window) {
+void Engine::priv::EngineEventHandler::internal_on_event_window_requested_closed(Window& window) {
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowRequestedToBeClosed);
     Game::onWindowRequestedToBeClosed(window);
     window.close();
 }
-void EngineEventHandler::internal_on_event_lost_focus(Window& window) {
+void Engine::priv::EngineEventHandler::internal_on_event_lost_focus(Window& window) {
     m_EventModule.onWindowLostFocus();
     Game::onLostFocus(window);
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowLostFocus);
 }
-void EngineEventHandler::internal_on_event_gained_focus(Window& window) {
+void Engine::priv::EngineEventHandler::internal_on_event_gained_focus(Window& window) {
     m_EventModule.onWindowGainedFocus();
     Game::onGainedFocus(window);
     window.m_Data.internal_on_reset_events(0.0f);
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowGainedFocus);
 }
-void EngineEventHandler::internal_on_event_text_entered(Window& window, uint32_t unicode) {
+void Engine::priv::EngineEventHandler::internal_on_event_text_entered(Window& window, uint32_t unicode) {
     Game::onTextEntered(window, unicode);
     internal_dispatch_event(Event{ EventType::TextEntered, EventTextEntered{ unicode } });
 }
-void EngineEventHandler::internal_on_event_key_pressed(Window& window, uint32_t key) {
+void Engine::priv::EngineEventHandler::internal_on_event_key_pressed(Window& window, uint32_t key) {
     m_EventModule.onEventKeyPressed(key + 1);
     Game::onKeyPressed(window, key + 1);
 
@@ -82,7 +80,7 @@ void EngineEventHandler::internal_on_event_key_pressed(Window& window, uint32_t 
 
     internal_dispatch_event(Event{ EventType::KeyPressed, std::move(e) });
 }
-void EngineEventHandler::internal_on_event_key_released(Window& window, uint32_t key) {
+void Engine::priv::EngineEventHandler::internal_on_event_key_released(Window& window, uint32_t key) {
     m_EventModule.onEventKeyReleased(key + 1);
     Game::onKeyReleased(window, key + 1);
 
@@ -94,22 +92,22 @@ void EngineEventHandler::internal_on_event_key_released(Window& window, uint32_t
 
     internal_dispatch_event(Event{ EventType::KeyReleased, std::move(e) });
 }
-void EngineEventHandler::internal_on_event_mouse_wheel_scrolled(Window& window, float delta, int mouseWheelX, int mouseWheelY) {
+void Engine::priv::EngineEventHandler::internal_on_event_mouse_wheel_scrolled(Window& window, float delta, int mouseWheelX, int mouseWheelY) {
     window.m_Data.internal_on_mouse_wheel_scrolled(delta, mouseWheelX, mouseWheelY);
     Game::onMouseWheelScrolled(window, delta, mouseWheelX, mouseWheelY);
     internal_dispatch_event(Event{ EventType::MouseWheelMoved, EventMouseWheel{ delta, mouseWheelX, mouseWheelY } });
 }
-void EngineEventHandler::internal_on_event_mouse_button_pressed(Window& window, uint32_t mouseButton) {
+void Engine::priv::EngineEventHandler::internal_on_event_mouse_button_pressed(Window& window, uint32_t mouseButton) {
     m_EventModule.onEventMouseButtonPressed(mouseButton + 1);
     Game::onMouseButtonPressed(window, mouseButton + 1);
     internal_dispatch_event(Event{ EventType::MouseButtonPressed, EventMouseButton{ (MouseButton::Button)(mouseButton + 1), window } });
 }
-void EngineEventHandler::internal_on_event_mouse_button_released(Window& window, uint32_t mouseButton) {
+void Engine::priv::EngineEventHandler::internal_on_event_mouse_button_released(Window& window, uint32_t mouseButton) {
     m_EventModule.onEventMouseButtonReleased(mouseButton + 1);
     Game::onMouseButtonReleased(window, mouseButton + 1);
     internal_dispatch_event(Event{ EventType::MouseButtonReleased, EventMouseButton{ (MouseButton::Button)(mouseButton + 1), window } });
 }
-void EngineEventHandler::internal_on_event_mouse_moved(Window& window, int mouseX, int mouseY) {
+void Engine::priv::EngineEventHandler::internal_on_event_mouse_moved(Window& window, int mouseX, int mouseY) {
     float mX = (float)mouseX;
     float mY = (float)mouseY;
     if (window.hasFocus()) {
@@ -118,35 +116,35 @@ void EngineEventHandler::internal_on_event_mouse_moved(Window& window, int mouse
     Game::onMouseMoved(window, mX, mY);
     internal_dispatch_event(Event{ EventType::MouseMoved, EventMouseMove{ mX, mY } });
 }
-void EngineEventHandler::internal_on_event_mouse_entered(Window& window) {
+void Engine::priv::EngineEventHandler::internal_on_event_mouse_entered(Window& window) {
     Game::onMouseEntered(window);
     internal_dispatch_event(Event{ EventType::MouseEnteredWindow, EventMouseMove{ window } });
 }
-void EngineEventHandler::internal_on_event_mouse_left(Window& window) {
+void Engine::priv::EngineEventHandler::internal_on_event_mouse_left(Window& window) {
     Game::onMouseLeft(window);
     internal_dispatch_event(Event{ EventType::MouseLeftWindow, EventMouseMove{ window } });
 }
-void EngineEventHandler::internal_on_event_joystick_button_pressed(Window& window, uint32_t button, uint32_t id) {
+void Engine::priv::EngineEventHandler::internal_on_event_joystick_button_pressed(Window& window, uint32_t button, uint32_t id) {
     Game::onJoystickButtonPressed();
     internal_dispatch_event(Event{ EventType::JoystickButtonPressed, EventJoystickButton{ id, button } });
 }
-void EngineEventHandler::internal_on_event_joystick_button_released(Window& window, uint32_t button, uint32_t id) {
+void Engine::priv::EngineEventHandler::internal_on_event_joystick_button_released(Window& window, uint32_t button, uint32_t id) {
     Game::onJoystickButtonReleased();
     internal_dispatch_event(Event{ EventType::JoystickButtonReleased, EventJoystickButton{ id, button } });
 }
-void EngineEventHandler::internal_on_event_joystick_moved(Window& window, uint32_t id, float position, uint32_t axis) {
+void Engine::priv::EngineEventHandler::internal_on_event_joystick_moved(Window& window, uint32_t id, float position, uint32_t axis) {
     Game::onJoystickMoved();
     internal_dispatch_event(Event{ EventType::JoystickMoved, EventJoystickMoved{ id, (JoystickAxis::Axis)axis, position } });
 }
-void EngineEventHandler::internal_on_event_joystick_connected(Window& window, uint32_t id) {
+void Engine::priv::EngineEventHandler::internal_on_event_joystick_connected(Window& window, uint32_t id) {
     Game::onJoystickConnected();
     internal_dispatch_event(Event{ EventType::JoystickConnected, EventJoystickConnection{ id } });
 }
-void EngineEventHandler::internal_on_event_joystick_disconnected(Window& window, uint32_t id) {
+void Engine::priv::EngineEventHandler::internal_on_event_joystick_disconnected(Window& window, uint32_t id) {
     Game::onJoystickDisconnected();
     internal_dispatch_event(Event{ EventType::JoystickDisconnected, EventJoystickConnection{ id } });
 }
-void EngineEventHandler::poll_events(Window& window) {
+void Engine::priv::EngineEventHandler::poll_events(Window& window) {
     sf::Event e;
     while (window.pollEvents(e)) {
         m_EditorCore.processEvent(e);

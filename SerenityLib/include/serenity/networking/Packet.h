@@ -94,58 +94,6 @@ namespace Engine::Networking {
 
             inline constexpr bool isNull() const noexcept { return m_Timestamp == 0 || m_PacketType == 0 || m_Valid == false; }
 
-            /*
-            void initialize(Engine::Networking::Packet& inPacket) noexcept {        
-                m_PacketType     = inPacket.m_PacketType;
-                m_Timestamp      = inPacket.m_Timestamp;
-                m_AckBitfield    = inPacket.m_AckBitfield;
-                m_SequenceNumber = inPacket.m_SequenceNumber;
-                m_Ack            = inPacket.m_Ack;
-                //if (!inPacket.endOfPacket()) {
-                //    unpack(inPacket);
-                //}
-            }
-            */
-            /*
-            void initialize(sf::Packet& inSFMLPacket) noexcept {
-                //if (!inSFMLPacket.endOfPacket()){
-                //    unpack(inSFMLPacket);
-                //}
-            }
-            */
-            /*
-            virtual Engine::Networking::Packet* clone() {
-                return NEW Engine::Networking::Packet(*this);
-            }
-            */
-            /*
-            virtual bool unpack(sf::Packet& inSFMLPacket) {
-                m_Valid = true;
-                return true;
-            }
-            virtual bool build(sf::Packet& inSFMLPacket) {
-                return true;
-            }
-            */
-            /*
-            virtual const void* onSend(std::size_t& size) override {
-                sf::Packet::clear();
-                using cast          = std::chrono::milliseconds;
-                m_Timestamp         = (PacketTimestamp)std::chrono::duration_cast<cast>(std::chrono::system_clock::now().time_since_epoch()).count();
-                initial_build();
-                //build(*this);
-                return sf::Packet::onSend(size);
-            }
-            */
-            /*
-            virtual void onReceive(const void* data, std::size_t size) override {
-                sf::Packet::onReceive(data, size);
-                initial_unpack();
-                if (!sf::Packet::endOfPacket()) {
-                    unpack(*this);
-                }
-            }
-            */
             void initial_build() {
                 bool initial_build = (*this
                     << m_PacketType

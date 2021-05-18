@@ -18,10 +18,10 @@ Cursor::~Cursor() {
 
 }
 bool Cursor::internal_load_from_pixels(const uint8_t* pixels, uint32_t width, uint32_t height, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier) noexcept {
-    m_Width           = width;
-    m_Height          = height;
-    size_t numBytes   = width * height * 4;
-    m_PixelsColored   = m_Pixels;
+    m_Width               = width;
+    m_Height              = height;
+    const size_t numBytes = width * height * 4;
+    m_PixelsColored       = m_Pixels;
 
     m_ColorMultiplier = colorMultiplier;
     m_PixelsColored.resize(numBytes);
@@ -38,14 +38,14 @@ bool Cursor::internal_load_from_pixels(const uint8_t* pixels, uint32_t width, ui
     bool result = m_SFMLCursor.loadFromPixels(m_PixelsColored.data(), sf::Vector2u(width, height), sf::Vector2u(hotspotX, hotspotY));
     return result;
 }
-bool Cursor::internal_rotate(long long startIndex, long long increment1, long long increment2, bool left) noexcept {
-    size_t oldWidth  = (size_t)m_Width;
-    size_t oldHeight = (size_t)m_Height;
-    size_t numBytes  = (size_t)m_Width * (size_t)m_Height * 4;
+bool Cursor::internal_rotate(int64_t startIndex, int64_t increment1, int64_t increment2, bool left) noexcept {
+    const size_t oldWidth  = (size_t)m_Width;
+    const size_t oldHeight = (size_t)m_Height;
+    const size_t numBytes  = (size_t)m_Width * (size_t)m_Height * 4;
 
     //rotate the pixels
     std::swap(m_Width, m_Height);
-    long long pixel = startIndex;
+    int64_t pixel = startIndex;
 
     auto newPixels = Engine::create_and_reserve<std::vector<uint8_t>>((uint32_t)numBytes);
     for (size_t i = 0; i < numBytes; i += 4) {
@@ -76,17 +76,17 @@ bool Cursor::internal_rotate(long long startIndex, long long increment1, long lo
         m_PixelsColored.emplace_back(b);
         m_PixelsColored.emplace_back(a);
     }
-    bool result = m_SFMLCursor.loadFromPixels(m_PixelsColored.data(), sf::Vector2u(m_Width, m_Height), sf::Vector2u(m_Hotspot.x, m_Hotspot.y));
+    const bool result = m_SFMLCursor.loadFromPixels(m_PixelsColored.data(), sf::Vector2u(m_Width, m_Height), sf::Vector2u(m_Hotspot.x, m_Hotspot.y));
     return result;
 }
 bool Cursor::rotateLeft() noexcept {
-    auto oldWidth  = (long long)m_Width;
-    auto oldHeight = (long long)m_Height;
+    const auto oldWidth  = (int64_t)m_Width;
+    const auto oldHeight = (int64_t)m_Height;
     return internal_rotate((oldWidth * oldHeight) - oldWidth, -oldWidth, (oldWidth * oldHeight) + 1, true);
 }
 bool Cursor::rotateRight() noexcept {
-    auto oldWidth  = (long long)m_Width;
-    auto oldHeight = (long long)m_Height;
+    const auto oldWidth  = (int64_t)m_Width;
+    const auto oldHeight = (int64_t)m_Height;
     return internal_rotate(oldWidth - 1, oldWidth, -((oldWidth * oldHeight) + 1), false);
 }
 void Cursor::setHotspot(uint32_t x, uint32_t y) noexcept {
@@ -103,7 +103,6 @@ bool Cursor::loadFromCurrentData(const glm::vec4& colorMultiplier) noexcept {
     }
     return internal_load_from_pixels(m_Pixels.data(), m_Width, m_Height, m_Hotspot.x, m_Hotspot.y, colorMultiplier);
 }
-
 bool Cursor::loadFromPixels(const uint8_t* pixels, uint32_t width, uint32_t height, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier) noexcept {
     m_Pixels = std::vector<uint8_t>(pixels, pixels + (width * height * 4));
     return internal_load_from_pixels(pixels, width, height, hotspot.x, hotspot.y, colorMultiplier);
@@ -112,20 +111,18 @@ bool Cursor::loadFromPixels(const uint8_t* pixels, uint32_t width, uint32_t heig
     m_Pixels = std::vector<uint8_t>(pixels, pixels + (width * height * 4));
     return internal_load_from_pixels(pixels, width, height, hotspotX, hotspotY, colorMultiplier);
 }
-
 bool Cursor::loadFromPixels(Texture* texture, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier) noexcept {
     ASSERT(texture, __FUNCTION__ << "(): texture was nullptr!");
-    auto pixels = texture->pixels();
+    const auto pixels = texture->pixels();
     m_Pixels = std::vector<uint8_t>(pixels, pixels + (size_t)(texture->width() * texture->height() * 4));
     return internal_load_from_pixels(pixels, texture->width(), texture->height(), hotspot.x, hotspot.y, colorMultiplier);
 }
 bool Cursor::loadFromPixels(Texture* texture, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier) noexcept {
     ASSERT(texture, __FUNCTION__ << "(): texture was nullptr!");
-    auto pixels = texture->pixels();
+    const auto pixels = texture->pixels();
     m_Pixels = std::vector<uint8_t>(pixels, pixels + (size_t)(texture->width() * texture->height() * 4));
     return internal_load_from_pixels(pixels, texture->width(), texture->height(), hotspotX, hotspotY, colorMultiplier);
 }
-
 bool Cursor::loadFromSystem(CursorType cursorType) noexcept {
     return m_SFMLCursor.loadFromSystem((sf::Cursor::Type)cursorType);
 }

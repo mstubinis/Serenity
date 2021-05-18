@@ -31,7 +31,7 @@ namespace Engine::priv {
 
             ThreadPoolFuture() = delete;
         public:
-            ThreadPoolFuture(FutureType&& future);
+            ThreadPoolFuture(FutureType&&);
 
             ThreadPoolFuture(const ThreadPoolFuture&) noexcept            = delete;
             ThreadPoolFuture& operator=(const ThreadPoolFuture&) noexcept = delete;
@@ -50,7 +50,7 @@ namespace Engine::priv {
 
             ThreadPoolFutureCallback() = delete;
         public:
-            ThreadPoolFutureCallback(FutureType&& future, ThreadJob&& callback);
+            ThreadPoolFutureCallback(FutureType&&, ThreadJob&&);
 
             ThreadPoolFutureCallback(const ThreadPoolFutureCallback&) noexcept            = delete;
             ThreadPoolFutureCallback& operator=(const ThreadPoolFutureCallback&) noexcept = delete;

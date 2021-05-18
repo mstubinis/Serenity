@@ -2,10 +2,11 @@
 #ifndef ENGINE_CAMERA_H
 #define ENGINE_CAMERA_H
 
+class  Scene;
+
 #include <serenity/ecs/components/Components.h>
 
-class  Scene;
-enum class CameraType : unsigned char {
+enum class CameraType : uint8_t {
     Perspective, 
     Orthographic,
 };

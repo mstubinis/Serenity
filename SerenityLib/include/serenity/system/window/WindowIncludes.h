@@ -2,7 +2,9 @@
 #ifndef ENGINE_WINDOW_INCLUDES_H
 #define ENGINE_WINDOW_INCLUDES_H
 
-class Window_Flags final { public: enum Flag : unsigned short {
+#include <cstdint>
+
+class Window_Flags final { public: enum Flag : uint16_t {
     WindowedFullscreen = 1 << 0,
     Windowed           = 1 << 1,
     Fullscreen         = 1 << 2,
@@ -13,7 +15,7 @@ class Window_Flags final { public: enum Flag : unsigned short {
     KeyRepeat          = 1 << 7,
 };};
 
-enum class WindowEventThreadOnlyCommands : unsigned int {
+enum class WindowEventThreadOnlyCommands : uint32_t {
     ShowMouse,
     HideMouse,
     RequestFocus,

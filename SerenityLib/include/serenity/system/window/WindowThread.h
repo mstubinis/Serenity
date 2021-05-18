@@ -22,8 +22,8 @@ namespace Engine::priv {
             Engine::queue_ts<WindowEventThreadOnlyCommands>   m_MainThreadToEventThreadQueue;
             std::unique_ptr<std::jthread>                     m_EventThread = nullptr;
 
-            void internal_startup(Window& super, const std::string& name, boost::latch* bLatch);
-            void internal_push(WindowEventThreadOnlyCommands command);
+            void internal_startup(Window&, const std::string& name, boost::latch*);
+            void internal_push(WindowEventThreadOnlyCommands);
             std::optional<sf::Event> internal_try_pop();
             void internal_update_loop();
         public:

@@ -37,21 +37,21 @@ class Window final{
 
         void internal_restore_state();
         void internal_init() noexcept;
-        bool internal_return_window_placement_cmd(unsigned int cmd) const noexcept;
-        bool internal_execute_show_window(unsigned int cmd) noexcept;
+        bool internal_return_window_placement_cmd(uint32_t cmd) const noexcept;
+        bool internal_execute_show_window(uint32_t cmd) noexcept;
 
         Window();
     public:
         ~Window();
 
-        void init(const EngineOptions& options) noexcept;
+        void init(const EngineOptions&) noexcept;
 
         [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Data.m_WindowName; }
 
         [[nodiscard]] glm::uvec2 getSize();
         [[nodiscard]] glm::uvec2 getPosition();
 
-        void setMouseCursor(const Cursor& cursor) noexcept;
+        void setMouseCursor(const Cursor&) noexcept;
 
         void setJoystickProcessingActive(bool active);
         [[nodiscard]] bool isJoystickProcessingActive() const;
@@ -65,7 +65,7 @@ class Window final{
         [[nodiscard]] inline constexpr sf::RenderWindow& getSFMLHandle() noexcept { return m_Data.m_SFMLWindow; }
         [[nodiscard]] inline constexpr unsigned int getFramerateLimit() const noexcept { return m_Data.m_FramerateLimit; }
 
-        bool pollEvents(sf::Event& InSFEvent);
+        bool pollEvents(sf::Event&);
         [[nodiscard]] bool hasFocus() const;
         [[nodiscard]] bool isOpen() const;
 
@@ -92,12 +92,12 @@ class Window final{
         void updateMousePosition(const glm::vec2& position, bool resetDifference = false, bool resetPreviousPosition = false);
 
         void setName(const char* name);
-        void setSize(unsigned int width, unsigned int height);
-        void setIcon(const Texture& texture);
+        void setSize(uint32_t width, uint32_t height);
+        void setIcon(const Texture&);
         void setIcon(const char* file);
         void setIcon(const std::string& file);
         void setMouseCursorVisible(bool);
-        void setPosition(unsigned int x, unsigned int y);
+        void setPosition(uint32_t x, uint32_t y);
 
         //currently specific to windows os only
         bool maximize() noexcept;
@@ -152,7 +152,7 @@ class Window final{
         //SFML will try to match the given limit as much as it can, but since it internally uses sf::sleep,
         //whose precision depends on the underlying OS, the results may be a little unprecise as well
         //(for example, you can get 65 FPS when requesting 60).
-        void setFramerateLimit(unsigned int limit);
+        void setFramerateLimit(uint32_t limit);
 
 };
 #endif

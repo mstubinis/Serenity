@@ -38,7 +38,7 @@ class Cursor {
         //pixels must be an array of width by height pixels in 32 - bit RGBA format.If not, this will cause undefined behavior.
         bool internal_load_from_pixels(const uint8_t* pixels, uint32_t width, uint32_t height, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier) noexcept;
 
-        bool internal_rotate(long long startIndex, long long increment, long long increment2, bool left) noexcept;
+        bool internal_rotate(int64_t startIndex, int64_t increment, int64_t increment2, bool left) noexcept;
     protected:
 
     public:
@@ -55,10 +55,10 @@ class Cursor {
         virtual bool loadFromPixels(const uint8_t* pixels, uint32_t width, uint32_t height, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
         virtual bool loadFromPixels(const uint8_t* pixels, uint32_t width, uint32_t height, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
 
-        virtual bool loadFromPixels(Texture* texture, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
-        virtual bool loadFromPixels(Texture* texture, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
+        virtual bool loadFromPixels(Texture*, const glm::uvec2& hotspot, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
+        virtual bool loadFromPixels(Texture*, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier = glm::vec4(1.0f)) noexcept;
 
-        virtual bool loadFromSystem(CursorType cursorType) noexcept;
+        virtual bool loadFromSystem(CursorType) noexcept;
 
         virtual void setHotspot(uint32_t x, uint32_t y) noexcept;
 

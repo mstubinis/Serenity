@@ -4,43 +4,40 @@
 
 #include <SFML/Window.hpp>
 
-using namespace Engine;
-using namespace Engine::priv;
+Engine::view_ptr<Engine::priv::EventModule> EVENT_MODULE = nullptr;
 
-Engine::view_ptr<EventModule> EVENT_MODULE = nullptr;
-
-EventModule::EventModule() {
+Engine::priv::EventModule::EventModule() {
     EVENT_MODULE = this;
 }
-void EventModule::onEventMouseButtonPressed(uint32_t mouseButton){
+void Engine::priv::EventModule::onEventMouseButtonPressed(uint32_t mouseButton){
     m_MouseModule.onButtonPressed(mouseButton);
 }
-void EventModule::onEventMouseButtonReleased(uint32_t mouseButton){
+void Engine::priv::EventModule::onEventMouseButtonReleased(uint32_t mouseButton){
     m_MouseModule.onButtonReleased(mouseButton);
 }
-void EventModule::onWindowLostFocus() {
+void Engine::priv::EventModule::onWindowLostFocus() {
     m_KeyboardModule.onWindowLostFocus();
     m_MouseModule.onWindowLostFocus();
     m_JoystickModule.onWindowLostFocus();
 }
-void EventModule::onWindowGainedFocus() {
+void Engine::priv::EventModule::onWindowGainedFocus() {
     m_KeyboardModule.onWindowGainedFocus();
     m_MouseModule.onWindowGainedFocus();
     m_JoystickModule.onWindowGainedFocus();
 }
-void EventModule::postUpdate(){
+void Engine::priv::EventModule::postUpdate(){
     m_EventDispatcher.postUpdate();
+}
+void Engine::priv::EventModule::onEventKeyPressed(uint32_t key) {
+    m_KeyboardModule.onKeyPressed(key);
+}
+void Engine::priv::EventModule::onEventKeyReleased(uint32_t key) {
+    m_KeyboardModule.onKeyReleased(key);
 }
 
 #pragma region Keyboard
 uint32_t Engine::getNumPressedKeys() {
     return EVENT_MODULE->m_KeyboardModule.getNumPressedKeys();
-}
-void EventModule::onEventKeyPressed(uint32_t key) {
-    m_KeyboardModule.onKeyPressed(key);
-}
-void EventModule::onEventKeyReleased(uint32_t key) {
-    m_KeyboardModule.onKeyReleased(key);
 }
 bool Engine::isKeyDown(KeyboardKey::Key key) {
     return EVENT_MODULE->m_KeyboardModule.isKeyDown(key);

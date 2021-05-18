@@ -6,7 +6,6 @@
 #include <serenity/resources/texture/Texture.h>
 #include <serenity/system/cursor/Cursor.h>
 
-#pragma region Window
 Window::Window() {
     internal_init();
 }
@@ -81,7 +80,7 @@ void Window::updateMousePosition(float x, float y, bool resetDifference, bool re
 void Window::updateMousePosition(const glm::vec2& position, bool resetDifference, bool resetPrevious) {
     m_Data.internal_update_mouse_position(*this, position.x, position.y, resetDifference, resetPrevious);
 }
-bool Window::internal_execute_show_window(unsigned int cmd) noexcept {
+bool Window::internal_execute_show_window(uint32_t cmd) noexcept {
     #ifdef _WIN32
         ::ShowWindow(m_Data.m_SFMLWindow.getSystemHandle(), cmd);
         return true;
@@ -94,7 +93,7 @@ bool Window::maximize() noexcept {
 bool Window::minimize() noexcept {
     return internal_execute_show_window(SW_MINIMIZE);
 }
-void Window::setPosition(unsigned int x, unsigned int y) {
+void Window::setPosition(uint32_t x, uint32_t y) {
     m_Data.m_SFMLWindow.setPosition(sf::Vector2i(x, y));
 }
 glm::uvec2 Window::getPosition() {
@@ -190,7 +189,7 @@ bool Window::isMouseKeptInWindow() const {
 void Window::display() {
     m_Data.m_SFMLWindow.display();
 }
-bool Window::internal_return_window_placement_cmd(unsigned int cmd) const noexcept {
+bool Window::internal_return_window_placement_cmd(uint32_t cmd) const noexcept {
     #ifdef _WIN32
         WINDOWPLACEMENT info;
         info.length = sizeof(WINDOWPLACEMENT);
@@ -221,7 +220,7 @@ bool Window::setActive(bool isToBeActive) {
     }
     return result;
 }
-void Window::setSize(unsigned int width, unsigned int height) {
+void Window::setSize(uint32_t width, uint32_t height) {
     if (m_Data.m_VideoMode.width == width && m_Data.m_VideoMode.height == height) {
         return;
     }
@@ -292,7 +291,7 @@ void Window::keepMouseInWindow(bool isToBeKept) {
         (isToBeKept) ? m_Data.m_Flags.add(Window_Flags::MouseGrabbed) : m_Data.m_Flags.remove(Window_Flags::MouseGrabbed);
     #endif
 }
-void Window::setFramerateLimit(unsigned int limit){
+void Window::setFramerateLimit(uint32_t limit){
     m_Data.m_SFMLWindow.setFramerateLimit(limit);
     m_Data.m_FramerateLimit = limit;
 }
@@ -320,4 +319,3 @@ bool Window::pollEvents(sf::Event& e) {
         return m_Data.m_SFMLWindow.pollEvent(e);
     #endif
 }
-#pragma endregion

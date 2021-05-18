@@ -351,7 +351,7 @@ float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bo
     return angle;
 }
 glm::quat Math::alignTo(float x, float y, float z) noexcept {
-    auto lookat       = glm::lookAt(glm::vec3{ 0.0f }, -glm::vec3{ x, y, z }, glm::vec3{ 0.0f, 1.0f, 0.0f });
+    auto lookat       = glm::lookAt(glm::vec3{ 0.0f }, glm::vec3{ x, y, z }, glm::vec3{ 0.0f, 1.0f, 0.0f });
     glm::quat outQuat = glm::conjugate(glm::toQuat(lookat));
     outQuat           = glm::normalize(outQuat);
     return outQuat;

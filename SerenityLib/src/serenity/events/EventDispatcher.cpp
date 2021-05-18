@@ -41,15 +41,13 @@ void Engine::priv::EventDispatcher::unregisterObjectImmediate(Observer& observer
 }
 bool Engine::priv::EventDispatcher::isObjectRegistered(const Observer& observer, EventType eventType) const noexcept {
     std::lock_guard lock{ m_Mutex };
-    const auto& observers_with_event = m_Observers[(size_t)eventType];
-    return internal_has_duplicate(observer, observers_with_event);
+    return internal_has_duplicate(observer, m_Observers[(size_t)eventType]);
 }
 void Engine::priv::EventDispatcher::internal_dispatch_event(const Event& e) {
     if ((size_t)e.type >= m_Observers.size()) {
         return;
     }
-    const auto& observers_with_event = m_Observers[(size_t)e.type];
-    for (auto& observerPtr : observers_with_event) {
+    for (auto& observerPtr : m_Observers[(size_t)e.type]) {
         observerPtr->onEvent(e);
     }
 }
@@ -57,8 +55,7 @@ void Engine::priv::EventDispatcher::dispatchEvent(const Event& e) noexcept {
     internal_dispatch_event(e);
 }
 void Engine::priv::EventDispatcher::dispatchEvent(EventType eventType) noexcept {
-    Event e{ eventType };
-    internal_dispatch_event(e);
+    internal_dispatch_event(Event{ eventType });
 }
 void Engine::priv::EventDispatcher::postUpdate() {
     if (m_UnregisteredObservers.size() > 0) {

@@ -17,12 +17,12 @@ class Observer {
         Observer() = default;
         virtual ~Observer() = default;
 
-        void registerEvent(EventType type) noexcept;
-        void unregisterEvent(EventType type) noexcept;
-        void unregisterEventImmediate(EventType type) noexcept;
-        [[nodiscard]] bool isRegistered(EventType type) const noexcept;
+        void registerEvent(EventType) noexcept;
+        void unregisterEvent(EventType) noexcept;
+        void unregisterEventImmediate(EventType) noexcept;
+        [[nodiscard]] bool isRegistered(EventType) const noexcept;
         
-        virtual void onEvent(const Event& e) {}
+        virtual void onEvent(const Event&) {}
 };
 
 #endif

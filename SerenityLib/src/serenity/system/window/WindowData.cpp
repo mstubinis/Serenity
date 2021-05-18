@@ -23,7 +23,7 @@ void Engine::priv::WindowData::internal_on_close() {
     m_SFMLWindow.close();
 }
 void Engine::priv::WindowData::internal_on_mouse_wheel_scrolled(float delta, int x, int y) {
-    m_MouseDelta += ((double)delta * 10.0);
+    m_MouseDelta += (double)delta * 10.0;
 }
 void Engine::priv::WindowData::internal_restore_state(Window& super) {
     if (m_FramerateLimit > 0) {
