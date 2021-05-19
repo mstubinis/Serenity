@@ -27,13 +27,15 @@ class DirectionalLight : public SunLight {
 };
 
 class DirectionalLightShadowData {
+    using CascadeContainerDistances = std::array<float, (size_t)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS + 1>;
+    using CascadeContainerMatrices  = std::array<glm::mat4, DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS>;
     public:
-        std::array<glm::mat4, DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS>   m_LightOrthoProjection;
-        glm::mat4   m_LightViewMatrix;
-        std::array<float, (size_t)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS + 1>  m_CascadeDistances;
-        uint32_t     m_ShadowWidth   = static_cast<uint32_t>(DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE);
-        uint32_t     m_ShadowHeight  = static_cast<uint32_t>(DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE);
-        bool         m_Enabled       = true;
+        CascadeContainerMatrices   m_LightOrthoProjection;
+        glm::mat4                  m_LightViewMatrix;
+        CascadeContainerDistances  m_CascadeDistances;
+        uint32_t                   m_ShadowWidth           = static_cast<uint32_t>(DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE);
+        uint32_t                   m_ShadowHeight          = static_cast<uint32_t>(DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE);
+        bool                       m_Enabled               = true;
 
         inline void setOrtho(float orthoSize, float Near, float Far) noexcept {
             m_LightOrthoProjection[0] = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, Near, Far);
@@ -50,7 +52,7 @@ class DirectionalLightShadowData {
             const auto dir = glm::normalize(direction) * 1.0f;
             m_LightViewMatrix = glm::lookAt(center + dir, center, up);
         }
-        inline void update(DirectionalLight& light, Camera& camera) {
+        inline void update(DirectionalLight& light, Camera& camera) noexcept {
             setLookAt(light.getComponent<ComponentTransform>()->getForward(), glm::vec3{ camera.getPosition() });
         }
 };

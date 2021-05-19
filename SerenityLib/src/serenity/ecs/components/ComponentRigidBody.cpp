@@ -54,6 +54,14 @@ ComponentRigidBody& ComponentRigidBody::operator=(ComponentRigidBody&& other) no
     internal_update_misc();
     return *this;
 }
+glm::vec3 ComponentRigidBody::internal_getScale() const noexcept {
+    auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
+    auto btColShape     = collisionShape->getBtShape();
+    if (btColShape) {
+        return Engine::Math::toGLM(btColShape->getLocalScaling());
+    }
+    return glm::vec3{ 1.0f };
+}
 void ComponentRigidBody::internal_update_misc() noexcept {
     if (m_BulletRigidBody) {
         m_BulletRigidBody->setMotionState(&m_BulletMotionState);
@@ -157,17 +165,21 @@ void ComponentRigidBody::setGravity(decimal x, decimal y, decimal z) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setGravity(btVector3{ (btScalar)x, (btScalar)y, (btScalar)z });
 }
-void ComponentRigidBody::internal_set_matrix(glm_mat4 matrix) {
+void ComponentRigidBody::internal_set_matrix(const glm_mat4& matrix) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    auto localScale = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(matrix);
+    auto clone = matrix;
+    auto localScale = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(clone);
     btTransform tr;
-    tr.setFromOpenGLMatrix(glm::value_ptr(matrix));
+    tr.setFromOpenGLMatrix(glm::value_ptr(clone));
     m_BulletRigidBody->setWorldTransform(tr);
     m_BulletRigidBody->setCenterOfMassTransform(tr);
     m_BulletRigidBody->getMotionState()->setWorldTransform(tr);
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
     if (collisionShape) {
-        collisionShape->internal_setScale((float)localScale.x, (float)localScale.y, (float)localScale.z);
+        const auto currentScale = internal_getScale();
+        if (currentScale != glm::vec3(localScale)) {
+            collisionShape->internal_setScale((float)localScale.x, (float)localScale.y, (float)localScale.z);
+        }
     }
 }
 void ComponentRigidBody::internal_setScale(float x, float y, float z) {

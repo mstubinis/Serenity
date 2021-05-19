@@ -56,8 +56,6 @@ using namespace Engine::priv;
     void Game::onJoystickDisconnected() {}
 #endif
 
-EngineCore* Core::m_Engine = nullptr;
-
 EngineCore::EngineCore(const EngineOptions& options) 
     : m_ResourceManager{ options }
     , m_RenderModule{ options }
@@ -67,7 +65,7 @@ EngineCore::EngineCore(const EngineOptions& options)
     std::srand(static_cast<uint32_t>(std::time(0)));
     m_Misc.m_MainThreadID = std::this_thread::get_id();
 }
-EngineCore::~EngineCore(){
+EngineCore::~EngineCore() {
     m_EngineEventHandler.internal_on_event_game_ended();
     Game::cleanup();
     internal_cleanup_os_specific();
@@ -77,6 +75,7 @@ void EngineCore::internal_init_os_specific(const EngineOptions& options) {
         //get args from shortcut, etc
         std::unordered_set<std::string> args;
         std::locale loc;
+        args.reserve(options.argc);
         for (int i = 0; i < options.argc; i++) {
             std::string key      = std::string(options.argv[i]);
             std::string lowerKey;
@@ -119,7 +118,7 @@ void EngineCore::init(const EngineOptions& options) {
     Game::initLogic(options);
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
-    if (m_ResourceManager.m_Scenes.size() == 0){
+    if (m_ResourceManager.m_Scenes.size() == 0) {
         Scene* defaultScene = Engine::Resources::addScene<Scene>("Default");
         Engine::Resources::setCurrentScene(defaultScene);
     }
@@ -138,7 +137,7 @@ void EngineCore::internal_pre_input_update(Window& window) {
     m_EventModule.m_KeyboardModule.update();
     m_EventModule.m_MouseModule.update();
 }
-void EngineCore::internal_update_logic(Scene& scene, Window& window, const float dt){
+void EngineCore::internal_update_logic(Scene& scene, Window& window, const float dt) {
     m_DebugManager.stop_clock();
     window.internal_on_dynamic_resize();
     m_NetworkingModule.update(dt);
@@ -151,7 +150,7 @@ void EngineCore::internal_update_logic(Scene& scene, Window& window, const float
     m_DiscordModule.update();
     m_DebugManager.calculate_logic();
 }
-void EngineCore::internal_update_sounds(Scene& scene, Window& window, const float dt){
+void EngineCore::internal_update_sounds(Scene& scene, Window& window, const float dt) {
     m_DebugManager.stop_clock();
     m_SoundModule.update(scene, dt);
     m_DebugManager.calculate_sounds();
@@ -169,7 +168,7 @@ void EngineCore::internal_post_update(Scene& scene, Window& window, const float 
     m_EventModule.postUpdate();
     window.m_Data.internal_on_reset_events(dt);
 }
-void EngineCore::internal_render(Scene& scene, Window& window, const float dt, const double alpha){
+void EngineCore::internal_render(Scene& scene, Window& window, const float dt, const double alpha) {
     m_DebugManager.stop_clock();
     Game::render();
     if (Engine::priv::PublicScene::IsSkipRenderThisFrame(scene)) {

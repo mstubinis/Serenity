@@ -162,12 +162,12 @@ void ComponentCollisionShape::setCollision(btCollisionShape* shape) {
         }
     }
     auto transform = m_Owner.getComponent<ComponentTransform>();
-    auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
+    //auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
     auto model     = m_Owner.getComponent<ComponentModel>();
     //Engine::Physics::removeRigidBodyThreadSafe(rigidBody->getBtBody());
-    if (rigidBody) {
+    //if (rigidBody) {
         //rigidBody->rebuildRigidBody(true);
-    }
+    //}
     if (transform) {
         transform->setScale(transform->getScale());
     }
@@ -251,8 +251,8 @@ void ComponentCollisionShape::forcePhysicsSync() noexcept {
 }
 void ComponentCollisionShape::internal_setScale(float x, float y, float z) {
     auto btColShape = m_CollisionShape.get();
-    auto model = m_Owner.getComponent<ComponentModel>();
-    //auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
+    auto model      = m_Owner.getComponent<ComponentModel>();
+    //auto rigidBody  = m_Owner.getComponent<ComponentRigidBody>();
     if (btColShape) {
         btColShape->setLocalScaling(btVector3{ (btScalar)x, (btScalar)y, (btScalar)z });
     }
@@ -263,7 +263,6 @@ void ComponentCollisionShape::internal_setScale(float x, float y, float z) {
     //    Engine::Physics::cleanProxyFromPairs(rigidBody->getBtBody());
     //}
 }
-
 void ComponentCollisionShape::setMass(float mass) {
     auto btShape = getBtShape();
     if (!btShape || isStaticTriangleType() || getType() == CollisionType::INVALID_SHAPE_PROXYTYPE || getType() == CollisionType::EMPTY_SHAPE_PROXYTYPE) {

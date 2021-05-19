@@ -321,7 +321,7 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
     for (uint32_t sectorX = 0; sectorX < m_TerrainData.m_BtHeightfieldShapesSizeRows; ++sectorX) {
         for (uint32_t sectorY = 0; sectorY < m_TerrainData.m_BtHeightfieldShapesSizeCols; ++sectorY) {
             auto* heightfield = m_TerrainData.m_BtHeightfieldShapes[(m_TerrainData.m_BtHeightfieldShapesSizeRows * sectorX) + sectorY];
-            auto  dimensions  = glm::ivec2(heightfield->getUserIndex(), heightfield->getUserIndex2());
+            auto  dimensions  = glm::ivec2{ heightfield->getUserIndex(), heightfield->getUserIndex2() };
 
             btTransform xform;
             xform.setIdentity();

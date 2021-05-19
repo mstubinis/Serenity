@@ -15,10 +15,7 @@ class  SystemBaseClass;
 
 #include <iostream>
 
-class ComponentNullType final : public ComponentBaseClass<ComponentNullType>{
-public:
-    static inline volatile int X = 0;
-};
+class ComponentNullType final : public ComponentBaseClass<ComponentNullType>{};
 
 namespace Engine::priv {
     class ECSSystemPool final {
@@ -59,7 +56,6 @@ namespace Engine::priv {
                 m_ComponentIDToSystems[COMPONENT::TYPE_ID - 1].push_back(inSystem);
                 inSystem->associateComponent<COMPONENT>();
             }
-
             template<class SYSTEM, class ... COMPONENTS>
             inline void hashSystem(SYSTEM* inSystem) {
                 (hashSystemImpl<SYSTEM, COMPONENTS>(inSystem), ...);
@@ -113,54 +109,12 @@ namespace Engine::priv {
                 hashSystem<SYSTEM, COMPONENTS...>(createdSystem);
                 return createdSystem;
             }
-
-            void update(const float dt, Scene& scene) {
-                for (int i = 0; i < m_Order.size(); ++i) {
-                    m_Systems[m_Order[i].typeID - 1]->onUpdate(dt, scene);
-                }
-            }
-            void onComponentAddedToEntity(uint32_t componentTypeID, void* component, Entity entity) {
-                if (m_ComponentIDToSystems.size() < componentTypeID) {
-                    return;
-                }
-                for (int i = 0; i < m_ComponentIDToSystems[componentTypeID - 1].size(); ++i) {
-                    m_ComponentIDToSystems[componentTypeID - 1][i]->onComponentAddedToEntity(component, entity);
-                }
-                for (int i = 0; i < m_ComponentIDToSystems[componentTypeID - 1].size(); ++i) {
-                    m_ComponentIDToSystems[componentTypeID - 1][i]->addEntity(entity);
-                }
-            }
-            void onComponentRemovedFromEntity(uint32_t componentTypeID, Entity entity) {
-                ASSERT(m_ComponentIDToSystems.size() >= componentTypeID, __FUNCTION__ << "(): m_ComponentIDToSystems did not have componentTypeID");
-                //if (m_ComponentIDToSystems.size() < componentTypeID) {
-                //    return;
-                //}
-                for (int i = 0; i < m_ComponentIDToSystems[componentTypeID - 1].size(); ++i) {
-                    m_ComponentIDToSystems[componentTypeID - 1][i]->removeEntity(entity);
-                }
-                for (int i = 0; i < m_ComponentIDToSystems[componentTypeID - 1].size(); ++i) {
-                    m_ComponentIDToSystems[componentTypeID - 1][i]->onComponentRemovedFromEntity(entity);
-                }
-            }
-            void onComponentRemovedFromEntity(Entity entity) {
-                for (int i = 0; i < m_Order.size(); ++i) {
-                    m_Systems[m_Order[i].typeID - 1]->removeEntity(entity);
-                }
-                for (int i = 0; i < m_Order.size(); ++i) {
-                    m_Systems[m_Order[i].typeID - 1]->onComponentRemovedFromEntity(entity);
-                }
-            }
-
-            void onSceneEntered(Scene& scene) noexcept {
-                for (int i = 0; i < m_Order.size(); ++i) {
-                    m_Systems[m_Order[i].typeID - 1]->onSceneEntered(scene);
-                }
-            }
-            void onSceneLeft(Scene& scene) noexcept {
-                for (int i = 0; i < m_Order.size(); ++i) {
-                    m_Systems[m_Order[i].typeID - 1]->onSceneLeft(scene);
-                }
-            }
+            void update(const float dt, Scene&);
+            void onComponentAddedToEntity(uint32_t componentTypeID, void* component, Entity);
+            void onComponentRemovedFromEntity(uint32_t componentTypeID, Entity);
+            void onComponentRemovedFromEntity(Entity);
+            void onSceneEntered(Scene&) noexcept;
+            void onSceneLeft(Scene&) noexcept;
 
             inline SystemBaseClass& operator[](const uint32_t idx) noexcept { return *m_Systems[idx].get(); }
             inline const SystemBaseClass& operator[](const uint32_t idx) const noexcept { return *m_Systems[idx].get(); }

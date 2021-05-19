@@ -31,18 +31,18 @@ namespace Engine::priv {
 namespace Engine::priv {
     class PhysicsPipeline final {
         public:
-            btInternalTickCallback                                         m_PreTickCallback  = [](btDynamicsWorld*, btScalar) {};
-            btInternalTickCallback                                         m_PostTickCallback = [](btDynamicsWorld*, btScalar) {};
+            btInternalTickCallback                                     m_PreTickCallback  = [](btDynamicsWorld*, btScalar) {};
+            btInternalTickCallback                                     m_PostTickCallback = [](btDynamicsWorld*, btScalar) {};
 
-            std::unique_ptr<PhysicsTaskScheduler>                          m_TaskScheduler;
-            std::unique_ptr<btBroadphaseInterface>                         m_Broadphase;
-            std::unique_ptr<btDefaultCollisionConfiguration>               m_CollisionConfiguration;
-            std::unique_ptr<btCollisionDispatcher>                         m_Dispatcher;
-            std::unique_ptr<btConstraintSolverPoolMt>                      m_SolverPool;
-            std::unique_ptr<btSequentialImpulseConstraintSolver>           m_Solver;
-            std::unique_ptr<btSequentialImpulseConstraintSolverMt>         m_SolverMT;
-            std::unique_ptr<btDiscreteDynamicsWorld>                       m_World;
-            GLDebugDrawer                                                  m_DebugDrawer;
+            std::unique_ptr<PhysicsTaskScheduler>                      m_TaskScheduler;
+            std::unique_ptr<btBroadphaseInterface>                     m_Broadphase;
+            std::unique_ptr<btDefaultCollisionConfiguration>           m_CollisionConfiguration;
+            std::unique_ptr<btCollisionDispatcher>                     m_Dispatcher;
+            std::unique_ptr<btConstraintSolverPoolMt>                  m_SolverPool;
+            std::unique_ptr<btSequentialImpulseConstraintSolver>       m_Solver;
+            std::unique_ptr<btSequentialImpulseConstraintSolverMt>     m_SolverMT;
+            std::unique_ptr<btDiscreteDynamicsWorld>                   m_World;
+            GLDebugDrawer                                              m_DebugDrawer;
         public:
             PhysicsPipeline();
             ~PhysicsPipeline();

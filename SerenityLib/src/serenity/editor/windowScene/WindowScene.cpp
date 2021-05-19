@@ -132,15 +132,16 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                 }
                 if (model && ImGui::TreeNode("ComponentModel")) {
                     for (size_t i = 0; i < model->getNumModels(); ++i) {
-                        ModelInstance& instance = model->getModel(i);
                         if (ImGui::TreeNode(("ModelInstance " + std::to_string(i)).c_str())) {
-                            const auto& color = instance.getColor();
-                            const auto& GRColor = instance.getGodRaysColor();
-                            float aColor[4] = { color.r(), color.g(), color.b(), color.a() };
-                            float aGodRays[3] = { GRColor.r(), GRColor.g(), GRColor.b() };
+                            ModelInstance& instance = model->getModel(i);
+                            const auto& color       = instance.getColor();
+                            const auto& GRColor     = instance.getGodRaysColor();
+                            float aColor[4]         = { color.r(), color.g(), color.b(), color.a() };
+                            float aGodRays[3]       = { GRColor.r(), GRColor.g(), GRColor.b() };
                             ImGui::ColorEdit4("Color", &aColor[0]);
                             ImGui::ColorEdit3("God Rays Color", &aGodRays[0]);
                             ImGui::Checkbox("Force Render", &instance.m_ForceRender);
+                            ImGui::Checkbox("Show", &instance.m_Visible);
                             ImGui::Separator();
                             ImGui::InputFloat3("position", &instance.m_Position[0]);
                             ImGui::InputFloat4("rotation", &instance.m_Orientation[0]);
@@ -148,7 +149,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
 
                             instance.setColor(aColor[0], aColor[1], aColor[2], aColor[3]);
                             instance.setGodRaysColor(aGodRays[0], aGodRays[1], aGodRays[2]);
-                            instance.internal_update_model_matrix(true);
+                            instance.internal_update_model_matrix(false);
 
                             ImGui::TreePop();
                         }
@@ -162,7 +163,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                         ImGui::InputFloat("AspectRatio", &cam->m_AspectRatio);
                         ImGui::InputFloat("Near", &cam->m_NearPlane);
                         ImGui::InputFloat("Far", &cam->m_FarPlane);
-                    }else{
+                    } else {
                         ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Orthographic Camera");
                         ImGui::InputFloat("Left", &cam->m_Left);
                         ImGui::InputFloat("Right", &cam->m_Right);

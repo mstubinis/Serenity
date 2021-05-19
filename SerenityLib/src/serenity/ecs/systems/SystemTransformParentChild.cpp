@@ -14,8 +14,7 @@ SystemTransformParentChild::SystemTransformParentChild(Engine::priv::ECS& ecs)
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         auto& system = (SystemTransformParentChild&)inSystem;
         system.computeAllParentChildWorldTransforms();
-
-        system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArg, Entity entity, ComponentTransform*) {
+        system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArg, Entity entity, ComponentTransform* transform) {
             auto rigidBody      = entity.getComponent<ComponentRigidBody>();
             auto collisionShape = entity.getComponent<ComponentCollisionShape>();
             pcsArg->syncRigidToTransform(rigidBody, collisionShape, entity);
@@ -64,11 +63,11 @@ void SystemTransformParentChild::computeAllParentChildWorldTransforms() {
 }
 void SystemTransformParentChild::syncRigidToTransform(ComponentRigidBody* rigidBody, ComponentCollisionShape* collisionShape, Entity entity) {
     if (rigidBody) {
-        const auto& thisWorldMatrix = m_WorldTransforms[entity.id() - 1];
+        const auto& thisWorldMatrix        = m_WorldTransforms[entity.id() - 1];
         if (collisionShape && collisionShape->isChildShape()) {
-            auto parentWorldMatrix  = m_WorldTransforms[collisionShape->getParent().id() - 1];
-            auto localMatrix        = glm::inverse(parentWorldMatrix) * thisWorldMatrix;
-            const auto localScale   = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(localMatrix);
+            const auto& parentWorldMatrix  = m_WorldTransforms[collisionShape->getParent().id() - 1];
+            auto localMatrix               = glm::inverse(parentWorldMatrix) * thisWorldMatrix;
+            const auto localScale          = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(localMatrix);
             collisionShape->updateChildShapeTransform(localMatrix);
         } else {
             rigidBody->internal_set_matrix(thisWorldMatrix);

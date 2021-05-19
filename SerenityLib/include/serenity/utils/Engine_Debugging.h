@@ -13,7 +13,8 @@
 namespace Engine::priv {
     class DebugManager {
         private:
-            sf::Clock m_Clock             = sf::Clock();
+            sf::Clock m_Clock;
+            sf::Clock m_ClockPhysics;
             sf::Int64 m_LogicTime         = 0;
             sf::Int64 m_PhysicsTime       = 0;
             sf::Int64 m_RenderTime        = 0;
@@ -45,8 +46,9 @@ namespace Engine::priv {
             void endGLQuery(const char* tag);
 
             inline void stop_clock() noexcept { m_Clock.restart(); }
+            inline void stop_clock_physics() noexcept { m_ClockPhysics.restart(); }
             inline void calculate_logic() noexcept { m_LogicTime = m_Clock.restart().asMicroseconds(); }
-            inline void calculate_physics() noexcept { m_PhysicsTime = m_Clock.restart().asMicroseconds(); }
+            inline void calculate_physics() noexcept { m_PhysicsTime = m_ClockPhysics.restart().asMicroseconds(); }
             inline void calculate_sounds() noexcept { m_SoundTime = m_Clock.restart().asMicroseconds(); }
             inline void calculate_render() noexcept { m_RenderTime = m_Clock.restart().asMicroseconds(); }
 

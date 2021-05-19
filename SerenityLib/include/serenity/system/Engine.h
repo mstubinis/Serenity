@@ -102,7 +102,7 @@ namespace Engine::priv {
     };
     class Core final {
         public:
-            static EngineCore* m_Engine;
+            static inline EngineCore* m_Engine = nullptr;
     };
 }
 

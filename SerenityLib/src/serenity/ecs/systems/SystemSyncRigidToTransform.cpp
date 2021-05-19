@@ -11,7 +11,6 @@ SystemSyncRigidToTransform::SystemSyncRigidToTransform(Engine::priv::ECS& ecs)
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         auto& system   = (SystemSyncRigidToTransform&)inSystem;
         auto& systemPC = inSystem.getECS().getSystem<SystemTransformParentChild>();
-
         system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArg, Entity entity, ComponentTransform* transform, ComponentRigidBody* rigidBody) {
             auto collisionShape = entity.getComponent<ComponentCollisionShape>();
             pcsArg->syncRigidToTransform(rigidBody, collisionShape, entity);

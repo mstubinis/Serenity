@@ -52,8 +52,6 @@ ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) no
     m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
     m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
     m_Owner            = std::exchange(other.m_Owner, Entity{});
-
-    //Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
     return *this;
 }
 decimal ComponentTransform::getDistance(Entity other) const {
@@ -149,10 +147,8 @@ glm_vec3 ComponentTransform::getWorldPosition() const {
 glm::quat ComponentTransform::getWorldRotation() const {
     auto& worldMatrix = getWorldMatrix();
 #if defined(ENGINE_HIGH_PRECISION)
-    //return glm::quat_cast( glm::mat4{ worldMatrix } * glm::mat4_cast(m_Rotation) );
     return glm::quat_cast(glm::mat4{ worldMatrix });
 #else
-    //return glm::quat_cast(worldMatrix * glm::mat4_cast(m_Rotation));
     return glm::quat_cast(worldMatrix);
 #endif
 }

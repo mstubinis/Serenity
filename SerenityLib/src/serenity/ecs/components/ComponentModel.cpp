@@ -27,25 +27,26 @@ std::pair<glm::vec3, float> ComponentModel_Functions::CalculateBoundingBoxAndRad
     return {maxBoundingBox, maxRadius};
 }
 float ComponentModel_Functions::CalculateRadius(ComponentModel& modelComponent) {
-    auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)ComponentModel_Functions::GetTotalVertexCount(modelComponent));
+    uint32_t vertexCount = (uint32_t)ComponentModel_Functions::GetTotalVertexCount(modelComponent);
+    auto points_total    = Engine::create_and_reserve<std::vector<glm::vec3>>(vertexCount);
     for (const auto& modelInstance : modelComponent) {
         const Mesh& mesh = *modelInstance->getMesh().get<Mesh>();
         if (!mesh.isLoaded()) {
             continue;
         }
-        float modelInstanceScale = Engine::Math::Max(modelInstance->getScale());
-        glm::vec3 localPosition  = Engine::Math::getMatrixPosition(modelInstance->getModelMatrix());
-        auto positions           = mesh.getVertexData().getPositions();
-        for (auto& vertexPosition : positions) {
+        const float modelInstanceScale = Engine::Math::Max(modelInstance->getScale());
+        const glm::vec3 localPosition  = Engine::Math::getMatrixPosition(modelInstance->getModelMatrix());
+        const auto positions           = mesh.getVertexData().getPositions();
+        for (const auto& vertexPosition : positions) {
             points_total.emplace_back(localPosition + (vertexPosition * modelInstanceScale));
         }
     }
-    auto boxAndRadius = CalculateBoundingBoxAndRadius(points_total);
+    const auto boxAndRadius = CalculateBoundingBoxAndRadius(points_total);
     modelComponent.m_Radius          = boxAndRadius.second;
     modelComponent.m_RadiusBox       = boxAndRadius.first;
-    auto body                        = modelComponent.m_Owner.getComponent<ComponentTransform>();
-    if (body) {
-        auto bodyScale               = Engine::Math::Max(glm::vec3{ body->getScale() });
+    const auto transform             = modelComponent.m_Owner.getComponent<ComponentTransform>();
+    if (transform) {
+        const auto bodyScale         = Engine::Math::Max(glm::vec3{ transform->getScale() });
         modelComponent.m_Radius     *= bodyScale;
         modelComponent.m_RadiusBox  *= bodyScale;
     }

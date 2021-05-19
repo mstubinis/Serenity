@@ -298,6 +298,8 @@
       </PrecompiledHeaderFile>
       <FloatingPointModel>Fast</FloatingPointModel>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -386,6 +388,8 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>None</DebugInformationFormat>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -413,7 +417,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -430,6 +434,8 @@
       </PrecompiledHeaderFile>
       <FloatingPointModel>Precise</FloatingPointModel>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -502,6 +508,8 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>None</DebugInformationFormat>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -549,6 +557,7 @@
     <ClCompile Include="src\serenity\ecs\components\ComponentName.cpp" />
     <ClCompile Include="src\serenity\ecs\ECS.cpp" />
     <ClCompile Include="src\serenity\ecs\ECSEntityPool.cpp" />
+    <ClCompile Include="src\serenity\ecs\ECSSystemPool.cpp" />
     <ClCompile Include="src\serenity\ecs\entity\Entity.cpp" />
     <ClCompile Include="src\serenity\ecs\entity\EntityBody.cpp" />
     <ClCompile Include="src\serenity\ecs\entity\EntityBodyRigid.cpp" />

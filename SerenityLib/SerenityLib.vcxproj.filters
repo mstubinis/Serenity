@@ -923,6 +923,9 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemSyncTransformToRigid.cpp">
       <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\ecs\ECSSystemPool.cpp">
+      <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">

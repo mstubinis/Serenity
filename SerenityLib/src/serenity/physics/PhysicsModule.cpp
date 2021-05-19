@@ -1,6 +1,7 @@
 
 #include <serenity/physics/PhysicsModule.h>
 #include <serenity/physics/DebugDrawer.h>
+#include <serenity/system/Engine.h>
 
 #include <serenity/renderer/Renderer.h>
 #include <serenity/scene/Camera.h>
@@ -137,21 +138,22 @@ bool add_rigid_body(Engine::priv::PhysicsPipeline& pipeline, btRigidBody* inRigi
     return true;
 }
 void Engine::priv::PhysicsModule::update(Scene& scene, const float dt, int maxSubSteps, float fixedTimeStep){
-    if (m_Paused) {
-        return;
-    }
-    m_Pipeline.m_World->stepSimulation((btScalar)dt, maxSubSteps, (btScalar)fixedTimeStep);
-    for (int i = 0; i < m_Pipeline.m_Dispatcher->getNumManifolds(); ++i) {
-        auto& contactMnifld = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
-        for (int j = 0; j < contactMnifld.getNumContacts(); ++j) {
-            auto& cp = contactMnifld.getContactPoint(j);
-            if (cp.getDistance() < 0.0f) {
-                btCollisionObject* colObject0 = const_cast<btCollisionObject*>(contactMnifld.getBody0());
-                btCollisionObject* colObject1 = const_cast<btCollisionObject*>(contactMnifld.getBody1());
-                ProcessManifoldContact(cp, colObject0, colObject1, nullptr, nullptr, nullptr, nullptr);
+    Engine::priv::Core::m_Engine->m_DebugManager.stop_clock_physics();
+    if (!m_Paused) {
+        m_Pipeline.m_World->stepSimulation((btScalar)dt, maxSubSteps, (btScalar)fixedTimeStep);
+        for (int i = 0; i < m_Pipeline.m_Dispatcher->getNumManifolds(); ++i) {
+            auto& contactMnifld = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
+            for (int j = 0; j < contactMnifld.getNumContacts(); ++j) {
+                auto& cp = contactMnifld.getContactPoint(j);
+                if (cp.getDistance() < 0.0f) {
+                    btCollisionObject* colObject0 = const_cast<btCollisionObject*>(contactMnifld.getBody0());
+                    btCollisionObject* colObject1 = const_cast<btCollisionObject*>(contactMnifld.getBody1());
+                    ProcessManifoldContact(cp, colObject0, colObject1, nullptr, nullptr, nullptr, nullptr);
+                }
             }
         }
     }
+    Engine::priv::Core::m_Engine->m_DebugManager.calculate_physics();
 }
 void Engine::priv::PhysicsModule::render(Scene& scene, const Camera& camera){
     m_Pipeline.m_World->debugDrawWorld();
