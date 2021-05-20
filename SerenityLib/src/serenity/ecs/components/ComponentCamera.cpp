@@ -5,7 +5,7 @@
 void Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& component) noexcept {
     if (component.m_Type == ComponentCamera::CameraType::Perspective) {
         component.m_ProjectionMatrix = glm::perspective(component.m_Angle, component.m_AspectRatio, component.m_NearPlane, component.m_FarPlane);
-    }else{
+    } else {
         component.m_ProjectionMatrix = glm::ortho(component.m_Left, component.m_Right, component.m_Bottom, component.m_Top, component.m_NearPlane, component.m_FarPlane);
     }
 }
@@ -100,33 +100,6 @@ void ComponentCamera::resize(uint32_t width, uint32_t height) noexcept {
         m_AspectRatio = width / (float)height;
     }
     Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
-}
-uint32_t ComponentCamera::pointIntersectTest(const glm_vec3& worldPosition) const noexcept {
-    auto zero = (decimal)0.0;
-    for (uint32_t i = 0; i < m_FrustumPlanes.size(); ++i) {
-        auto d = m_FrustumPlanes[i].x * worldPosition.x + m_FrustumPlanes[i].y * worldPosition.y + m_FrustumPlanes[i].z * worldPosition.z + m_FrustumPlanes[i].w;
-        if (d > zero) {
-            return 0; //outside
-        }
-    }
-    return 1; //inside
-}
-uint32_t ComponentCamera::sphereIntersectTest(const glm_vec3& worldPosition, float radius) const noexcept {
-    uint32_t res = 1; //inside the viewing frustum
-    auto zero    = (decimal)0.0;
-    auto two     = (decimal)2.0;
-    if (radius <= zero) {
-        return 0;
-    }
-    for (size_t i = 0; i < m_FrustumPlanes.size(); ++i) {
-        auto d = m_FrustumPlanes[i].x * worldPosition.x + m_FrustumPlanes[i].y * worldPosition.y + m_FrustumPlanes[i].z * worldPosition.z + m_FrustumPlanes[i].w;
-        if (d > radius * two) {
-            return 0; //outside the viewing frustrum
-        }else if (d > zero) {
-            res = 2; //intersecting the viewing plane
-        }
-    }
-    return res;
 }
 void ComponentCamera::setViewMatrix(const glm::mat4& viewMatrix) noexcept {
     m_ViewMatrix = viewMatrix;

@@ -8,6 +8,10 @@ class ComponentCamera;
 namespace Engine::priv {
     class  EditorWindowScene;
 };
+namespace Engine::priv::Culling {
+    class  SphereIntersectTest;
+    class  PointIntersectTest;
+}
 
 #include <serenity/dependencies/glm.h>
 #include <serenity/ecs/components/ComponentBaseClass.h>
@@ -23,6 +27,8 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
     friend class  ComponentModel;
     friend struct Engine::priv::ComponentCamera_Functions;
     friend class  Engine::priv::EditorWindowScene;
+    friend class  Engine::priv::Culling::SphereIntersectTest;
+    friend class  Engine::priv::Culling::PointIntersectTest;
     public:
         enum class CameraType : uint8_t {
             Perspective,
@@ -89,9 +95,6 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         [[nodiscard]] inline std::array<glm::vec4, 6>& getFrustrumPlanes() noexcept { return m_FrustumPlanes; }
         [[nodiscard]] inline glm::vec3 getRight() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][0], m_ViewMatrix[1][0], m_ViewMatrix[2][0])); }
         [[nodiscard]] inline constexpr glm::vec3 getUp() const noexcept { return m_Up; /*normalize later?*/ }
-
-        [[nodiscard]] uint32_t pointIntersectTest(const glm_vec3& objectPosition) const noexcept;
-        [[nodiscard]] uint32_t sphereIntersectTest(const glm_vec3& objectPosition, float objectRadius) const noexcept;
 };
 
 #endif

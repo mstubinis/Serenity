@@ -632,6 +632,10 @@
     <ClCompile Include="src\serenity\physics\PhysicsModule.cpp" />
     <ClCompile Include="src\serenity\physics\PhysicsPipeline.cpp" />
     <ClCompile Include="src\serenity\physics\PhysicsTaskScheduler.cpp" />
+    <ClCompile Include="src\serenity\renderer\culling\Culling.cpp" />
+    <ClCompile Include="src\serenity\renderer\culling\DistanceTest.cpp" />
+    <ClCompile Include="src\serenity\renderer\culling\PointIntersectTest.cpp" />
+    <ClCompile Include="src\serenity\renderer\culling\SphereIntersectTest.cpp" />
     <ClCompile Include="src\serenity\renderer\Decal.cpp" />
     <ClCompile Include="src\serenity\renderer\FramebufferObject.cpp" />
     <ClCompile Include="src\serenity\renderer\FullscreenItems.cpp" />
@@ -895,6 +899,10 @@
     <ClInclude Include="include\serenity\physics\PhysicsModule.h" />
     <ClInclude Include="include\serenity\physics\PhysicsPipeline.h" />
     <ClInclude Include="include\serenity\physics\PhysicsTaskScheduler.h" />
+    <ClInclude Include="include\serenity\renderer\culling\Culling.h" />
+    <ClInclude Include="include\serenity\renderer\culling\DistanceTest.h" />
+    <ClInclude Include="include\serenity\renderer\culling\PointIntersectTest.h" />
+    <ClInclude Include="include\serenity\renderer\culling\SphereIntersectTest.h" />
     <ClInclude Include="include\serenity\renderer\Decal.h" />
     <ClInclude Include="include\serenity\renderer\FramebufferObject.h" />
     <ClInclude Include="include\serenity\renderer\FullscreenItems.h" />

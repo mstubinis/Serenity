@@ -1,6 +1,7 @@
 
 #include <serenity/renderer/pipelines/DeferredPipeline.h>
 #include <serenity/renderer/opengl/UniformBufferObject.h>
+#include <serenity/renderer/culling/SphereIntersectTest.h>
 #include <serenity/system/Engine.h>
 #include <serenity/lights/Lights.h>
 #include <serenity/resources/mesh/Mesh.h>
@@ -863,7 +864,8 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, PointLight& pointLight, c
     auto cull       = pointLight.getCullingRadius();
     auto factor     = 1100.0f * cull;
     auto distSq     = (float)camera.getDistanceSquared(pos);
-    if ((!camera.sphereIntersectTest(pos, cull)) || (distSq > factor * factor)) {
+
+    if ((!Engine::priv::Culling::sphereIntersectTest(pos, cull, camera)) || (distSq > factor * factor)) {
         return 0;
     }
     const auto& col = pointLight.getColor();
@@ -904,7 +906,7 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, con
     auto cull      = spotLight.getCullingRadius();
     auto factor    = 1100.0f * cull;
     auto distSq    = (float)camera.getDistanceSquared(pos);
-    if (!camera.sphereIntersectTest(pos, cull)) {
+    if (!Engine::priv::Culling::sphereIntersectTest(pos, cull, camera)) {
         return 0;
     }
     if (distSq > factor * factor) {
@@ -930,7 +932,7 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const
     auto cullingDistance = rodLight.getRodLength() + (rodLight.getCullingRadius() * 2.0f);
     auto factor          = 1100.0f * cullingDistance;
     auto distSq          = (float)camera.getDistanceSquared(pos);
-    if (!camera.sphereIntersectTest(pos, cullingDistance) || (distSq > factor * factor)) {
+    if (!Engine::priv::Culling::sphereIntersectTest(pos, cullingDistance, camera) || (distSq > factor * factor)) {
         return 0;
     }
     const auto& col      = rodLight.getColor();

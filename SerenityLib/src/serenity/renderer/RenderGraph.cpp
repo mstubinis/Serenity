@@ -9,14 +9,13 @@
 #include <serenity/scene/Viewport.h>
 #include <serenity/system/Engine.h>
 
-using namespace Engine;
-using namespace Engine::priv;
+#include <serenity/renderer/culling/Culling.h>
 
-void RenderGraph::internal_addModelInstanceToPipeline(ModelInstance& inModelInstance) {
+void Engine::priv::RenderGraph::internal_addModelInstanceToPipeline(ModelInstance& inModelInstance) {
     // material node check
-    priv::MaterialNode* materialNode  = nullptr;
-    priv::MeshNode*     meshNode      = nullptr;
-    ModelInstance*      modelInstance = nullptr;
+    Engine::priv::MaterialNode* materialNode  = nullptr;
+    Engine::priv::MeshNode*     meshNode      = nullptr;
+    ModelInstance*              modelInstance = nullptr;
     for (auto& itr : m_MaterialNodes) {
         if (itr.material == inModelInstance.getMaterial()) {
             materialNode = &itr;
@@ -46,11 +45,11 @@ void RenderGraph::internal_addModelInstanceToPipeline(ModelInstance& inModelInst
         m_InstancesTotal.emplace_back(&inModelInstance);
     }
 }
-void RenderGraph::internal_removeModelInstanceFromPipeline(ModelInstance& inModelInstance) {
+void Engine::priv::RenderGraph::internal_removeModelInstanceFromPipeline(ModelInstance& inModelInstance) {
     // material node check
-    priv::MaterialNode*  materialNode  = nullptr;
-    priv::MeshNode*      meshNode      = nullptr;
-    ModelInstance*       modelInstance = nullptr;
+    Engine::priv::MaterialNode*  materialNode  = nullptr;
+    Engine::priv::MeshNode*      meshNode      = nullptr;
+    ModelInstance*               modelInstance = nullptr;
     for (auto& itr : m_MaterialNodes) {
         if (itr.material == inModelInstance.getMaterial()) {
             materialNode = &itr;
@@ -81,7 +80,7 @@ void RenderGraph::internal_removeModelInstanceFromPipeline(ModelInstance& inMode
         }
     }
 }
-bool RenderGraph::remove_material_node(MaterialNode& materialNode) {
+bool Engine::priv::RenderGraph::remove_material_node(MaterialNode& materialNode) {
     for (size_t i = 0; i < m_MaterialNodes.size(); ++i) {
         if (&m_MaterialNodes[i] == &materialNode) {
             m_MaterialNodes.erase(m_MaterialNodes.begin() + i);
@@ -90,7 +89,7 @@ bool RenderGraph::remove_material_node(MaterialNode& materialNode) {
     }
     return false;
 }
-bool RenderGraph::remove_mesh_node(MaterialNode& materialNode, MeshNode& meshNode) {
+bool Engine::priv::RenderGraph::remove_mesh_node(MaterialNode& materialNode, MeshNode& meshNode) {
     for (size_t i = 0; i < materialNode.meshNodes.size(); ++i) {
         if (&materialNode.meshNodes[i] == &meshNode) {
             materialNode.meshNodes.erase(materialNode.meshNodes.begin() + i);
@@ -99,7 +98,7 @@ bool RenderGraph::remove_mesh_node(MaterialNode& materialNode, MeshNode& meshNod
     }
     return false;
 }
-bool RenderGraph::remove_instance_node(MeshNode& meshNode, ModelInstance& instanceNode) {
+bool Engine::priv::RenderGraph::remove_instance_node(MeshNode& meshNode, ModelInstance& instanceNode) {
     for (size_t i = 0; i < meshNode.instanceNodes.size(); ++i) {
         if (meshNode.instanceNodes[i] == &instanceNode) {
             meshNode.instanceNodes.erase(meshNode.instanceNodes.begin() + i);
@@ -115,7 +114,7 @@ bool RenderGraph::remove_instance_node(MeshNode& meshNode, ModelInstance& instan
 }
 
 // TODO: correct this
-void RenderGraph::sort_bruteforce(Camera* camera, SortingMode sortingMode) {
+void Engine::priv::RenderGraph::sort_bruteforce(Camera* camera, SortingMode sortingMode) {
     if (!camera) {
         return;
     }
@@ -143,7 +142,7 @@ void RenderGraph::sort_bruteforce(Camera* camera, SortingMode sortingMode) {
     Engine::sort(/*std::execution::par_unseq, */ m_InstancesTotal, lambda_sorter);
 #endif
 }
-void RenderGraph::sort_cheap_bruteforce(Camera* camera, SortingMode sortingMode) {
+void Engine::priv::RenderGraph::sort_cheap_bruteforce(Camera* camera, SortingMode sortingMode) {
     if (!camera) {
         return;
     }
@@ -165,7 +164,7 @@ void RenderGraph::sort_cheap_bruteforce(Camera* camera, SortingMode sortingMode)
     Engine::sort(/*std::execution::par_unseq, */ m_InstancesTotal, lambda_sorter);
 #endif
 }
-void RenderGraph::sort_cheap(Camera* camera, SortingMode sortingMode) {
+void Engine::priv::RenderGraph::sort_cheap(Camera* camera, SortingMode sortingMode) {
     if (!camera) {
         return;
     }
@@ -194,7 +193,7 @@ void RenderGraph::sort_cheap(Camera* camera, SortingMode sortingMode) {
 #endif
 }
 // TODO: correct this
-void RenderGraph::sort(Camera* camera, SortingMode sortingMode) {
+void Engine::priv::RenderGraph::sort(Camera* camera, SortingMode sortingMode) {
     if (!camera) {
         return;
     }
@@ -227,7 +226,7 @@ void RenderGraph::sort(Camera* camera, SortingMode sortingMode) {
     }
 #endif
 }
-void RenderGraph::clean(Entity inEntity) {
+void Engine::priv::RenderGraph::clean(Entity inEntity) {
     if (inEntity.null()) {
         return;
     }
@@ -249,42 +248,10 @@ void RenderGraph::clean(Entity inEntity) {
     m_InstancesTotal.clear();
     std::move(std::begin(kept_nodes_total), std::end(kept_nodes_total), std::back_inserter(m_InstancesTotal));
 }
-void RenderGraph::validate_model_instances_for_rendering(Camera* camera, Viewport* viewport) {
-    decimal global_distance_factor = ModelInstance::getGlobalDistanceFactor();
-    auto lambda = [&](std::vector<ModelInstance*>& inInstanceNodes, const glm_vec3& camPos) {
-        for (auto& modelInstancePtr : inInstanceNodes) {
-            auto& modelInstance    = *modelInstancePtr;
-            auto body              = modelInstance.getParent().getComponent<ComponentTransform>();
-            auto model             = modelInstance.getParent().getComponent<ComponentModel>();
-            bool is_valid_viewport = viewport ? PublicModelInstance::IsViewportValid(modelInstance, *viewport) : true;
-            if (is_valid_viewport) {
-                if (body) {
-                    if (modelInstance.isForceRendered()) {
-                        modelInstance.setPassedRenderCheck(modelInstance.isVisible());
-                    }else{
-                        float radius            = model->getRadius();
-                        glm_vec3 worldPosition  = body->getWorldPosition() + glm_vec3(modelInstance.getPosition());
-                        uint32_t sphereTest     = camera ? camera->sphereIntersectTest(worldPosition, radius) : 1; //per mesh instance radius instead?
-                        decimal comparison      = (decimal)radius * global_distance_factor;
-                        auto comparison2        = comparison * comparison;
-
-                        bool failedVisibleTest  = !modelInstance.isVisible();
-                        bool failedSphereTest   = (sphereTest == 0);
-                        bool failedDistanceTest = camera ? glm::distance2(worldPosition, camPos) > comparison2 : false;
-                        bool result             = !(failedVisibleTest || failedSphereTest || failedDistanceTest);
-                        modelInstance.setPassedRenderCheck(result);
-                    }
-                }else{
-                    modelInstance.setPassedRenderCheck(false);
-                }
-            }else{
-                modelInstance.setPassedRenderCheck(false);
-            }
-        }
-    };
-    lambda(m_InstancesTotal, camera ? camera->getPosition() : glm_vec3(0.0));
+void Engine::priv::RenderGraph::validate_model_instances_for_rendering(Camera* camera, Viewport* viewport) {
+    Engine::priv::Culling::cull(camera, viewport, m_InstancesTotal);
 }
-void RenderGraph::render(Engine::priv::RenderModule& renderer, Camera* camera, bool useDefaultShaders, SortingMode sortingMode) {
+void Engine::priv::RenderGraph::render(Engine::priv::RenderModule& renderer, Camera* camera, bool useDefaultShaders, SortingMode sortingMode) {
     auto shaderProgram = m_ShaderProgram.get<ShaderProgram>();
     if (useDefaultShaders) {
         renderer.bind(shaderProgram);
@@ -322,7 +289,7 @@ void RenderGraph::render(Engine::priv::RenderModule& renderer, Camera* camera, b
         }
     }
 }
-void RenderGraph::render_bruteforce(Engine::priv::RenderModule& renderer, Camera* camera, bool useDefaultShaders, SortingMode sortingMode) {
+void Engine::priv::RenderGraph::render_bruteforce(Engine::priv::RenderModule& renderer, Camera* camera, bool useDefaultShaders, SortingMode sortingMode) {
     auto shaderProgram = m_ShaderProgram.get<ShaderProgram>();
     if (useDefaultShaders) {
         renderer.bind(shaderProgram);
@@ -357,12 +324,9 @@ void RenderGraph::render_bruteforce(Engine::priv::RenderModule& renderer, Camera
         }
     }
 }
-void RenderGraph::render_shadow_map(Engine::priv::RenderModule& renderer, Camera* camera) {
-    //auto shaderProgram = m_ShaderProgram.get<ShaderProgram>();
+void Engine::priv::RenderGraph::render_shadow_map(Engine::priv::RenderModule& renderer, Camera* camera) {
     for (auto& materialNode : m_MaterialNodes) {
         if (materialNode.meshNodes.size() > 0) {
-            //auto material = materialNode.material.get<Material>();
-            //renderer.bind(material);
             for (auto& meshNode : materialNode.meshNodes) {
                 if (meshNode.instanceNodes.size() > 0) {
                     auto mesh = meshNode.mesh.get<Mesh>();
@@ -377,18 +341,13 @@ void RenderGraph::render_shadow_map(Engine::priv::RenderModule& renderer, Camera
                     renderer.unbind(mesh);
                 }
             }
-            //renderer.unbind(material);
         }
     }
 }
-void RenderGraph::render_bruteforce_shadow_map(Engine::priv::RenderModule& renderer, Camera* camera) {
+void Engine::priv::RenderGraph::render_bruteforce_shadow_map(Engine::priv::RenderModule& renderer, Camera* camera) {
     for (auto& modelInstance : m_InstancesTotal) {
         auto mesh = modelInstance->getMesh().get<Mesh>();
-        //auto material = modelInstance->getMaterial().get<Material>();
-        //auto transform = modelInstance->getParent().getComponent<ComponentTransform>();
-        //auto renderingMatrix = transform->getWorldMatrixRendering();
         if (modelInstance->hasPassedRenderCheck()) {
-            //renderer.bind(material);
             renderer.bind(mesh);
             renderer.bind(modelInstance);
 
@@ -396,8 +355,6 @@ void RenderGraph::render_bruteforce_shadow_map(Engine::priv::RenderModule& rende
 
             renderer.unbind(modelInstance);
             renderer.unbind(mesh);
-            //renderer.unbind(material);
         }
-        // protect against any custom changes by restoring to the regular shader and material
     }
 }

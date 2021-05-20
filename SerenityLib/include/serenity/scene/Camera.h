@@ -64,9 +64,6 @@ class Camera: public Entity {
         [[nodiscard]] glm::mat4 getViewProjection() const noexcept;
         [[nodiscard]] glm::mat4 getViewProjectionInverse() const noexcept;
 
-        [[nodiscard]] uint32_t sphereIntersectTest(const glm_vec3& worldPos, float radius) const noexcept;
-        [[nodiscard]] uint32_t pointIntersectTest(const glm_vec3& worldPos) const noexcept;
-
         [[nodiscard]] bool rayIntersectSphere(Entity) const noexcept;
 };
 #endif

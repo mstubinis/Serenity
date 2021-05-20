@@ -175,12 +175,6 @@ decimal Camera::getDistanceSquared(Entity otherEntity, const glm_vec3& thisPosit
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition, const glm_vec3& thisPosition) const noexcept {
     return glm::distance2(otherPosition, thisPosition);
 }
-uint32_t Camera::sphereIntersectTest(const glm_vec3& otherWorldPosition, float otherRadius) const noexcept {
-    return getComponent<ComponentCamera>()->sphereIntersectTest(otherWorldPosition, otherRadius);
-}
-uint32_t Camera::pointIntersectTest(const glm_vec3& otherWorldPosition) const noexcept {
-    return getComponent<ComponentCamera>()->pointIntersectTest(otherWorldPosition);
-}
 bool Camera::rayIntersectSphere(Entity entity) const noexcept {
     auto entityTransform = entity.getComponent<ComponentTransform>();
     auto entityModel     = entity.getComponent<ComponentModel>();

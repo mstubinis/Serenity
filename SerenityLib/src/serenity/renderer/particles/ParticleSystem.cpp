@@ -4,6 +4,7 @@
 #include <serenity/renderer/particles/Particle.h>
 #include <serenity/renderer/particles/ParticleEmissionProperties.h>
 #include <serenity/renderer/pipelines/IRenderingPipeline.h>
+#include <serenity/renderer/culling/SphereIntersectTest.h>
 
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/resources/material/Material.h>
@@ -157,7 +158,7 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
     auto lamda_culler_particle = [&](Particle& particle, size_t j, size_t k) {
         float radius           = planeMesh.getRadius() * Math::Max(particle.m_Scale.x, particle.m_Scale.y);
         const glm::vec3& pos   = particle.position();
-        const uint sphereTest  = camera.sphereIntersectTest(pos, radius);
+        const int sphereTest   = Engine::priv::Culling::sphereIntersectTest(pos, radius, camera);
         float comparison       = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
         if (particle.isActive() && (glm::distance2(pos, camPos) <= (comparison * comparison)) && sphereTest > 0) {
             //its just pretty expensive in general...
@@ -206,27 +207,11 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
     //sorting
     auto lambda = [&camPos](const ParticleDOD& l, const ParticleDOD& r) {
 #if defined(ENGINE_PARTICLES_HALF_SIZE)
-        glm::vec3 lPos(
-            Engine::Math::Float32From16(l.PositionX), 
-            Engine::Math::Float32From16(l.PositionY),
-            Engine::Math::Float32From16(l.PositionZ)
-        );
-        glm::vec3 rPos(
-            Engine::Math::Float32From16(r.PositionX),
-            Engine::Math::Float32From16(r.PositionY),
-            Engine::Math::Float32From16(r.PositionZ)
-        );
+        glm::vec3 lPos{ Math::Float32From16(l.PositionX), Math::Float32From16(l.PositionY), Math::Float32From16(l.PositionZ) };
+        glm::vec3 rPos{ Math::Float32From16(r.PositionX), Math::Float32From16(r.PositionY), Math::Float32From16(r.PositionZ) };
 #else
-        glm::vec3 lPos(
-            l.PositionX,
-            l.PositionY,
-            l.PositionZ
-        );
-        glm::vec3 rPos(
-            r.PositionX,
-            r.PositionY,
-            r.PositionZ
-        );
+        glm::vec3 lPos(l.PositionX, l.PositionY, l.PositionZ);
+        glm::vec3 rPos(r.PositionX, r.PositionY, r.PositionZ);
 #endif
         return glm::length2(lPos) > glm::length2(rPos);
     };

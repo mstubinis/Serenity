@@ -330,6 +330,12 @@
     <Filter Include="Source Files\Engine\Core\Editor\Imgui">
       <UniqueIdentifier>{5cfe8af1-f726-4125-9093-bf52400d7649}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\culling">
+      <UniqueIdentifier>{5d74ee84-fa53-49f3-a6eb-c0d754af5f58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\culling">
+      <UniqueIdentifier>{1fb277f3-60f2-4f12-82f9-008161d9e224}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp">
@@ -925,6 +931,18 @@
     </ClCompile>
     <ClCompile Include="src\serenity\ecs\ECSSystemPool.cpp">
       <Filter>Source Files\Engine\Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\culling\Culling.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\culling</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\culling\SphereIntersectTest.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\culling</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\culling\PointIntersectTest.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\culling</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\culling\DistanceTest.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\culling</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1722,6 +1740,18 @@
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\systems\SystemSyncTransformToRigid.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\culling\Culling.h">
+      <Filter>Header Files\Engine\Core\Renderer\culling</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\culling\SphereIntersectTest.h">
+      <Filter>Header Files\Engine\Core\Renderer\culling</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\culling\PointIntersectTest.h">
+      <Filter>Header Files\Engine\Core\Renderer\culling</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\culling\DistanceTest.h">
+      <Filter>Header Files\Engine\Core\Renderer\culling</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -62,7 +62,7 @@ constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const En
 
 bool priv::PublicModelInstance::IsViewportValid(const ModelInstance& modelInstance, const Viewport& viewport) {
     const auto flags = modelInstance.getViewportFlags();
-    return (flags & (1 << viewport.getId()) || flags == 0);
+    return flags == 0 || flags & (1 << viewport.getId());
 }
 
 ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle shaderProgram)
