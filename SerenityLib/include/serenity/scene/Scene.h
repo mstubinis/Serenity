@@ -203,12 +203,12 @@ namespace Engine::priv {
         static void                       RenderParticles(RenderModule&, Scene&, Viewport&, Camera&, Handle program);
 
 
-        static void                       RenderGeometryOpaqueShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
-        static void                       RenderGeometryTransparentShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
-        static void                       RenderGeometryTransparentTrianglesSortedShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
-        static void                       RenderForwardOpaqueShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
-        static void                       RenderForwardTransparentShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
-        static void                       RenderForwardTransparentTrianglesSortedShadowMap(RenderModule&, Scene&, Viewport*, Camera*);
+        static void                       RenderGeometryOpaqueShadowMap(RenderModule&, Scene&, Viewport*, const glm::mat4& viewProjMatrix);
+        static void                       RenderGeometryTransparentShadowMap(RenderModule&, Scene&, Viewport*, const glm::mat4& viewProjMatrix);
+        static void                       RenderGeometryTransparentTrianglesSortedShadowMap(RenderModule&, Scene&, Viewport*, const glm::mat4& viewProjMatrix);
+        static void                       RenderForwardOpaqueShadowMap(RenderModule&, Scene&, Viewport*, const glm::mat4& viewProjMatrix);
+        static void                       RenderForwardTransparentShadowMap(RenderModule&, Scene&, Viewport*, const glm::mat4& viewProjMatrix);
+        static void                       RenderForwardTransparentTrianglesSortedShadowMap(RenderModule&, Scene&, Viewport*, const glm::mat4& viewProjMatrix);
 
 
 

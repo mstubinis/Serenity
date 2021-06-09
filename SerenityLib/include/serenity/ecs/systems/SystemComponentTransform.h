@@ -8,6 +8,7 @@ class  ComponentTransform;
 #include <cstdint>
 #include <serenity/dependencies/glm.h>
 
+//computes initial local and world matrices from transform component's local position, rotation, and scale
 class SystemComponentTransform final : public SystemCRTP<SystemComponentTransform, ComponentTransform> {
     friend class  ComponentTransform;
     public:

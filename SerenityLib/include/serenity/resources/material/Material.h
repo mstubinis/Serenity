@@ -36,19 +36,12 @@ class Material final : public Resource<Material> {
     friend class  Engine::priv::MaterialLoader;
     friend class  Engine::priv::RenderModule;
     friend class  Engine::priv::IRenderingPipeline;
-
-    using bind_fp    = void(*)(Material*);
-  //using unbind_fp  = void(*)(Material*);
     using MaterialID = uint16_t;
-
     public:
         static Handle Checkers, WhiteShadeless; //loaded in renderer
         static std::vector<glm::vec4>     m_MaterialProperities;
     private:
         std::vector<MaterialComponent>    m_Components;
-        bind_fp                           m_CustomBindFunctor   = [](Material*) {};
-      //unbind_fp                         m_CustomUnbindFunctor = [](Material*) {};
-
         Engine::color_vector_4            m_F0Color             = Engine::color_vector_4(10_uc, 10_uc, 10_uc, 255_uc); //basically a uint32_t
         MaterialID                        m_ID                  = 0U; //uint16_t
         DiffuseModel                      m_DiffuseModel        = DiffuseModel::Lambert; //uint8_t
@@ -92,9 +85,6 @@ class Material final : public Resource<Material> {
         Material& operator=(Material&&) noexcept;
         ~Material();
 
-        inline void setCustomBindFunctor(const bind_fp& functor) noexcept { m_CustomBindFunctor = functor; }
-        inline void setCustomBindFunctor(bind_fp&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
-
         inline const std::vector<MaterialComponent>& getComponents() const noexcept { return m_Components; }
         [[nodiscard]] inline MaterialComponent& getComponent(uint32_t index) { return m_Components[index]; }
 
@@ -112,15 +102,24 @@ class Material final : public Resource<Material> {
 
         [[nodiscard]] inline bool getShadeless() const noexcept { return m_Shadeless; }
         [[nodiscard]] inline const Engine::color_vector_4& getF0() const noexcept { return m_F0Color; }
-        [[nodiscard]] inline uint8_t getGlow() const noexcept { return m_BaseGlow; }
         [[nodiscard]] inline MaterialID getID() const noexcept { return m_ID; }
         [[nodiscard]] inline DiffuseModel getDiffuseModel() const noexcept { return m_DiffuseModel; }
         [[nodiscard]] inline SpecularModel getSpecularModel() const noexcept { return m_SpecularModel; }
+        [[nodiscard]] inline uint8_t getGlow() const noexcept { return m_BaseGlow; }
         [[nodiscard]] inline uint8_t getMetalness() const noexcept { return m_BaseMetalness; }
         [[nodiscard]] inline uint8_t getSmoothness() const noexcept { return m_BaseSmoothness; }
         [[nodiscard]] inline uint8_t getAO() const noexcept { return m_BaseAO; }
         [[nodiscard]] inline uint8_t getAlpha() const noexcept { return m_BaseAlpha; }
         
+
+        [[nodiscard]] inline float getGlowFloat() const noexcept { return m_BaseGlow * (1.0f / 255.0f); }
+        [[nodiscard]] inline float getMetalnessFloat() const noexcept { return m_BaseMetalness * (1.0f / 255.0f); }
+        [[nodiscard]] inline float getSmoothnessFloat() const noexcept { return m_BaseSmoothness * (1.0f / 255.0f); }
+        [[nodiscard]] inline float getAOFloat() const noexcept { return m_BaseAO * (1.0f / 255.0f); }
+        [[nodiscard]] inline float getAlphaFloat() const noexcept { return m_BaseAlpha * (1.0f / 255.0f); }
+        [[nodiscard]] inline float getDiffuseModelFloat() const noexcept { return static_cast<float>(m_DiffuseModel); }
+        [[nodiscard]] inline float getSpecularModelFloat () const noexcept { return static_cast<float>(m_SpecularModel); }
+
         void setF0Color(uint8_t r, uint8_t g, uint8_t b) noexcept;
         inline void setF0Color(const Engine::color_vector_4& f0Color) noexcept { Material::setF0Color(f0Color.rc(), f0Color.gc(), f0Color.bc()); }
 

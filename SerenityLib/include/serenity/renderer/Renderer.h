@@ -32,7 +32,7 @@ namespace Engine::priv {
 
 /*
 extern "C" {
-    __declspec(dllexport) unsigned long NvOptimusEnablement = 1; //enable dedicated graphics for nvidia
+    __declspec(dllexport) unsigned long NvOptimusEnablement = 1;        //enable dedicated graphics for nvidia
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1; //enable dedicated graphics for amd radeon
 }
 */
@@ -131,6 +131,10 @@ namespace Engine::Renderer {
     bool cullFace(GLenum state);
     bool setDepthFunc(GLenum func);
     bool setViewport(float x, float y, float width, float height);
+
+    template<class X, class Y, class W, class H>
+    inline bool setViewport(X x, Y y, W w, H h) noexcept { return setViewport(static_cast<float>(x), static_cast<float>(y), static_cast<float>(w), static_cast<float>(h)); }
+
 
     /*
     func - sets the stencil test function that determines whether a fragment passes or is discarded. This test function is applied to the stored stencil value

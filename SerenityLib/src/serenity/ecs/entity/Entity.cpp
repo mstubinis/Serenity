@@ -124,7 +124,7 @@ bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef
     return false;
 }
 bool Entity::removeComponent(std::string_view componentClassName) {
-    if (componentClassName == "ComponentBody") {
+    if (componentClassName == "ComponentTransform") {
         return removeComponent<ComponentTransform>();
     }else if (componentClassName == "ComponentRigidBody") {
         return removeComponent<ComponentRigidBody>();
@@ -151,7 +151,7 @@ luabridge::LuaRef Entity::getComponent(std::string_view componentClassName) {
     lua_State* L            = Engine::priv::getLUABinder().getState()->getState();
     std::string global_name = toString() + ":" + std::string{ componentClassName };
     auto* global_name_cstr  = global_name.c_str();
-    if (componentClassName == "ComponentBody") {
+    if (componentClassName == "ComponentTransform") {
         return PublicEntity::GetComponent<ComponentTransform>(L, *this, global_name_cstr);
     }else if (componentClassName == "ComponentRigidBody") {
         return PublicEntity::GetComponent<ComponentRigidBody>(L, *this, global_name_cstr);

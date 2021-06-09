@@ -3,22 +3,19 @@
 #include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/scene/Scene.h>
 
-SpotLight::SpotLight(Scene* scene, const glm_vec3& pos, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees)
-    : PointLight{ scene, LightType::Spot, pos }
+SpotLight::SpotLight(Scene* scene, const glm_vec3& position, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees)
+    : PointLight{ scene, LightType::Spot, position }
 {
     setCutoff(innerCutoffInDegrees);
     setCutoffOuter(outerCutoffInDegrees);
-
     setDirection(direction);
 }
-SpotLight::~SpotLight() {
-}
-void SpotLight::setDirection(decimal xDir, decimal yDir, decimal zDir) noexcept {
-    auto body = getComponent<ComponentTransform>();
-    if (body) {
-        body->alignTo(xDir, yDir, zDir);
+void SpotLight::setDirection(float xDir, float yDir, float zDir) noexcept {
+    auto transform = getComponent<ComponentTransform>();
+    if (transform) {
+        transform->alignTo(xDir, yDir, zDir);
     }
 }
-void SpotLight::setDirection(const glm_vec3& direction) noexcept {
+void SpotLight::setDirection(const glm::vec3& direction) noexcept {
     setDirection(direction.x, direction.y, direction.z);
 }

@@ -103,11 +103,12 @@ namespace Engine::priv {
             inline void setCustomUnbindFunctor(const UnbindFP& functor) noexcept { m_CustomUnbindFunctor = functor; }
             inline void setCustomBindFunctor(BindFP&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
             inline void setCustomUnbindFunctor(UnbindFP&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
+
             inline void bind() const noexcept { m_CustomBindFunctor(this); }
             inline void unbind() const noexcept { m_CustomUnbindFunctor(this); }
-            inline FramebufferObjectAttatchment* getAttatchement(uint32_t index) const noexcept { return m_Attatchments.at(index).get(); }
+            inline FramebufferObjectAttatchment* getAttatchement(const uint32_t index) const noexcept { return m_Attatchments.at(index).get(); }
 
-            void resize(uint32_t width, uint32_t height);
+            void resize(const uint32_t width, const uint32_t height);
 
             template<class ... ARGS>
             FramebufferTexture* attatchTexture(FramebufferAttatchment attatchment, ARGS&&... args) {

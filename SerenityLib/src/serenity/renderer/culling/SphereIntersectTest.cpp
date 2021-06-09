@@ -1,7 +1,7 @@
 #include <serenity/renderer/culling/SphereIntersectTest.h>
 #include <serenity/ecs/components/ComponentCamera.h>
 #include <serenity/scene/Camera.h>
-
+#include <serenity/math/Engine_Math.h>
 
 int Engine::priv::Culling::SphereIntersectTest::sphereIntersectTest(const glm_vec3& position, const float radius, const std::array<glm::vec4, 6>& frustumPlanes) {
     int res         = 1; // inside the viewing frustum
@@ -37,4 +37,15 @@ int Engine::priv::Culling::sphereIntersectTest(const glm_vec3& position, const f
 }
 int Engine::priv::Culling::sphereIntersectTest(const glm_vec3& position, const float radius, const ComponentCamera& componentCamera) {
     return Engine::priv::Culling::SphereIntersectTest::sphereIntersectTest(position, radius, componentCamera);
+}
+
+
+int Engine::priv::Culling::sphereIntersectTest(const glm_vec3& position, const float radius, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+    glm::mat4 viewProjMatrix = projectionMatrix * viewMatrix;
+    return Engine::priv::Culling::sphereIntersectTest(position, radius, viewProjMatrix);
+}
+int Engine::priv::Culling::sphereIntersectTest(const glm_vec3& position, const float radius, const glm::mat4& viewProjectionMatrix) {
+    std::array<glm::vec4, 6> planes;
+    Engine::Math::extractViewFrustumPlanesHartmannGribbs(viewProjectionMatrix, planes);
+    return Engine::priv::Culling::sphereIntersectTest(position, radius, planes);
 }

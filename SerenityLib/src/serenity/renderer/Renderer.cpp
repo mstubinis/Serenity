@@ -145,16 +145,7 @@ bool RenderModule::unbind(Mesh* mesh) const {
     return true;
 }
 bool RenderModule::bind(Material* material) const {
-    bool res = m_Pipeline->bind(material);
-    if (res) {
-        if (material->isLoaded()) {
-            material->m_CustomBindFunctor(material);
-        }else{
-            auto* material = Material::Checkers.get<Material>();
-            material->m_CustomBindFunctor(material);
-        }
-    }
-    return res;
+    return m_Pipeline->bind(material->isLoaded() ? material : Material::Checkers.get<Material>());
 }
 bool RenderModule::unbind(Material* material) const {
     return m_Pipeline->unbind(material);

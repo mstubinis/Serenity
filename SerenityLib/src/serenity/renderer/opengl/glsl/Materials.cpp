@@ -400,12 +400,17 @@ vec4 CalculateDiffuseLOD(Layer inLayer, vec4 canvas, vec4 objectColor, vec2 inUV
 vec3 CalculateNormals(Layer inLayer, vec3 objectNormals, vec2 inUVs) {
     vec3 outNormals = objectNormals;
     if (inLayer.data1.y > 0.9) {
-        outNormals = CalcBumpedNormal(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture);
+        if (inLayer.data1.z >= 0.5) {
+            outNormals = CalcBumpedNormal(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, texture2D(inLayer.mask, inUVs).r);
+        }else{
+            outNormals = CalcBumpedNormal(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture);
+        }
     }else if (inLayer.data1.y > 0.4) {
-        outNormals = CalcBumpedNormalCompressed(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture);
-    }
-    if (inLayer.data1.z >= 0.5) {
-        outNormals *= texture2D(inLayer.mask, inUVs).r;
+        if (inLayer.data1.z >= 0.5) {
+            outNormals = CalcBumpedNormalCompressed(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, texture2D(inLayer.mask, inUVs).r);
+        }else{
+            outNormals = CalcBumpedNormalCompressed(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture);
+        }
     }
     outNormals *= inLayer.data2.xyz;
     outNormals *= inLayer.data2.w;
@@ -414,12 +419,17 @@ vec3 CalculateNormals(Layer inLayer, vec3 objectNormals, vec2 inUVs) {
 vec3 CalculateNormalsLOD(Layer inLayer, vec3 objectNormals, vec2 inUVs, float lod) {
     vec3 outNormals = objectNormals;
     if (inLayer.data1.y > 0.9) {
-        outNormals = CalcBumpedNormalLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod);
+        if (inLayer.data1.z >= 0.5) {
+            outNormals = CalcBumpedNormalLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod, texture2D(inLayer.mask, inUVs).r);
+        }else{
+            outNormals = CalcBumpedNormalLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod);
+        }
     }else if (inLayer.data1.y > 0.4) {
-        outNormals = CalcBumpedNormalCompressedLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod);
-    }
-    if (inLayer.data1.z >= 0.5) {
-        outNormals *= texture2D(inLayer.mask, inUVs).r;
+        if (inLayer.data1.z >= 0.5) {
+            outNormals = CalcBumpedNormalCompressedLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod, texture2D(inLayer.mask, inUVs).r);
+        }else{
+            outNormals = CalcBumpedNormalCompressedLOD(inUVs * inLayer.uvModifications.zw + inLayer.uvModifications.xy, inLayer.texture, lod);
+        }
     }
     outNormals *= inLayer.data2.xyz;
     outNormals *= inLayer.data2.w;

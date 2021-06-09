@@ -37,10 +37,8 @@ class Entity {
 
         inline constexpr operator bool() const noexcept { return !null(); }
         inline constexpr bool null() const noexcept { return (m_ID == 0 && m_SceneID == 0 && m_VersionID == 0); }
-        inline constexpr bool operator<(Entity other) const noexcept { return m_ID < other.m_ID; }
-        inline constexpr bool operator>(Entity other) const noexcept { return m_ID > other.m_ID; }
-        inline constexpr bool operator<=(Entity other) const noexcept { return m_ID <= other.m_ID; }
-        inline constexpr bool operator>=(Entity other) const noexcept { return m_ID >= other.m_ID; }
+
+        inline constexpr auto operator<=>(Entity other) const noexcept { return m_ID <=> other.m_ID; }
         inline constexpr bool operator==(Entity other) const noexcept { return (m_ID == other.m_ID && m_SceneID == other.m_SceneID && m_VersionID == other.m_VersionID); }
         inline constexpr bool operator!=(Entity other) const noexcept { return !Entity::operator==(other); }
 
@@ -67,16 +65,14 @@ class Entity {
         void removeChild(Entity child) const noexcept;
         //void removeAllChildren() const noexcept;
 
-        template<class T, class ... ARGS>
+        template<class COMPONENT, class ... ARGS>
         bool addComponent(ARGS&&... args) noexcept {
-            return Engine::priv::PublicEntity::GetECS(*this)->addComponent<T>(*this, std::forward<ARGS>(args)...);
+            return Engine::priv::PublicEntity::GetECS(*this)->addComponent<COMPONENT>(*this, std::forward<ARGS>(args)...);
         }
+        template<class COMPONENT> bool removeComponent() noexcept;
+        template<class COMPONENT> [[nodiscard]] Engine::view_ptr<COMPONENT> getComponent() const noexcept;
 
-        template<class T> bool removeComponent() noexcept;
-        template<class T> [[nodiscard]] Engine::view_ptr<T> getComponent() const noexcept;
-
-        template<class ... Types>
-        [[nodiscard]] std::tuple<Types*...> getComponents() const noexcept {
+        template<class ... Types> [[nodiscard]] std::tuple<Types*...> getComponents() const noexcept {
             return Engine::priv::PublicEntity::GetECS(*this)->getComponents<Types...>(*this);
         }
 
@@ -90,9 +86,7 @@ namespace std {
     struct hash<Entity> {
         std::size_t operator()(const Entity& entity) const {
             using std::hash;
-            return ((hash<uint32_t>()(entity.id())
-                ^ (hash<uint32_t>()(entity.sceneID()) << 1)) >> 1)
-                ^ (hash<uint32_t>()(entity.versionID()) << 1);
+            return ((hash<uint32_t>()(entity.id()) ^ (hash<uint32_t>()(entity.sceneID()) << 1)) >> 1) ^ (hash<uint32_t>()(entity.versionID()) << 1);
         }
     };
 };
@@ -102,7 +96,7 @@ namespace Engine::priv {
     struct PublicEntity final {
         static Engine::view_ptr<Engine::priv::ECS> GetECS(Entity entity);
 
-        template<class T> [[nodiscard]] static luabridge::LuaRef GetComponent(lua_State* L, Entity entity, const char* globalName);
+        template<class COMPONENT> [[nodiscard]] static luabridge::LuaRef GetComponent(lua_State* L, Entity entity, const char* globalName);
     };
 };
 

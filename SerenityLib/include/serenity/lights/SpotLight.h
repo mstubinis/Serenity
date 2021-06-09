@@ -27,13 +27,13 @@ class SpotLight : public PointLight {
             float innerCutoffInDegrees = SPOT_LIGHT_DEFAULT_CUTOFF,
             float outerCutoffInDegrees = SPOT_LIGHT_DEFAULT_OUTER_CUTOFF
         );
-        virtual ~SpotLight();
+        virtual ~SpotLight() {}
 
         [[nodiscard]] inline constexpr float getCutoff() const noexcept { return m_Cutoff; }
         [[nodiscard]] inline constexpr float getCutoffOuter() const noexcept { return m_OuterCutoff; }
 
-        void setDirection(decimal xDir, decimal yDir, decimal zDir) noexcept;
-        void setDirection(const glm_vec3& direction) noexcept;
+        void setDirection(float xDir, float yDir, float zDir) noexcept;
+        void setDirection(const glm::vec3& direction) noexcept;
 
         void setCutoffRadians(float cutoffInRadians) noexcept { m_Cutoff = glm::cos(cutoffInRadians); }
         void setCutoffOuterRadians(float outerCutoffInRadians) noexcept { m_OuterCutoff = glm::cos(outerCutoffInRadians); }

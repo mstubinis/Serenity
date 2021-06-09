@@ -158,9 +158,29 @@ vec3 CalcBumpedNormalLOD(vec2 inUVs, sampler2D inTexture, in float lod){
     return normalize(TBN * t_);
 }
 vec3 CalcBumpedNormalCompressedLOD(vec2 inUVs, sampler2D inTexture, in float lod){
-    vec2 t_ = (texture2DLod(inTexture, inUVs, lod).yx) * 2.0 - 1.0;
+    vec2 t_ = (texture2DLod(inTexture, inUVs, lod).yx) * 2.0 - .0;
     float z_ = sqrt(1.0 - t_.x * t_.x - t_.y * t_.y);
     vec3 normal = vec3(t_.xy, z_);
+    return normalize(TBN * normal);
+}
+vec3 CalcBumpedNormal(vec2 inUVs, sampler2D inTexture, float scale){
+    vec3 t_ = mix(vec3(0.0, 0.0, 1.0), (texture2D(inTexture, inUVs).xyz) * 2.0 - 1.0, scale);
+    return normalize(TBN * t_);
+}
+vec3 CalcBumpedNormalCompressed(vec2 inUVs, sampler2D inTexture, float scale){
+    vec2 t_ = (texture2D(inTexture, inUVs).yx) * 2.0 - 1.0;
+    float z_ = sqrt(1.0 - t_.x * t_.x - t_.y * t_.y);
+    vec3 normal = mix(vec3(0.0, 0.0, 1.0), vec3(t_.xy, z_), scale);
+    return normalize(TBN * normal);
+}
+vec3 CalcBumpedNormalLOD(vec2 inUVs, sampler2D inTexture, in float lod, float scale){
+    vec3 t_ = mix(vec3(0.0, 0.0, 1.0), (texture2DLod(inTexture, inUVs, lod).xyz) * 2.0 - 1.0, scale);
+    return normalize(TBN * t_);
+}
+vec3 CalcBumpedNormalCompressedLOD(vec2 inUVs, sampler2D inTexture, in float lod, float scale){
+    vec2 t_ = (texture2DLod(inTexture, inUVs, lod).yx) * 2.0 - 1.0;
+    float z_ = sqrt(1.0 - t_.x * t_.x - t_.y * t_.y);
+    vec3 normal = mix(vec3(0.0, 0.0, 1.0), vec3(t_.xy, z_), scale);
     return normalize(TBN * normal);
 }
 )"

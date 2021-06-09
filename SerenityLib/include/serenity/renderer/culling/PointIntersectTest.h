@@ -26,6 +26,12 @@ namespace Engine::priv::Culling {
     int pointIntersectTest(const glm_vec3& position, const ComponentCamera&);
     //returns 0 if outside the frustum, 1 if inside the frustum
     int pointIntersectTest(const glm_vec3& position, const Camera* const);
+
+
+    //returns 0 if outside the frustum, 1 if inside the frustum, and 2 if intersecting the frustum
+    int pointIntersectTest(const glm_vec3& position, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    //returns 0 if outside the frustum, 1 if inside the frustum, and 2 if intersecting the frustum
+    int pointIntersectTest(const glm_vec3& position, const glm::mat4& viewProjectionMatrix);
 }
 
 #endif

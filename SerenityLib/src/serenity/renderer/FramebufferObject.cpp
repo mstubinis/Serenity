@@ -70,7 +70,7 @@ void RenderbufferObject::unbind(){
 
 namespace Engine::priv {
     struct FramebufferObjectDefaultBindFunctor final { void operator()(const FramebufferObject* fbo) const {
-        Engine::Renderer::setViewport(0.0f, 0.0f, (float)fbo->width(), (float)fbo->height());
+        Engine::Renderer::setViewport(0.0f, 0.0f, fbo->width(), fbo->height());
         fbo->m_CurrentFBOIndex = (fbo->m_CurrentFBOIndex + 1) % fbo->m_FBOs.size(); //swap buffers
         Engine::Renderer::bindFBO(*fbo);
         for (const auto& [idx, attatchment] : fbo->attatchments()) {
@@ -83,7 +83,7 @@ namespace Engine::priv {
         }
         Engine::Renderer::unbindFBO();
         const auto winSize = Resources::getWindowSize();
-        Engine::Renderer::setViewport(0.0f, 0.0f, (float)winSize.x, (float)winSize.y);
+        Engine::Renderer::setViewport(0.0f, 0.0f, winSize.x, winSize.y);
     }};
 };
 
@@ -105,7 +105,7 @@ void FramebufferObject::init(uint32_t width, uint32_t height, float divisor, uin
     m_Divisor           = divisor;
     m_FramebufferWidth  = (uint32_t)((float)width * m_Divisor);
     m_FramebufferHeight = (uint32_t)((float)height * m_Divisor);
-    m_FBOs.resize(swapBufferCount, GLuint(0));
+    m_FBOs.resize(swapBufferCount, 0);
     for (auto& fbo : m_FBOs) {
         glGenFramebuffers(1, &fbo);
     }
@@ -125,11 +125,12 @@ void FramebufferObject::cleanup() {
     for (size_t i = 0; i < m_FBOs.size(); ++i) {
         glDeleteFramebuffers(1, &m_FBOs[i]);
     }
+    m_Attatchments.clear();
 }
-void FramebufferObject::resize(uint32_t w, uint32_t h){
+void FramebufferObject::resize(const uint32_t w, const uint32_t h) {
     m_FramebufferWidth  = (uint32_t)((float)w * m_Divisor);
     m_FramebufferHeight = (uint32_t)((float)h * m_Divisor);
-    Engine::Renderer::setViewport(0.0f, 0.0f, (float)m_FramebufferWidth, (float)m_FramebufferHeight);
+    Engine::Renderer::setViewport(0.0f, 0.0f, m_FramebufferWidth, m_FramebufferHeight);
     for (const auto fbo : m_FBOs) {
         Engine::Renderer::bindFBO(fbo);
         for (auto& attatchment : m_Attatchments) {
@@ -139,7 +140,7 @@ void FramebufferObject::resize(uint32_t w, uint32_t h){
 }
 
 
-constexpr const char* debugFramebufferStatusAsStr(GLenum fbStatus) {
+constexpr const char* debugFramebufferStatusAsStr(const GLenum fbStatus) {
     switch (fbStatus) {
         case GL_FRAMEBUFFER_UNDEFINED: {
             return "UNDEFINED";
@@ -165,7 +166,7 @@ constexpr const char* debugFramebufferStatusAsStr(GLenum fbStatus) {
 bool FramebufferObject::checkStatus() {
     for (const auto fbo : m_FBOs) {
         Engine::Renderer::bindFBO(fbo);
-        GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        const GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
             ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() error - fbo: " << fbo << ": " << debugFramebufferStatusAsStr(framebufferStatus))
             return false;

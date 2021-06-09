@@ -42,6 +42,23 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace Engine::Renderer;
 
+constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](const Material& m) {
+    const auto& components = m.getComponents();
+    size_t numComponents   = components.size();
+    size_t textureUnit     = 0;
+
+    for (size_t i = 0; i < numComponents; ++i) {
+        const auto& component = components[i];
+        component.bind(i, textureUnit);
+    }
+    Engine::Renderer::sendUniform1Safe("numComponents", (int)numComponents);
+    Engine::Renderer::sendUniform1Safe("Shadeless", (int)m.getShadeless());
+    Engine::Renderer::sendUniform4Safe("Material_F0AndID", m.getF0().r(), m.getF0().g(), m.getF0().b(), (float)m.getID());
+    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne", m.getGlowFloat(), m.getAOFloat(), m.getMetalnessFloat(), m.getSmoothnessFloat());
+    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", m.getAlphaFloat(), m.getDiffuseModelFloat(), m.getSpecularModelFloat(), 0.0f);
+};
+
+
 #ifndef ENGINE_PRODUCTION
 constexpr const char* getDebugMsgSourceStr(GLenum src) {
     switch (src) {
@@ -110,12 +127,12 @@ void opengl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsize
 #endif 
 
 constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
-    glm::mat4{ 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
-    glm::mat4{ 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
-    glm::mat4{ 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
-    glm::mat4{ 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
-    glm::mat4{ 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
-    glm::mat4{ -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f },
+    glm::mat4{  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+    glm::mat4{  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+    glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+    glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+    glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+    glm::mat4{ -1.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
 };
 
 struct ShaderEnum final { enum Shader : uint32_t {
@@ -185,7 +202,7 @@ DeferredPipeline::~DeferredPipeline() {
     //TODO: add cleanup() from ssao / smaa here?
 }
 void DeferredPipeline::internal_gl_scissor_reset() noexcept {
-    auto winSize          = Resources::getWindowSize();
+    auto winSize          = Engine::Resources::getWindowSize();
     m_CurrentScissorState = glm::vec4(-1.0f);
     m_CurrentScissorDepth = std::numeric_limits<float>().min();
     glScissor(0, 0, winSize.x, winSize.y);
@@ -201,7 +218,7 @@ void DeferredPipeline::internal_gl_scissor(const glm::vec4& scissor, float depth
 }
 void DeferredPipeline::init() {
     const auto window_size = Engine::Resources::getWindowSize();
-    m_2DProjectionMatrix   = glm::ortho(0.0f, (float)window_size.x, 0.0f, (float)window_size.y, 0.005f, 3000.0f);
+    m_2DProjectionMatrix   = glm::ortho(0.0f, (float)window_size.x, 0.0f, (float)window_size.y, 0.005f, 99999999.0f);
 
     float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     m_InternalShaders.resize(ShaderEnum::_TOTAL, Handle{});
@@ -241,11 +258,6 @@ void DeferredPipeline::init() {
     auto emplaceShader = [](uint32_t index, const std::string& str, std::vector<Handle>& collection, ShaderType type) {
         collection[index] = Engine::Resources::addResource<Shader>(str, type, false);
     };
-
-    //auto add_shader_file_job = [this, &emplaceShader](uint32_t idx, const std::string& shaderCode, ShaderType shaderType) {
-    //    priv::threading::addJob([this, &emplaceShader]() {emplaceShader(idx, shaderCode, m_InternalShaders, shaderType); });
-    //};
-
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(1, EShaders::decal_frag, m_InternalShaders, ShaderType::Fragment); });
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(2, EShaders::fullscreen_quad_vertex, m_InternalShaders, ShaderType::Vertex); });
@@ -387,15 +399,18 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
     fbo.bind();
 
     //make these global / constexpr in the renderer class?
-    glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f);
+    const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f);
+    std::vector<glm::mat4> captureViews;
+    captureViews.reserve(CAPTURE_VIEWS.size());
+    for (uint32_t i = 0; i < CAPTURE_VIEWS.size(); ++i) {
+        captureViews.emplace_back(captureProjection * CAPTURE_VIEWS[i]);
+    }
 
     m_Renderer.bind(covoludeShaderProgram.get<ShaderProgram>());
-
     Engine::Renderer::sendTexture("cubemap", cubemap.address(), 0, GL_TEXTURE_CUBE_MAP);
-    Engine::Renderer::setViewport(0.0f, 0.0f, (float)size, (float)size);
-    for (uint32_t i = 0; i < CAPTURE_VIEWS.size(); ++i) {
-        glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
-        Engine::Renderer::sendUniformMatrix4("VP", vp);
+    Engine::Renderer::setViewport(0.0f, 0.0f, size, size);
+    for (uint32_t i = 0; i < captureViews.size(); ++i) {
+        Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, convolutionTexture.address(), 0);
         Engine::Renderer::Settings::clear(true, true, false);
         Skybox::bindMesh();
@@ -405,23 +420,20 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
     auto& preEnvTexture = *preEnvTextureHandle.get<TextureCubemap>();
     Engine::Renderer::bindTextureForModification(TextureType::CubeMap, preEnvTexture.address());
 
-
     m_Renderer.bind(prefilterShaderProgram.get<ShaderProgram>());
-
     Engine::Renderer::sendTexture("cubemap", cubemap.address(), 0, GL_TEXTURE_CUBE_MAP);
-    Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((cubemap.width() * cubemap.width()) * 6));
+    Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((cubemap.width() * cubemap.width()) * 6 ));
     Engine::Renderer::sendUniform1("NUM_SAMPLES", 32);
-    uint32_t maxMipLevels = 5;
+    const uint32_t maxMipLevels = 5;
     for (uint32_t m = 0; m < maxMipLevels; ++m) {
         const uint32_t mipSize(size * (uint32_t)glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
         fbo.resize(mipSize, mipSize);
-        float roughness = (float)m / (float)(maxMipLevels - 1);
+        const float roughness = float(m) / float(maxMipLevels - 1);
         Engine::Renderer::sendUniform1("roughness", roughness);
-        float a = roughness * roughness;
+        const float a = roughness * roughness;
         Engine::Renderer::sendUniform1("a2", a * a);
-        for (uint32_t i = 0; i < CAPTURE_VIEWS.size(); ++i) {
-            glm::mat4 vp = captureProjection * CAPTURE_VIEWS[i];
-            Engine::Renderer::sendUniformMatrix4("VP", vp);
+        for (uint32_t i = 0; i < captureViews.size(); ++i) {
+            Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, preEnvTexture.address(), m);
             fbo.checkStatus();
             Engine::Renderer::Settings::clear(true, true, false);
@@ -680,13 +692,18 @@ bool DeferredPipeline::unbind(ShaderProgram* program) {
     return true;
 }
 bool DeferredPipeline::bind(Material* material) {
+    bool res = false;
     if (m_RendererState.current_bound_material != material) {
         m_RendererState.current_bound_material = material;
-        return true;
+        res = true;
     }
-    return false;
+    DEFAULT_MATERIAL_BIND_FUNCTOR(*m_RendererState.current_bound_material);
+    return res;
 }
 bool DeferredPipeline::unbind(Material* material) {
+    if (!m_RendererState.current_bound_material) {
+        return false;
+    }
     m_RendererState.current_bound_material = nullptr;
     return true;
 }
@@ -698,6 +715,9 @@ bool DeferredPipeline::bind(Mesh* mesh) {
     return false;
 }
 bool DeferredPipeline::unbind(Mesh* mesh) {
+    if (!m_RendererState.current_bound_mesh) {
+        return false;
+    }
     m_RendererState.current_bound_mesh = nullptr;
     return true;
 }
@@ -1431,7 +1451,6 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     if (!m_Renderer.m_Lighting) {
         return;
     }
-    //TODO: bind shadow depth shader
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::ShadowDepth].get<ShaderProgram>());
     Engine::Renderer::colorMask(false, false, false, false);
 
@@ -1439,20 +1458,18 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     for (auto& dir : m_ShadowCasters.m_ShadowCastersDirectional) {
         auto& data = *std::get<1>(dir);
         if (data.m_Enabled) {
-            //any last minute cpu side updates here
-            //data.update(*std::get<0>(dir), camera);
             data.calculateOrthographicProjections(camera, *std::get<0>(dir));
-            Engine::Renderer::setViewport(0.0f, 0.0f, static_cast<float>(data.m_ShadowWidth), static_cast<float>(data.m_ShadowHeight));
+            Engine::Renderer::setViewport(0.0f, 0.0f, data.m_ShadowWidth, data.m_ShadowHeight);
             for (int i = 0; i < (int)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS; ++i) {
                 data.bindUniformsWriting(i);
+                glm::mat4 viewProj = data.m_LightOrthoProjection[i] * data.m_LightViewMatrix;
 
-                //creating shadow map specific functions has helped enormously here performance wise :)
-                PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, nullptr);
-                PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, nullptr);
-                PublicScene::RenderGeometryTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, nullptr);
-                PublicScene::RenderForwardOpaqueShadowMap(m_Renderer, scene, nullptr, nullptr);
-                PublicScene::RenderForwardTransparentShadowMap(m_Renderer, scene, nullptr, nullptr);
-                PublicScene::RenderForwardTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, nullptr);
+                PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderGeometryTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderForwardOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderForwardTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderForwardTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
             }
         }
     }
@@ -1898,8 +1915,7 @@ void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport,
     }
 }
 void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth) {
-    m_GBuffer.bindBackbuffer(viewport);
-    Engine::Renderer::GLEnablei(GL_BLEND, 0);
+    glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_TRUE);
     if (mainRenderFunc) {
@@ -1916,7 +1932,7 @@ void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCo
             }
         }
     } 
-    Engine::Renderer::GLDisablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 0);
 }
 
 void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) {
@@ -1935,7 +1951,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
                 UniformBufferObjectMapper mapper{ *m_UBOCamera };
                 m_CameraUBODataPtr = static_cast<UBOCameraDataStruct*>(mapper.getPtr());
 
-                float logDepthBufferFCoeff = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
+                const float logDepthBufferFCoeff = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
                 //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
 
                 //same simulation and render space
@@ -1958,16 +1974,16 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
                 //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
                 
                 glm::mat4 viewNoTranslation = camera.getView();
-                viewNoTranslation[3][0]     = 0.001f;
-                viewNoTranslation[3][1]     = 0.001f;
-                viewNoTranslation[3][2]     = 0.001f;
+                viewNoTranslation[3][0]     = 0.0001f;
+                viewNoTranslation[3][1]     = 0.0001f;
+                viewNoTranslation[3][2]     = 0.0001f;
                 m_CameraUBODataPtr->CameraView        = viewNoTranslation;
                 m_CameraUBODataPtr->CameraProj        = camera.getProjection();
                 m_CameraUBODataPtr->CameraViewProj    = m_CameraUBODataPtr->CameraProj * viewNoTranslation;
                 m_CameraUBODataPtr->CameraInvProj     = camera.getProjectionInverse();
                 m_CameraUBODataPtr->CameraInvView     = glm::inverse(m_CameraUBODataPtr->CameraView);
                 m_CameraUBODataPtr->CameraInvViewProj = glm::inverse(m_CameraUBODataPtr->CameraViewProj);
-                m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ 0.001f, 0.001f, 0.001f, camera.getNear() };
+                m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ viewNoTranslation[3][0], viewNoTranslation[3][1], viewNoTranslation[3][2], camera.getNear() };
                 m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ glm::vec3{viewNoTranslation[0][2], viewNoTranslation[1][2], viewNoTranslation[2][2]}, camera.getFar() };
                 m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ camera.getPosition(), logDepthBufferFCoeff };
                 m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
@@ -1998,7 +2014,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
 
         //this needs to be cleaned up
         m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGB");
-        Engine::Renderer::Settings::clear(true, false, false);//lighting rgb channels cleared to black
+        Engine::Renderer::Settings::clear(true, false, false);
         if (m_Renderer.m_Lighting) {
             if (renderer.m_LightingAlgorithm == LightingAlgorithm::PBR) {
                 internal_pass_lighting(viewport, camera, mainRenderFunction);
@@ -2011,12 +2027,10 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         Engine::Renderer::GLEnable(GL_DEPTH_TEST);
         glDepthMask(GL_TRUE);
         
-        m_GBuffer.bindFramebuffers(GBufferType::Diffuse, "RGBA");
-        glEnablei(GL_BLEND, 0);
         glDepthRange(0.0f, 0.98f);
+        m_GBuffer.bindFramebuffers(GBufferType::Diffuse, "RGBA");
         render2DAPI(m_Background2DAPICommands, mainRenderFunction, viewport, false);
         glDepthRange(0.0f, 1.0f);
-        glDisablei(GL_BLEND, 0);
         internal_pass_forward(viewport, camera, depthPrepass);
         //this is god awful and ugly, but it's needed. find a way to refactor this properly
         for (GLint i = 0; i < OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS; ++i) {
@@ -2036,6 +2050,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         internal_pass_aa(mainRenderFunction, viewport, camera, sceneTexture, outTexture);
     }
     renderPhysicsAPI(mainRenderFunction, viewport, camera, scene);
+    m_GBuffer.bindBackbuffer(viewport);
     render2DAPI(m_2DAPICommands, mainRenderFunction, viewport);
 }
 void DeferredPipeline::internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>& commands, Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {

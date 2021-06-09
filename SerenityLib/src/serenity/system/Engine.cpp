@@ -8,6 +8,7 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Camera.h>
 #include <serenity/scene/Viewport.h>
+#include <serenity/system/Macros.h>
 
 #include <serenity/renderer/postprocess/SSAO.h>
 #include <serenity/renderer/postprocess/HDR.h>

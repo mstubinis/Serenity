@@ -20,74 +20,50 @@ class OpenGLRenderableProperties final {
         uint8_t  m_BlendEquationRGB : 4;
         uint8_t  m_BlendEquationAlpha : 4;
 
-
+        //byte 4
         uint8_t  m_BlendFuncSrcAlpha : 5;
         uint8_t  m_FrontFace : 2;
+        uint8_t  m_DoCullFace : 1;
 
-
+        //byte 5
         uint8_t  m_BlendFuncDstAlpha : 5;
+        uint8_t  m_DoBlend : 1;
+        uint8_t  m_DoDepthMask : 1;
+        uint8_t  m_DoDepthTest : 1;
 
 
-        uint8_t  m_Bools : 5;
+        //TODO: alpha testing?
+        //TODO: add bool indicating if this group is apart of shadow mapping?
+
+        uint8_t  m_Bools : 1;
         /*
-        bool m_DoCullFace  = true;
         bool m_DoStencil   = false;
-        bool m_DoBlend     = true;
-        bool m_DoDepthMask = true;
-        bool m_DoDepthTest = true;
         */
     public:
-        /*
-        accepted parameter values : GL_CW, GL_CCW
-        */
-        inline void setFrontFace(GLuint frontFace) noexcept {
-            m_FrontFace = frontFace - GL_CW;
-        }
-        inline GLuint getFrontFace() const noexcept {
-            return m_FrontFace + GL_CW;
-        }
+        /* accepted parameter values : GL_CW, GL_CCW */
+        inline void setFrontFace(GLuint frontFace) noexcept { m_FrontFace = frontFace - GL_CW; }
+        inline GLuint getFrontFace() const noexcept { return m_FrontFace + GL_CW; }
 
+        /* accepted parameter values : GL_FRONT, GL_BACK, GL_FRONT_AND_BACK */
+        inline void setCullFace(GLuint cullFaceMode) noexcept { m_CullFace = cullFaceMode - GL_FRONT; }
+        inline GLuint getCullFace() const noexcept { return m_CullFace + GL_FRONT; }
 
+        /* accepted parameter values : GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS */
+        inline void setDepthFunc(GLuint func) noexcept { m_DepthFunc = func - GL_NEVER; }
+        inline GLuint getDepthFunc() const noexcept { return m_DepthFunc + GL_NEVER; }
 
-        /*
-        accepted parameter values : GL_FRONT, GL_BACK, GL_FRONT_AND_BACK
-        */
-        inline void setCullFace(GLuint cullFaceMode) noexcept {
-            m_CullFace = cullFaceMode - GL_FRONT;
-        }
-        inline GLuint getCullFace() const noexcept {
-            return m_CullFace + GL_FRONT;
-        }
-
-
-        /*
-        accepted parameter values : GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS
-        */
-        inline void setDepthFunc(GLuint func) noexcept {
-            m_DepthFunc = func - GL_NEVER;
-        }
-        inline GLuint getDepthFunc() const noexcept {
-            return m_DepthFunc + GL_NEVER;
-        }
-
-
-        /*
-        accepted parameter values : GL_FUNC_ADD, GL_FUNC_SUBTRACT, GL_FUNC_REVERSE_SUBTRACT, GL_MIN, GL_MAX
-        */
+        /* accepted parameter values : GL_FUNC_ADD, GL_FUNC_SUBTRACT, GL_FUNC_REVERSE_SUBTRACT, GL_MIN, GL_MAX */
         void setBlendEquation(GLuint rgb, GLuint alpha) noexcept {
             m_BlendEquationRGB   = rgb   - GL_FUNC_ADD;
             m_BlendEquationAlpha = alpha - GL_FUNC_ADD;
         }
-        std::pair<GLuint, GLuint> getBlendEquation() const noexcept {
-            return { m_BlendEquationRGB + GL_FUNC_ADD , m_BlendEquationAlpha + GL_FUNC_ADD };
-        }
+        //first is equationRGB, second is equationAlpha
+        std::pair<GLuint, GLuint> getBlendEquation() const noexcept { return { m_BlendEquationRGB + GL_FUNC_ADD , m_BlendEquationAlpha + GL_FUNC_ADD }; }
         
-        /*
-        accepted parameter values : GL_ZERO GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR
-                                    GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR
-                                    GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, GL_SRC_ALPHA_SATURATE
-                                    GL_SRC1_COLOR, GL_ONE_MINUS_SRC1_COLOR, GL_SRC1_ALPHA, GL_ONE_MINUS_SRC1_ALPHA
-        */
+        /* accepted parameter values : GL_ZERO GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR
+                                       GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR
+                                       GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, GL_SRC_ALPHA_SATURATE
+                                       GL_SRC1_COLOR, GL_ONE_MINUS_SRC1_COLOR, GL_SRC1_ALPHA, GL_ONE_MINUS_SRC1_ALPHA */
         void setBlendFuncSeparate(GLuint srcRGB, GLuint dstRGB, GLuint srcAlpha, GLuint dstAlpha) noexcept {
             auto transform = [](GLuint input) {
                 if (input >= GL_SRC_COLOR && input <= GL_SRC_ALPHA_SATURATE) {
@@ -101,11 +77,12 @@ class OpenGLRenderableProperties final {
                 }
                 return input;
             };
-            m_BlendFuncSrcRGB = transform(srcRGB);
-            m_BlendFuncDstRGB = transform(dstRGB);
+            m_BlendFuncSrcRGB   = transform(srcRGB);
+            m_BlendFuncDstRGB   = transform(dstRGB);
             m_BlendFuncSrcAlpha = transform(srcAlpha);
             m_BlendFuncDstAlpha = transform(dstAlpha);
         }
+        //srcRGB, dstRGB, srcAlpha, dstAlpha
         std::tuple<GLuint, GLuint, GLuint, GLuint> getBlendFuncSeparate() const noexcept {
             auto transform = [](uint8_t input) -> GLuint {
                 if (input >= 18) {

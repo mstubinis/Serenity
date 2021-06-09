@@ -41,7 +41,7 @@ namespace Engine::priv{
 
             void internal_Build_Texture_Buffer(FramebufferObject& fbo, GBufferType::Type gbuffer_type, uint32_t w, uint32_t h);
             void internal_Destruct();
-            void internal_Start(std::vector<uint32_t>& types, std::string_view channels, bool first_fbo);
+            void internal_Start(const std::vector<uint32_t>& types, std::string_view channels, bool first_fbo);
         public:
             GBuffer() = default;
             GBuffer(const GBuffer&)                = delete;
@@ -66,8 +66,8 @@ namespace Engine::priv{
             inline constexpr uint32_t height() const noexcept { return m_Height; }
 
             inline constexpr const std::array<FramebufferTexture*, GBufferType::_TOTAL>& getBuffers() const noexcept { return m_FramebufferTextures; }
-            FramebufferTexture& getBuffer(uint32_t index) const noexcept;
-            Texture& getTexture(uint32_t index) const noexcept;
+            FramebufferTexture& getBuffer(const uint32_t index) const noexcept;
+            Texture& getTexture(const uint32_t index) const noexcept;
 
             inline constexpr const FramebufferObject& getMainFBO() const noexcept { return m_FBO; }
             inline constexpr const FramebufferObject& getSmallFBO() const noexcept { return m_SmallFBO; }

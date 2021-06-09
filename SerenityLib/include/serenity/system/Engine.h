@@ -8,14 +8,6 @@ namespace Engine::priv {
     class WindowData;
 };
 
-#ifndef ENGINE_FIXED_TIMESTEP_VALUE
-#define ENGINE_FIXED_TIMESTEP_VALUE 0.01666666666666666666f
-#endif
-
-#ifndef ENGINE_FIXED_TIMESTEP_VALUE_D
-#define ENGINE_FIXED_TIMESTEP_VALUE_D 0.01666666666666666666
-#endif
-
 #include <serenity/system/window/Window.h>
 #include <serenity/utils/Engine_Debugging.h>
 #include <serenity/resources/Engine_Resources.h>

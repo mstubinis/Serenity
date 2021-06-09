@@ -59,19 +59,19 @@ Engine::view_ptr<Scene> Engine::priv::ResourceManager::getSceneByID(uint32_t id)
 
 
 std::string Engine::Data::reportTime() {
-    return priv::Core::m_Engine->m_DebugManager.reportTime();
+    return Engine::priv::Core::m_Engine->m_DebugManager.reportTime();
 }
 std::mutex& Engine::Resources::getMutex() noexcept {
     return Engine::priv::ResourceManager::RESOURCE_MANAGER->getMutex();
 }
 double Engine::Resources::dt() {
-    return priv::Core::m_Engine->m_Misc.m_Dt;
+    return Engine::priv::Core::m_Engine->m_Misc.m_Dt;
 }
 double Engine::Resources::timeScale(){
-    return priv::Core::m_Engine->m_DebugManager.timeScale();
+    return Engine::priv::Core::m_Engine->m_DebugManager.timeScale();
 }
 double Engine::Resources::applicationTime() {
-    return priv::Core::m_Engine->m_DebugManager.totalTime();
+    return Engine::priv::Core::m_Engine->m_DebugManager.totalTime();
 }
 Engine::view_ptr<Scene> Engine::Resources::getCurrentScene() {
     return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene;
@@ -92,7 +92,7 @@ glm::uvec2 Engine::Resources::getWindowSize(uint32_t index) {
 bool Engine::Resources::deleteScene(std::string_view sceneName) {
     for (auto& scene_ptr : Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
-            return Resources::deleteScene(*scene_ptr);
+            return Engine::Resources::deleteScene(*scene_ptr);
         }
     }
     return false;

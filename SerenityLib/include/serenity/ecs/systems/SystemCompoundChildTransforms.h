@@ -6,6 +6,7 @@ class  ComponentCollisionShape;
 
 #include <serenity/ecs/systems/SystemBaseClass.h>
 
+//if collision shape is a bullet compound child shape, update the local collision shape matrix to match what was calculated via the parent child heirarchy
 class SystemCompoundChildTransforms final : public SystemCRTP<SystemCompoundChildTransforms, ComponentCollisionShape> {
     private:
 

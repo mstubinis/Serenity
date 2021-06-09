@@ -75,6 +75,7 @@ namespace Engine {
         return inPtr && typeid(DERIVED) == typeid(*inPtr);
     }
 
+    //returns true if the iterator was found and erase was successful
     template<class CONTAINER, class ITERATOR> bool erase(CONTAINER& container, const ITERATOR& itr) {
         if (itr != container.end()) {
             container.erase(itr);

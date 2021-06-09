@@ -43,42 +43,12 @@ constexpr std::array<MaterialDefaultPhysicsProperty, (size_t)MaterialPhysics::_T
     { 168_uc, 155_uc, 134_uc, 242_uc, 255_uc },        // 25 - nickel
 } };
 
-constexpr float ONE_OVER_255 = 0.003921568627451f;
-
-
-constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](Material* m) {
-    const auto&  components = m->getComponents();
-    size_t numComponents    = components.size();
-    size_t textureUnit      = 0;
-
-    for (size_t i = 0; i < numComponents; ++i) {
-        const auto& component = components[i];
-        component.bind(i, textureUnit);
-    }
-    Engine::Renderer::sendUniform1Safe("numComponents", (int)numComponents);
-    Engine::Renderer::sendUniform1Safe("Shadeless", (int)m->getShadeless());
-    Engine::Renderer::sendUniform4Safe("Material_F0AndID", m->getF0().r(), m->getF0().g(), m->getF0().b(), (float)m->getID());
-    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne",
-        float(m->getGlow())       * ONE_OVER_255,
-        float(m->getAO())         * ONE_OVER_255,
-        float(m->getMetalness())  * ONE_OVER_255,
-        float(m->getSmoothness()) * ONE_OVER_255
-    );
-    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", 
-        float(m->getAlpha())        * ONE_OVER_255, 
-        float(m->getDiffuseModel()), 
-        float(m->getSpecularModel()), 
-        0.0f
-    );
-};
-
 #pragma region Material
 
 Material::Material()
     : Resource{ ResourceType::Material }
 {
     Engine::priv::MaterialLoader::InitBase(*this);
-    setCustomBindFunctor(DEFAULT_MATERIAL_BIND_FUNCTOR);
 }
 Material::Material(std::string_view name, std::string_view diffuse, std::string_view normal, std::string_view glow, std::string_view specular, std::string_view ao, std::string_view metalness, std::string_view smoothness)
     : Resource{ ResourceType::Material, name }
@@ -93,19 +63,16 @@ Material::Material(std::string_view name, std::string_view diffuse, std::string_
 
     Engine::priv::MaterialLoader::Init(*this, d.m_Handle, n.m_Handle, g.m_Handle, s.m_Handle, a.m_Handle, m.m_Handle, sm.m_Handle);
     Engine::priv::PublicMaterial::Load(*this);
-    setCustomBindFunctor(DEFAULT_MATERIAL_BIND_FUNCTOR);
 }
 Material::Material(std::string_view name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness)
     : Resource{ ResourceType::Material, name }
 {
     Engine::priv::MaterialLoader::Init(*this, diffuse, normal, glow, specular, ao, metalness, smoothness);
     Engine::priv::PublicMaterial::Load(*this);
-    setCustomBindFunctor(DEFAULT_MATERIAL_BIND_FUNCTOR);
 }
 Material::Material(Material&& other) noexcept
     : Resource{ std::move(other) }
     , m_Components        { std::move(other.m_Components) }
-    , m_CustomBindFunctor { std::move(other.m_CustomBindFunctor) }
     , m_DiffuseModel      { std::move(other.m_DiffuseModel) }
     , m_SpecularModel     { std::move(other.m_SpecularModel) }
     , m_Shadeless         { std::move(other.m_Shadeless) }
@@ -121,7 +88,6 @@ Material::Material(Material&& other) noexcept
 Material& Material::operator=(Material&& other) noexcept {
     Resource::operator=(std::move(other));
     m_Components        = std::move(other.m_Components);
-    m_CustomBindFunctor = std::move(other.m_CustomBindFunctor);
     m_DiffuseModel      = std::move(other.m_DiffuseModel);
     m_SpecularModel     = std::move(other.m_SpecularModel);
     m_Shadeless         = std::move(other.m_Shadeless);
@@ -153,7 +119,7 @@ void Material::internal_update_global_material_pool(bool addToDatabase) noexcept
     //this data is kept around to be deferred to the lighting pass
     auto update_data = [this](glm::vec4& materialData) {
         materialData.r = Engine::Compression::pack3FloatsInto1FloatUnsigned(m_F0Color.r(), m_F0Color.g(), m_F0Color.b());
-        materialData.g = (float)(m_BaseAlpha) * ONE_OVER_255;
+        materialData.g = (float)(m_BaseAlpha) * (1.0f / 255.0f);
         materialData.b = (float)m_SpecularModel;
         materialData.a = (float)m_DiffuseModel;
     };

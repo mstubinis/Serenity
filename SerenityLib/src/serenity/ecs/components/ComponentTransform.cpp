@@ -39,7 +39,8 @@ ComponentTransform::ComponentTransform(ComponentTransform&& other) noexcept
     , m_UserPointer1     { std::exchange(other.m_UserPointer1, nullptr) }
     , m_UserPointer2     { std::exchange(other.m_UserPointer2, nullptr) }
     , m_Owner            { std::exchange(other.m_Owner, Entity{}) }
-{}
+{
+}
 ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) noexcept {
     m_Position         = std::move(other.m_Position);
     m_Rotation         = std::move(other.m_Rotation);

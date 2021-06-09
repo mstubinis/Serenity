@@ -11,7 +11,17 @@ class ModelInstance;
 #include <vector>
 
 namespace Engine::priv::Culling {
-    void cull(Camera*, Viewport*, const std::vector<ModelInstance*>&);
+    void cull(const Camera* const, const Viewport* const, const std::vector<ModelInstance*>&);
+    void cull(const Camera* const, const std::vector<ModelInstance*>&);
+
+    void cull(const glm::mat4& viewProjMatrix, const Viewport* const, const std::vector<ModelInstance*>&);
+    void cull(const glm::mat4& viewMatrix, const glm::mat4& projMatrix, const Viewport* const, const std::vector<ModelInstance*>&);
+
+    void cull(const glm::mat4& viewProjMatrix, const std::vector<ModelInstance*>&);
+    void cull(const glm::mat4& viewMatrix, const glm::mat4& projMatrix, const std::vector<ModelInstance*>&);
+
+    void cull(const Viewport* const, const std::vector<ModelInstance*>&);
+    void cull(const std::vector<ModelInstance*>&);
 }
 
 #endif

@@ -9,6 +9,7 @@ class  ComponentRigidBody;
 #include <cstdint>
 #include <serenity/dependencies/glm.h>
 
+//syncs bullet rigid body and collision shape to world matrices
 class SystemSyncRigidToTransform final : public SystemCRTP<SystemSyncRigidToTransform, ComponentTransform, ComponentRigidBody> {
     friend class  ComponentTransform;
     friend class  ComponentRigidBody;

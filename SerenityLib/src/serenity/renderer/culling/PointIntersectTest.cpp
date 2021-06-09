@@ -1,6 +1,7 @@
 #include <serenity/renderer/culling/PointIntersectTest.h>
 #include <serenity/ecs/components/ComponentCamera.h>
 #include <serenity/scene/Camera.h>
+#include <serenity/math/Engine_Math.h>
 
 int Engine::priv::Culling::PointIntersectTest::pointIntersectTest(const glm_vec3& position, const std::array<glm::vec4, 6>& frustumPlanes) {
     const auto zero = (decimal)0.0;
@@ -29,4 +30,16 @@ int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const Ca
 }
 int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const ComponentCamera& componentCamera) {
     return Engine::priv::Culling::PointIntersectTest::pointIntersectTest(position, componentCamera);
+}
+
+
+
+int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+    glm::mat4 viewProjMatrix = projectionMatrix * viewMatrix;
+    return Engine::priv::Culling::pointIntersectTest(position, viewProjMatrix);
+}
+int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const glm::mat4& viewProjectionMatrix) {
+    std::array<glm::vec4, 6> planes;
+    Engine::Math::extractViewFrustumPlanesHartmannGribbs(viewProjectionMatrix, planes);
+    return Engine::priv::Culling::pointIntersectTest(position, planes);
 }

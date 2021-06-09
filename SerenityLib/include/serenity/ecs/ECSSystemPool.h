@@ -13,10 +13,6 @@ class  SystemBaseClass;
 #include <serenity/system/Macros.h>
 #include <serenity/utils/Utils.h>
 
-#include <iostream>
-
-class ComponentNullType final : public ComponentBaseClass<ComponentNullType>{};
-
 namespace Engine::priv {
     class ECSSystemPool final {
         using SystemComponentHashContainer = std::vector<std::vector<SystemBaseClass*>>;
@@ -45,14 +41,10 @@ namespace Engine::priv {
 
             template<class SYSTEM, class COMPONENT>
             void hashSystemImpl(SYSTEM* inSystem) {
-                if (std::is_same<COMPONENT, ComponentNullType>::value) {
-                    return;
-                }
                 ASSERT(COMPONENT::TYPE_ID != 0, __FUNCTION__ << "(): COMPONENT::TYPE_ID was 0, please register this component type! (component class: " << typeid(COMPONENT).name());
                 if (m_ComponentIDToSystems.size() < COMPONENT::TYPE_ID) {
                     m_ComponentIDToSystems.resize(COMPONENT::TYPE_ID);
                 }
-                //TODO: assert if system is not already in the container ?
                 m_ComponentIDToSystems[COMPONENT::TYPE_ID - 1].push_back(inSystem);
                 inSystem->associateComponent<COMPONENT>();
             }

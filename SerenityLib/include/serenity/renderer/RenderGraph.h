@@ -2,13 +2,11 @@
 #ifndef ENGINE_RENDER_GRAPH_H
 #define ENGINE_RENDER_GRAPH_H
 
-class  ShaderProgram;
 class  Camera;
 class  Scene;
 class  Material;
 class  Mesh;
 class  ModelInstance;
-class  ModelInstanceHandle;
 class  Entity;
 class  Viewport;
 namespace Engine::priv {
@@ -18,10 +16,10 @@ namespace Engine::priv {
     struct PublicScene;
 };
 
-#include <serenity/utils/Utils.h>
 #include <serenity/renderer/RendererIncludes.h>
-#include <serenity/model/ModelInstanceHandle.h>
+#include <serenity/system/Macros.h>
 #include <serenity/resources/Handle.h>
+#include <vector>
 #include <array>
 
 namespace Engine::priv {
@@ -56,16 +54,19 @@ namespace Engine::priv {
         friend class  RenderGraphContainer;
         friend struct Engine::priv::PublicScene;
         private:
-            Handle                        m_ShaderProgram;
             std::vector<MaterialNode>     m_MaterialNodes;
             std::vector<ModelInstance*>   m_InstancesTotal;
+            const Handle                  m_ShaderProgram;
 
             RenderGraph() = delete;
 
+            void internal_sort_impl(Camera*, SortingMode, std::vector<ModelInstance*>&);
+            void internal_sort_cheap_impl(Camera*, SortingMode, std::vector<ModelInstance*>&);
+            void internal_scan_nodes(const ModelInstance&, Engine::priv::MaterialNode*&, Engine::priv::MeshNode*&, ModelInstance*&);
             void internal_addModelInstanceToPipeline(ModelInstance&);
             void internal_removeModelInstanceFromPipeline(ModelInstance&);
         public:
-            RenderGraph(Handle shaderProgram)
+            RenderGraph(const Handle shaderProgram)
                 : m_ShaderProgram{ shaderProgram }
             {}
 
@@ -74,15 +75,18 @@ namespace Engine::priv {
             RenderGraph(RenderGraph&&) noexcept            = default;
             RenderGraph& operator=(RenderGraph&&) noexcept = default;
 
-            bool remove_material_node(MaterialNode&);
-            bool remove_mesh_node(MaterialNode&, MeshNode&);
-            bool remove_instance_node(MeshNode&, ModelInstance&);
+            bool remove_material_node(const MaterialNode*);
+            bool remove_mesh_node(MaterialNode*, const MeshNode*);
+            bool remove_instance_node(MeshNode*, const ModelInstance*);
 
-            void clean(Entity entity);
+            void clean(Entity);
 
+            //accurate sort that takes object radius into account
             void sort(Camera*, SortingMode);
-            void sort_cheap(Camera*, SortingMode);
             void sort_bruteforce(Camera*, SortingMode);
+
+            //not as accurate, only takes position into account but its cheaper to compute
+            void sort_cheap(Camera*, SortingMode);
             void sort_cheap_bruteforce(Camera*, SortingMode);
 
             void render(Engine::priv::RenderModule&, Camera*, bool useDefaultShaders = true, SortingMode = SortingMode::None);
@@ -92,6 +96,7 @@ namespace Engine::priv {
             void render_bruteforce_shadow_map(Engine::priv::RenderModule&, Camera*);
 
             void validate_model_instances_for_rendering(Camera*, Viewport*);
+            void validate_model_instances_for_rendering(const glm::mat4& viewProj, Viewport*);
     };
 
     class RenderGraphContainer final {
@@ -100,8 +105,8 @@ namespace Engine::priv {
             ContainerType m_RenderGraphs;
         public:
             bool hasItemsToRender() const noexcept { 
-                for (const auto& itr : m_RenderGraphs) {
-                    for (const auto& graph : itr) {
+                for (const auto& stage : m_RenderGraphs) {
+                    for (const auto& graph : stage) {
                         if (graph.m_InstancesTotal.size() > 0) {
                             return true;
                         }
@@ -109,12 +114,9 @@ namespace Engine::priv {
                 }
                 return false;
             }
-            inline std::vector<Engine::priv::RenderGraph>& operator[](size_t idx) noexcept { return m_RenderGraphs[idx]; }
+            inline std::vector<Engine::priv::RenderGraph>& operator[](const size_t idx) noexcept { return m_RenderGraphs[idx]; }
 
-            inline ContainerType::iterator begin() noexcept { return m_RenderGraphs.begin(); }
-            inline ContainerType::iterator end() noexcept { return m_RenderGraphs.end(); }
-            inline ContainerType::const_iterator begin() const noexcept { return m_RenderGraphs.begin(); }
-            inline ContainerType::const_iterator end() const noexcept { return m_RenderGraphs.end(); }
+            BUILD_BEGIN_END_ITR_CLASS_MEMBERS(ContainerType, m_RenderGraphs)
     };
 };
 #endif

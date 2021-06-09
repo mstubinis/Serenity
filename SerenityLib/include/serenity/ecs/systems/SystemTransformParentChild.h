@@ -10,6 +10,7 @@ class  ComponentCollisionShape;
 #include <cstdint>
 #include <serenity/dependencies/glm.h>
 
+//computes updated world matrices by walking the parent child heirarchy, also updates bullet physics matrices to the newly updated world matrices
 class SystemTransformParentChild final : public SystemCRTP<SystemTransformParentChild, ComponentTransform> {
     friend class  ComponentTransform;
     private:
