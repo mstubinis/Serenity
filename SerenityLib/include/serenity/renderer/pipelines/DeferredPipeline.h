@@ -109,6 +109,7 @@ namespace Engine::priv {
             void internal_renderRectangle(std::vector<IRenderingPipeline::API2DCommand>&, const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment, const glm::vec4& scissor);
             void internal_renderTriangle(std::vector<IRenderingPipeline::API2DCommand>&, const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment, const glm::vec4& scissor);
 
+            void internal_render2DAPI(uint32_t diffuseBuffer, const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport&, bool clearDepth = true);
 
             DeferredPipeline() = delete;
         public:

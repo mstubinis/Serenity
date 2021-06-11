@@ -1509,8 +1509,11 @@ void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera
     if (m_Renderer.m_DrawSkybox && viewport.getRenderFlags().has(ViewportRenderingFlag::Skybox)) {
         renderSkybox(scene.skybox(), m_InternalShaderPrograms[ShaderProgramEnum::DeferredSkybox], scene, viewport, camera);
     }
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnablei(GL_BLEND, 0);
     PublicScene::RenderGeometryTransparent(m_Renderer, scene, &viewport, &camera);
     PublicScene::RenderGeometryTransparentTrianglesSorted(m_Renderer, scene, &viewport, &camera, true);    
+    glDisablei(GL_BLEND, 0);
 }
 void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera, bool depthPrepass) {
     Scene& scene = viewport.getScene();
@@ -1520,7 +1523,7 @@ void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera,
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for (uint32_t i = 0; i < 4; ++i) {
-        Engine::Renderer::GLEnablei(GL_BLEND, i);
+        glEnablei(GL_BLEND, i);
     }
     if (!depthPrepass) {
         glDepthMask(GL_TRUE);
@@ -1535,7 +1538,7 @@ void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera,
     PublicScene::RenderParticles(m_Renderer, scene, viewport, camera, m_InternalShaderPrograms[ShaderProgramEnum::Particle]);
 
     for (uint32_t i = 0; i < 4; ++i) {
-        Engine::Renderer::GLDisablei(GL_BLEND, i); //this is needed for smaa at least
+        glDisablei(GL_BLEND, i); //this is needed for smaa at least
     }
 }
 void DeferredPipeline::internal_pass_ssao(Viewport& viewport, Camera& camera) {
@@ -1934,7 +1937,10 @@ void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCo
     } 
     glDisablei(GL_BLEND, 0);
 }
-
+void DeferredPipeline::internal_render2DAPI(uint32_t diffuseBuffer, const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth) {
+    m_GBuffer.bindFramebuffers(diffuseBuffer, "RGBA");
+    render2DAPI(commands, mainRenderFunc, viewport, clearDepth);
+}
 void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) {
     auto& camera             = viewport.getCamera();
     auto& scene              = viewport.getScene();
@@ -2028,8 +2034,8 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         glDepthMask(GL_TRUE);
         
         glDepthRange(0.0f, 0.98f);
-        m_GBuffer.bindFramebuffers(GBufferType::Diffuse, "RGBA");
-        render2DAPI(m_Background2DAPICommands, mainRenderFunction, viewport, false);
+
+        internal_render2DAPI(GBufferType::Diffuse, m_Background2DAPICommands, mainRenderFunction, viewport, false);
         glDepthRange(0.0f, 1.0f);
         internal_pass_forward(viewport, camera, depthPrepass);
         //this is god awful and ugly, but it's needed. find a way to refactor this properly
@@ -2051,7 +2057,8 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
     }
     renderPhysicsAPI(mainRenderFunction, viewport, camera, scene);
     m_GBuffer.bindBackbuffer(viewport);
-    render2DAPI(m_2DAPICommands, mainRenderFunction, viewport);
+
+    internal_render2DAPI(GBufferType::BackBuffer, m_2DAPICommands, mainRenderFunction, viewport);
 }
 void DeferredPipeline::internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>& commands, Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
     commands.emplace_back([textureHandle, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(textureHandle, p, c, a, s, d, align, scissor); }, d);

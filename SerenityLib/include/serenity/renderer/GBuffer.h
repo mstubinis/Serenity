@@ -11,7 +11,6 @@ class Camera;
 namespace Engine::priv {
     class FramebufferTexture;
     class FramebufferObject;
-
     struct GBufferType { enum Type : uint8_t {
         Diffuse,
         Normal,
@@ -20,7 +19,8 @@ namespace Engine::priv {
         Bloom,
         GodRays,
         Depth,
-    _TOTAL};};
+        _TOTAL,
+    BackBuffer};};
 };
 
 #include <GL/glew.h>
@@ -35,10 +35,11 @@ namespace Engine::priv{
         private:
             mutable FramebufferObject                             m_FBO;
             mutable FramebufferObject                             m_SmallFBO;
-            std::array<FramebufferTexture*, GBufferType::_TOTAL>  m_FramebufferTextures;
+            std::array<FramebufferTexture*, GBufferType::_TOTAL>  m_FramebufferTextures  = { nullptr };
             uint32_t                                              m_Width                = 0U;
             uint32_t                                              m_Height               = 0U;
 
+            uint32_t internal_get_attatchment(uint32_t buffer) noexcept;
             void internal_Build_Texture_Buffer(FramebufferObject& fbo, GBufferType::Type gbuffer_type, uint32_t w, uint32_t h);
             void internal_Destruct();
             void internal_Start(const std::vector<uint32_t>& types, std::string_view channels, bool first_fbo);
@@ -61,6 +62,7 @@ namespace Engine::priv{
             void bindFramebuffers(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string_view channels, bool isMainFBO = true);
 
             void bindBackbuffer(const Viewport& viewport, GLuint final_fbo = 0, GLuint final_rbo = 0);
+            void bindBackbuffer(GLuint final_fbo = 0, GLuint final_rbo = 0);
 
             inline constexpr uint32_t width() const noexcept { return m_Width; }
             inline constexpr uint32_t height() const noexcept { return m_Height; }

@@ -63,7 +63,7 @@ void Engine::priv::GBuffer::internal_Destruct() {
     Engine::Renderer::unbindFBO();
     m_FramebufferTextures.fill(nullptr);
 }
-Engine::priv::GBuffer::~GBuffer(){
+Engine::priv::GBuffer::~GBuffer() {
     internal_Destruct();
 }
 bool Engine::priv::GBuffer::resize(uint32_t width, uint32_t height) {
@@ -80,59 +80,68 @@ void Engine::priv::GBuffer::internal_Build_Texture_Buffer(FramebufferObject& fbo
     const auto [internalFmt, pxlFmt, pxlType, fbAttatch] = GBUFFER_TYPE_DATA[gbufferType];
     m_FramebufferTextures[gbufferType] = fbo.attatchTexture(fbAttatch, w, h, pxlType, pxlFmt, internalFmt, fbo.divisor());
 }
+uint32_t Engine::priv::GBuffer::internal_get_attatchment(uint32_t buffer) noexcept {
+    return buffer != GBufferType::BackBuffer ? m_FramebufferTextures[buffer]->attatchment() : GBufferType::BackBuffer;
+}
 void Engine::priv::GBuffer::internal_Start(const std::vector<uint32_t>& types, std::string_view channels, bool first_fbo) {
     ASSERT(types.size() > 0, __FUNCTION__ << "(): types was empty!");
-    first_fbo ? m_FBO.bind() : m_SmallFBO.bind();
-    const bool r = channels.find("R") != std::string::npos;
-    const bool g = channels.find("G") != std::string::npos;
-    const bool b = channels.find("B") != std::string::npos;
-    const bool a = channels.find("A") != std::string::npos;
+    if (types[0] != GBufferType::BackBuffer) {
+        first_fbo ? m_FBO.bind() : m_SmallFBO.bind();
+        const bool r = channels.find("R") != std::string::npos;
+        const bool g = channels.find("G") != std::string::npos;
+        const bool b = channels.find("B") != std::string::npos;
+        const bool a = channels.find("A") != std::string::npos;
 
-    glDrawBuffers(types[0] != 0 ? (GLsizei)types.size() : (GLsizei)0, types.data());
-    Engine::Renderer::colorMask(r, g, b, a);
+        glDrawBuffers(types[0] != 0 ? (GLsizei)types.size() : (GLsizei)0, types.data());
+        Engine::Renderer::colorMask(r, g, b, a);
+    } else {
+        GBuffer::bindBackbuffer(0, 0);
+    }
 }
 void Engine::priv::GBuffer::bindFramebuffers(std::string_view channels, bool mainFBO) {
     internal_Start({ 0 }, channels, mainFBO);
 }
 void Engine::priv::GBuffer::bindFramebuffers(uint32_t buffer, std::string_view channels, bool mainFBO) {
-    internal_Start({ m_FramebufferTextures[buffer]->attatchment() }, channels, mainFBO);
+    internal_Start({ internal_get_attatchment(buffer) }, channels, mainFBO);
 }
-void Engine::priv::GBuffer::bindFramebuffers(uint32_t t1, uint32_t t2, std::string_view channels, bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(uint32_t t1, uint32_t t2, std::string_view channels, bool mainFBO) {
     internal_Start({
-        m_FramebufferTextures[t1]->attatchment(),
-        m_FramebufferTextures[t2]->attatchment() 
+        internal_get_attatchment(t1),
+        internal_get_attatchment(t2)
     }, channels, mainFBO);
 }
-void Engine::priv::GBuffer::bindFramebuffers(uint32_t t1, uint32_t t2, uint32_t t3, std::string_view channels, bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(uint32_t t1, uint32_t t2, uint32_t t3, std::string_view channels, bool mainFBO) {
     internal_Start({
-        m_FramebufferTextures[t1]->attatchment(), 
-        m_FramebufferTextures[t2]->attatchment(), 
-        m_FramebufferTextures[t3]->attatchment() 
+        internal_get_attatchment(t1),
+        internal_get_attatchment(t2),
+        internal_get_attatchment(t3)
     }, channels, mainFBO);
 }
-void Engine::priv::GBuffer::bindFramebuffers(uint32_t t1, uint32_t t2, uint32_t t3, uint32_t t4, std::string_view channels, bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(uint32_t t1, uint32_t t2, uint32_t t3, uint32_t t4, std::string_view channels, bool mainFBO) {
     internal_Start({ 
-        m_FramebufferTextures[t1]->attatchment(),
-        m_FramebufferTextures[t2]->attatchment(),
-        m_FramebufferTextures[t3]->attatchment(),
-        m_FramebufferTextures[t4]->attatchment() 
+        internal_get_attatchment(t1),
+        internal_get_attatchment(t2),
+        internal_get_attatchment(t3),
+        internal_get_attatchment(t4)
     }, channels, mainFBO);
 }
-void Engine::priv::GBuffer::bindFramebuffers(uint32_t t1, uint32_t t2, uint32_t t3, uint32_t t4, uint32_t t5, std::string_view channels, bool mainFBO){
+void Engine::priv::GBuffer::bindFramebuffers(uint32_t t1, uint32_t t2, uint32_t t3, uint32_t t4, uint32_t t5, std::string_view channels, bool mainFBO) {
     internal_Start({ 
-        m_FramebufferTextures[t1]->attatchment(), 
-        m_FramebufferTextures[t2]->attatchment(), 
-        m_FramebufferTextures[t3]->attatchment(), 
-        m_FramebufferTextures[t4]->attatchment(), 
-        m_FramebufferTextures[t5]->attatchment() 
+        internal_get_attatchment(t1),
+        internal_get_attatchment(t2),
+        internal_get_attatchment(t3),
+        internal_get_attatchment(t4),
+        internal_get_attatchment(t5)
     }, channels, mainFBO);
 }
 
-
-void Engine::priv::GBuffer::bindBackbuffer(const Viewport& viewport, GLuint final_fbo, GLuint final_rbo){
+void Engine::priv::GBuffer::bindBackbuffer(GLuint final_fbo, GLuint final_rbo) {
     Engine::Renderer::bindFBO(final_fbo);
     Engine::Renderer::bindRBO(final_rbo); //probably dont even need this. or only implement this if final_rbo != 0
     Engine::Renderer::colorMask(true, true, true, true);
+}
+void Engine::priv::GBuffer::bindBackbuffer(const Viewport& viewport, GLuint final_fbo, GLuint final_rbo) {
+    GBuffer::bindBackbuffer(final_fbo, final_rbo);
     const auto& dimensions = viewport.getViewportDimensions();
     Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
 }
