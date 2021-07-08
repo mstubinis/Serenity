@@ -150,11 +150,11 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
 }
 void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, std::string_view type, uint32_t texture, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Program_Blur.get<ShaderProgram>());
-    glm::vec2 hv(0.0f);
+    glm::vec2 hv;
     if (type == "H") { 
-        hv = glm::vec2(1.0f, 0.0f); 
-    }else{ 
-        hv = glm::vec2(0.0f, 1.0f); 
+        hv = glm::vec2{ 1.0f, 0.0f };
+    } else { 
+        hv = glm::vec2{ 0.0f, 1.0f };
     }
     Engine::Renderer::sendUniform4("Data", m_ssao_blur_radius, m_ssao_blur_strength, hv.x, hv.y);
     Engine::Renderer::sendTexture("image", gbuffer.getTexture(texture), 0);

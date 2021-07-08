@@ -285,7 +285,7 @@ void Engine::priv::RenderGraph::render_shadow_map(Engine::priv::RenderModule& re
                     auto mesh = meshNode.mesh.get<Mesh>();
                     renderer.bind(mesh);
                     for (auto& modelInstance : meshNode.instanceNodes) {
-                        if (modelInstance->hasPassedRenderCheck()) {
+                        if (modelInstance->hasPassedRenderCheck() && modelInstance->isShadowCaster()) {
                             renderer.bind(modelInstance);
                             renderer.m_Pipeline->renderMesh(*mesh, (uint32_t)modelInstance->getDrawingMode());
                             renderer.unbind(modelInstance);
@@ -300,7 +300,7 @@ void Engine::priv::RenderGraph::render_shadow_map(Engine::priv::RenderModule& re
 void Engine::priv::RenderGraph::render_bruteforce_shadow_map(Engine::priv::RenderModule& renderer, Camera* camera) {
     for (auto& modelInstance : m_InstancesTotal) {
         auto mesh = modelInstance->getMesh().get<Mesh>();
-        if (modelInstance->hasPassedRenderCheck()) {
+        if (modelInstance->hasPassedRenderCheck() && modelInstance->isShadowCaster()) {
             renderer.bind(mesh);
             renderer.bind(modelInstance);
 

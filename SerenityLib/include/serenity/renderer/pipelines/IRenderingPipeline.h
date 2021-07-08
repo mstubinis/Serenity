@@ -331,7 +331,7 @@ namespace Engine::priv {
             ) = 0;
 
             virtual void renderFullscreenTriangle() = 0;
-            virtual void renderFullscreenQuad() = 0;
+            virtual void renderFullscreenQuad(float width, float height) = 0;
 
             virtual void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) = 0;
     };

@@ -70,6 +70,7 @@ class ModelInstance final : public Observer {
         bool                                              m_PassedRenderCheck   = false;
         bool                                              m_Visible             = true;
         bool                                              m_ForceRender         = false;
+        bool                                              m_IsShadowCaster      = true;
 
         float internal_calculate_radius();
         void internal_init(Handle mesh, Handle mat, Handle program);
@@ -93,6 +94,9 @@ class ModelInstance final : public Observer {
         ~ModelInstance();
 
         void onEvent(const Event& e) override;
+
+        inline void setShadowCaster(bool isShadowCaster) noexcept { m_IsShadowCaster = isShadowCaster; }
+        inline bool isShadowCaster() const noexcept { return m_IsShadowCaster; }
 
         static inline void setGlobalDistanceFactor(decimal factor) noexcept { m_GlobalDistanceFactor = factor; }
         static inline constexpr decimal getGlobalDistanceFactor() noexcept { return m_GlobalDistanceFactor; }

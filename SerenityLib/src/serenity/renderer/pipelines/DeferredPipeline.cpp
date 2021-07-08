@@ -980,7 +980,8 @@ void DeferredPipeline::renderDirectionalLight(Camera& camera, DirectionalLight& 
     }
     std::string start = "light.";
     sendGPUDataLight(camera, directionalLight, start);
-    renderFullscreenQuad();
+    auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    renderFullscreenQuad(winSize.x, winSize.y);
 }
 void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) {
     if (!sunLight.isActive()) {
@@ -988,7 +989,8 @@ void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewpo
     }
     std::string start = "light.";
     sendGPUDataLight(camera, sunLight, start);
-    renderFullscreenQuad();
+    auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    renderFullscreenQuad(winSize.x, winSize.y);
 }
 void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) {
     if (!pointLight.isActive()) {
@@ -1810,8 +1812,9 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
                     m_GBuffer.bindFramebuffers(outTexture, "RGBA");
                     internal_pass_final(sceneTexture);
                     std::swap(sceneTexture, outTexture);
-                    const auto winSize = glm::vec2(Resources::getWindowSize());
-                    const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
+                    //const auto winSize  = glm::vec2{ Resources::getWindowSize() };
+                    const auto& winSize = viewport.getViewportDimensions();
+                    const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.z, 1.0f / winSize.w, winSize.z, winSize.w);
                     SMAA::STATIC_SMAA.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
                     SMAA::STATIC_SMAA.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
                     m_GBuffer.bindFramebuffers(outTexture, "RGBA");
@@ -1946,7 +1949,9 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
     auto& scene              = viewport.getScene();
     const auto& sceneAmbient = scene.getAmbientColor();
     auto& viewportDimensions = viewport.getViewportDimensions();
-    auto winSize             = glm::vec2(m_GBuffer.width(), m_GBuffer.height());
+    auto winSize             = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
+
+    m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
 
     internal_render_per_frame_preparation(viewport, camera);
     if (Engine::priv::PublicScene::HasItemsToRender(scene)) {
@@ -1992,7 +1997,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
                 m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ viewNoTranslation[3][0], viewNoTranslation[3][1], viewNoTranslation[3][2], camera.getNear() };
                 m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ glm::vec3{viewNoTranslation[0][2], viewNoTranslation[1][2], viewNoTranslation[2][2]}, camera.getFar() };
                 m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ camera.getPosition(), logDepthBufferFCoeff };
-                m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
+                m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ viewportDimensions.z, viewportDimensions.w, viewportDimensions.z, viewportDimensions.w };
                 m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
                 m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
             }
@@ -2128,9 +2133,12 @@ void DeferredPipeline::renderFullscreenTriangle() {
     Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y));
     m_FullscreenTriangle.render();
 }
-void DeferredPipeline::renderFullscreenQuad() {
+void DeferredPipeline::renderFullscreenQuad(float width, float height) {
     const glm::vec2 winSize{ Engine::Resources::getWindowSize() };
-    Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4{ 1.0f });
+    auto modelMatrix = glm::mat4{ 1.0f };
+    modelMatrix      = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
+    Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    //Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(-winSize.x / 2.0f, winSize.x / 2.0f, -winSize.y / 2.0f, winSize.y / 2.0f));
     Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y));
     m_FullscreenQuad.render();
 }

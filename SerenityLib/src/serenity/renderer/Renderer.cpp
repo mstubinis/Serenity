@@ -477,9 +477,12 @@ void Engine::Renderer::renderBackgroundBorder(float borderSize, const glm::vec2&
 
 
 
-
 void Engine::Renderer::renderFullscreenQuad() {
-    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->renderFullscreenQuad();
+    const auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->renderFullscreenQuad(winSize.x, winSize.y);
+}
+void Engine::Renderer::renderFullscreenQuad(float width, float height) {
+    Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->renderFullscreenQuad(width, height);
 }
 void Engine::Renderer::renderFullscreenTriangle() {
     Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->renderFullscreenTriangle();

@@ -44,13 +44,16 @@ void Engine::priv::FullscreenTriangle::changeDimensions(float width, float heigh
     m_Vertices.clear();
     MeshVertexDataFullscreen v1, v2, v3;
 
+    //v1.position = glm::vec3(-width / 2.0f,                   -height / 2.0f,                    0.0f);
+    //v2.position = glm::vec3((2.0f * width) - (width / 2.0f), -height / 2.0f,                    0.0f);
+    //v3.position = glm::vec3(-width / 2.0f,                   (2.0f * height) - (height / 2.0f), 0.0f);
     v1.position = glm::vec3(0, 0, 0.0f);
-    v2.position = glm::vec3(2.0f * width, 0, 0.0f);
-    v3.position = glm::vec3(0, 2.0f * height, 0.0f);
+    v2.position = glm::vec3((2.0f * width), 0, 0.0f);
+    v3.position = glm::vec3(0, (2.0f * height), 0.0f);
 
-    v1.uv = glm::vec2(0,0);
-    v2.uv = glm::vec2(2.0f ,0);
-    v3.uv = glm::vec2(0, 2.0f );
+    v1.uv = glm::vec2{ 0.0f, 0.0f };
+    v2.uv = glm::vec2{ 2.0f, 0.0f };
+    v3.uv = glm::vec2{ 0.0f, 2.0f };
 
     m_Vertices.emplace_back(v1);
     m_Vertices.emplace_back(v2);
@@ -139,15 +142,19 @@ void Engine::priv::FullscreenQuad::changeDimensions(float width, float height) {
     m_Vertices.clear();
     MeshVertexDataFullscreen v1, v2, v3, v4;
 
-    v1.position = glm::vec3(0, 0, 0.0f);
-    v2.position = glm::vec3(width, 0, 0.0f);
-    v3.position = glm::vec3(width, height, 0.0f);
-    v4.position = glm::vec3(0, height, 0.0f);
-    
-    v1.uv = glm::vec2(0.0f, 0.0f);
-    v2.uv = glm::vec2(1.0f, 0.0f);
-    v3.uv = glm::vec2(1.0f, 1.0f);
-    v4.uv = glm::vec2(0.0f, 1.0f);
+    //v1.position = glm::vec3{ -width / 2.0f,  -height / 2.0f,  0.0f };
+    //v2.position = glm::vec3{ width / 2.0f,   -height / 2.0f,  0.0f };
+    //v3.position = glm::vec3{ width / 2.0f,   height / 2.0f,   0.0f };
+    //v4.position = glm::vec3{ -width / 2.0f,  height / 2.0f,   0.0f };
+    v1.position = glm::vec3{ 0,  0,  0.0f };
+    v2.position = glm::vec3{ width,   0,  0.0f };
+    v3.position = glm::vec3{ width,   height,   0.0f };
+    v4.position = glm::vec3{ 0,  height,   0.0f };
+
+    v1.uv = glm::vec2{ 0.0f, 0.0f };
+    v2.uv = glm::vec2{ 1.0f, 0.0f };
+    v3.uv = glm::vec2{ 1.0f, 1.0f };
+    v4.uv = glm::vec2{ 0.0f, 1.0f };
     
     m_Vertices.emplace_back(v1);
     m_Vertices.emplace_back(v2);

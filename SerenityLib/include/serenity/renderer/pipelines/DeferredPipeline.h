@@ -250,7 +250,7 @@ namespace Engine::priv {
 
 
             void renderFullscreenTriangle() override;
-            void renderFullscreenQuad() override;
+            void renderFullscreenQuad(float width, float height) override;
 
             void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) override;
     };

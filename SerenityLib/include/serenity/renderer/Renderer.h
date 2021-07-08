@@ -122,6 +122,7 @@ namespace Engine::Renderer {
     void restoreCurrentOpenGLState();
 
     void renderFullscreenQuad();
+    void renderFullscreenQuad(float width, float height);
     void renderFullscreenTriangle();
 
     uint32_t getUniformLoc(const char* location);

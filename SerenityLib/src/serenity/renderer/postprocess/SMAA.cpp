@@ -569,7 +569,7 @@ constexpr uint32_t TEXTURE_INTERMEDIARY = Engine::priv::GBufferType::Normal;
 void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t sceneTexture, uint32_t outTexture, const Engine::priv::RenderModule& renderer) {
     gbuffer.bindFramebuffers(outTexture, "RGBA"); //probably the lighting buffer
     renderer.bind(m_Shader_Programs[PassStage::Edge].get<ShaderProgram>());
-
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     Engine::Renderer::Settings::clear(true, false, true);//lighting rgba, stencil is completely filled with 0's
 
     Engine::Renderer::GLEnable(GL_STENCIL_TEST);
@@ -603,7 +603,7 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
 void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t outTexture, const Engine::priv::RenderModule& renderer) {
     gbuffer.bindFramebuffers(TEXTURE_INTERMEDIARY, "RGBA");
     Engine::Renderer::Settings::clear(true, false, false); //clear color only
-
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_Programs[PassStage::Blend].get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
@@ -627,7 +627,7 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
 }
 void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Programs[PassStage::Neighbor].get<ShaderProgram>());
-
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
     Engine::Renderer::sendTextureSafe("textureMap", gbuffer.getTexture(sceneTexture), 0); //need original final image from first smaa pass
     Engine::Renderer::sendTextureSafe("blend_tex", gbuffer.getTexture(TEXTURE_INTERMEDIARY), 1);
@@ -641,11 +641,12 @@ void Engine::priv::SMAA::passFinal(Engine::priv::GBuffer& gbuffer, const Viewpor
     /*
     //this pass is optional. lets skip it for now
     //gbuffer.bindFramebuffers(GBufferType::Lighting);
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     gbuffer.stop();
 
     renderer.bind(m_Shader_Programs[PassStage::Final]);
 
-    Engine::Renderer::renderFullscreenTriangle(0,0,fboWidth,fboHeight);
+    Engine::Renderer::renderFullscreenTriangle();
     */
 }
 void Engine::Renderer::smaa::setQuality(SMAAQualityLevel qualityLevel) {
