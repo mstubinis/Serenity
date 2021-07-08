@@ -689,6 +689,7 @@
     <ClCompile Include="src\serenity\resources\mesh\VertexData.cpp" />
     <ClCompile Include="src\serenity\resources\mesh\VertexDataFormat.cpp" />
     <ClCompile Include="src\serenity\resources\Resource.cpp" />
+    <ClCompile Include="src\serenity\resources\ResourceModule.cpp" />
     <ClCompile Include="src\serenity\resources\shader\Shader.cpp" />
     <ClCompile Include="src\serenity\resources\shader\ShaderHelper.cpp" />
     <ClCompile Include="src\serenity\resources\shader\ShaderProgram.cpp" />

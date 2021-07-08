@@ -16,7 +16,7 @@ namespace Engine::priv {
     class ResourceModule final {
         friend class Engine::priv::ResourceManager;
         private:
-            static inline std::atomic<uint32_t>            m_RegisteredResources = 0;
+            static std::atomic<uint32_t>                   m_RegisteredResources;
             std::vector<std::unique_ptr<IResourceVector>>  m_Resources;
             mutable std::mutex                             m_Mutex;
         public:
