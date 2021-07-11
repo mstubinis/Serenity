@@ -77,8 +77,8 @@ void Engine::priv::HDR::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_
 
     gbuffer.bindFramebuffers(outTexture, outTexture2, "RGBA");
 
-    Engine::Renderer::sendUniform4Safe("HDRInfo", m_Exposure, 0.0f, godRaysFactor, (float)m_Algorithm);
-    Engine::Renderer::sendUniform1Safe("HasGodRays", (int)godRays);
+    Engine::Renderer::sendUniform4Safe("HDRInfo", m_Exposure, 0.0f, godRaysFactor, float(m_Algorithm));
+    Engine::Renderer::sendUniform1Safe("HasGodRays", int(godRays));
 
     Engine::Renderer::sendTextureSafe("lightingBuffer", gbuffer.getTexture(GBufferType::Lighting), 0);
     Engine::Renderer::sendTextureSafe("gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 1);

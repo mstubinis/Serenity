@@ -27,7 +27,6 @@ void Engine::priv::FullscreenTriangle::init() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW);
 
-    //vao's
     buildVAO();
     registerEvent(EventType::WindowFullscreenChanged);
 }
@@ -44,12 +43,12 @@ void Engine::priv::FullscreenTriangle::changeDimensions(float width, float heigh
     m_Vertices.clear();
     MeshVertexDataFullscreen v1, v2, v3;
 
-    //v1.position = glm::vec3(-width / 2.0f,                   -height / 2.0f,                    0.0f);
-    //v2.position = glm::vec3((2.0f * width) - (width / 2.0f), -height / 2.0f,                    0.0f);
-    //v3.position = glm::vec3(-width / 2.0f,                   (2.0f * height) - (height / 2.0f), 0.0f);
-    v1.position = glm::vec3(0, 0, 0.0f);
-    v2.position = glm::vec3((2.0f * width), 0, 0.0f);
-    v3.position = glm::vec3(0, (2.0f * height), 0.0f);
+    //v1.position = glm::vec3{ -width / 2.0f,                   -height / 2.0f,                    0.0f };
+    //v2.position = glm::vec3{ (2.0f * width) - (width / 2.0f), -height / 2.0f,                    0.0f };
+    //v3.position = glm::vec3{ -width / 2.0f,                   (2.0f * height) - (height / 2.0f), 0.0f };
+    v1.position = glm::vec3{ 0.0f,            0.0f,            0.0f };
+    v2.position = glm::vec3{(2.0f * width),   0.0f,            0.0f };
+    v3.position = glm::vec3{ 0.0f,           (2.0f * height),  0.0f };
 
     v1.uv = glm::vec2{ 0.0f, 0.0f };
     v2.uv = glm::vec2{ 2.0f, 0.0f };
@@ -101,7 +100,6 @@ void Engine::priv::FullscreenTriangle::onEvent(const Event& e) {
 #pragma endregion
 
 
-
 #pragma region Quad
 
 void Engine::priv::FullscreenQuad::init() {
@@ -125,7 +123,6 @@ void Engine::priv::FullscreenQuad::init() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW);
 
-    //vao's
     buildVAO();
     registerEvent(EventType::WindowFullscreenChanged);
 }
@@ -146,10 +143,10 @@ void Engine::priv::FullscreenQuad::changeDimensions(float width, float height) {
     //v2.position = glm::vec3{ width / 2.0f,   -height / 2.0f,  0.0f };
     //v3.position = glm::vec3{ width / 2.0f,   height / 2.0f,   0.0f };
     //v4.position = glm::vec3{ -width / 2.0f,  height / 2.0f,   0.0f };
-    v1.position = glm::vec3{ 0,  0,  0.0f };
-    v2.position = glm::vec3{ width,   0,  0.0f };
-    v3.position = glm::vec3{ width,   height,   0.0f };
-    v4.position = glm::vec3{ 0,  height,   0.0f };
+    v1.position = glm::vec3{ 0.0f,   0.0f,     0.0f };
+    v2.position = glm::vec3{ width,  0.0f,     0.0f };
+    v3.position = glm::vec3{ width,  height,   0.0f };
+    v4.position = glm::vec3{ 0.0f,   height,   0.0f };
 
     v1.uv = glm::vec2{ 0.0f, 0.0f };
     v2.uv = glm::vec2{ 1.0f, 0.0f };
