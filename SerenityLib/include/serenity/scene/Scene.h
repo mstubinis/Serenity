@@ -182,7 +182,7 @@ namespace Engine::priv {
         static std::vector<Camera*>&             GetCameras(const Scene& scene);
 
         template<class LIGHT>
-        [[nodiscard]] static inline const Engine::priv::LightContainer<LIGHT>& GetLights(const Scene& scene) noexcept {
+        [[nodiscard]] static inline Engine::priv::LightContainer<LIGHT>& GetLights(const Scene& scene) noexcept {
             return scene.m_LightsModule.getLights<LIGHT>(); 
         }
         template<class LIGHT>

@@ -182,14 +182,87 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
         ImGui::TreePop();
         ImGui::Separator();
     }
-    //do lights...
-    //const auto& directionalLights = Engine::priv::PublicScene::GetLights<DirectionalLight>(currentScene);
-    //if (ImGui::TreeNode("Entities")) {
+    
+    auto& directionalLights = Engine::priv::PublicScene::GetLights<DirectionalLight>(currentScene);
+    auto& sunLights         = Engine::priv::PublicScene::GetLights<SunLight>(currentScene);
+    auto& pointLights       = Engine::priv::PublicScene::GetLights<PointLight>(currentScene);
+    auto& spotLights        = Engine::priv::PublicScene::GetLights<SpotLight>(currentScene);
+    auto& rodLights         = Engine::priv::PublicScene::GetLights<RodLight>(currentScene);
 
+    auto do_light_logic = [](const char* nodeName, auto functor) {
+        if (ImGui::TreeNode(nodeName)) {
+            functor();
+            ImGui::TreePop();
+            ImGui::Separator();
+        }
+    };
+    auto base_light_stuff = [](auto& light, int id) {
+        const std::string title = (std::string("Light ") + std::to_string(id));
+        if (ImGui::TreeNode(title.c_str())) {
+            bool isLightActive = light.isActive();
+            ImGui::Checkbox("Enabled", &isLightActive);
+            light.activate(isLightActive);
 
-    //    ImGui::TreePop();
-    //    ImGui::Separator();
-    //}
+            bool isShadowCaster = light.isShadowCaster();
+            ImGui::Checkbox("Casts Shadows", &isShadowCaster);
+            light.setShadowCaster(isShadowCaster);
+
+            const auto& color = light.getColor();
+            ImGui::ColorEdit4("Color", const_cast<float*>(glm::value_ptr(color)));
+            light.setColor(color);
+
+            auto diff = light.getDiffuseIntensity();
+            auto spec = light.getSpecularIntensity();
+            ImGui::SliderFloat("Diffuse Intensity", &diff, 0.0f, 20.0f);
+            ImGui::SliderFloat("Specular Intensity", &spec, 0.0f, 20.0f);
+            light.setDiffuseIntensity(diff);
+            light.setSpecularIntensity(spec);
+
+            ImGui::TreePop();
+        }
+    };
+
+    if (directionalLights.size() > 0 || sunLights.size() > 0 || pointLights.size() > 0 || spotLights.size() > 0 || rodLights.size() > 0) {
+        if (ImGui::TreeNode("Lights")) {
+            if (directionalLights.size() > 0) {
+                do_light_logic("Directional Lights", [&]() {
+                    for (int i = 0; i < directionalLights.size(); ++i) {
+                        base_light_stuff(*directionalLights[i], i);
+                    }
+                });
+            }
+            if (sunLights.size() > 0) {
+                do_light_logic("Sun Lights", [&]() {
+                    for (int i = 0; i < sunLights.size(); ++i) {
+                        base_light_stuff(*sunLights[i], i);
+                    }
+                });
+            }
+            if (pointLights.size() > 0) {
+                do_light_logic("Point Lights", [&]() {
+                    for (int i = 0; i < pointLights.size(); ++i) {
+                        base_light_stuff(*pointLights[i], i);
+                    }
+                });
+            }
+            if (spotLights.size() > 0) {
+                do_light_logic("Spot Lights", [&]() {
+                    for (int i = 0; i < spotLights.size(); ++i) {
+                        base_light_stuff(*spotLights[i], i);
+                    }
+                });
+            }
+            if (rodLights.size() > 0) {
+                do_light_logic("Rod Lights", [&]() {
+                    for (int i = 0; i < rodLights.size(); ++i) {
+                        base_light_stuff(*rodLights[i], i);
+                    }
+                });
+            }
+            ImGui::TreePop();
+            ImGui::Separator();
+        }
+    }
     ImGui::EndChild();
 }
 void Engine::priv::EditorWindowScene::internal_render_profiler() {
