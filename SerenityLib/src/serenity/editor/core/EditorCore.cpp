@@ -10,6 +10,7 @@
 
 #include <serenity/editor/windowScene/WindowScene.h>
 #include <serenity/editor/embeddedImages/PointLightImage.h>
+#include <serenity/editor/embeddedImages/SunLightImage.h>
 
 Engine::view_ptr<Engine::priv::EditorCore> Engine::priv::EditorCore::EDITOR;
 
@@ -41,6 +42,7 @@ void Engine::priv::EditorCore::init(const EngineOptions& options, Engine::priv::
         m_RegisteredWindows.insert(resourceManager.m_Windows[0].get());
 
         m_PointLightTexture = internal_load_embedded_image(POINT_LIGHT_IMAGE_DATA, 32, 32, "PointLightEditorTexture");
+        m_SunLightTexture   = internal_load_embedded_image(SUN_LIGHT_IMAGE_DATA, 32, 32, "SunLightEditorTexture");
     }
 }
 void Engine::priv::EditorCore::update(Window& window, const float dt) {
@@ -93,10 +95,17 @@ void Engine::priv::EditorCore::renderLightIcons(Scene& scene) {
         if (camera) {
             const auto white = glm::vec4{ 1.0f };
             const auto depth = 0.1f;
+
             for (const auto& pointLight : pointLights) {
                 const auto twoDPos = Engine::Math::getScreenCoordinates(glm::vec3{ pointLight->getPosition() }, *camera, false);
                 if (twoDPos.z > 0) {
                     Engine::Renderer::renderTexture(m_PointLightTexture, glm::vec2{ twoDPos }, white, 0.0f, glm::vec2{ 1.0f }, depth);
+                }
+            }
+            for (const auto& sunLight : sunLights) {
+                const auto twoDPos = Engine::Math::getScreenCoordinates(glm::vec3{ sunLight->getPosition() }, *camera, false);
+                if (twoDPos.z > 0) {
+                    Engine::Renderer::renderTexture(m_SunLightTexture, glm::vec2{ twoDPos }, white, 0.0f, glm::vec2{ 1.0f }, depth);
                 }
             }
         }
