@@ -836,6 +836,7 @@
     <ClInclude Include="include\serenity\ecs\systems\SystemTransformParentChild.h" />
     <ClInclude Include="include\serenity\editor\core\EditorCore.h" />
     <ClInclude Include="include\serenity\editor\embeddedImages\PointLightImage.h" />
+    <ClInclude Include="include\serenity\editor\embeddedImages\SpotLightImage.h" />
     <ClInclude Include="include\serenity\editor\embeddedImages\SunLightImage.h" />
     <ClInclude Include="include\serenity\editor\imgui\imconfig-SFML.h" />
     <ClInclude Include="include\serenity\editor\imgui\imconfig.h" />

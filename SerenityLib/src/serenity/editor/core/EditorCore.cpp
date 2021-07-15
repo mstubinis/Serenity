@@ -11,6 +11,7 @@
 #include <serenity/editor/windowScene/WindowScene.h>
 #include <serenity/editor/embeddedImages/PointLightImage.h>
 #include <serenity/editor/embeddedImages/SunLightImage.h>
+#include <serenity/editor/embeddedImages/SpotLightImage.h>
 
 Engine::view_ptr<Engine::priv::EditorCore> Engine::priv::EditorCore::EDITOR;
 
@@ -43,6 +44,7 @@ void Engine::priv::EditorCore::init(const EngineOptions& options, Engine::priv::
 
         m_PointLightTexture = internal_load_embedded_image(POINT_LIGHT_IMAGE_DATA, 32, 32, "PointLightEditorTexture");
         m_SunLightTexture   = internal_load_embedded_image(SUN_LIGHT_IMAGE_DATA, 32, 32, "SunLightEditorTexture");
+        m_SpotLightTexture  = internal_load_embedded_image(SPOT_LIGHT_IMAGE_DATA, 32, 32, "SpotLightEditorTexture");
     }
 }
 void Engine::priv::EditorCore::update(Window& window, const float dt) {
@@ -93,21 +95,19 @@ void Engine::priv::EditorCore::renderLightIcons(Scene& scene) {
         auto& rodLights         = Engine::priv::PublicScene::GetLights<RodLight>(scene);
         auto camera             = scene.getActiveCamera();
         if (camera) {
-            const auto white = glm::vec4{ 1.0f };
-            const auto depth = 0.1f;
-
-            for (const auto& pointLight : pointLights) {
-                const auto twoDPos = Engine::Math::getScreenCoordinates(glm::vec3{ pointLight->getPosition() }, *camera, false);
-                if (twoDPos.z > 0) {
-                    Engine::Renderer::renderTexture(m_PointLightTexture, glm::vec2{ twoDPos }, white, 0.0f, glm::vec2{ 1.0f }, depth);
+            auto render_light_icons = [&camera](auto& container, Handle texture) {
+                const auto white = glm::vec4{ 1.0f };
+                const auto depth = 0.1f;
+                for (const auto& light : container) {
+                    const auto twoDPos = Engine::Math::getScreenCoordinates(glm::vec3{ light->getPosition() }, *camera, false);
+                    if (twoDPos.z > 0) {
+                        Engine::Renderer::renderTexture(texture, glm::vec2{ twoDPos }, white, 0.0f, glm::vec2{ 1.0f }, depth);
+                    }
                 }
-            }
-            for (const auto& sunLight : sunLights) {
-                const auto twoDPos = Engine::Math::getScreenCoordinates(glm::vec3{ sunLight->getPosition() }, *camera, false);
-                if (twoDPos.z > 0) {
-                    Engine::Renderer::renderTexture(m_SunLightTexture, glm::vec2{ twoDPos }, white, 0.0f, glm::vec2{ 1.0f }, depth);
-                }
-            }
+            };
+            render_light_icons(pointLights,  m_PointLightTexture);
+            render_light_icons(sunLights,    m_SunLightTexture);
+            render_light_icons(spotLights,   m_SpotLightTexture);
         }
     }
 }
