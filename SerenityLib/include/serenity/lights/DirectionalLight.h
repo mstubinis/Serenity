@@ -24,6 +24,8 @@ class DirectionalLight : public SunLight {
 
         void setDirection(const glm::vec3& direction);
         void setDirection(float directionX, float directionY, float directionZ);
+
+        glm::vec3 getDirection() const noexcept;
 };
 
 class DirectionalLightShadowData {

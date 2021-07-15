@@ -176,6 +176,7 @@ void EngineCore::internal_render(Scene& scene, Window& window, const float dt, c
         return;
     }
     scene.render();
+    m_Editor.renderLightIcons(scene);
     m_RenderModule._sort2DAPICommands();
     auto& scene_viewports = Engine::priv::PublicScene::GetViewports(scene);
     for (auto& viewport : scene_viewports) {

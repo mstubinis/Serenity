@@ -336,6 +336,9 @@
     <Filter Include="Header Files\Engine\Core\Renderer\culling">
       <UniqueIdentifier>{1fb277f3-60f2-4f12-82f9-008161d9e224}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\Editor\EmbeddedImages">
+      <UniqueIdentifier>{8b7133fd-59c3-45f4-a5e9-40a56ba01b4c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp">
@@ -1755,6 +1758,9 @@
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\culling\DistanceTest.h">
       <Filter>Header Files\Engine\Core\Renderer\culling</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\editor\embeddedImages\PointLightImage.h">
+      <Filter>Header Files\Engine\Core\Editor\EmbeddedImages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

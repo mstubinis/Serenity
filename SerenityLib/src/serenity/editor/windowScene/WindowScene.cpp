@@ -189,76 +189,86 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
     auto& spotLights        = Engine::priv::PublicScene::GetLights<SpotLight>(currentScene);
     auto& rodLights         = Engine::priv::PublicScene::GetLights<RodLight>(currentScene);
 
-    auto do_light_logic = [](const char* nodeName, auto functor) {
-        if (ImGui::TreeNode(nodeName)) {
-            functor();
-            ImGui::TreePop();
-            ImGui::Separator();
-        }
+    auto base_light_logic = [](auto& light) {
+        bool isLightActive = light.isActive();
+        ImGui::Checkbox("Enabled", &isLightActive);
+        light.activate(isLightActive);
+
+        bool isShadowCaster = light.isShadowCaster();
+        ImGui::Checkbox("Casts Shadows", &isShadowCaster);
+        light.setShadowCaster(isShadowCaster);
+
+        const auto& color = light.getColor();
+        ImGui::ColorEdit4("Color", const_cast<float*>(glm::value_ptr(color)));
+        light.setColor(color);
+
+        auto diff = light.getDiffuseIntensity();
+        auto spec = light.getSpecularIntensity();
+        ImGui::SliderFloat("Diffuse Intensity", &diff, 0.0f, 20.0f);
+        ImGui::SliderFloat("Specular Intensity", &spec, 0.0f, 20.0f);
+        light.setDiffuseIntensity(diff);
+        light.setSpecularIntensity(spec);
+
+        //TODO: position? all lights use position EXCEPT directional lights
     };
-    auto base_light_stuff = [](auto& light, int id) {
-        const std::string title = (std::string("Light ") + std::to_string(id));
-        if (ImGui::TreeNode(title.c_str())) {
-            bool isLightActive = light.isActive();
-            ImGui::Checkbox("Enabled", &isLightActive);
-            light.activate(isLightActive);
 
-            bool isShadowCaster = light.isShadowCaster();
-            ImGui::Checkbox("Casts Shadows", &isShadowCaster);
-            light.setShadowCaster(isShadowCaster);
-
-            const auto& color = light.getColor();
-            ImGui::ColorEdit4("Color", const_cast<float*>(glm::value_ptr(color)));
-            light.setColor(color);
-
-            auto diff = light.getDiffuseIntensity();
-            auto spec = light.getSpecularIntensity();
-            ImGui::SliderFloat("Diffuse Intensity", &diff, 0.0f, 20.0f);
-            ImGui::SliderFloat("Specular Intensity", &spec, 0.0f, 20.0f);
-            light.setDiffuseIntensity(diff);
-            light.setSpecularIntensity(spec);
-
-            ImGui::TreePop();
+    auto lamda_lights = [&](auto& container, const char* nodeName, const char* lightName, auto functor) {
+        if (container.size() > 0) {
+            if (ImGui::TreeNode(nodeName)) {
+                for (int i = 0; i < container.size(); ++i) {
+                    const std::string title = (std::string(lightName) + " " + std::to_string(i));
+                    if (ImGui::TreeNode(title.c_str())) {
+                        base_light_logic(*container[i]);
+                        functor(*container[i]);
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::TreePop();
+                ImGui::Separator();
+            }
         }
     };
 
     if (directionalLights.size() > 0 || sunLights.size() > 0 || pointLights.size() > 0 || spotLights.size() > 0 || rodLights.size() > 0) {
         if (ImGui::TreeNode("Lights")) {
-            if (directionalLights.size() > 0) {
-                do_light_logic("Directional Lights", [&]() {
-                    for (int i = 0; i < directionalLights.size(); ++i) {
-                        base_light_stuff(*directionalLights[i], i);
-                    }
-                });
-            }
-            if (sunLights.size() > 0) {
-                do_light_logic("Sun Lights", [&]() {
-                    for (int i = 0; i < sunLights.size(); ++i) {
-                        base_light_stuff(*sunLights[i], i);
-                    }
-                });
-            }
-            if (pointLights.size() > 0) {
-                do_light_logic("Point Lights", [&]() {
-                    for (int i = 0; i < pointLights.size(); ++i) {
-                        base_light_stuff(*pointLights[i], i);
-                    }
-                });
-            }
-            if (spotLights.size() > 0) {
-                do_light_logic("Spot Lights", [&]() {
-                    for (int i = 0; i < spotLights.size(); ++i) {
-                        base_light_stuff(*spotLights[i], i);
-                    }
-                });
-            }
-            if (rodLights.size() > 0) {
-                do_light_logic("Rod Lights", [&]() {
-                    for (int i = 0; i < rodLights.size(); ++i) {
-                        base_light_stuff(*rodLights[i], i);
-                    }
-                });
-            }
+            lamda_lights(directionalLights, "Directional Lights", "Directional Light", [&](DirectionalLight& light) {
+                const auto dir = light.getDirection();
+                ImGui::InputFloat3("Direction", const_cast<float*>(glm::value_ptr(dir)));
+                light.setDirection(dir); //TODO: add a check to see if the direction is different in this function call? this is quite expensive to do per frame
+            });
+            lamda_lights(sunLights, "Sun Lights", "Sun Light", [&](SunLight& light) {
+                auto transform   = light.getComponent<ComponentTransform>();
+                ImGui::InputDouble3("Position", &transform->m_Position[0]);
+            });
+            lamda_lights(pointLights, "Point Lights", "Point Light", [&](PointLight& light) {
+                auto transform   = light.getComponent<ComponentTransform>();
+                ImGui::InputDouble3("Position", &transform->m_Position[0]);
+                auto constant_   = light.getConstant();
+                auto linear_     = light.getLinear();
+                auto exponent_   = light.getExponent();
+                ImGui::SliderFloat("Constant", &constant_, 0.0f, 5.0f);
+                ImGui::SliderFloat("Linear", &linear_, 0.0f, 5.0f);
+                ImGui::SliderFloat("Exponent", &exponent_, 0.0f, 5.0f);
+                light.setConstant(constant_);
+                light.setLinear(linear_);
+                light.setExponent(exponent_);
+                //TODO: add attenuation model
+            });
+            lamda_lights(spotLights, "Spot Lights", "Spot Light", [&](SpotLight& light) {
+                auto transform   = light.getComponent<ComponentTransform>();
+                ImGui::InputDouble3("Position", &transform->m_Position[0]);
+
+                auto cutoff      = light.getCutoff();
+                auto outerCutoff = light.getCutoffOuter();
+                ImGui::SliderFloat("Inner Cutoff", &cutoff, 0.0f, 360.0f);
+                ImGui::SliderFloat("Outer Cutoff", &outerCutoff, 0.0f, 360.0f);
+                light.setCutoffDegrees(cutoff);
+                light.setCutoffOuterDegrees(outerCutoff);
+            });
+            lamda_lights(rodLights, "Rod Lights", "Rod Light", [&](RodLight& light) {
+                auto transform   = light.getComponent<ComponentTransform>();
+                ImGui::InputDouble3("Position", &transform->m_Position[0]);
+            });
             ImGui::TreePop();
             ImGui::Separator();
         }

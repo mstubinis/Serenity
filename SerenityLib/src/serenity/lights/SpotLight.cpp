@@ -6,8 +6,8 @@
 SpotLight::SpotLight(Scene* scene, const glm_vec3& position, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees)
     : PointLight{ scene, LightType::Spot, position }
 {
-    setCutoff(innerCutoffInDegrees);
-    setCutoffOuter(outerCutoffInDegrees);
+    setCutoffDegrees(innerCutoffInDegrees);
+    setCutoffOuterDegrees(outerCutoffInDegrees);
     setDirection(direction);
 }
 void SpotLight::setDirection(float xDir, float yDir, float zDir) noexcept {

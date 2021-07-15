@@ -27,10 +27,13 @@ bool DirectionalLight::setShadowCaster(bool castsShadow) noexcept {
 void DirectionalLight::setDirection(float directionX, float directionY, float directionZ) {
     if (m_IsShadowCaster) {
         auto& renderer = Engine::priv::Core::m_Engine->m_RenderModule;
-        renderer.m_Pipeline->setShadowDirectionalLightDirection(*this, glm::vec3(directionX, directionY, directionZ));
+        renderer.m_Pipeline->setShadowDirectionalLightDirection(*this, glm::vec3{ directionX, directionY, directionZ });
     }
     getComponent<ComponentTransform>()->alignTo(directionX, directionY, directionZ);
 }
 void DirectionalLight::setDirection(const glm::vec3& direction) {
     DirectionalLight::setDirection(direction.x, direction.y, direction.z);
+}
+glm::vec3 DirectionalLight::getDirection() const noexcept {
+    return getComponent<ComponentTransform>()->getForward();
 }

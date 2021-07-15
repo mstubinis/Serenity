@@ -925,7 +925,7 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, con
     auto forward   = transform->getForward();
     auto cull      = spotLight.getCullingRadius();
     auto factor    = 1100.0f * cull;
-    auto distSq    = (float)camera.getDistanceSquared(pos);
+    auto distSq    = float(camera.getDistanceSquared(pos));
     if (!Engine::priv::Culling::sphereIntersectTest(pos, cull, camera)) {
         return 0;
     }
@@ -936,9 +936,9 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, con
     sendUniform4Safe((start + "DataA").c_str(), 0.0f, spotLight.getDiffuseIntensity(), spotLight.getSpecularIntensity(), forward.x);
     sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, spotLight.getConstant(), spotLight.getLinear());
     sendUniform4Safe((start + "DataC").c_str(), spotLight.getExponent(), pos.x, pos.y, pos.z);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)spotLight.getType());
-    sendUniform4Safe((start + "DataE").c_str(), spotLight.getCutoff(), spotLight.getCutoffOuter(), (float)spotLight.getAttenuationModel(), 0.0f);
-    sendUniform2Safe("VertexShaderData", spotLight.getCutoffOuter(), cull);
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(spotLight.getType()));
+    sendUniform4Safe((start + "DataE").c_str(), glm::cos(glm::radians(spotLight.getCutoff())), glm::cos(glm::radians(spotLight.getCutoffOuter())), float(spotLight.getAttenuationModel()), 0.0f);
+    sendUniform2Safe("VertexShaderData", glm::cos(glm::radians(spotLight.getCutoffOuter())), cull);
     sendUniform1Safe("Type", 2.0f);
     sendUniform1Safe("ShadowEnabled", 0);
     if (distSq <= (cull * cull)) { //inside the light volume
