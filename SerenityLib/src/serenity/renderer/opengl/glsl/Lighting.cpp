@@ -59,10 +59,11 @@ vec3 CalcRodLight(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlVi
     if (ShaderHelper::lacksDefinition(code, "CalcSpotLight(", "vec3 CalcSpotLight(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
 vec3 CalcSpotLight(in Light inLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){ //generated
-    vec3 LightDir = normalize(LightPos - PxlWorldPos);
-    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
-    float cosAngle = dot(LightDir, -SpotLightDir);
-    float spotEffect = smoothstep(inLight.DataE.y, inLight.DataE.x, cosAngle);
+    vec3 LightDir    = normalize(LightPos - PxlWorldPos);
+    vec3 c           = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    float theta      = dot(LightDir, -SpotLightDir);
+    float epsilon    = inLight.DataE.x - inLight.DataE.y;
+    float spotEffect = smoothstep(0.0, 1.0, (theta - inLight.DataE.y) / epsilon);
     return c * spotEffect;
 }
 )", "vec3 CalcRodLight(");
@@ -74,9 +75,9 @@ vec3 CalcSpotLight(in Light inLight, vec3 SpotLightDir, vec3 LightPos,vec3 PxlWo
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
 vec3 CalcPointLight(in Light inLight, vec3 LightPos,vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){ //generated
     vec3 RawDirection = LightPos - PxlWorldPos;
-    float Dist = length(RawDirection);
-    vec3 LightDir = RawDirection / Dist;
-    vec3 c = CalcLightInternal(inLight, LightDir, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    float Dist        = length(RawDirection);
+    vec3 LightDir     = RawDirection / Dist;
+    vec3 c            = CalcLightInternal(inLight, LightDir, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     float attenuation = CalculateAttenuation(inLight, Dist, 1.0);
     return c * attenuation;
 }
@@ -435,10 +436,11 @@ vec3 CalcRodLightBasic(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 
     if (ShaderHelper::lacksDefinition(code, "CalcSpotLightBasic(", "vec3 CalcSpotLightBasic(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
 vec3 CalcSpotLightBasic(in Light inLight, vec3 SpotLightDir, vec3 LightPos, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
-    vec3 LightDir = normalize(LightPos - PxlWorldPos);
-    vec3 c = CalcPointLightBasic(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
-    float cosAngle = dot(LightDir, -SpotLightDir);
-    float spotEffect = smoothstep(inLight.DataE.y, inLight.DataE.x, cosAngle);
+    vec3 LightDir    = normalize(LightPos - PxlWorldPos);
+    vec3 c           = CalcPointLightBasic(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO);
+    float theta      = dot(LightDir, -SpotLightDir);
+    float epsilon    = inLight.DataE.x - inLight.DataE.y;
+    float spotEffect = smoothstep(0.0, 1.0, (theta - inLight.DataE.y) / epsilon);
     return c * spotEffect;
 }
 )", "vec3 CalcRodLightBasic(");
@@ -450,8 +452,8 @@ vec3 CalcSpotLightBasic(in Light inLight, vec3 SpotLightDir, vec3 LightPos, vec3
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
 vec3 CalcPointLightBasic(in Light inLight, vec3 LightPos, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, float MatAlpha, float AO){
     vec3 RawDirection = LightPos - PxlWorldPos;
-    float Dist = length(RawDirection);
-    vec3 LightDir = RawDirection / Dist;
+    float Dist        = length(RawDirection);
+    vec3 LightDir     = RawDirection / Dist;
     return CalcLightInternalBasic(inLight, LightDir, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MatAlpha, AO) * CalculateAttenuationBasic(inLight, Dist, 1.0);
 }
 )", "vec3 CalcSpotLightBasic(");

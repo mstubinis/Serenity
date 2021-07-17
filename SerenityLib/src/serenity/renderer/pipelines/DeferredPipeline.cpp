@@ -743,8 +743,8 @@ void DeferredPipeline::onFullscreen() {
     m_GBuffer.init(winSize.x, winSize.y);
 }
 void DeferredPipeline::onResize(uint32_t newWidth, uint32_t newHeight) {
-    float floatWidth     = (float)newWidth;
-    float floatHeight    = (float)newHeight;
+    float floatWidth     = float(newWidth);
+    float floatHeight    = float(newHeight);
     m_2DProjectionMatrix = glm::ortho(0.0f, floatWidth, 0.0f, floatHeight, 0.003f, 6000.0f);
 
     m_FullscreenQuad.changeDimensions(floatWidth, floatHeight);
@@ -834,7 +834,7 @@ void DeferredPipeline::setShadowDirectionalLightDirection(DirectionalLight& dire
     }
 }
 void DeferredPipeline::sendGPUDataAllLights(Scene& scene, Camera& camera) {
-    int maxLights = glm::min((int)scene.getNumLights(), MAX_LIGHTS_PER_PASS);
+    int maxLights = glm::min(int(scene.getNumLights()), MAX_LIGHTS_PER_PASS);
     Engine::Renderer::sendUniform1Safe("numLights", maxLights);
     int i = 0;
     auto lambda = [&i, this, &camera, maxLights](const auto& container) {
@@ -874,7 +874,7 @@ void DeferredPipeline::sendGPUDataLight(Camera& camera, SunLight& sunLight, cons
     const auto& col  = sunLight.getColor();
     sendUniform4Safe((start + "DataA").c_str(), 0.0f, sunLight.getDiffuseIntensity(), sunLight.getSpecularIntensity(), 0.0f);
     sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)sunLight.getType());
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(sunLight.getType()));
     sendUniform1Safe("Type", 0.0f);
     sendUniform1Safe("ShadowEnabled", 0);
 }
@@ -933,12 +933,14 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, con
         return 0;
     }
     const auto& col = spotLight.getColor();
+
+    auto cosRad = [](float in) { return glm::cos(glm::radians(in)); };
+
     sendUniform4Safe((start + "DataA").c_str(), 0.0f, spotLight.getDiffuseIntensity(), spotLight.getSpecularIntensity(), forward.x);
     sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, spotLight.getConstant(), spotLight.getLinear());
     sendUniform4Safe((start + "DataC").c_str(), spotLight.getExponent(), pos.x, pos.y, pos.z);
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(spotLight.getType()));
-    sendUniform4Safe((start + "DataE").c_str(), glm::cos(glm::radians(spotLight.getCutoff())), glm::cos(glm::radians(spotLight.getCutoffOuter())), float(spotLight.getAttenuationModel()), 0.0f);
-    sendUniform2Safe("VertexShaderData", glm::cos(glm::radians(spotLight.getCutoffOuter())), cull);
+    sendUniform4Safe((start + "DataE").c_str(), cosRad(spotLight.getCutoff()), cosRad(spotLight.getCutoffOuter()), float(spotLight.getAttenuationModel()), 0.0f);
     sendUniform1Safe("Type", 2.0f);
     sendUniform1Safe("ShadowEnabled", 0);
     if (distSq <= (cull * cull)) { //inside the light volume
@@ -951,7 +953,7 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const
     auto pos             = glm::vec3{ transform->getPosition() };
     auto cullingDistance = rodLight.getRodLength() + (rodLight.getCullingRadius() * 2.0f);
     auto factor          = 1100.0f * cullingDistance;
-    auto distSq          = (float)camera.getDistanceSquared(pos);
+    auto distSq          = float(camera.getDistanceSquared(pos));
     if (!Engine::priv::Culling::sphereIntersectTest(pos, cullingDistance, camera) || (distSq > factor * factor)) {
         return 0;
     }
@@ -962,8 +964,8 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const
     sendUniform4Safe((start + "DataA").c_str(), 0.0f, rodLight.getDiffuseIntensity(), rodLight.getSpecularIntensity(), firstEndPt.x);
     sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, rodLight.getConstant(), rodLight.getLinear());
     sendUniform4Safe((start + "DataC").c_str(), rodLight.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)rodLight.getType());
-    sendUniform4Safe((start + "DataE").c_str(), rodLight.getRodLength(), 0.0f, (float)rodLight.getAttenuationModel(), 0.0f);
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(rodLight.getType()));
+    sendUniform4Safe((start + "DataE").c_str(), rodLight.getRodLength(), 0.0f, float(rodLight.getAttenuationModel()), 0.0f);
     sendUniform1Safe("Type", 1.0f);
     sendUniform1Safe("ShadowEnabled", 0);
     if (distSq <= (cullingDistance * cullingDistance)) {
@@ -1039,7 +1041,6 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
         cullFace(GL_BACK);
     }
     auto& spotLightMesh = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds().get<Mesh>();
-
     m_Renderer.bind(&spotLightMesh);
     renderMesh(spotLightMesh);
     m_Renderer.unbind(&spotLightMesh);
@@ -1084,7 +1085,6 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
     if (result == 0) {
         return;
     }
-
     Engine::Renderer::sendTextureSafe("gTextureMap", *projectionLight.getTexture().get<Texture>(), 5);
 
     if (result == 1) {

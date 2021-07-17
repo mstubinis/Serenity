@@ -351,10 +351,14 @@ float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bo
     return angle;
 }
 glm::quat Math::alignTo(float x, float y, float z) noexcept {
-    auto lookat       = glm::lookAt(glm::vec3{ 0.0f }, glm::vec3{ x, y, z }, glm::vec3{ 0.0f, 1.0f, 0.0f });
-    glm::quat outQuat = glm::conjugate(glm::toQuat(lookat));
-    outQuat           = glm::normalize(outQuat);
-    return outQuat;
+    auto eye    = glm::vec3{ 0.0f };
+    auto center = glm::vec3{ x, y, z };
+    auto up     = glm::vec3{ 0.0f, 1.0f, 0.0f };
+    auto CdotU  = glm::dot(center, up);
+    if (CdotU == 1.0f || CdotU == -1.0f) {
+        center += 0.001f;
+    }
+    return glm::normalize(glm::conjugate(glm::toQuat(glm::lookAt(eye, center, up))));
 }
 void Math::setColor(glm::vec3& c, float r, float g, float b){
     if(r > 1.0f) r /= 255.0f;

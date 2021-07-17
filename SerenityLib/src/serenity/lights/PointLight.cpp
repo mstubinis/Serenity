@@ -45,8 +45,8 @@ float PointLight::calculateCullingRadius() {
     //else if(m_AttenuationModel == LightAttenuation::Distance){
     //    radius = (lightMax * (256.0f / 5.0f));
     //}
-    auto& body = *getComponent<ComponentTransform>();
-    body.setScale(radius, radius, radius);
+    auto& transform = *getComponent<ComponentTransform>();
+    transform.setScale(radius);
     return radius;
 }
 void PointLight::setConstant(float constant) {

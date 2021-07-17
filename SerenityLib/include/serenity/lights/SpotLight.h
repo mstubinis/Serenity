@@ -6,8 +6,8 @@ class SpotLight;
 
 #include <serenity/lights/PointLight.h>
 
-constexpr float SPOT_LIGHT_DEFAULT_CUTOFF_DEGREES = 11.0f;
-constexpr float SPOT_LIGHT_DEFAULT_OUTER_CUTOFF_DEGREES = 13.0f;
+constexpr float SPOT_LIGHT_DEFAULT_CUTOFF_DEGREES = 12.5f;
+constexpr float SPOT_LIGHT_DEFAULT_OUTER_CUTOFF_DEGREES = 17.5f;
 
 class SpotLightShadowData {
 

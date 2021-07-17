@@ -128,7 +128,6 @@ layout (location = 1) in vec2 uv;
 
 uniform mat4 Model;
 uniform mat4 VP;
-uniform vec2 VertexShaderData;
 uniform float Type;
 uniform vec3 uSceneAmbientColor;
 
@@ -136,16 +135,10 @@ varying vec2 texcoords;
 flat varying vec3 CamRealPosition;
 flat varying vec3 SceneAmbientColor;
 
-vec3 doSpotLightStuff(vec3 inPositions){
-    float opposite = tan(VertexShaderData.x * 0.5) * VertexShaderData.y;
-    inPositions.xy *= vec2(opposite / VertexShaderData.y);
-    return inPositions;
-}
-void main(){
+void main() {
     mat4 ModelClone = Model;
     vec3 ModelSpacePositions = position;
     if(Type == 2.0){
-        ModelSpacePositions = doSpotLightStuff(ModelSpacePositions);
         ModelClone[3][0] -= CameraRealPosition.x;
         ModelClone[3][1] -= CameraRealPosition.y;
         ModelClone[3][2] -= CameraRealPosition.z;

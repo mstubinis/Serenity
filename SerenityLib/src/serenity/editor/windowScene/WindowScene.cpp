@@ -231,6 +231,22 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
 
     if (directionalLights.size() > 0 || sunLights.size() > 0 || pointLights.size() > 0 || spotLights.size() > 0 || rodLights.size() > 0) {
         if (ImGui::TreeNode("Lights")) {
+
+            auto lamda_point_light_data = [](PointLight& light) {
+                auto transform = light.getComponent<ComponentTransform>();
+                ImGui::InputDouble3("Position", &transform->m_Position[0]);
+                auto constant_ = light.getConstant();
+                auto linear_   = light.getLinear();
+                auto exponent_ = light.getExponent();
+                ImGui::SliderFloat("Constant", &constant_, 0.0f, 5.0f);
+                ImGui::SliderFloat("Linear", &linear_, 0.0f, 5.0f);
+                ImGui::SliderFloat("Exponent", &exponent_, 0.0f, 5.0f);
+                light.setConstant(constant_);
+                light.setLinear(linear_);
+                light.setExponent(exponent_);
+                //TODO: add attenuation model
+            };
+
             lamda_lights(directionalLights, "Directional Lights", "Directional Light", [&](DirectionalLight& light) {
                 const auto dir = light.getDirection();
                 ImGui::InputFloat3("Direction", const_cast<float*>(glm::value_ptr(dir)));
@@ -241,33 +257,19 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                 ImGui::InputDouble3("Position", &transform->m_Position[0]);
             });
             lamda_lights(pointLights, "Point Lights", "Point Light", [&](PointLight& light) {
-                auto transform   = light.getComponent<ComponentTransform>();
-                ImGui::InputDouble3("Position", &transform->m_Position[0]);
-                auto constant_   = light.getConstant();
-                auto linear_     = light.getLinear();
-                auto exponent_   = light.getExponent();
-                ImGui::SliderFloat("Constant", &constant_, 0.0f, 5.0f);
-                ImGui::SliderFloat("Linear", &linear_, 0.0f, 5.0f);
-                ImGui::SliderFloat("Exponent", &exponent_, 0.0f, 5.0f);
-                light.setConstant(constant_);
-                light.setLinear(linear_);
-                light.setExponent(exponent_);
-                //TODO: add attenuation model
+                lamda_point_light_data(light);
             });
             lamda_lights(spotLights, "Spot Lights", "Spot Light", [&](SpotLight& light) {
-                auto transform   = light.getComponent<ComponentTransform>();
-                ImGui::InputDouble3("Position", &transform->m_Position[0]);
-
+                lamda_point_light_data(light);
                 auto cutoff      = light.getCutoff();
                 auto outerCutoff = light.getCutoffOuter();
-                ImGui::SliderFloat("Inner Cutoff", &cutoff, 0.0f, 360.0f);
-                ImGui::SliderFloat("Outer Cutoff", &outerCutoff, 0.0f, 360.0f);
+                ImGui::SliderFloat("Inner Cutoff", &cutoff, 0.0f, 180.0f);
+                ImGui::SliderFloat("Outer Cutoff", &outerCutoff, 0.0f, 180.0f);
                 light.setCutoffDegrees(cutoff);
                 light.setCutoffOuterDegrees(outerCutoff);
             });
             lamda_lights(rodLights, "Rod Lights", "Rod Light", [&](RodLight& light) {
-                auto transform   = light.getComponent<ComponentTransform>();
-                ImGui::InputDouble3("Position", &transform->m_Position[0]);
+                lamda_point_light_data(light);
             });
             ImGui::TreePop();
             ImGui::Separator();
