@@ -773,7 +773,7 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, Handle shaderProgram, Scene&
     if (skybox) {
         Engine::Renderer::sendUniform1("IsFake", 0);
         Engine::Renderer::sendTextureSafe("Texture", *skybox->cubemap().get<TextureCubemap>(), 0);
-    }else{
+    } else {
         Engine::Renderer::sendUniform1("IsFake", 1);
         const auto& bgColor = scene.getBackgroundColor();
         Engine::Renderer::sendUniform4Safe("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
@@ -959,8 +959,8 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const
     }
     const auto& col      = rodLight.getColor();
     float half           = rodLight.getRodLength() / 2.0f;
-    auto firstEndPt      = pos + (transform->getForward() * half);
-    auto secndEndPt      = pos - (transform->getForward() * half);
+    auto firstEndPt      = (pos + (transform->getForward() * half)) - glm::vec3{ m_CameraUBODataPtr->CameraInfo3 };
+    auto secndEndPt      = (pos - (transform->getForward() * half)) - glm::vec3{ m_CameraUBODataPtr->CameraInfo3 };
     sendUniform4Safe((start + "DataA").c_str(), 0.0f, rodLight.getDiffuseIntensity(), rodLight.getSpecularIntensity(), firstEndPt.x);
     sendUniform4Safe((start + "DataB").c_str(), firstEndPt.y, firstEndPt.z, rodLight.getConstant(), rodLight.getLinear());
     sendUniform4Safe((start + "DataC").c_str(), rodLight.getExponent(), secndEndPt.x, secndEndPt.y, secndEndPt.z);

@@ -42,13 +42,13 @@ void opengl::glsl::Lighting::convert(std::string& code, uint32_t versionNumber, 
     if (ShaderHelper::lacksDefinition(code, "CalcRodLight(", "vec3 CalcRodLight(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
 vec3 CalcRodLight(in Light inLight, vec3 A, vec3 B, vec3 PxlWorldPos, vec3 PxlViewPos, vec3 PxlNormal, float Specular, vec3 Albedo, float SSAO, vec2 MetalSmooth, float MatAlpha, vec3 MatF0, float MatTypeDiffuse, float MatTypeSpecular, float AO){ //generated
-    vec3 BMinusA = B - A;
-    vec3 CMinusA = PxlWorldPos - A;
-    float Dist = length(BMinusA);
-    vec3 _Normal = BMinusA / Dist;
-    float t = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);
+    vec3 BMinusA  = B - A;
+    vec3 CMinusA  = PxlWorldPos - A;
+    float Dist    = length(BMinusA);
+    vec3 _Normal  = BMinusA / Dist;
+    float t       = clamp(dot(CMinusA, _Normal / Dist), 0.0, 1.0);
     vec3 LightPos = A + t * BMinusA;
-    vec3 c = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
+    vec3 c        = CalcPointLight(inLight, LightPos, PxlWorldPos, PxlViewPos, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     return c;
 }
 )", "void main(");

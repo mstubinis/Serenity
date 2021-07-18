@@ -1768,6 +1768,9 @@
     <ClInclude Include="include\serenity\editor\embeddedImages\SpotLightImage.h">
       <Filter>Header Files\Engine\Core\Editor\EmbeddedImages</Filter>
     </ClInclude>
+    <ClInclude Include="include\serenity\editor\embeddedImages\RodLightImage.h">
+      <Filter>Header Files\Engine\Core\Editor\EmbeddedImages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\serenity\ecs\systems\SystemBaseClass.inl">

@@ -22,7 +22,7 @@ class RodLight : public PointLight {
         RodLight() = delete;
         RodLight(
             Scene* scene,
-            const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f),
+            const glm_vec3& position = glm_vec3{ 0.0f, 0.0f, 0.0f },
             float rodLength = ROD_LIGHT_DEFAULT_ROD_LENGTH
         );
         virtual ~RodLight();

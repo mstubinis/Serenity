@@ -12,6 +12,7 @@
 #include <serenity/editor/embeddedImages/PointLightImage.h>
 #include <serenity/editor/embeddedImages/SunLightImage.h>
 #include <serenity/editor/embeddedImages/SpotLightImage.h>
+#include <serenity/editor/embeddedImages/RodLightImage.h>
 
 Engine::view_ptr<Engine::priv::EditorCore> Engine::priv::EditorCore::EDITOR;
 
@@ -45,6 +46,7 @@ void Engine::priv::EditorCore::init(const EngineOptions& options, Engine::priv::
         m_PointLightTexture = internal_load_embedded_image(POINT_LIGHT_IMAGE_DATA, 32, 32, "PointLightEditorTexture");
         m_SunLightTexture   = internal_load_embedded_image(SUN_LIGHT_IMAGE_DATA, 32, 32, "SunLightEditorTexture");
         m_SpotLightTexture  = internal_load_embedded_image(SPOT_LIGHT_IMAGE_DATA, 32, 32, "SpotLightEditorTexture");
+        m_RodLightTexture   = internal_load_embedded_image(ROD_LIGHT_IMAGE_DATA, 32, 32, "RodLightEditorTexture");
     }
 }
 void Engine::priv::EditorCore::update(Window& window, const float dt) {
@@ -108,6 +110,7 @@ void Engine::priv::EditorCore::renderLightIcons(Scene& scene) {
             render_light_icons(pointLights,  m_PointLightTexture);
             render_light_icons(sunLights,    m_SunLightTexture);
             render_light_icons(spotLights,   m_SpotLightTexture);
+            render_light_icons(rodLights,    m_RodLightTexture);
         }
     }
 }
