@@ -34,17 +34,29 @@ PointLight::PointLight(Scene* scene, const glm_vec3& pos)
     : PointLight{ scene, LightType::Point, pos.x, pos.y, pos.z }
 {}
 float PointLight::calculateCullingRadius() {
-    float lightMax = Engine::Math::Max(m_Color.x, m_Color.y, m_Color.z);
-    float radius = 0;
-    //if(m_AttenuationModel == LightAttenuation::Constant_Linear_Exponent){
-          radius = (-m_L + glm::sqrt(m_L * m_L - 4.0f * m_E * (m_C - (256.0f / 5.0f) * lightMax))) / (2.0f * m_E);
-    //}
-    //else if(m_AttenuationModel == LightAttenuation::Distance_Squared){
-    //    radius = glm::sqrt(lightMax * (256.0f / 5.0f)); // 51.2f   is   256.0f / 5.0f
-    //}
-    //else if(m_AttenuationModel == LightAttenuation::Distance){
-    //    radius = (lightMax * (256.0f / 5.0f));
-    //}
+    float lightMax   = Engine::Math::Max(m_Color.x, m_Color.y, m_Color.z);
+    float almostDark = 256.0f / 5.0f;
+    float radius     = 0;
+    switch (m_AttenuationModel) {
+        case LightAttenuation::Constant_Linear_Exponent: {
+            radius = (-m_L + glm::sqrt(m_L * m_L - 4.0f * m_E * (m_C - almostDark * lightMax))) / (2.0f * m_E);
+            break;
+        } case LightAttenuation::Distance_Squared: {
+            radius = glm::sqrt(lightMax * almostDark);
+            break;
+        } case LightAttenuation::Distance: {
+            radius = (lightMax * almostDark);
+            break;
+        } case LightAttenuation::Constant: {
+            radius = (lightMax * almostDark);
+            break;
+        } case LightAttenuation::Distance_Radius_Squared: {
+            //float rad = 1.0f;
+            //attenuation = pow((Dist / rad) + 1.0, 2.0);
+            radius = (lightMax * almostDark);
+            break;
+        }
+    }
     auto& transform = *getComponent<ComponentTransform>();
     transform.setScale(radius);
     return radius;
@@ -72,6 +84,8 @@ void PointLight::setAttenuation(LightRange r) {
     PointLight::setAttenuation(data.constant, data.linear, data.exponent);
 }
 void PointLight::setAttenuationModel(LightAttenuation model) {
-    m_AttenuationModel = model; 
-    m_CullingRadius = calculateCullingRadius();
+    if (m_AttenuationModel != model) {
+        m_AttenuationModel = model;
+        m_CullingRadius    = calculateCullingRadius();
+    }
 }

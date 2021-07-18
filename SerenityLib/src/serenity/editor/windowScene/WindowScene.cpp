@@ -244,7 +244,10 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                 light.setConstant(constant_);
                 light.setLinear(linear_);
                 light.setExponent(exponent_);
-                //TODO: add attenuation model
+                static const char* AttenuModels[] = { "Constant", "Distance", "Distance Squared", "Constant Linear Exponent", "Distance Radius Squared" };
+                static int curr_atten_model       = int(light.getAttenuationModel());
+                ImGui::ListBox("Attenuation Model", &curr_atten_model, AttenuModels, IM_ARRAYSIZE(AttenuModels));
+                light.setAttenuationModel(static_cast<LightAttenuation>(curr_atten_model));
             };
 
             lamda_lights(directionalLights, "Directional Lights", "Directional Light", [&](DirectionalLight& light) {

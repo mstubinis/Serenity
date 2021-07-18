@@ -370,20 +370,27 @@ vec3 SchlickFrensel(float inTheta, vec3 inF0){ //generated
 #pragma endregion
 
 #pragma region Attenuation Function
+/*
+if(currentLight.DataE.z == 0.0){       //constant
+}else if(currentLight.DataE.z == 1.0){ //distance
+}else if(currentLight.DataE.z == 2.0){ //distance squared
+}else if(currentLight.DataE.z == 3.0){ //constant linear exponent
+}else if(currentLight.DataE.z == 4.0){ //distance radius squared
+*/
     if (ShaderHelper::lacksDefinition(code, "CalculateAttenuation(", "float CalculateAttenuation(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-float CalculateAttenuation(in Light currentLight, float Dist, float radius){ //generated
+float CalculateAttenuation(in Light inLight, float Dist, float radius) { //generated
     float attenuation = 0.0;
-    if(currentLight.DataE.z == 0.0){       //constant
-        attenuation = 1.0 / max(1.0 , currentLight.DataB.z);
-    }else if(currentLight.DataE.z == 1.0){ //distance
-        attenuation = 1.0 / max(1.0 , Dist);
-    }else if(currentLight.DataE.z == 2.0){ //distance squared
-        attenuation = 1.0 / max(1.0 , Dist * Dist);
-    }else if(currentLight.DataE.z == 3.0){ //constant linear exponent
-        attenuation = 1.0 / max(1.0 , currentLight.DataB.z + (currentLight.DataB.w * Dist) + (currentLight.DataC.x * Dist * Dist));
-    }else if(currentLight.DataE.z == 4.0){ //distance radius squared
-        attenuation = 1.0 / max(1.0 ,pow((Dist / radius) + 1.0, 2.0));
+    if (inLight.DataE.z == 0.0) {
+        attenuation = 1.0 / max(1.0, inLight.DataB.z);
+    } else if (inLight.DataE.z == 1.0) {
+        attenuation = 1.0 / max(1.0, Dist);
+    } else if (inLight.DataE.z == 2.0) {
+        attenuation = 1.0 / max(1.0, Dist * Dist);
+    } else if (inLight.DataE.z == 3.0) {
+        attenuation = 1.0 / max(1.0, inLight.DataB.z + (inLight.DataB.w * Dist) + (inLight.DataC.x * Dist * Dist));
+    } else if (inLight.DataE.z == 4.0) {
+        attenuation = 1.0 / max(1.0, pow((Dist / radius) + 1.0, 2.0));
     }
     return attenuation;
 }
@@ -514,18 +521,18 @@ vec3 CalcLightInternalBasic(in Light currentLight, vec3 LightDir, vec3 PxlWorldP
 #pragma region Attenuation Function Basic
     if (ShaderHelper::lacksDefinition(code, "CalculateAttenuationBasic(", "float CalculateAttenuationBasic(")) {
         ShaderHelper::insertStringRightBeforeLineContent(code, R"(
-float CalculateAttenuationBasic(in Light currentLight, float Dist, float radius){
+float CalculateAttenuationBasic(in Light inLight, float Dist, float radius){
     float attenuation = 0.0;
-    if(currentLight.DataE.z == 0.0){       //constant
-        attenuation = 1.0 / max(1.0 , currentLight.DataB.z);
-    }else if(currentLight.DataE.z == 1.0){ //distance
-        attenuation = 1.0 / max(1.0 , Dist);
-    }else if(currentLight.DataE.z == 2.0){ //distance squared
-        attenuation = 1.0 / max(1.0 , Dist * Dist);
-    }else if(currentLight.DataE.z == 3.0){ //constant linear exponent
-        attenuation = 1.0 / max(1.0 , currentLight.DataB.z + (currentLight.DataB.w * Dist) + (currentLight.DataC.x * Dist * Dist));
-    }else if(currentLight.DataE.z == 4.0){ //distance radius squared
-        attenuation = 1.0 / max(1.0 ,pow((Dist / radius) + 1.0, 2.0));
+    if (inLight.DataE.z == 0.0) {
+        attenuation = 1.0 / max(1.0, inLight.DataB.z);
+    } else if (inLight.DataE.z == 1.0) {
+        attenuation = 1.0 / max(1.0, Dist);
+    } else if (inLight.DataE.z == 2.0) {
+        attenuation = 1.0 / max(1.0, Dist * Dist);
+    } else if (inLight.DataE.z == 3.0) {
+        attenuation = 1.0 / max(1.0, inLight.DataB.z + (inLight.DataB.w * Dist) + (inLight.DataC.x * Dist * Dist));
+    } else if (inLight.DataE.z == 4.0) {
+        attenuation = 1.0 / max(1.0, pow((Dist / radius) + 1.0, 2.0));
     }
     return attenuation;
 }
