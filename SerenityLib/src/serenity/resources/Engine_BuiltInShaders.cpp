@@ -1246,17 +1246,17 @@ void main(){
     float MatTypeDiffuse  = materials[matID].a;
     float MatTypeSpecular = materials[matID].b;
     float AO              = fract(MatIDAndAO) + 0.0001;
-    if(light.DataD.w == 0.0){
+    if (light.DataD.w == 0.0) {
         lightCalculation = CalcLightInternal(light, normalize(LightPosition - PxlPosition), PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
-    }else if(light.DataD.w == 1.0){
+    } else if (light.DataD.w == 1.0) {
         lightCalculation = CalcPointLight(light, LightPosition, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
-    }else if(light.DataD.w == 2.0){
+    } else if (light.DataD.w == 2.0) {
         lightCalculation = CalcLightInternal(light, LightDirection, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
-    }else if(light.DataD.w == 3.0){
+    } else if (light.DataD.w == 3.0) {
         lightCalculation = CalcSpotLight(light, LightDirection, LightPosition, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
-    }else if(light.DataD.w == 4.0){
+    } else if (light.DataD.w == 4.0) {
         lightCalculation = CalcRodLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
-    }else if(light.DataD.w == 5.0){
+    } else if (light.DataD.w == 5.0) {
         lightCalculation = CalcProjectionLight(light, vec3(light.DataA.w, light.DataB.xy), light.DataC.yzw, PxlPosition, PxlViewPosition, PxlNormal, Specular, Albedo, SSAO, MetalSmooth, MatAlpha, MatF0, MatTypeDiffuse, MatTypeSpecular, AO);
     }
     gl_FragData[0].rgb = lightCalculation;

@@ -22,10 +22,12 @@ ThreadPoolFutureCallback::ThreadPoolFutureCallback(FutureType&& future, ThreadJo
 ThreadPool::ThreadPool(size_t sections) {
     m_FuturesBasic.resize(sections);
     m_FuturesCallback.resize(sections);
-
-    for (auto& section : m_FuturesBasic) { section.reserve(1200); }
-    for (auto& section : m_FuturesCallback) { section.reserve(1200); }
-
+    for (auto& section : m_FuturesBasic) { 
+        section.reserve(1200);
+    }
+    for (auto& section : m_FuturesCallback) {
+        section.reserve(1200); 
+    }
     m_TaskQueues.resize(sections);
 }
 ThreadPool::~ThreadPool() {
@@ -109,8 +111,7 @@ void ThreadPool::update() {
                 if ((*it).isReady()) {
                     (*it)(); //calls the "then" function
                     it = callbackSection.erase(it);
-                }
-                else {
+                } else {
                     ++it;
                 }
             }
@@ -120,8 +121,7 @@ void ThreadPool::update() {
             while (it != basicSection.end()) {
                 if ((*it).isReady()) {
                     it = basicSection.erase(it);
-                }
-                else {
+                } else {
                     ++it;
                 }
             }

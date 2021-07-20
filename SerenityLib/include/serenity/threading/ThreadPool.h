@@ -65,7 +65,6 @@ namespace Engine::priv {
 
             inline void operator()() const noexcept {
                 ASSERT(m_Callback, __FUNCTION__ << "(): m_Callback was invalid!");
-                //if(m_Callback)
                 m_Callback();
             }
     };
@@ -86,19 +85,20 @@ namespace Engine::priv {
             ThreadPool(size_t sections = 2U);
             ~ThreadPool();
 
-            bool startup(size_t num_threads);
-
             ThreadPool(const ThreadPool&) noexcept            = delete;
             ThreadPool& operator=(const ThreadPool&) noexcept = delete;
             ThreadPool(ThreadPool&&) noexcept                 = delete;
             ThreadPool& operator=(ThreadPool&&) noexcept      = delete;
+
+            //starts the threadpool. the threadpool is stopped by default
+            bool startup(size_t num_threads);
 
             void shutdown() noexcept;
 
             [[nodiscard]] size_t get_number_of_tasks_in_queue() const noexcept;
             [[nodiscard]] inline size_t size() const noexcept { return m_WorkerThreads.size(); }
 
-            template<class JOB> [[nodiscard]] FutureType& add_job(JOB&& job, size_t section) {
+            template<class JOB> [[nodiscard]] FutureType& add_job(JOB&& job, size_t section = 0U) {
                 if (size() > 0) {
                     FutureType* ret;
                     {
@@ -114,7 +114,7 @@ namespace Engine::priv {
                     return m_FuturesBasic[section].emplace_back(task->get_future()).getFuture();
                 }
             }
-            template<class JOB, class THEN> [[nodiscard]] FutureType& add_job(JOB&& job, THEN&& callback, size_t section) {
+            template<class JOB, class THEN> [[nodiscard]] FutureType& add_job(JOB&& job, THEN&& callback, size_t section = 0U) {
                 if (size() > 0) {
                     FutureType* ret;
                     {

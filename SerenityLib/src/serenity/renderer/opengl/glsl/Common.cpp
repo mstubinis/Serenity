@@ -3,6 +3,7 @@
 #include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/resources/shader/ShaderHelper.h>
 #include <serenity/resources/material/MaterialEnums.h>
+#include <serenity/renderer/opengl/State.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -10,10 +11,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>
 
-using namespace Engine;
-using namespace Engine::priv;
-
-void opengl::glsl::Common::convert(std::string& code, uint32_t versionNumber) {
+void Engine::priv::opengl::glsl::Common::convert(std::string& code, uint32_t versionNumber) {
 
 #pragma region constants
     if (ShaderHelper::lacksDefinition(code, "ConstantOneVec3", "const vec3 ConstantOneVec3")) {
@@ -48,26 +46,28 @@ void opengl::glsl::Common::convert(std::string& code, uint32_t versionNumber) {
         "3D",
         "Cube",
     };
-    auto lambda_sampler_add_code = [&](const std::string& view) {
+    auto lambda_sampler_add_code = [&](const std::string& type) {
+        const auto samplerType = "sampler" + type;
+        const auto funcName = "USE_SAMPLER_" + type;
         //if (is_bindless_supported) {
         //    ShaderHelper::insertStringAtLine(code, 
-        //        "sampler" + view + " USE_SAMPLER_" + view + "(uint64_t inHandle){//generated\n"
-        //        "    return sampler" + view + "(inHandle);\n"
+        //        samplerType + " " + funcName + "(uint64_t inHandle){ //generated\n"
+        //        "    return " + samplerType + "(inHandle);\n"
         //        "}\n"
         //    , 1);
-        //}else{
+        //} else {
             ShaderHelper::insertStringAtLine(code, 
-                "sampler" + view + " USE_SAMPLER_" + view + "(sampler" + view + " inSampler){//generated\n"
+                samplerType + " " + funcName + "(" + samplerType + " inSampler) { //generated\n"
                 "    return inSampler;\n"
                 "}\n"
             , 1);
         //}
     };
-    auto lambda_sampler_add_code_type = [&](const std::string& view) {
+    auto lambda_sampler_add_code_type = [&](const std::string& type) {
         if (is_bindless_supported) {
-            boost::replace_all(code, "SAMPLER_TYPE_" + view, "sampler" + view);
+            boost::replace_all(code, "SAMPLER_TYPE_" + type, "sampler" + type);
         }else{
-            boost::replace_all(code, "SAMPLER_TYPE_" + view, "sampler" + view);
+            boost::replace_all(code, "SAMPLER_TYPE_" + type, "sampler" + type);
         }
     };
 
@@ -99,9 +99,12 @@ vec2 HammersleySequence(int i, int N){
 
 #pragma region VanDerCorpus
     if (ShaderHelper::lacksDefinition(code, "VanDerCorpus(", "float VanDerCorpus(")){
-        ShaderHelper::insertStringAtLine(code, 
-R"(
-float VanDerCorpus(uint bits){
+        //2.3283064365386963e-10 = 0x100000000
+        const auto version = Engine::priv::OpenGLState::getHighestGLSLVersion();
+        std::string vanDerCorpus;
+        if (!version.empty() && std::stoi(version) >= 130) {
+            vanDerCorpus = R"(
+float VanDerCorpus(uint bits) {
     bits = (bits << 16u) | (bits >> 16u);
     bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
     bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
@@ -109,29 +112,26 @@ float VanDerCorpus(uint bits){
     bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
     return float(bits) * 2.3283064365386963e-10;
 }
-)"
-//2.3283064365386963e-10 = 0x100000000
-
-//use this if bit shitfing is not supported
-/*
-R"(
+)";
+        } else {
+            vanDerCorpus = R"(
 float VanDerCorpus(int n){
     float invBase = 0.5;
     float denom   = 1.0;
     float result  = 0.0;
-    for(int i = 0; i < 32; ++i){
-        if(n > 0){
-            denom = mod(float(n), 2.0);
-            result += denom * invBase;
+    for (int i = 0; i < 32; ++i) {
+        if (n > 0) {
+            denom    = mod(float(n), 2.0);
+            result  += denom * invBase;
             invBase *= 0.5;
-            n = int(float(n) * 0.5);
+            n        = int(float(n) * 0.5);
         }
     }
     return result;
 }
-)"
-*/
-        , 1);
+)";
+        }
+        ShaderHelper::insertStringAtLine(code, std::move(vanDerCorpus), 1);
     }
 #pragma endregion
 

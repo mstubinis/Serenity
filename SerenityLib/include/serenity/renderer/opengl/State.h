@@ -307,6 +307,7 @@ namespace Engine::priv {
             static Constants constants;
 
             static std::string getHighestGLSLVersion() noexcept;
+            static int getHighestGLSLVersionAsInt();
 
             GLuint getCurrentlyBoundTextureOfType(GLenum textureType) noexcept;
 

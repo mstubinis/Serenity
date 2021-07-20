@@ -46,7 +46,7 @@ class Window final{
 
         void init(const EngineOptions&) noexcept;
 
-        [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Data.m_WindowName; }
+        [[nodiscard]] inline const std::string& name() const noexcept { return m_Data.m_WindowName; }
 
         [[nodiscard]] glm::uvec2 getSize();
         [[nodiscard]] glm::uvec2 getPosition();
@@ -56,19 +56,19 @@ class Window final{
         void setJoystickProcessingActive(bool active);
         [[nodiscard]] bool isJoystickProcessingActive() const;
 
-        [[nodiscard]] inline constexpr const glm::vec2& getMousePositionDifference() const noexcept { return m_Data.m_MouseDifference; }
-        [[nodiscard]] inline constexpr const glm::vec2& getMousePositionPrevious() const noexcept { return m_Data.m_MousePosition_Previous; }
-        [[nodiscard]] inline constexpr const glm::vec2& getMousePosition() const noexcept { return m_Data.m_MousePosition; }
-        [[nodiscard]] inline constexpr double getMouseWheelDelta() const noexcept { return m_Data.m_MouseDelta; }
+        [[nodiscard]] inline const glm::vec2& getMousePositionDifference() const noexcept { return m_Data.m_MouseDifference; }
+        [[nodiscard]] inline const glm::vec2& getMousePositionPrevious() const noexcept { return m_Data.m_MousePosition_Previous; }
+        [[nodiscard]] inline const glm::vec2& getMousePosition() const noexcept { return m_Data.m_MousePosition; }
+        [[nodiscard]] inline double getMouseWheelDelta() const noexcept { return m_Data.m_MouseDelta; }
         [[nodiscard]] inline std::thread::id getOpenglThreadID() const noexcept { return m_Data.m_OpenGLThreadID; }
         [[nodiscard]] inline sf::WindowHandle getSystemHandle() const noexcept { return m_Data.m_SFMLWindow.getSystemHandle(); }
-        [[nodiscard]] inline constexpr sf::RenderWindow& getSFMLHandle() noexcept { return m_Data.m_SFMLWindow; }
-        [[nodiscard]] inline constexpr unsigned int getFramerateLimit() const noexcept { return m_Data.m_FramerateLimit; }
+        [[nodiscard]] inline sf::RenderWindow& getSFMLHandle() noexcept { return m_Data.m_SFMLWindow; }
+        [[nodiscard]] inline unsigned int getFramerateLimit() const noexcept { return m_Data.m_FramerateLimit; }
 
         bool pollEvents(sf::Event&);
         [[nodiscard]] bool hasFocus() const;
         [[nodiscard]] bool isOpen() const;
-
+        [[nodiscard]] bool isVsyncEnabled() const;
         //returns true if the window is in fullscreen OR windowed fullscreen mode
         [[nodiscard]] bool isFullscreen() const;
 

@@ -7,24 +7,22 @@
 #include <serenity/renderer/postprocess/SSAO.h>
 
 struct EngineOptions final {
+    std::string                        window_title       = "Engine";
+    std::string                        icon;
+    uint32_t                           width              = 1024;
+    uint32_t                           height             = 768;
     AntiAliasingAlgorithm              aa_algorithm       = AntiAliasingAlgorithm::None;
     char**                             argv;
     int                                argc               = 0;
-    unsigned char                      ssao_level         = SSAOLevel::Medium;
-    unsigned char                      hdr                = HDRAlgorithm::None;
-
     int                                window_mode        = 0; //0 = normal, 1 = fullscreen, 2 = windowed_fullscreen
-
+    uint8_t                            ssao_level         = SSAOLevel::Medium;
+    uint8_t                            hdr                = HDRAlgorithm::None;
     bool                               editor_enabled     = false;
     bool                               god_rays_enabled   = true;
     bool                               fog_enabled        = false;
     bool                               show_console       = false;
     bool                               maximized          = false;
     bool                               vsync              = true;
-    unsigned int                       width              = 1024;
-    unsigned int                       height             = 768;
-    std::string                        window_title       = "Engine";
-    std::string                        icon;
 };
 
 #endif

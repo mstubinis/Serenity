@@ -3,18 +3,28 @@
 #define ENGINE_EDITOR_WINDOW_SCENE_H
 
 class  Scene;
-
-#include <vector>
-
+namespace Engine::priv {
+    class EditorWindowSceneFunctions;
+}
 namespace Engine::priv {
     class EditorWindowScene final {
-        private:
+        friend class EditorWindowSceneFunctions;
+        public:
+            enum class TabType {
+                Entities = 0,
+                Renderer,
+                Resources,
+                Profiler,
+                Network,
+            _TOTAL,};
+         private:
             int  m_Tab = 0;
 
             void internal_render_entities(Scene& currentScene);
-            void internal_render_profiler();
-            void internal_render_renderer();
-            void internal_render_network();
+            void internal_render_renderer(Scene& currentScene);
+            void internal_render_resources(Scene& currentScene);
+            void internal_render_profiler(Scene& currentScene);
+            void internal_render_network(Scene& currentScene);
         public:
             EditorWindowScene() = default;
 

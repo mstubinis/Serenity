@@ -1168,3 +1168,17 @@ std::string OpenGLState::getHighestGLSLVersion() noexcept {
     std::string version = std::to_string(Engine::priv::OpenGLState::constants.MAJOR_VERSION) + "." + std::to_string(Engine::priv::OpenGLState::constants.MINOR_VERSION);
     return VERSION_MAP.contains(version) ? VERSION_MAP.at(version) : "";
 }
+int OpenGLState::getHighestGLSLVersionAsInt() {
+    const auto version = OpenGLState::getHighestGLSLVersion();
+    if (!version.empty()) {
+        try {
+            const auto res = std::stoi(version);
+            return res;
+        } catch (const std::invalid_argument&) {
+            return -1;
+        } catch (const std::out_of_range&) {
+            return -1;
+        }
+    }
+    return -1;
+}

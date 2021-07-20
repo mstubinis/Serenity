@@ -17,10 +17,10 @@ namespace Engine::priv {
             ThreadPool m_ThreadPool;
 
             ThreadingModule();
-            ~ThreadingModule() { cleanup(); }
+            ~ThreadingModule();
 
-            inline void cleanup() { m_ThreadPool.shutdown(); }
-            inline void update(const float dt) { m_ThreadPool.update(); }
+            void cleanup();
+            void update(const float dt);
     };
     namespace threading {
         bool isOpenGLThread() noexcept;
@@ -28,9 +28,7 @@ namespace Engine::priv {
 
         void submitTaskForMainThread(std::function<void()>&& task) noexcept;
 
-        inline void waitForAll(size_t section = 0) noexcept {
-            ThreadingModule::THREADING_MODULE->m_ThreadPool.wait_for_all(section);
-        }
+        void waitForAll(size_t section = 0) noexcept;
 
         template<class JOB> inline FutureType& finalizeJob(JOB&& task, size_t section) {
             return ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task), section);

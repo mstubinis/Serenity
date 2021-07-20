@@ -13,6 +13,8 @@
 #include <serenity/renderer/postprocess/FXAA.h>
 #include <serenity/renderer/postprocess/Bloom.h>
 
+#include <serenity/resources/material/Material.h>
+
 #include <serenity/networking/Networking.h>
 
 #include <iomanip>
@@ -23,7 +25,21 @@
 #include <Psapi.h>
 #endif
 
-void Engine::priv::EditorWindowScene::internal_render_network() {
+using InternalFunc = void(Engine::priv::EditorWindowScene::*)(Scene&);
+namespace Engine::priv {
+    class EditorWindowSceneFunctions {
+        public: 
+            constexpr static std::array<std::tuple<const char*, InternalFunc>, (size_t)Engine::priv::EditorWindowScene::TabType::_TOTAL> TAB_TYPES_DATA{ {
+                { "Entities", &Engine::priv::EditorWindowScene::internal_render_entities },
+                { "Renderer", &Engine::priv::EditorWindowScene::internal_render_renderer },
+                { "Resources", &Engine::priv::EditorWindowScene::internal_render_resources },
+                { "Profiler", &Engine::priv::EditorWindowScene::internal_render_profiler },
+                { "Network", &Engine::priv::EditorWindowScene::internal_render_network },
+            } };
+    };
+}
+
+void Engine::priv::EditorWindowScene::internal_render_network(Scene& currentScene) {
     const ImVec4 yellow      = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     const auto& tcpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_TCPSockets;
     const auto& tcpListeners = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_TCPListeners;
@@ -283,7 +299,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
     }
     ImGui::EndChild();
 }
-void Engine::priv::EditorWindowScene::internal_render_profiler() {
+void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentScene) {
     const auto& debugging = Engine::priv::Core::m_Engine->m_DebugManager;
     const ImVec4 yellow   = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     ImGui::TextColored(yellow, ("Update Time:  " + debugging.updateTimeInMs() + " ms").c_str());
@@ -335,12 +351,12 @@ void Engine::priv::EditorWindowScene::internal_render_profiler() {
 #endif
 
 }
-void Engine::priv::EditorWindowScene::internal_render_renderer() {
+void Engine::priv::EditorWindowScene::internal_render_renderer(Scene& currentScene) {
     auto& renderer = Engine::priv::Core::m_Engine->m_RenderModule;
     //general
     {
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "General");
-        static bool vsync = false;
+        bool vsync = Engine::Resources::getWindow().isVsyncEnabled();
         ImGui::Checkbox("Vsync ", &vsync);
         Engine::Resources::getWindow().setVerticalSyncEnabled(vsync);
     }
@@ -430,46 +446,64 @@ void Engine::priv::EditorWindowScene::internal_render_renderer() {
         ImGui::Separator();
     }
 }
+void Engine::priv::EditorWindowScene::internal_render_resources(Scene& currentScene) {
+    ImGui::BeginChild("ChildResources");
+    if (ImGui::TreeNode("Materials")) {
+        auto materials = Engine::Resources::GetAllResourcesOfType<Material>(); //doing this every frame is slow
+        for (auto& material : materials) {
+            if (ImGui::TreeNode(material->name().c_str())) {
+
+                const auto& color = material->getF0();
+                float color_arr[] = { color.r(), color.g(), color.b(), color.a() };
+                ImGui::ColorEdit3("F0 Color", &color_arr[0]);
+                material->setF0Color(uint8_t(color_arr[0] * 255.0f), uint8_t(color_arr[1] * 255.0f), uint8_t(color_arr[2] * 255.0f));
+
+                int glow = int(material->getGlow());
+                ImGui::SliderInt("Glow", &glow, 0, 255);
+                material->setGlow(uint8_t(glow));
+
+                int alpha = int(material->getAlpha());
+                ImGui::SliderInt("Alpha", &alpha, 0, 255);
+                material->setAlpha(uint8_t(alpha));
+
+                int ao = int(material->getAO());
+                ImGui::SliderInt("AO", &ao, 0, 255);
+                material->setAO(uint8_t(ao));
+
+                int metalness = int(material->getMetalness());
+                ImGui::SliderInt("Metalness", &metalness, 0, 255);
+                material->setMetalness(uint8_t(metalness));
+
+                int smoothness = int(material->getSmoothness());
+                ImGui::SliderInt("Smoothness", &smoothness, 0, 255);
+                material->setSmoothness(uint8_t(smoothness));
+
+                ImGui::TreePop();
+                ImGui::Separator();
+            }
+        }
+
+        ImGui::TreePop();
+        ImGui::Separator();
+    }
+    ImGui::EndChild();
+}
 void Engine::priv::EditorWindowScene::update() {
     auto currScene        = Engine::Resources::getCurrentScene();
     std::string sceneName = currScene ? currScene->name() : "N/A";
     ImGui::Begin(("Scene - " + sceneName).c_str(), NULL);
     ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
     if (ImGui::BeginTabBar("TabBar")) {
-        if (ImGui::BeginTabItem("Entities")) {
-            m_Tab = 0;
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Renderer")) {
-            m_Tab = 1;
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Profiler")) {
-            m_Tab = 2;
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Network")) {
-            m_Tab = 3;
-            ImGui::EndTabItem();
+        for (int i = 0; i < EditorWindowSceneFunctions::TAB_TYPES_DATA.size(); ++i) {
+            if (ImGui::BeginTabItem(std::get<0>(EditorWindowSceneFunctions::TAB_TYPES_DATA[i]))) {
+                m_Tab = i;
+                ImGui::EndTabItem();
+            }
         }
         ImGui::EndTabBar();
     }
     ImGui::PopStyleColor();
-    switch (m_Tab) {
-        case 0: { //Entities
-            internal_render_entities(*currScene);
-            break;
-        } case 1: { //Renderer
-            internal_render_renderer();
-            break;
-        } case 2: { //Profiler
-            internal_render_profiler();
-            break;
-        } case 3: { //Network
-            internal_render_network();
-            break;
-        }
-    }
+    (this->*std::get<1>(EditorWindowSceneFunctions::TAB_TYPES_DATA[m_Tab]))(*currScene);
 
     // Plot some values
     //const float my_values[] = { 0.2f, 0.1f, 1.0f, 0.5f, 0.9f, 2.2f };

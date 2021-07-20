@@ -41,7 +41,7 @@ void Window::init(const EngineOptions& options) noexcept {
     requestFocus();
     display();
 
-    //setVerticalSyncEnabled(options.vsync); //unfortunately this will not work until a few frames after the window creation
+    setVerticalSyncEnabled(options.vsync); //unfortunately this will not work until a few frames after the window creation
 
     if (options.show_console) {
         ENGINE_PRODUCTION_LOG("Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion <<
@@ -134,6 +134,7 @@ void Window::setVerticalSyncEnabled(bool isToBeEnabled) {
     m_Data.m_SFMLWindow.setVerticalSyncEnabled(isToBeEnabled);
     (isToBeEnabled) ? m_Data.m_Flags.add(Window_Flags::Vsync) : m_Data.m_Flags.remove(Window_Flags::Vsync);
 }
+bool Window::isVsyncEnabled() const { return m_Data.m_Flags.has(Window_Flags::Vsync); }
 void Window::setKeyRepeatEnabled(bool isToBeEnabled) {
     m_Data.m_SFMLWindow.setKeyRepeatEnabled(isToBeEnabled);
     (isToBeEnabled) ? m_Data.m_Flags.add(Window_Flags::KeyRepeat) : m_Data.m_Flags.remove(Window_Flags::KeyRepeat);

@@ -98,12 +98,11 @@ void Engine::priv::EditorCore::renderLightIcons(Scene& scene) {
         auto camera             = scene.getActiveCamera();
         if (camera) {
             auto render_light_icons = [&camera](auto& container, Handle texture) {
-                const auto white = glm::vec4{ 1.0f };
                 const auto depth = 0.1f;
                 for (const auto& light : container) {
                     const auto twoDPos = Engine::Math::getScreenCoordinates(glm::vec3{ light->getPosition() }, *camera, false);
                     if (twoDPos.z > 0) {
-                        Engine::Renderer::renderTexture(texture, glm::vec2{ twoDPos }, white, 0.0f, glm::vec2{ 1.0f }, depth);
+                        Engine::Renderer::renderTexture(texture, glm::vec2{ twoDPos }, light->getColor(), 0.0f, glm::vec2{ 1.0f }, depth);
                     }
                 }
             };
