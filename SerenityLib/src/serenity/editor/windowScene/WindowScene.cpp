@@ -478,11 +478,24 @@ void Engine::priv::EditorWindowScene::internal_render_resources(Scene& currentSc
                 ImGui::SliderInt("Smoothness", &smoothness, 0, 255);
                 material->setSmoothness(uint8_t(smoothness));
 
+                bool isShadeless = material->getShadeless();
+                ImGui::Checkbox("Shadeless", &isShadeless);
+                material->setShadeless(isShadeless);
+
+                static const char* DiffuseModels[] = { "None", "Lambert", "Oren Nayar", "Ashikhmin Shirley", "Minnaert" };
+                int diffuseModel = int(material->getDiffuseModel());
+                ImGui::ListBox("Diffuse Model", &diffuseModel, DiffuseModels, IM_ARRAYSIZE(DiffuseModels));
+                material->setDiffuseModel(static_cast<DiffuseModel>(diffuseModel));
+
+                static const char* SpecularModels[] = { "None", "Blinn Phong", "Phong", "GGX", "Cook Torrance", "Guassian", "Beckmann", "Ashikhmin Shirley"};
+                int specularModel = int(material->getSpecularModel());
+                ImGui::ListBox("Specular Model", &specularModel, SpecularModels, IM_ARRAYSIZE(SpecularModels));
+                material->setSpecularModel(static_cast<SpecularModel>(specularModel));
+
                 ImGui::TreePop();
                 ImGui::Separator();
             }
         }
-
         ImGui::TreePop();
         ImGui::Separator();
     }
