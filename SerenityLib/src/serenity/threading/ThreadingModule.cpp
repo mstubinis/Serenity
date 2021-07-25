@@ -3,11 +3,9 @@
 #include <serenity/system/window/Window.h>
 #include <serenity/system/Engine.h>
 
-using namespace Engine::priv;
+Engine::view_ptr<Engine::priv::ThreadingModule> Engine::priv::ThreadingModule::THREADING_MODULE = nullptr;
 
-Engine::view_ptr<ThreadingModule> ThreadingModule::THREADING_MODULE = nullptr;
-
-ThreadingModule::ThreadingModule() {
+Engine::priv::ThreadingModule::ThreadingModule() {
     auto hardware_concurrency = Engine::hardware_concurrency();
     if (hardware_concurrency > 1) {
         m_ThreadPool.startup(hardware_concurrency);
@@ -15,19 +13,19 @@ ThreadingModule::ThreadingModule() {
     }
     THREADING_MODULE = this;
 }
-ThreadingModule::~ThreadingModule() {
+Engine::priv::ThreadingModule::~ThreadingModule() {
     cleanup();
 }
-void ThreadingModule::cleanup() {
+void Engine::priv::ThreadingModule::cleanup() {
     m_ThreadPool.shutdown();
 }
-void ThreadingModule::update(const float dt) {
+void Engine::priv::ThreadingModule::update(const float dt) {
     m_ThreadPool.update(); 
 }
 void Engine::priv::threading::submitTaskForMainThread(std::function<void()>&& task) noexcept {
     Engine::priv::Core::m_Engine->m_Misc.m_QueuedCommands.push(std::move(task));
 }
-void Engine::priv::threading::waitForAll(size_t section = 0) noexcept {
+void Engine::priv::threading::waitForAll(size_t section) noexcept {
     ThreadingModule::THREADING_MODULE->m_ThreadPool.wait_for_all(section);
 }
 bool Engine::priv::threading::isMainThread() noexcept {

@@ -337,17 +337,17 @@ void DeferredPipeline::init() {
             ++count;
         }
     }
+    //"D" = default
+    Texture::White     = Engine::Resources::addResource<Texture>(sfImageWhite, "DWhiteTexture", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
+    Texture::Black     = Engine::Resources::addResource<Texture>(sfImageBlack, "DBlackTexture", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
 
-    Texture::White     = Engine::Resources::addResource<Texture>(sfImageWhite, "WhiteTexturePlaceholder", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
-    Texture::Black     = Engine::Resources::addResource<Texture>(sfImageBlack, "BlackTexturePlaceholder", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
-
-    Texture::Checkers  = Engine::Resources::addResource<Texture>(sfImageCheckers, "CheckersTexturePlaceholder", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
+    Texture::Checkers  = Engine::Resources::addResource<Texture>(sfImageCheckers, "DCheckersTexture", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
     Texture::Checkers.get<Texture>()->setFilter(TextureFilter::Nearest);
-    Material::Checkers = Engine::Resources::addResource<Material>("MaterialDefaultCheckers", Texture::Checkers);
+    Material::Checkers = Engine::Resources::addResource<Material>("DCheckers", Texture::Checkers);
     Material::Checkers.get<Material>()->setSpecularModel(SpecularModel::None);
     Material::Checkers.get<Material>()->setSmoothness(0_uc);
 
-    Material::WhiteShadeless = Engine::Resources::addResource<Material>("MaterialDefaultWhiteShadeless", Texture::White);
+    Material::WhiteShadeless = Engine::Resources::addResource<Material>("DWhiteShadeless", Texture::White);
     Material::WhiteShadeless.get<Material>()->setSpecularModel(SpecularModel::None);
     Material::WhiteShadeless.get<Material>()->setSmoothness(0_uc);
     Material::WhiteShadeless.get<Material>()->setShadeless(true);

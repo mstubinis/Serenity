@@ -3,16 +3,9 @@
 #include <serenity/resources/shader/ShaderHelper.h>
 #include <serenity/resources/material/MaterialEnums.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/lexical_cast.hpp>
 
-using namespace Engine;
-using namespace Engine::priv;
-
-void opengl::glsl::Compression::convert(std::string& code, uint32_t versionNumber) {
+void Engine::priv::opengl::glsl::Compression::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
 #pragma region Pack2NibblesInto8BitChannel
     if (ShaderHelper::lacksDefinition(code, "Pack2NibblesInto8BitChannel(", "float Pack2NibblesInto8BitChannel(")) {
         ShaderHelper::insertStringAtLine(code, R"(

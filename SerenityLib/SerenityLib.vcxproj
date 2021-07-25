@@ -652,9 +652,11 @@
     <ClCompile Include="src\serenity\renderer\opengl\Extensions.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Common.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Compression.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\DeferredFunctions.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\DepthOfFieldCode.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Lighting.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Materials.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Shadows.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\SSAOCode.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\VersionConversion.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\State.cpp" />
@@ -924,9 +926,11 @@
     <ClInclude Include="include\serenity\renderer\opengl\Extensions.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Common.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Compression.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\DeferredFunctions.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\DepthOfFieldCode.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Lighting.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Materials.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Shadows.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\SSAOCode.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\VersionConversion.h" />
     <ClInclude Include="include\serenity\renderer\opengl\OpenGL.h" />

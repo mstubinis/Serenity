@@ -5,16 +5,9 @@
 #include <serenity/resources/shader/ShaderHelper.h>
 #include <serenity/resources/material/MaterialEnums.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/lexical_cast.hpp>
 
-using namespace Engine;
-using namespace Engine::priv;
-
-void opengl::glsl::Materials::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
+void Engine::priv::opengl::glsl::Materials::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
 #pragma region OutputSubmissions
     if (ShaderHelper::lacksDefinition(code, "SUBMIT_DIFFUSE(", "void SUBMIT_DIFFUSE(")) {
         ShaderHelper::insertStringRightBeforeMainFunc(code, R"(

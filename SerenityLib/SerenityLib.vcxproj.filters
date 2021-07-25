@@ -950,6 +950,12 @@
     <ClCompile Include="src\serenity\resources\ResourceModule.cpp">
       <Filter>Source Files\Engine\Core\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Shadows.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\DeferredFunctions.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -1770,6 +1776,12 @@
     </ClInclude>
     <ClInclude Include="include\serenity\editor\embeddedImages\RodLightImage.h">
       <Filter>Header Files\Engine\Core\Editor\EmbeddedImages</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Shadows.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\DeferredFunctions.h">
+      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

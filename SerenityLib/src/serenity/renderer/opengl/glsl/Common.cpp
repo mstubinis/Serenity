@@ -5,13 +5,9 @@
 #include <serenity/resources/material/MaterialEnums.h>
 #include <serenity/renderer/opengl/State.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/lexical_cast.hpp>
 
-void Engine::priv::opengl::glsl::Common::convert(std::string& code, uint32_t versionNumber) {
+void Engine::priv::opengl::glsl::Common::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
 
 #pragma region constants
     if (ShaderHelper::lacksDefinition(code, "ConstantOneVec3", "const vec3 ConstantOneVec3")) {

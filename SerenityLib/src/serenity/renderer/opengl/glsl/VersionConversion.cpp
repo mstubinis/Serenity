@@ -4,14 +4,7 @@
 #include <serenity/resources/shader/ShaderHelper.h>
 #include <serenity/resources/material/MaterialEnums.h>
 
-#include <boost/filesystem.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/lexical_cast.hpp>
-
-using namespace Engine;
-using namespace Engine::priv;
 
 //TODO: change from [const char* const] to [string] in c++20?
 constexpr std::array<const char* const, 30> TYPES {
@@ -47,7 +40,7 @@ constexpr std::array<const char* const, 30> TYPES {
     "umat4",
 };
 
-void opengl::glsl::VersionConversion::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
+void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
     //deal with MRT binding points
     if (versionNumber >= 130) {
         for (uint32_t i = 0; i < 100; ++i) {
