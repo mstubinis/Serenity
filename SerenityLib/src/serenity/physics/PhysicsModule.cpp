@@ -141,14 +141,14 @@ bool add_rigid_body(Engine::priv::PhysicsPipeline& pipeline, btRigidBody* inRigi
 void Engine::priv::PhysicsModule::internal_process_contact_manifolds() {
     int numManifolds = m_Pipeline.m_Dispatcher->getNumManifolds();
     for (int i = 0; i < numManifolds; ++i) {
-        auto& contactMnifld = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
-        int numContacts = contactMnifld.getNumContacts();
+        auto& contactManifold = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
+        int numContacts = contactManifold.getNumContacts();
         for (int j = 0; j < numContacts; ++j) {
-            auto& cp = contactMnifld.getContactPoint(j);
+            auto& cp = contactManifold.getContactPoint(j);
             if (cp.getDistance() < 0.0f) {
-                btCollisionObject* colObject0 = const_cast<btCollisionObject*>(contactMnifld.getBody0());
-                btCollisionObject* colObject1 = const_cast<btCollisionObject*>(contactMnifld.getBody1());
-                ProcessManifoldContact(cp, colObject0, colObject1, nullptr, nullptr, nullptr, nullptr);
+                btCollisionObject* colObj0 = const_cast<btCollisionObject*>(contactManifold.getBody0());
+                btCollisionObject* colObj1 = const_cast<btCollisionObject*>(contactManifold.getBody1());
+                ProcessManifoldContact(cp, colObj0, colObj1, nullptr, nullptr, nullptr, nullptr);
             }
         }
     }
@@ -172,7 +172,7 @@ void Engine::Physics::cleanProxyFromPairs(btRigidBody* BTRigidBody) {
     auto& world = *Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World;
     world.getBroadphase()->getOverlappingPairCache()->cleanProxyFromPairs(BTRigidBody->getBroadphaseHandle(), world.getDispatcher());
 }
-void Engine::Physics::updateDiscreteCollisionDetection() noexcept {
+void Engine::Physics::performDiscreteCollisionDetection() noexcept {
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->performDiscreteCollisionDetection();
 }
 void Engine::Physics::updateAABBs() noexcept {

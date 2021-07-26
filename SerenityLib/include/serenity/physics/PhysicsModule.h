@@ -72,7 +72,7 @@ namespace Engine{
         [[nodiscard]] uint32_t getNumberOfStepsPerFrame();
 
         void cleanProxyFromPairs(btRigidBody*);
-        void updateDiscreteCollisionDetection() noexcept;
+        void performDiscreteCollisionDetection() noexcept;
         void updateAABBs() noexcept;
         void calculateOverlappingPairs() noexcept;
 

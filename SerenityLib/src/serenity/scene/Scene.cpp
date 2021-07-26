@@ -295,11 +295,11 @@ void Scene::internal_register_systems() {
 
     registerSystemOrdered<SystemComponentTransform, std::tuple<>, ComponentTransform>(60'000);
     registerSystemOrdered<SystemSyncRigidToTransform, std::tuple<>, ComponentTransform, ComponentRigidBody>(70'000);
-    registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(80'000);
-    registerSystemOrdered<SystemSyncTransformToRigid, std::tuple<>, ComponentTransform, ComponentRigidBody>(90'000);
+    registerSystemOrdered<SystemTransformParentChild, std::tuple<>, ComponentTransform>(80'000);
+    registerSystemOrdered<SystemCompoundChildTransforms, std::tuple<>, ComponentCollisionShape>(90'000);
 
-    registerSystemOrdered<SystemTransformParentChild, std::tuple<>, ComponentTransform>(100'000);
-    registerSystemOrdered<SystemCompoundChildTransforms, std::tuple<>, ComponentCollisionShape>(110'000);
+    registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(100'000);
+    registerSystemOrdered<SystemSyncTransformToRigid, std::tuple<>, ComponentTransform, ComponentRigidBody>(110'000);
 
     registerSystemOrdered<SystemComponentLogic1, std::tuple<>, ComponentLogic1>(120'000);
     registerSystemOrdered<SystemComponentModel, std::tuple<>, ComponentModel>(130'000);
