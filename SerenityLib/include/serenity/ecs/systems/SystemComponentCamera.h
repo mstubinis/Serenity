@@ -6,6 +6,7 @@ class  ComponentCamera;
 
 #include <serenity/ecs/systems/SystemBaseClass.h>
 
+//on update - calculate view frustum planes
 class SystemComponentCamera final : public SystemCRTP<SystemComponentCamera, ComponentCamera> {
     private:
 

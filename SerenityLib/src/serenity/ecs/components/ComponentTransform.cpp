@@ -137,9 +137,9 @@ void ComponentTransform::setScale(float x, float y, float z) {
     }
 }
 glm_vec3 ComponentTransform::getPosition() const {
-    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-    auto& system = ecs.getSystem<SystemTransformParentChild>();
-    auto& matrix = system.m_WorldTransforms[m_Owner.id() - 1];
+    const auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
+    const auto& system = ecs.getSystem<SystemTransformParentChild>();
+    const auto& matrix = system.m_WorldTransforms[m_Owner.id() - 1];
     return Engine::Math::getMatrixPosition(matrix);
 }
 glm_vec3 ComponentTransform::getWorldPosition() const {

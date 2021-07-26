@@ -9,7 +9,7 @@ SystemSceneChanging::SystemSceneChanging(Engine::priv::ECS& ecs)
 {
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         auto& hasSwap = std::get<2>(Engine::priv::Core::m_Engine->m_ResourceManager.m_SceneSwap);
-        if (hasSwap == false) {
+        if (!hasSwap) {
             return;
         }
         auto& oldScene = std::get<0>(Engine::priv::Core::m_Engine->m_ResourceManager.m_SceneSwap);

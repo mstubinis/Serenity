@@ -4,6 +4,7 @@
 
 #include <serenity/ecs/systems/SystemBaseClass.h>
 
+//on update - if a scene swap occured, process the ecs and systems accordingly
 class SystemSceneChanging final : public SystemCRTP<SystemSceneChanging> {
     private:
 

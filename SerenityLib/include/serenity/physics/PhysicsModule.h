@@ -50,6 +50,8 @@ namespace Engine{
                 std::mutex                       m_Mutex;
                 uint32_t                         m_NumberOfStepsPerFrame = 1;
                 bool                             m_Paused                = false;
+            private:
+                void internal_process_contact_manifolds();
             public:
                 PhysicsModule();
 

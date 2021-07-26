@@ -8,10 +8,11 @@ class  ComponentRigidBody;
 #include <cstdint>
 #include <serenity/dependencies/glm.h>
 
+//adds and removes rigid bodies on scene change, and recalculates mass upon adding entities to scenes, and adds the body to the scene when the entity enters the scene upon creation
 class SystemComponentRigidBody final : public SystemCRTP<SystemComponentRigidBody, ComponentRigidBody> {
     friend class  ComponentRigidBody;
-public:
-    SystemComponentRigidBody(Engine::priv::ECS& ecs);
+    public:
+        SystemComponentRigidBody(Engine::priv::ECS& ecs);
 };
 
 #endif

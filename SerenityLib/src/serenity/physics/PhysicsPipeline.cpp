@@ -33,7 +33,9 @@ Engine::priv::PhysicsPipeline::PhysicsPipeline() {
     m_DebugDrawer.setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
     m_World->setDebugDrawer(&m_DebugDrawer);
     m_World->setGravity(btVector3{ 0.0, 0.0, 0.0 });
-    m_World->setForceUpdateAllAabbs(false); //TODO: optional optimization thing. remove if it causes issues
+
+    m_World->setForceUpdateAllAabbs(true);
+    //m_World->setForceUpdateAllAabbs(false); //TODO: optional optimization thing. remove if it causes issues
 
     btGImpactCollisionAlgorithm::registerAlgorithm(m_Dispatcher.get());
     setPreTickCallback(m_PreTickCallback);

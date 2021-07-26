@@ -138,23 +138,26 @@ bool add_rigid_body(Engine::priv::PhysicsPipeline& pipeline, btRigidBody* inRigi
     pipeline.m_World->addRigidBody(inRigidBody);
     return true;
 }
+void Engine::priv::PhysicsModule::internal_process_contact_manifolds() {
+    int numManifolds = m_Pipeline.m_Dispatcher->getNumManifolds();
+    for (int i = 0; i < numManifolds; ++i) {
+        auto& contactMnifld = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
+        int numContacts = contactMnifld.getNumContacts();
+        for (int j = 0; j < numContacts; ++j) {
+            auto& cp = contactMnifld.getContactPoint(j);
+            if (cp.getDistance() < 0.0f) {
+                btCollisionObject* colObject0 = const_cast<btCollisionObject*>(contactMnifld.getBody0());
+                btCollisionObject* colObject1 = const_cast<btCollisionObject*>(contactMnifld.getBody1());
+                ProcessManifoldContact(cp, colObject0, colObject1, nullptr, nullptr, nullptr, nullptr);
+            }
+        }
+    }
+}
 void Engine::priv::PhysicsModule::update(Scene& scene, const float dt, int maxSubSteps, float fixedTimeStep){
     Engine::priv::Core::m_Engine->m_DebugManager.stop_clock_physics();
     if (!m_Paused) {
         m_Pipeline.m_World->stepSimulation(btScalar(dt), maxSubSteps, btScalar(fixedTimeStep));
-        int numManifolds = m_Pipeline.m_Dispatcher->getNumManifolds();
-        for (int i = 0; i < numManifolds; ++i) {
-            auto& contactMnifld = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
-            int numContacts = contactMnifld.getNumContacts();
-            for (int j = 0; j < numContacts; ++j) {
-                auto& cp = contactMnifld.getContactPoint(j);
-                if (cp.getDistance() < 0.0f) {
-                    btCollisionObject* colObject0 = const_cast<btCollisionObject*>(contactMnifld.getBody0());
-                    btCollisionObject* colObject1 = const_cast<btCollisionObject*>(contactMnifld.getBody1());
-                    ProcessManifoldContact(cp, colObject0, colObject1, nullptr, nullptr, nullptr, nullptr);
-                }
-            }
-        }
+        internal_process_contact_manifolds();
     }
     Engine::priv::Core::m_Engine->m_DebugManager.calculate_physics();
 }

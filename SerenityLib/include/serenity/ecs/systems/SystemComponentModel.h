@@ -6,6 +6,7 @@ class  ComponentModel;
 
 #include <serenity/ecs/systems/SystemBaseClass.h>
 
+//recalculates model radius, and process animations on update
 class SystemComponentModel final : public SystemCRTP<SystemComponentModel, ComponentModel> {
     private:
 

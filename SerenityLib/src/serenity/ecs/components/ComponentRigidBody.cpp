@@ -89,11 +89,11 @@ bool ComponentRigidBody::rebuildRigidBody(bool addBodyToPhysicsWorld) {
         t.setRotation(Engine::Math::toBT(transform->getWorldRotation()));
         ci.m_startWorldTransform  = t;
     }
-    ci.m_linearDamping            = (btScalar)0.1;
-    ci.m_angularDamping           = (btScalar)0.4;
-    ci.m_friction                 = (btScalar)0.3;
-    ci.m_linearSleepingThreshold  = (btScalar)0.015;
-    ci.m_angularSleepingThreshold = (btScalar)0.015;
+    ci.m_linearDamping            = btScalar(0.1);
+    ci.m_angularDamping           = btScalar(0.4);
+    ci.m_friction                 = btScalar(0.3);
+    ci.m_linearSleepingThreshold  = btScalar(0.015);
+    ci.m_angularSleepingThreshold = btScalar(0.015);
 
     m_BulletRigidBody.reset(new btRigidBodyType { ci });
     m_BulletRigidBody->setMassProps(m_Mass, collisionShape->getInertia());
