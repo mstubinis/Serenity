@@ -60,18 +60,11 @@ namespace Engine{
         };
     };
     namespace Physics{
-        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        std::vector<RayCastResult> rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, MaskType group = -1, MaskType mask = -1);
+        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>&& ignored, MaskType group = -1, MaskType mask = -1);
 
-        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, Entity ignoredObject = Entity{}, MaskType group = -1, MaskType mask = -1);
-        std::vector<RayCastResult> rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
-
-
-        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredObject = nullptr, MaskType group = -1, MaskType mask = -1);
-        RayCastResult rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
-
-        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity ignoredObject = Entity{}, MaskType group = -1, MaskType mask = -1);
-        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredObjects, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, MaskType group = -1, MaskType mask = -1);
+        RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>&& ignored, MaskType group = -1, MaskType mask = -1);
 
         void setNumberOfStepsPerFrame(uint32_t numSteps);
         [[nodiscard]] uint32_t getNumberOfStepsPerFrame();

@@ -12,7 +12,7 @@ SystemComponentRigidBody::SystemComponentRigidBody(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
     setComponentAddedToEntityFunction([](SystemBaseClass& inSystem, void* component, Entity entity) {
-        auto& system = (SystemComponentRigidBody&)inSystem;
+        auto& system = static_cast<SystemComponentRigidBody&>(inSystem);
         auto model   = entity.getComponent<ComponentModel>();
         if (model) {
             Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
@@ -32,13 +32,13 @@ SystemComponentRigidBody::SystemComponentRigidBody(Engine::priv::ECS& ecs)
         }
     });
     setSceneLeftFunction([](SystemBaseClass& inSystem, Scene& scene) {
-        auto& system = (SystemComponentRigidBody&)inSystem;
+        auto& system = static_cast<SystemComponentRigidBody&>(inSystem);
         system.forEach([](Entity entity, ComponentRigidBody* rigidBodyComponent) {
             rigidBodyComponent->removePhysicsFromWorld();
         }, SystemExecutionPolicy::Normal);
     });
     setSceneEnteredFunction([](SystemBaseClass& inSystem, Scene& scene) {
-        auto& system = (SystemComponentRigidBody&)inSystem;
+        auto& system = static_cast<SystemComponentRigidBody&>(inSystem);
         system.forEach([](Entity entity, ComponentRigidBody* rigidBodyComponent) {
             rigidBodyComponent->addPhysicsToWorld();
         }, SystemExecutionPolicy::Normal);

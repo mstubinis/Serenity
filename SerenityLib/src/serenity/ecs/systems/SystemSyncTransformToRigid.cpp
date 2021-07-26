@@ -9,7 +9,7 @@ SystemSyncTransformToRigid::SystemSyncTransformToRigid(Engine::priv::ECS& ecs)
     /* if this is a root transform, set this transform to use the bullet physics rigid body's coordinate system
        this system happens AFTER SystemSyncRigidToTransform  */
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
-        auto& system = (SystemSyncTransformToRigid&)inSystem;
+        auto& system = static_cast<SystemSyncTransformToRigid&>(inSystem);
         system.forEach([](Entity entity, ComponentTransform* transform, ComponentRigidBody* rigidBody) {
             if (!transform->hasParent()) {
                 transform->m_Position = rigidBody->getPosition();

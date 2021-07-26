@@ -16,7 +16,7 @@ SystemCompoundChildTransforms::SystemCompoundChildTransforms(Engine::priv::ECS& 
     * update's the compound child shape coordinate systems
     */
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
-        auto& system   = (SystemCompoundChildTransforms&)inSystem;
+        auto& system   = static_cast<SystemCompoundChildTransforms&>(inSystem);
         auto& systemPC = inSystem.getECS().getSystem<SystemTransformParentChild>();
         system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArg, Entity entity, ComponentCollisionShape* collisionShape) {
             if (collisionShape->isChildShape()) {

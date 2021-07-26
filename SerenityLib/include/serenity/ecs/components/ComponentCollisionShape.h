@@ -69,7 +69,11 @@ class ComponentCollisionShape : public ComponentBaseClass<ComponentCollisionShap
         inline void setCollisionUserIndex(int idx) const noexcept { getBtShape()->setUserIndex(idx); }
         inline void setCollisionUserIndex2(int idx) const noexcept { getBtShape()->setUserIndex2(idx); }
 
-        inline bool isStaticTriangleType() const noexcept { return (getType() == CollisionType::TRIANGLE_MESH_SHAPE_PROXYTYPE || getType() == CollisionType::SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE || getType() == CollisionType::TRIANGLE_SHAPE_PROXYTYPE); }
+        inline bool isStaticTriangleType() const noexcept { 
+            return (getType() == CollisionType::TRIANGLE_MESH_SHAPE_PROXYTYPE || 
+                    getType() == CollisionType::SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE || 
+                    getType() == CollisionType::TRIANGLE_SHAPE_PROXYTYPE); 
+        }
 
         void calculateLocalInertia(float mass) noexcept;
 
@@ -100,6 +104,9 @@ namespace Engine::priv {
         private:
             std::unordered_map<Entity, std::tuple<Handle, float, CollisionType> >                        m_DeferredLoadingCollisionsSingle;
             std::unordered_map<Entity, std::tuple<std::vector<ModelInstance*>, float, CollisionType> >   m_DeferredLoadingCollisionsMulti;
+
+            void internal_cleanup_single_using_entity(Entity);
+            void internal_cleanup_multi_using_entity(Entity);
         public:
             static inline ComponentCollisionShapeDeferredLoading& get() {
                 static ComponentCollisionShapeDeferredLoading m_Instance;

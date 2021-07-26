@@ -15,12 +15,13 @@
 #include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
 
 #include <serenity/physics/btRigidBodyEnhanced.h>
+#include <serenity/physics/Raycast.h>
 
 Engine::view_ptr<Engine::priv::PhysicsModule> Engine::priv::PhysicsModule::PHYSICS_MANAGER = nullptr;
 
 void ProcessManifoldContact(btManifoldPoint& cp, btCollisionObject* collObjA, btCollisionObject* collObjB, btCollisionShape* childShapeA, btCollisionShape* childShapeB, const btCollisionShape* shapeA, const btCollisionShape* shapeB) {
-    auto aRigidBody   = static_cast<ComponentRigidBody*>(collObjA->getUserPointer());
-    auto bRigidBody   = static_cast<ComponentRigidBody*>(collObjB->getUserPointer());
+    auto aRigidBody = static_cast<ComponentRigidBody*>(collObjA->getUserPointer());
+    auto bRigidBody = static_cast<ComponentRigidBody*>(collObjB->getUserPointer());
     if (aRigidBody && bRigidBody) {
         glm::vec3 ptA            = Engine::Math::toGLM(cp.getPositionWorldOnA());
         glm::vec3 ptB            = Engine::Math::toGLM(cp.getPositionWorldOnB());
@@ -113,7 +114,7 @@ bool CustomMaterialContactAddedCallback(btManifoldPoint& cp, const btCollisionOb
     }
     return true;
 }
-Engine::priv::PhysicsModule::PhysicsModule(){
+Engine::priv::PhysicsModule::PhysicsModule() {
     PHYSICS_MANAGER       = this;
     gContactAddedCallback = CustomMaterialContactAddedCallback;
 }
@@ -140,10 +141,12 @@ bool add_rigid_body(Engine::priv::PhysicsPipeline& pipeline, btRigidBody* inRigi
 void Engine::priv::PhysicsModule::update(Scene& scene, const float dt, int maxSubSteps, float fixedTimeStep){
     Engine::priv::Core::m_Engine->m_DebugManager.stop_clock_physics();
     if (!m_Paused) {
-        m_Pipeline.m_World->stepSimulation((btScalar)dt, maxSubSteps, (btScalar)fixedTimeStep);
-        for (int i = 0; i < m_Pipeline.m_Dispatcher->getNumManifolds(); ++i) {
+        m_Pipeline.m_World->stepSimulation(btScalar(dt), maxSubSteps, btScalar(fixedTimeStep));
+        int numManifolds = m_Pipeline.m_Dispatcher->getNumManifolds();
+        for (int i = 0; i < numManifolds; ++i) {
             auto& contactMnifld = *m_Pipeline.m_Dispatcher->getManifoldByIndexInternal(i);
-            for (int j = 0; j < contactMnifld.getNumContacts(); ++j) {
+            int numContacts = contactMnifld.getNumContacts();
+            for (int j = 0; j < numContacts; ++j) {
                 auto& cp = contactMnifld.getContactPoint(j);
                 if (cp.getDistance() < 0.0f) {
                     btCollisionObject* colObject0 = const_cast<btCollisionObject*>(contactMnifld.getBody0());
@@ -190,10 +193,10 @@ void Engine::Physics::unpause(){
 void Engine::Physics::setGravity(float x, float y, float z){
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->setGravity(btVector3(x,y,z));
 }
-bool Engine::Physics::addRigidBody(btRigidBody* rigidBody, MaskType group, MaskType mask){
+bool Engine::Physics::addRigidBody(btRigidBody* rigidBody, MaskType group, MaskType mask) {
     return add_rigid_body(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline, rigidBody, group, mask);
 }
-bool Engine::Physics::addRigidBody(btRigidBody* rigidBody){
+bool Engine::Physics::addRigidBody(btRigidBody* rigidBody) {
     return add_rigid_body(Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline, rigidBody);
 }
 bool Engine::Physics::removeRigidBody(btRigidBody* rigidBody){
@@ -235,114 +238,36 @@ void debugDrawRaycastLine(const btVector3& start, const btVector3& end, float r,
         Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->getDebugDrawer()->drawLine(start, end, btVector4(r, g, b, a));
     #endif
 }
-Engine::RayCastResult internal_ray_cast_nearest(const btVector3& start, const btVector3& end, MaskType group, MaskType mask) {
-    btCollisionWorld::ClosestRayResultCallback RayCallback{ start, end };
-    RayCallback.m_collisionFilterGroup = group;
-    RayCallback.m_collisionFilterMask  = mask;
+Engine::RayCastResult internal_ray_cast_nearest(const btVector3& start, const btVector3& end, MaskType group, MaskType mask, std::vector<Entity>&& ignored) {
+    RayResultCallback RayCallback{ start, end, group, mask, std::move(ignored) };
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->rayTest(start, end, RayCallback);
     debugDrawRaycastLine(start, end, 1.0f, 0.5f, 0.0f, 1.0f);
-    Engine::RayCastResult result{ RayCallback };
-    return result;
+    return Engine::RayCastResult{ RayCallback };
 }
-std::vector<Engine::RayCastResult> internal_ray_cast(const btVector3& start, const btVector3& end, MaskType group, MaskType mask) {
-    btCollisionWorld::AllHitsRayResultCallback AllHitsRayCallback{ start, end };
-    AllHitsRayCallback.m_collisionFilterGroup = group;
-    AllHitsRayCallback.m_collisionFilterMask  = mask;
+std::vector<Engine::RayCastResult> internal_ray_cast(const btVector3& start, const btVector3& end, MaskType group, MaskType mask, std::vector<Entity>&& ignored) {
+    RayResultAllCallback AllHitsRayCallback{ start, end, group, mask, std::move(ignored) };
     Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline.m_World->rayTest(start, end, AllHitsRayCallback);
     debugDrawRaycastLine(start, end, 1.0f, 0.5f, 0.0f, 1.0f);
     std::vector<Engine::RayCastResult> result;
     if (AllHitsRayCallback.hasHit()) {
-        auto& pts = AllHitsRayCallback.m_hitPointWorld;
-        result.reserve(pts.size());
-        for (int i = 0; i < pts.size(); ++i) { 
+        auto& ptsArray = AllHitsRayCallback.m_hitPointWorld;
+        result.reserve(ptsArray.size());
+        for (int i = 0; i < ptsArray.size(); ++i) {
             result.emplace_back(AllHitsRayCallback, i);
         }
     }
     return result;
 }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredRigidBody, MaskType group, MaskType mask){
-    if (ignoredRigidBody) {
-        Engine::Physics::removeRigidBody(ignoredRigidBody->getBtBody());
-    }
-    std::vector<Engine::RayCastResult> result = internal_ray_cast(start, end, group, mask);
-    if (ignoredRigidBody) {
-        Engine::Physics::addRigidBody(ignoredRigidBody->getBtBody(), ignoredRigidBody->getCollisionGroup(), ignoredRigidBody->getCollisionMask());
-    }
-    return result;
-}
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredRigidBodies, MaskType group, MaskType mask){
-    for (auto& ignoredRigidBody : ignoredRigidBodies) {
-        Engine::Physics::removeRigidBody(ignoredRigidBody->getBtBody());
-    }
-    std::vector<RayCastResult> result = internal_ray_cast(start, end, group, mask);
-    for (auto& ignoredRigidBody : ignoredRigidBodies) {
-        Engine::Physics::addRigidBody(ignoredRigidBody->getBtBody(), ignoredRigidBody->getCollisionGroup(), ignoredRigidBody->getCollisionMask());
-    }
-    return result;
+
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end, MaskType group, MaskType mask) {
+    return internal_ray_cast(Engine::Math::toBT(start), Engine::Math::toBT(end), group, mask, std::vector<Entity>{});
  }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end, Entity ignoredEntity, MaskType group, MaskType mask){
-    btVector3 start_ = Engine::Math::toBT(start);
-    btVector3 end_   = Engine::Math::toBT(end);
-    if (ignoredEntity) {
-        auto rigidBody = ignoredEntity.getComponent<ComponentRigidBody>();
-        if (rigidBody) {
-            return Engine::Physics::rayCast(start_, end_, rigidBody, group, mask);
-        }
-    }
-    return Engine::Physics::rayCast(start_, end_, nullptr, group, mask);
- }
-std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end , std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask){
-    btVector3 start_ = Engine::Math::toBT(start);
-    btVector3 end_   = Engine::Math::toBT(end);
-    auto objs = Engine::create_and_reserve<std::vector<ComponentRigidBody*>>((uint32_t)ignoredEntities.size());
-    for(auto ignoredEntity : ignoredEntities){
-        auto rigid = ignoredEntity.getComponent<ComponentRigidBody>();
-        if(rigid) {
-            objs.emplace_back(rigid);
-        }
-    }
-    return Engine::Physics::rayCast(start_, end_, objs, group, mask);
+std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>&& ignored, MaskType group, MaskType mask) {
+    return internal_ray_cast(Engine::Math::toBT(start), Engine::Math::toBT(end), group, mask, std::move(ignored));
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, const btVector3& end, ComponentRigidBody* ignoredRigidBody, MaskType group, MaskType mask) {
-    if (ignoredRigidBody) {
-        Engine::Physics::removeRigidBody(ignoredRigidBody->getBtBody());
-    }
-    Engine::RayCastResult result = internal_ray_cast_nearest(start, end, group, mask);
-    if (ignoredRigidBody) {
-        Engine::Physics::addRigidBody(ignoredRigidBody->getBtBody(), ignoredRigidBody->getCollisionGroup(), ignoredRigidBody->getCollisionMask());
-    }
-    return result;
+Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, MaskType group, MaskType mask) {
+    return internal_ray_cast_nearest(Engine::Math::toBT(start), Engine::Math::toBT(end), group, mask, std::vector<Entity>{});
 }
-Engine::RayCastResult Engine::Physics::rayCastNearest(const btVector3& start, const btVector3& end, std::vector<ComponentRigidBody*>& ignoredRigidBodies, MaskType group, MaskType mask) {
-    for (auto& ignoredRigidBody : ignoredRigidBodies) {
-        Physics::removeRigidBody(ignoredRigidBody->getBtBody());
-    }
-    Engine::RayCastResult result = internal_ray_cast_nearest(start, end, group, mask);
-    for (auto& ignoredRigidBody : ignoredRigidBodies) {
-        Engine::Physics::addRigidBody(ignoredRigidBody->getBtBody(), ignoredRigidBody->getCollisionGroup(), ignoredRigidBody->getCollisionMask());
-    }
-    return result;
-}
-Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, Entity ignoredEntity, MaskType group, MaskType mask) {
-    btVector3 start_ = Engine::Math::toBT(start);
-    btVector3 end_   = Engine::Math::toBT(end);
-    if (ignoredEntity) {
-        auto rigid = ignoredEntity.getComponent<ComponentRigidBody>();
-        if (rigid) {
-            return Engine::Physics::rayCastNearest(start_, end_, rigid, group, mask);
-        }
-    }
-    return Engine::Physics::rayCastNearest(start_, end_, nullptr, group, mask);
-}
-Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>& ignoredEntities, MaskType group, MaskType mask) {
-    btVector3 start_ = Engine::Math::toBT(start);
-    btVector3 end_   = Engine::Math::toBT(end);
-    auto objs = Engine::create_and_reserve<std::vector<ComponentRigidBody*>>((uint32_t)ignoredEntities.size());
-    for (auto ignoredEntity : ignoredEntities) {
-        auto rigid = ignoredEntity.getComponent<ComponentRigidBody>();
-        if (rigid) {
-            objs.emplace_back(rigid);
-        }
-    }
-    return Engine::Physics::rayCastNearest(start_, end_, objs, group, mask);
+Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>&& ignored, MaskType group, MaskType mask) {
+    return internal_ray_cast_nearest(Engine::Math::toBT(start), Engine::Math::toBT(end), group, mask, std::move(ignored));
 }

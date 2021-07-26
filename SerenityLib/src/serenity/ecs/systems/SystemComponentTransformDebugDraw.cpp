@@ -12,7 +12,7 @@ SystemComponentTransformDebugDraw::SystemComponentTransformDebugDraw(Engine::pri
 {
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         #if defined(_DEBUG) || defined(ENGINE_FORCE_PHYSICS_DEBUG_DRAW)
-        auto& system = (SystemComponentTransformDebugDraw&)inSystem;
+        auto& system = static_cast<SystemComponentTransformDebugDraw&>(inSystem);
         system.forEach<Scene*>([](Scene* scene, Entity entity, ComponentTransform* transform, ComponentModel* model) {
             //ASSERT(scene && body && model, __FUNCTION__ << "(): parameter(s) was nullptr!");
             const auto world_pos = glm::vec3{ transform->getPosition() };

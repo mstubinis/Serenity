@@ -18,6 +18,7 @@ class  btTransform;
 class  btVector3;
 class  btDiscreteDynamicsWorld;
 class  btPersistentManifold;
+class  BulletWorld;
 namespace Engine::priv {
     class  PhysicsTaskScheduler;
     class  PhysicsPipeline;
@@ -26,7 +27,6 @@ namespace Engine::priv {
 #include <serenity/physics/DebugDrawer.h>
 #include <serenity/physics/PhysicsTaskScheduler.h>
 #include <LinearMath/btThreads.h>
-#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
 
 namespace Engine::priv {
     class PhysicsPipeline final {

@@ -1,4 +1,3 @@
-
 #include <serenity/physics/PhysicsPipeline.h>
 #include <serenity/system/Engine.h>
 #include <serenity/threading/ThreadingModule.h>
@@ -18,14 +17,13 @@
 
 Engine::priv::PhysicsPipeline::PhysicsPipeline() {
     auto hardware_concurrency = Engine::hardware_concurrency();
-
     m_Broadphase              = std::make_unique<btDbvtBroadphase>();
     m_CollisionConfiguration  = std::make_unique<btDefaultCollisionConfiguration>();
     m_Dispatcher              = std::make_unique<btCollisionDispatcher>(m_CollisionConfiguration.get());
     if (hardware_concurrency <= 1) {
         m_Solver              = std::make_unique<btSequentialImpulseConstraintSolver>();
         m_World               = std::make_unique<btDiscreteDynamicsWorld>(m_Dispatcher.get(), m_Broadphase.get(), m_Solver.get(), m_CollisionConfiguration.get());
-    }else{
+    } else {
         m_TaskScheduler       = std::make_unique<PhysicsTaskScheduler>("PhysicsTaskScheduler");
         btSetTaskScheduler(m_TaskScheduler.get());
         m_SolverPool          = std::make_unique<btConstraintSolverPoolMt>(hardware_concurrency);

@@ -421,7 +421,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -532,7 +532,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="include\serenity\physics\btRigidBodyEnhanced.cpp" />
     <ClCompile Include="include\serenity\resources\mesh\animation\Skeleton.cpp" />
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp" />
     <ClCompile Include="src\serenity\algorithms\RadixSort.cpp" />
@@ -636,10 +635,12 @@
     <ClCompile Include="src\serenity\networking\SocketManager.cpp" />
     <ClCompile Include="src\serenity\networking\SocketTCP.cpp" />
     <ClCompile Include="src\serenity\networking\SocketUDP.cpp" />
+    <ClCompile Include="src\serenity\physics\btRigidBodyEnhanced.cpp" />
     <ClCompile Include="src\serenity\physics\DebugDrawer.cpp" />
     <ClCompile Include="src\serenity\physics\PhysicsModule.cpp" />
     <ClCompile Include="src\serenity\physics\PhysicsPipeline.cpp" />
     <ClCompile Include="src\serenity\physics\PhysicsTaskScheduler.cpp" />
+    <ClCompile Include="src\serenity\physics\Raycast.cpp" />
     <ClCompile Include="src\serenity\renderer\culling\Culling.cpp" />
     <ClCompile Include="src\serenity\renderer\culling\DistanceTest.cpp" />
     <ClCompile Include="src\serenity\renderer\culling\PointIntersectTest.cpp" />
@@ -914,6 +915,7 @@
     <ClInclude Include="include\serenity\physics\PhysicsModule.h" />
     <ClInclude Include="include\serenity\physics\PhysicsPipeline.h" />
     <ClInclude Include="include\serenity\physics\PhysicsTaskScheduler.h" />
+    <ClInclude Include="include\serenity\physics\Raycast.h" />
     <ClInclude Include="include\serenity\renderer\culling\Culling.h" />
     <ClInclude Include="include\serenity\renderer\culling\DistanceTest.h" />
     <ClInclude Include="include\serenity\renderer\culling\PointIntersectTest.h" />

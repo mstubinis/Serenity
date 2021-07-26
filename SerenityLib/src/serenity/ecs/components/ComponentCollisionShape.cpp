@@ -141,26 +141,11 @@ void ComponentCollisionShape::setCollision(btCollisionShape* shape) {
     m_CollisionShape.reset(shape);
 
     auto& deferredSystem = Engine::priv::ComponentCollisionShapeDeferredLoading::get();
-    {
-        auto itrSingle = deferredSystem.m_DeferredLoadingCollisionsSingle.begin();
-        while (itrSingle != deferredSystem.m_DeferredLoadingCollisionsSingle.end()) {
-            if ((*itrSingle).first == m_Owner) {
-                itrSingle = deferredSystem.m_DeferredLoadingCollisionsSingle.erase(itrSingle);
-            }else{
-                itrSingle++;
-            }
-        }
-    }
-    {
-        auto itrMulti = deferredSystem.m_DeferredLoadingCollisionsMulti.begin();
-        while (itrMulti != deferredSystem.m_DeferredLoadingCollisionsMulti.end()) {
-            if ((*itrMulti).first == m_Owner) {
-                itrMulti = deferredSystem.m_DeferredLoadingCollisionsMulti.erase(itrMulti);
-            }else{
-                itrMulti++;
-            }
-        }
-    }
+
+    //we dont need the old collision that was going to be assigned to this entity once its loaded anymore since we are changing it
+    deferredSystem.internal_cleanup_single_using_entity(m_Owner);
+    deferredSystem.internal_cleanup_multi_using_entity(m_Owner);
+
     auto transform = m_Owner.getComponent<ComponentTransform>();
     //auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();
     auto model     = m_Owner.getComponent<ComponentModel>();
@@ -184,7 +169,7 @@ void ComponentCollisionShape::setCollision(CollisionType collisionType, Handle m
     if (!mesh.isLoaded() /*|| !mesh.m_CPUData.m_CollisionFactory*/) {
         m_CollisionShape = std::unique_ptr<btCollisionShape>(Engine::priv::PublicMesh::BuildCollision(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), collisionType));
         Engine::priv::ComponentCollisionShapeDeferredLoading::get().deferredLoadSingle(m_Owner, meshHandle, mass, collisionType);
-    }else{
+    } else {
         ComponentCollisionShape::internal_load_single_mesh_impl(*this, collisionType, meshHandle, mass);
     }
 }
@@ -206,10 +191,10 @@ void ComponentCollisionShape::setCollision(CollisionType collisionType, Componen
         }
         if (!allLoaded) {
             Engine::priv::ComponentCollisionShapeDeferredLoading::get().deferredLoadMultiple(m_Owner, instances, mass, collisionType);
-        }else{
+        } else {
             ComponentCollisionShape::internal_load_multiple_meshes_impl(*this, instances, mass, collisionType);
         }
-    }else{
+    } else {
         ComponentCollisionShape::setCollision(collisionType, &componentModel.getModel(0), mass);
     }
 }
@@ -233,15 +218,13 @@ void ComponentCollisionShape::setCollision(CollisionType collisionType, const st
         m_CollisionShape.reset(new btCompoundShape{});
         if (!allLoaded) {
             Engine::priv::ComponentCollisionShapeDeferredLoading::get().deferredLoadMultiple(m_Owner, instances, mass, collisionType);
-        }else{
+        } else {
             ComponentCollisionShape::internal_load_multiple_meshes_impl(*this, instances, mass, collisionType);
         }
-    }else{
+    } else {
         ComponentCollisionShape::setCollision(collisionType, instances[0], mass);
     }
 }
-
-
 void ComponentCollisionShape::forcePhysicsSync() noexcept {
     auto transform = m_Owner.getComponent<ComponentTransform>();
     if (transform) {
@@ -281,9 +264,6 @@ void ComponentCollisionShape::setMass(float mass) {
         btShape->calculateLocalInertia(mass, m_BtInertia);
     }
 }
-
-
-
 void ComponentCollisionShape::internal_load_single_mesh(Entity entity, CollisionType collisionType, Handle mesh, float mass) {
     auto collision = entity.getComponent<ComponentCollisionShape>();
     if (collision) {
@@ -331,7 +311,7 @@ void ComponentCollisionShape::internal_load_multiple_meshes_impl(ComponentCollis
             auto rot = transformChild->getRotation() * instance->getRotation();
             auto pos = transformChild->getLocalPosition() * instance->getPosition();
             localTransform = btTransform{ Engine::Math::toBT(rot), Engine::Math::toBT(pos) };
-        }else{
+        } else {
             localTransform = btTransform{ Engine::Math::toBT(instance->getRotation()), Engine::Math::toBT(instance->getPosition()) };
         }
         built_collision_shape->setMargin(0.04f);
@@ -351,6 +331,26 @@ void ComponentCollisionShape::internal_load_multiple_meshes_impl(ComponentCollis
     collisionShape.internal_update_ptrs();
 }
 
+void Engine::priv::ComponentCollisionShapeDeferredLoading::internal_cleanup_single_using_entity(Entity entity) {
+    auto itrSingle = m_DeferredLoadingCollisionsSingle.begin();
+    while (itrSingle != m_DeferredLoadingCollisionsSingle.end()) {
+        if ((*itrSingle).first == entity) {
+            itrSingle = m_DeferredLoadingCollisionsSingle.erase(itrSingle);
+        } else {
+            itrSingle++;
+        }
+    }
+}
+void Engine::priv::ComponentCollisionShapeDeferredLoading::internal_cleanup_multi_using_entity(Entity entity) {
+    auto itrMulti = m_DeferredLoadingCollisionsMulti.begin();
+    while (itrMulti != m_DeferredLoadingCollisionsMulti.end()) {
+        if ((*itrMulti).first == entity) {
+            itrMulti = m_DeferredLoadingCollisionsMulti.erase(itrMulti);
+        } else {
+            itrMulti++;
+        }
+    }
+}
 void Engine::priv::ComponentCollisionShapeDeferredLoading::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
         Mesh* loadedMesh = static_cast<Mesh*>(e.eventResource.resource);
@@ -363,7 +363,7 @@ void Engine::priv::ComponentCollisionShapeDeferredLoading::onEvent(const Event& 
             if (mesh == loadedMesh || mesh->isLoaded()) {
                 ComponentCollisionShape::internal_load_single_mesh(data.first, std::get<2>(data.second), meshHandle, std::get<1>(data.second));
                 itrSingle = m_DeferredLoadingCollisionsSingle.erase(itrSingle);
-            }else{
+            } else {
                 itrSingle++;
             }
         }
@@ -383,7 +383,7 @@ void Engine::priv::ComponentCollisionShapeDeferredLoading::onEvent(const Event& 
             if (counter == instances.size()) {
                 ComponentCollisionShape::internal_load_multiple_meshes(data.first, instances, std::get<1>(data.second), std::get<2>(data.second));
                 itrMulti = m_DeferredLoadingCollisionsMulti.erase(itrMulti);
-            }else{
+            } else {
                 itrMulti++;
             }
         }

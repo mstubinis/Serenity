@@ -171,15 +171,27 @@ void ComponentRigidBody::internal_set_matrix(const glm_mat4& matrix) {
     auto localScale = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(clone);
     btTransform tr;
     tr.setFromOpenGLMatrix(glm::value_ptr(clone));
+    auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
+    /*
+    if (collisionShape) {
+        if (collisionShape->isStaticTriangleType()) {
+            this->removePhysicsFromWorldImmediate();
+        }
+    }
+    */
     m_BulletRigidBody->setWorldTransform(tr);
     m_BulletRigidBody->setCenterOfMassTransform(tr);
     m_BulletRigidBody->getMotionState()->setWorldTransform(tr);
-    auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
     if (collisionShape) {
         const auto currentScale = internal_getScale();
-        if (currentScale != glm::vec3(localScale)) {
-            collisionShape->internal_setScale((float)localScale.x, (float)localScale.y, (float)localScale.z);
+        if (currentScale != glm::vec3{ localScale }) {
+            collisionShape->internal_setScale(float(localScale.x), float(localScale.y), float(localScale.z));
         }
+        /*
+        if (collisionShape->isStaticTriangleType()) {
+            this->addPhysicsToWorldImmediate();
+        }
+        */
     }
 }
 void ComponentRigidBody::internal_setScale(float x, float y, float z) {
@@ -190,8 +202,7 @@ void ComponentRigidBody::internal_setScale(float x, float y, float z) {
 }
 btTransform ComponentRigidBody::internal_get_bt_transform() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    auto& tr = m_BulletRigidBody->getWorldTransform();
-    return tr;
+    return m_BulletRigidBody->getWorldTransform();
 }
 btTransform ComponentRigidBody::internal_get_bt_transform_motion_state() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");

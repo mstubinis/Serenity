@@ -12,7 +12,7 @@ SystemTransformParentChild::SystemTransformParentChild(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
-        auto& system = (SystemTransformParentChild&)inSystem;
+        auto& system = static_cast<SystemTransformParentChild&>(inSystem);
         system.computeAllParentChildWorldTransforms();
         system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArg, Entity entity, ComponentTransform* transform) {
             auto rigidBody      = entity.getComponent<ComponentRigidBody>();

@@ -860,9 +860,6 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemSceneChanging.cpp">
       <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="include\serenity\physics\btRigidBodyEnhanced.cpp">
-      <Filter>Source Files\Engine\Core\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\ecs\systems\SystemCompoundChildTransforms.cpp">
       <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
@@ -955,6 +952,12 @@
     </ClCompile>
     <ClCompile Include="src\serenity\renderer\opengl\glsl\DeferredFunctions.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\physics\Raycast.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\physics\btRigidBodyEnhanced.cpp">
+      <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1782,6 +1785,9 @@
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\opengl\glsl\DeferredFunctions.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\physics\Raycast.h">
+      <Filter>Header Files\Engine\Core\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

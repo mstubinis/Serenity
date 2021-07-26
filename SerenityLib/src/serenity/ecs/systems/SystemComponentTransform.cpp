@@ -9,7 +9,7 @@ SystemComponentTransform::SystemComponentTransform(Engine::priv::ECS& ecs)
 {
 
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
-        auto& system   = (SystemComponentTransform&)inSystem;
+        auto& system   = static_cast<SystemComponentTransform&>(inSystem);
         auto& systemPC = inSystem.getECS().getSystem<SystemTransformParentChild>();
         system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArgs, Entity entity, ComponentTransform* transform) {
             auto& worldMatrix = pcsArgs->m_WorldTransforms[entity.id() - 1];
@@ -26,7 +26,7 @@ SystemComponentTransform::SystemComponentTransform(Engine::priv::ECS& ecs)
     });
 
     setComponentAddedToEntityFunction([](SystemBaseClass& inSystem, void* component, Entity entity) {
-        auto& system  = (SystemComponentTransform&)inSystem;
+        auto& system  = static_cast<SystemComponentTransform&>(inSystem);
         auto model    = entity.getComponent<ComponentModel>();
         if (model) {
             Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
