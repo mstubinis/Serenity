@@ -3,6 +3,7 @@
 #define ENGINE_SCENE_H
 
 class  Scene;
+struct SceneImpl;
 class  Camera;
 class  SunLight;
 class  DirectionalLight;
@@ -45,6 +46,7 @@ namespace Engine::priv {
 #include <serenity/renderer/particles/ParticleSystem.h>
 
 class Scene: public Observer {
+    friend struct SceneImpl;
     friend class  Engine::priv::RenderGraph;
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::PublicScene;
@@ -124,7 +126,7 @@ class Scene: public Observer {
         inline void setAmbientColor(float r, float g, float b) noexcept { m_AmbientColor = glm::vec3{ r, g, b }; }
 
         [[nodiscard]] inline constexpr uint32_t id() const noexcept { return m_ID; }
-        [[nodiscard]] inline uint32_t numViewports() const noexcept { return (uint32_t)m_Viewports.size(); }
+        [[nodiscard]] inline uint32_t getNumViewports() const noexcept { return static_cast<uint32_t>(m_Viewports.size()); }
 
 
         [[nodiscard]] Entity createEntity();
@@ -173,8 +175,9 @@ class Scene: public Observer {
 };
 namespace Engine::priv {
     struct PublicScene final {
-        friend class Scene;
-        friend class Engine::priv::RenderGraph;
+        friend class  Scene;
+        friend struct SceneImpl;
+        friend class  Engine::priv::RenderGraph;
 
         static std::vector<Particle>&            GetParticles(const Scene& scene);
         static std::vector<Entity>&              GetEntities(Scene& scene);

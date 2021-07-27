@@ -30,6 +30,16 @@
 #include <serenity/ecs/systems/SystemComponentLogic3.h>
 #include <serenity/ecs/systems/SystemComponentModel.h>
 
+struct SceneImpl final {
+    template<class FUNC> static void iterateMaterials(Scene& scene, FUNC&& func) {
+        for (size_t i = 0; i < (size_t)RenderStage::_TOTAL; ++i) {
+            for (auto& graph : scene.m_RenderGraphs[i]) {
+                graph.iterateMaterials(std::forward<FUNC&&>(func));
+            }
+        }
+    }
+};
+
 std::vector<Particle>& Engine::priv::PublicScene::GetParticles(const Scene& scene) {
     return scene.m_ParticleSystem.getParticles();
 }
@@ -53,25 +63,15 @@ void Engine::priv::PublicScene::CleanECS(Scene& scene, Entity inEntity) {
     }
 }
 void Engine::priv::PublicScene::UpdateMaterials(Scene& scene, const float dt) {
-    for (size_t i = 0; i < (size_t)RenderStage::_TOTAL; ++i) {
-        for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
-                auto material = materialNode.material.get<Material>();
-                material->m_UpdatedThisFrame = false;
-            }
+    SceneImpl::iterateMaterials(scene, [](Material& material) {
+        material.m_UpdatedThisFrame = false;
+    });
+    SceneImpl::iterateMaterials(scene, [dt](Material& material) {
+        if (!material.m_UpdatedThisFrame) {
+            material.update(dt);
+            material.m_UpdatedThisFrame = true;
         }
-    }
-    for (size_t i = 0; i < (size_t)RenderStage::_TOTAL; ++i) {
-        for (auto& render_graph_ptr : scene.m_RenderGraphs[i]) {
-            for (auto& materialNode : render_graph_ptr.m_MaterialNodes) {
-                auto material = materialNode.material.get<Material>();
-                if (!material->m_UpdatedThisFrame) {
-                    material->update(dt);
-                    material->m_UpdatedThisFrame = true;
-                }
-            }
-        }
-    }
+    });
 }
 void Engine::priv::PublicScene::RenderGeometryOpaque(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = (size_t)RenderStage::GeometryOpaque; i < (size_t)RenderStage::GeometryOpaque_4; ++i) {
@@ -327,9 +327,7 @@ ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& propertie
     return m_ParticleSystem.add_emitter(properties, scene, lifetime, parent);
 }
 Viewport& Scene::addViewport(float x, float y, float width, float height, Camera& camera) {
-    uint32_t id         = numViewports();
     Viewport& viewport  = m_Viewports.emplace_back(*this, camera);
-    viewport.m_ID       = id;
     viewport.setViewportDimensions(x, y, width, height);
     return viewport;
 }
@@ -350,17 +348,15 @@ Camera* Scene::getActiveCamera() const {
 }
 void Scene::setActiveCamera(Camera& camera){
     if (m_Viewports.size() == 0) {
-        uint32_t id        = numViewports();
-        Viewport& viewport = m_Viewports.emplace_back(*this, camera);
-        viewport.m_ID      = id;
+        m_Viewports.emplace_back(*this, camera);
         return;
     }
     m_Viewports[0].setCamera(camera);
 }
-void Scene::centerSceneToObject(Entity centerEntity){
+void Scene::centerSceneToObject(Entity centerEntity) {
     auto centerTransform = centerEntity.getComponent<ComponentTransform>();
-    auto centerPos = centerTransform->getWorldPosition();
-    auto centerPosFloat = glm::vec3(centerPos);
+    auto centerPos       = centerTransform->getWorldPosition();
+    auto centerPosFloat  = glm::vec3{ centerPos };
     for (const auto e : Engine::priv::PublicScene::GetEntities(*this)) {
         if (e != centerEntity) {
             auto eTransform = e.getComponent<ComponentTransform>();
@@ -385,7 +381,7 @@ void Scene::centerSceneToObject(Entity centerEntity){
     Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(*this);
     ComponentTransform::recalculateAllParentChildMatrices(*this);
 }
-void Scene::update(const float dt){
+void Scene::update(const float dt) {
     m_ECS.update(dt, *this);
 
     Engine::priv::PublicScene::UpdateMaterials(*this, dt);
@@ -411,9 +407,7 @@ void Scene::setGlobalIllumination(const glm::vec3& globalIllumination) {
     setGlobalIllumination(globalIllumination.x, globalIllumination.y, globalIllumination.z);
 }
 void Scene::setGlobalIllumination(float global, float diffuse, float specular) {
-    m_GI.x = global;
-    m_GI.y = diffuse;
-    m_GI.z = specular;
+    m_GI = glm::vec3{ global, diffuse, specular };
     Engine::Renderer::Settings::Lighting::setGIContribution(global, diffuse, specular);
 }
 void Scene::onEvent(const Event& e) {

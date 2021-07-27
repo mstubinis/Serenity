@@ -72,33 +72,33 @@ Material::Material(std::string_view name, Handle diffuse, Handle normal, Handle 
 }
 Material::Material(Material&& other) noexcept
     : Resource{ std::move(other) }
-    , m_Components        { std::move(other.m_Components) }
-    , m_DiffuseModel      { std::move(other.m_DiffuseModel) }
-    , m_SpecularModel     { std::move(other.m_SpecularModel) }
-    , m_Shadeless         { std::move(other.m_Shadeless) }
-    , m_UpdatedThisFrame  { std::move(other.m_UpdatedThisFrame) }
-    , m_F0Color           { std::move(other.m_F0Color) }
-    , m_BaseGlow          { std::move(other.m_BaseGlow) }
-    , m_BaseMetalness     { std::move(other.m_BaseMetalness) }
-    , m_BaseSmoothness    { std::move(other.m_BaseSmoothness) }
-    , m_BaseAO            { std::move(other.m_BaseAO) }
-    , m_BaseAlpha         { std::move(other.m_BaseAlpha) }
-    , m_ID                { std::move(other.m_ID) }
+    , m_Components       { std::move(other.m_Components) }
+    , m_DiffuseModel     { std::move(other.m_DiffuseModel) }
+    , m_SpecularModel    { std::move(other.m_SpecularModel) }
+    , m_Shadeless        { std::move(other.m_Shadeless) }
+    , m_F0Color          { std::move(other.m_F0Color) }
+    , m_BaseGlow         { std::move(other.m_BaseGlow) }
+    , m_BaseMetalness    { std::move(other.m_BaseMetalness) }
+    , m_BaseSmoothness   { std::move(other.m_BaseSmoothness) }
+    , m_BaseAO           { std::move(other.m_BaseAO) }
+    , m_BaseAlpha        { std::move(other.m_BaseAlpha) }
+    , m_ID               { std::move(other.m_ID) }
+    , m_UpdatedThisFrame { std::move(other.m_UpdatedThisFrame) }
 {}
 Material& Material::operator=(Material&& other) noexcept {
     Resource::operator=(std::move(other));
-    m_Components        = std::move(other.m_Components);
-    m_DiffuseModel      = std::move(other.m_DiffuseModel);
-    m_SpecularModel     = std::move(other.m_SpecularModel);
-    m_Shadeless         = std::move(other.m_Shadeless);
-    m_UpdatedThisFrame  = std::move(other.m_UpdatedThisFrame);
-    m_F0Color           = std::move(other.m_F0Color);
-    m_BaseGlow          = std::move(other.m_BaseGlow);
-    m_BaseMetalness     = std::move(other.m_BaseMetalness);
-    m_BaseSmoothness    = std::move(other.m_BaseSmoothness);
-    m_BaseAO            = std::move(other.m_BaseAO);
-    m_BaseAlpha         = std::move(other.m_BaseAlpha);
-    m_ID                = std::move(other.m_ID);
+    m_Components       = std::move(other.m_Components);
+    m_DiffuseModel     = std::move(other.m_DiffuseModel);
+    m_SpecularModel    = std::move(other.m_SpecularModel);
+    m_Shadeless        = std::move(other.m_Shadeless);
+    m_F0Color          = std::move(other.m_F0Color);
+    m_BaseGlow         = std::move(other.m_BaseGlow);
+    m_BaseMetalness    = std::move(other.m_BaseMetalness);
+    m_BaseSmoothness   = std::move(other.m_BaseSmoothness);
+    m_BaseAO           = std::move(other.m_BaseAO);
+    m_BaseAlpha        = std::move(other.m_BaseAlpha);
+    m_ID               = std::move(other.m_ID);
+    m_UpdatedThisFrame = std::move(other.m_UpdatedThisFrame);
     return *this;
 }
 Material::~Material() {

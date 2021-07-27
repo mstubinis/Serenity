@@ -75,6 +75,12 @@ namespace Engine::priv {
             RenderGraph(RenderGraph&&) noexcept            = default;
             RenderGraph& operator=(RenderGraph&&) noexcept = default;
 
+            template<class FUNC> void iterateMaterials(FUNC&& func) {
+                for (auto& materialNode : m_MaterialNodes) {
+                    func(*materialNode.material.get<Material>());
+                }
+            }
+
             bool remove_material_node(const MaterialNode*);
             bool remove_mesh_node(MaterialNode*, const MeshNode*);
             bool remove_instance_node(MeshNode*, const ModelInstance*);

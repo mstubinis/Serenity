@@ -45,29 +45,27 @@ class Viewport final {
 
         glm::vec4                     m_Viewport_Dimensions = glm::vec4(0.0f, 0.0f, 256.0f, 256.0f);
         glm::vec4                     m_BackgroundColor     = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        RenderFunc                    m_RenderFuncPointer   = nullptr;
         Scene*                        m_Scene               = nullptr;
         Camera*                       m_Camera              = nullptr;
         float                         m_DepthMaskValue      = 50.0f;
         uint32_t                      m_ID                  = 0;
         Engine::Flag<uint16_t>        m_RenderFlags;
         Engine::Flag<uint8_t>         m_StateFlags;
-        RenderFunc                    m_RenderFuncPointer   = nullptr;
 
-        Viewport(RenderFunc renderFunc = nullptr);
+        Viewport(RenderFunc = nullptr);
     public:
-        Viewport(Scene& scene, Camera& camera, RenderFunc renderFunc = nullptr);
+        Viewport(Scene&, Camera&, RenderFunc = nullptr);
 
-        Viewport(Viewport&& other) noexcept;
-        Viewport& operator=(Viewport&& other) noexcept;
-
-        ~Viewport() = default;
+        Viewport(const Viewport&) = delete;
+        Viewport& operator=(const Viewport&) = delete;
+        Viewport(Viewport&&) noexcept;
+        Viewport& operator=(Viewport&&) noexcept;
 
         [[nodiscard]] inline constexpr uint32_t getId() const noexcept { return m_ID; }
         inline void setID(uint32_t id) noexcept { m_ID = id; }
 
-        inline void render(Engine::priv::RenderModule& renderModule, Viewport& viewport, bool mainRenderFunc) const noexcept { 
-            if(m_RenderFuncPointer) m_RenderFuncPointer(renderModule, viewport, mainRenderFunc); 
-        }
+        void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunc) const noexcept;
         inline void setRenderFunc(RenderFunc renderFuncPtr) noexcept { m_RenderFuncPointer = renderFuncPtr; }
 
         [[nodiscard]] inline Engine::Flag<uint16_t> getRenderFlags() const noexcept { return m_RenderFlags; }
@@ -81,6 +79,7 @@ class Viewport final {
         [[nodiscard]] inline constexpr bool isDepthMaskActive() const noexcept { return m_StateFlags.has(StateFlags::DepthMaskActive); }
 
         [[nodiscard]] inline constexpr const glm::vec4& getBackgroundColor() const noexcept { return m_BackgroundColor; }
+        inline void setBackgroundColor(const glm::vec4& color) noexcept { setBackgroundColor(color.r, color.g, color.b, color.a); }
         void setBackgroundColor(float r, float g, float b, float a);
 
         void setAspectRatioSynced(bool synced);

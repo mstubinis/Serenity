@@ -18,22 +18,22 @@ Viewport::Viewport(RenderFunc renderFunc) {
 Viewport::Viewport(Scene& scene, Camera& camera, RenderFunc renderFunc)
     : Viewport{ renderFunc }
 {
-    auto winSize{ Engine::Resources::getWindowSize() };
-    m_Scene       = &scene;
-
+    const auto winSize{ Engine::Resources::getWindowSize() };
+    m_ID    = scene.getNumViewports();
+    m_Scene = &scene;
     setCamera(camera);
-    setViewportDimensions(0.0f, 0.0f, (float)winSize.x, (float)winSize.y);
+    setViewportDimensions(0.0f, 0.0f, float(winSize.x), float(winSize.y));
 }
 Viewport::Viewport(Viewport&& other) noexcept 
-    : m_Scene{ std::move(other.m_Scene) }
-    , m_Camera{ std::move(other.m_Camera) }
+    : m_Scene              { std::move(other.m_Scene) }
+    , m_Camera             { std::move(other.m_Camera) }
     , m_Viewport_Dimensions{ std::move(other.m_Viewport_Dimensions) }
-    , m_BackgroundColor{ std::move(other.m_BackgroundColor) }
-    , m_StateFlags{ std::move(other.m_StateFlags) }
-    , m_DepthMaskValue{ std::move(other.m_DepthMaskValue) }
-    , m_ID{ std::move(other.m_ID) }
-    , m_RenderFlags{ std::move(other.m_RenderFlags) }
-    , m_RenderFuncPointer { std::move(other.m_RenderFuncPointer) }
+    , m_BackgroundColor    { std::move(other.m_BackgroundColor) }
+    , m_StateFlags         { std::move(other.m_StateFlags) }
+    , m_DepthMaskValue     { std::move(other.m_DepthMaskValue) }
+    , m_ID                 { std::move(other.m_ID) }
+    , m_RenderFlags        { std::move(other.m_RenderFlags) }
+    , m_RenderFuncPointer  { std::move(other.m_RenderFuncPointer) }
 {}
 Viewport& Viewport::operator=(Viewport&& other) noexcept {
     m_Scene               = std::move(other.m_Scene);
@@ -49,7 +49,7 @@ Viewport& Viewport::operator=(Viewport&& other) noexcept {
 }
 
 void Viewport::activateDepthMask(bool active) {
-    (active) ? m_StateFlags.add(StateFlags::DepthMaskActive) : m_StateFlags.remove(StateFlags::DepthMaskActive);
+    active ? m_StateFlags.add(StateFlags::DepthMaskActive) : m_StateFlags.remove(StateFlags::DepthMaskActive);
 }
 void Viewport::setBackgroundColor(float r, float g, float b, float a) {
     m_BackgroundColor.r = r;
@@ -58,17 +58,22 @@ void Viewport::setBackgroundColor(float r, float g, float b, float a) {
     m_BackgroundColor.a = a;
 }
 void Viewport::setAspectRatioSynced(bool synced) {
-    (synced) ? m_StateFlags.add(StateFlags::AspectRatioSynced) : m_StateFlags.remove(StateFlags::AspectRatioSynced);
+    synced ? m_StateFlags.add(StateFlags::AspectRatioSynced) : m_StateFlags.remove(StateFlags::AspectRatioSynced);
 }
 bool Viewport::isAspectRatioSynced() const {
     return m_StateFlags.has(StateFlags::AspectRatioSynced);
 }
 void Viewport::activate(bool active) {
-    (active) ? m_StateFlags.add(StateFlags::Active) : m_StateFlags.remove(StateFlags::Active);
+    active ? m_StateFlags.add(StateFlags::Active) : m_StateFlags.remove(StateFlags::Active);
 }
 void Viewport::setViewportDimensions(float x, float y, float width, float height) {
     m_Viewport_Dimensions.x = x;
     m_Viewport_Dimensions.y = y;
     m_Viewport_Dimensions.z = width;
     m_Viewport_Dimensions.w = height;
+}
+void Viewport::render(Engine::priv::RenderModule& renderModule, Viewport& viewport, bool mainRenderFunc) const noexcept {
+    if (m_RenderFuncPointer) {
+        m_RenderFuncPointer(renderModule, viewport, mainRenderFunc);
+    }
 }
