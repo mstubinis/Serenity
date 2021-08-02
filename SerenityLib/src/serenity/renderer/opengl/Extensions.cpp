@@ -5,16 +5,12 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <string>
-#include <array>
+#include <vector>
 
-using namespace Engine;
-using namespace Engine::priv;
+static std::vector<bool> OPENGL_EXTENSIONS;
 
-std::array<bool, OpenGLExtensions::_TOTAL> OPENGL_EXTENSIONS {
-
-};
-
-void OpenGLExtensions::INIT() noexcept {
+void Engine::priv::OpenGLExtensions::INIT() noexcept {
+    OPENGL_EXTENSIONS.resize(OpenGLExtensions::_TOTAL, false);
     OPENGL_EXTENSIONS[OpenGLExtensions::EXT_texture_filter_anisotropic]  = checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
     OPENGL_EXTENSIONS[OpenGLExtensions::ARB_texture_filter_anisotropic]  = checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
     OPENGL_EXTENSIONS[OpenGLExtensions::EXT_draw_instanced]              = checkOpenGLExtension("GL_EXT_draw_instanced");
@@ -41,17 +37,14 @@ void OpenGLExtensions::INIT() noexcept {
         }
     #endif
 }
-
-bool OpenGLExtensions::checkOpenGLExtension(const char* e) noexcept {
-    if (glewIsExtensionSupported(e) != 0) {
-        return true;
-    }
-    return (0 != glewIsSupported(e)); 
+bool Engine::priv::OpenGLExtensions::checkOpenGLExtension(const char* e) noexcept {
+    return (glewIsExtensionSupported(e) != 0) ? true : (0 != glewIsSupported(e));
 }
-void OpenGLExtensions::printAllAvailableExtensions() noexcept {
+void Engine::priv::OpenGLExtensions::printAllAvailableExtensions() noexcept {
     GLint n = 0;
     glGetIntegerv(GL_NUM_EXTENSIONS, &n);
     std::string output;
+    output.reserve(n * 4);
     for (GLint i = 0; i < n; ++i) {
         const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
         output += std::to_string(i) + ": " + extension + "\n";
@@ -59,9 +52,9 @@ void OpenGLExtensions::printAllAvailableExtensions() noexcept {
     ENGINE_PRODUCTION_LOG(output)
 }
 
-bool OpenGLExtensions::supported(OpenGLExtensions::Extension extension) noexcept {
+bool Engine::priv::OpenGLExtensions::supported(OpenGLExtensions::Extension extension) noexcept {
     return OPENGL_EXTENSIONS[extension];
 }
-bool OpenGLExtensions::isBindlessTexturesSupported() noexcept {
+bool Engine::priv::OpenGLExtensions::isBindlessTexturesSupported() noexcept {
     return OPENGL_EXTENSIONS[OpenGLExtensions::ARB_bindless_texture] || OPENGL_EXTENSIONS[OpenGLExtensions::NV_bindless_texture];
 }

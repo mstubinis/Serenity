@@ -1788,7 +1788,7 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
         internal_pass_final(sceneTexture);
         m_GBuffer.bindBackbuffer(viewport);   
         internal_pass_depth_and_transparency(viewport, outTexture);
-    }else{
+    } else {
         switch (m_Renderer.m_AA_algorithm) {
             case AntiAliasingAlgorithm::None: {
                 break;
@@ -1819,8 +1819,8 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
                     SMAA::STATIC_SMAA.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
                     m_GBuffer.bindFramebuffers(outTexture, "RGBA");
                     SMAA::STATIC_SMAA.passNeighbor(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, m_Renderer);
-                    //m_GBuffer.bindFramebuffers(sceneTexture);
-                    //SMAA::smaa.passFinal(m_GBuffer, viewport);//unused
+                    //m_GBuffer.bindFramebuffers(sceneTexture, "RGBA");
+                    //SMAA::STATIC_SMAA.passFinal(m_GBuffer, viewport, m_Renderer);
                     m_GBuffer.bindBackbuffer(viewport);
                     internal_pass_depth_and_transparency(viewport, outTexture);
                 }

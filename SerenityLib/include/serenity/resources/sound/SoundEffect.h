@@ -48,8 +48,12 @@ class SoundEffect : public SoundBaseClass {
         void setAttenuation(float attenuation) override;
 
         [[nodiscard]] glm::vec3 getPosition() const override;
+
         void setPosition(float x, float y, float z) override;
         void setPosition(const glm::vec3& position) override;
+        void translate(float x, float y, float z) override;
+        void translate(const glm::vec3& position) override;
+
         [[nodiscard]] float getVolume() const override;
         void setVolume(float volume) override;
         [[nodiscard]] float getPitch() const override;

@@ -39,11 +39,13 @@ class Window final{
         void internal_init() noexcept;
         bool internal_return_window_placement_cmd(uint32_t cmd) const noexcept;
         bool internal_execute_show_window(uint32_t cmd) noexcept;
+        void internal_set_icon_from_options(const EngineOptions&);
+        void internal_set_fullscreen_from_options(const EngineOptions&);
+        void internal_set_minimized_or_maximized_from_options(const EngineOptions&);
 
         Window();
     public:
-        ~Window();
-
+        ~Window() = default;
         void init(const EngineOptions&) noexcept;
 
         [[nodiscard]] inline const std::string& name() const noexcept { return m_Data.m_WindowName; }
@@ -153,6 +155,12 @@ class Window final{
         //whose precision depends on the underlying OS, the results may be a little unprecise as well
         //(for example, you can get 65 FPS when requesting 60).
         void setFramerateLimit(uint32_t limit);
+
+        //show or hide the window, the window is shown by default
+        void setVisible(bool isVisible);
+
+        void hide();
+        void show();
 
 };
 #endif

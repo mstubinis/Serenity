@@ -49,7 +49,7 @@ void Engine::priv::WindowThread::internal_startup(Window& super, const std::stri
     m_EventThread.reset(NEW std::jthread([this, &super, &name, &bLatch]() {
         m_Data.m_SFMLWindow.create(m_Data.m_VideoMode, name, m_Data.m_Style, m_Data.m_SFContextSettings);
         super.setIcon(m_Data.m_IconFile);
-        bool successfulDeactivation = m_Data.m_SFMLWindow.setActive(false);
+        m_Data.m_SFMLWindow.setActive(false);
         m_Data.m_UndergoingClosing = false;
         if (bLatch) {
             bLatch->count_down();

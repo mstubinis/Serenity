@@ -45,8 +45,6 @@ namespace Engine::priv {
 
             void init(const SceneOptions&);
 
-            void clearAllEntities() noexcept;
-
             [[nodiscard]] inline const ECSEntityPool& getEntityPool() const noexcept { return m_EntityPool; }
             [[nodiscard]] Entity createEntity(Scene&);
             [[nodiscard]] inline sparse_set_base* getComponentPool(uint32_t typeID) noexcept { return m_ComponentPools[typeID - 1].get(); }

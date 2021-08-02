@@ -2,7 +2,7 @@
 #include <SFML/Window/Keyboard.hpp>
 
 void Engine::priv::KeyboardModule::onWindowLostFocus() noexcept {
-    m_CurrKeyboardKeyStatus.fill(false);
+    std::fill(std::begin(m_CurrKeyboardKeyStatus), std::end(m_CurrKeyboardKeyStatus), false);
     m_NumPressedKeys = 0;
 }
 void Engine::priv::KeyboardModule::onWindowGainedFocus() noexcept {
@@ -20,11 +20,11 @@ void Engine::priv::KeyboardModule::onKeyReleased(uint32_t key) noexcept {
         return;
     }
     m_CurrKeyboardKeyStatus[key] = false;
-    m_NumPressedKeys = std::max(m_NumPressedKeys - 1U, 0U);
+    m_NumPressedKeys = std::max(m_NumPressedKeys - 1, 0);
 }
 void Engine::priv::KeyboardModule::update() noexcept {
     m_PrevKeyboardKeyStatus = m_CurrKeyboardKeyStatus;
-    m_CurrKeyboardKeyStatus[(uint32_t)KeyboardKey::Unknown] = true;
+    m_CurrKeyboardKeyStatus[KeyboardKey::Unknown] = true;
 }
 bool Engine::priv::KeyboardModule::isKeyDownOnce(uint32_t key) noexcept {
     return isKeyDown(key) && !m_PrevKeyboardKeyStatus[key];

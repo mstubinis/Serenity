@@ -67,7 +67,9 @@ Particle& Particle::operator=(Particle&& other) noexcept {
     m_EmitterSource   = std::move(other.m_EmitterSource);
     return *this;
 }
-
+float Particle::lifetime() const noexcept {
+    return m_EmitterSource->m_Properties->m_Lifetime;
+}
 void Particle::setPosition(const glm::vec3& newPosition) noexcept {
     setPosition(newPosition.x, newPosition.y, newPosition.z);
 }
@@ -76,6 +78,12 @@ void Particle::setPosition(float x, float y, float z) noexcept {
     m_Position.y = y;
     m_Position.z = z;
 }
-float Particle::lifetime() const noexcept {
-    return m_EmitterSource->m_Properties->m_Lifetime;
+void Particle::translate(const glm::vec3& newPosition) noexcept {
+    translate(newPosition.x, newPosition.y, newPosition.z);
 }
+void Particle::translate(float x, float y, float z) noexcept {
+    m_Position.x += x;
+    m_Position.y += y;
+    m_Position.z += z;
+}
+

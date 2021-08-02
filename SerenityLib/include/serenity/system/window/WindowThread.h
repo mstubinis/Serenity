@@ -2,7 +2,8 @@
 #ifndef ENGINE_WINDOW_THREAD_H
 #define ENGINE_WINDOW_THREAD_H
 
-class Window;
+class  Window;
+struct EngineOptions;
 
 #include <serenity/system/window/WindowIncludes.h>
 #include <serenity/containers/Queue_ts.h>
@@ -29,13 +30,11 @@ namespace Engine::priv {
         public:
             WindowThread(WindowData&);
 
-            bool operator==(bool rhs) const {
-                bool res = (bool)m_EventThread.get();
+            bool operator==(bool rhs) const noexcept {
+                bool res = bool(m_EventThread.get());
                 return (rhs) ? res : !res;
             }
-            explicit operator bool() const {
-                return (bool)m_EventThread.get();
-            }
+            inline explicit operator bool() const noexcept { return bool(m_EventThread.get()); }
     };
 }
 #endif

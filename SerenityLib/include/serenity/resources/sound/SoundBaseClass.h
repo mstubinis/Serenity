@@ -53,6 +53,8 @@ class SoundBaseClass {
         [[nodiscard]] virtual glm::vec3 getPosition() const { return glm::vec3(0.0f); }
         virtual void setPosition(float x, float y, float z) {}
         virtual void setPosition(const glm::vec3& position) {}
+        virtual void translate(float x, float y, float z) {}
+        virtual void translate(const glm::vec3& position) {}
         [[nodiscard]] virtual float getVolume() const { return 0.0f; }
         virtual void setVolume(float volume) {}
         [[nodiscard]] virtual float getPitch() const { return 0.0f; }

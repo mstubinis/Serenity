@@ -173,7 +173,14 @@ void SoundEffect::setPosition(float x, float y, float z) {
     m_Sound.setPosition(x, y, z);
 }
 void SoundEffect::setPosition(const glm::vec3& position) {
-    m_Sound.setPosition(position.x, position.y, position.z);
+    SoundEffect::setPosition(position.x, position.y, position.z);
+}
+void SoundEffect::translate(float x, float y, float z) {
+    const auto pos = m_Sound.getPosition();
+    SoundEffect::setPosition(pos.x + x, pos.y + y, pos.z + z);
+}
+void SoundEffect::translate(const glm::vec3& position) {
+    SoundEffect::translate(position.x, position.y, position.z);
 }
 float SoundEffect::getVolume() const {
     return m_Sound.getVolume();

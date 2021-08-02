@@ -112,7 +112,6 @@ class Scene: public Observer {
             m_LightsModule.deleteLight(light); 
         }
 
-        void clearAllEntities() noexcept;
         void update(const float dt);
         virtual void render() {}
         virtual void onEvent(const Event&);

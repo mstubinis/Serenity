@@ -320,9 +320,6 @@ size_t Scene::getNumLights() const noexcept {
     }
     return count;
 }
-void Scene::clearAllEntities() noexcept {
-    m_ECS.clearAllEntities();
-}
 ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     return m_ParticleSystem.add_emitter(properties, scene, lifetime, parent);
 }
@@ -341,10 +338,7 @@ Viewport& Scene::getMainViewport() {
     return m_Viewports[0];
 }
 Camera* Scene::getActiveCamera() const {
-    if (m_Viewports.size() == 0){
-        return nullptr;
-    }
-    return &m_Viewports[0].getCamera();
+    return m_Viewports.size() > 0 ? &m_Viewports[0].getCamera() : nullptr;
 }
 void Scene::setActiveCamera(Camera& camera){
     if (m_Viewports.size() == 0) {
@@ -355,31 +349,30 @@ void Scene::setActiveCamera(Camera& camera){
 }
 void Scene::centerSceneToObject(Entity centerEntity) {
     auto centerTransform = centerEntity.getComponent<ComponentTransform>();
+    ASSERT(centerTransform, __FUNCTION__ << "(): centerTransform was null!");
     auto centerPos       = centerTransform->getWorldPosition();
     auto centerPosFloat  = glm::vec3{ centerPos };
-    for (const auto e : Engine::priv::PublicScene::GetEntities(*this)) {
+    for (const Entity e : Engine::priv::PublicScene::GetEntities(*this)) {
         if (e != centerEntity) {
             auto eTransform = e.getComponent<ComponentTransform>();
             if (eTransform && !eTransform->hasParent()) {
-                eTransform->setPosition(eTransform->getWorldPosition() - centerPos);
+                eTransform->translate(-centerPos, false);
             }
         }
     }
     for (auto& particle : m_ParticleSystem.getParticles()) {
         if (particle.isActive()) {
-            particle.setPosition(particle.position() - centerPosFloat);
+            particle.translate(-centerPosFloat);
         }
     }
     for (auto& soundEffect : Engine::Sound::getAllSoundEffects()) {
         if (soundEffect.isActive() && soundEffect.getAttenuation() > 0.0f) {
-            soundEffect.setPosition(soundEffect.getPosition() - centerPosFloat);
+            soundEffect.translate(-centerPosFloat);
         }
     }
-    if (centerTransform) {
-        centerTransform->setPosition(decimal(0.0));
-    }
+    centerTransform->setPosition(decimal(0.0));
     Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(*this);
-    ComponentTransform::recalculateAllParentChildMatrices(*this);
+    ComponentTransform::recalculateAllParentChildMatrices(*this); //hmm is this needed?
 }
 void Scene::update(const float dt) {
     m_ECS.update(dt, *this);

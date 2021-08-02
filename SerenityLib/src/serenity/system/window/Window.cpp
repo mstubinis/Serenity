@@ -9,44 +9,32 @@
 Window::Window() {
     internal_init();
 }
-Window::~Window(){
-}
 void Window::init(const EngineOptions& options) noexcept {
     m_Data.m_WindowName        = options.window_title;
     m_Data.m_VideoMode.width   = options.width;
     m_Data.m_VideoMode.height  = options.height;
     m_Data.m_SFContextSettings = m_Data.internal_create(*this, options.window_title);
     int opengl_version         = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
-    Engine::priv::Core::m_Engine->m_RenderModule._onOpenGLContextCreation(
-        m_Data.m_VideoMode.width, 
-        m_Data.m_VideoMode.height
-    );
+    Engine::priv::Core::m_Engine->m_RenderModule._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height);
 
     m_Data.internal_init_position(*this);
-
-    if (!options.icon.empty()) {
-        setIcon(options.icon);
-    }
-    if (options.window_mode == 1) {
-        setFullscreen(true);
-    }else if (options.window_mode == 2) {
-        setFullscreenWindowed(true);
-    }else {
-        setFullscreen(false);
-    }
-    if (options.maximized) {
-        maximize();
-    }
-
+    setVisible(false);
+    internal_set_icon_from_options(options);
+    internal_set_fullscreen_from_options(options);
+    internal_set_minimized_or_maximized_from_options(options);
     requestFocus();
+    setVisible(true);
     display();
-
     setVerticalSyncEnabled(options.vsync); //unfortunately this will not work until a few frames after the window creation
-
     if (options.show_console) {
         ENGINE_PRODUCTION_LOG("Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion <<
-            ", with depth bits: " << m_Data.m_SFContextSettings.depthBits <<
-            " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits)
+            ", with depth bits: " << m_Data.m_SFContextSettings.depthBits << " and stencil bits: " << m_Data.m_SFContextSettings.stencilBits
+        )
+    }
+}
+void Window::internal_set_minimized_or_maximized_from_options(const EngineOptions& options) {
+    if (options.maximized) {
+        maximize();
     }
 }
 void Window::internal_init() noexcept {
@@ -65,15 +53,28 @@ void Window::internal_init() noexcept {
     m_Data.m_VideoMode.bitsPerPixel = 32;
     m_Data.m_Style                  = sf::Style::Default;
 }
-void Window::setMouseCursor(const Cursor& cursor) noexcept {
-    m_Data.m_SFMLWindow.setMouseCursor(cursor.getSFMLCursor());
+void Window::internal_set_icon_from_options(const EngineOptions& options) {
+    if (!options.icon.empty()) {
+        setIcon(options.icon);
+    }
 }
-void Window::setJoystickProcessingActive(bool active) {
-    m_Data.m_SFMLWindow.setJoystickManagerActive(active);
+void Window::internal_set_fullscreen_from_options(const EngineOptions& options) {
+    switch (options.window_mode) {
+        case 1: {
+            setFullscreen(true);
+            break;
+        } case 2: {
+            setFullscreenWindowed(true);
+            break;
+        } default: {
+            setFullscreen(false);
+            break;
+        }
+    }
 }
-bool Window::isJoystickProcessingActive() const {
-    return m_Data.m_SFMLWindow.isJoystickManagerActive();
-}
+void Window::setMouseCursor(const Cursor& cursor) noexcept { m_Data.m_SFMLWindow.setMouseCursor(cursor.getSFMLCursor()); }
+void Window::setJoystickProcessingActive(bool active) { m_Data.m_SFMLWindow.setJoystickManagerActive(active); }
+bool Window::isJoystickProcessingActive() const { return m_Data.m_SFMLWindow.isJoystickManagerActive(); }
 void Window::updateMousePosition(float x, float y, bool resetDifference, bool resetPrevious) {
     m_Data.internal_update_mouse_position(*this, x, y, resetDifference, resetPrevious);
 }
@@ -87,22 +88,22 @@ bool Window::internal_execute_show_window(uint32_t cmd) noexcept {
     #endif
     return false;
 }
-bool Window::maximize() noexcept {
-    return internal_execute_show_window(SW_MAXIMIZE);
+bool Window::maximize() noexcept { 
+    const auto result = internal_execute_show_window(SW_MAXIMIZE);
+    return result;
 }
-bool Window::minimize() noexcept {
-    return internal_execute_show_window(SW_MINIMIZE);
+bool Window::minimize() noexcept { 
+    const auto result = internal_execute_show_window(SW_MINIMIZE); 
+    return result;
 }
-void Window::setPosition(uint32_t x, uint32_t y) {
-    m_Data.m_SFMLWindow.setPosition(sf::Vector2i(x, y));
-}
+void Window::setPosition(uint32_t x, uint32_t y) { m_Data.m_SFMLWindow.setPosition(sf::Vector2i(x, y)); }
 glm::uvec2 Window::getPosition() {
-    auto position = m_Data.m_SFMLWindow.getPosition();
-    return glm::uvec2(position.x, position.y);
+    const auto position = m_Data.m_SFMLWindow.getPosition();
+    return glm::uvec2{ position.x, position.y };
 }
 glm::uvec2 Window::getSize(){
-    sf::Vector2u window_size = m_Data.m_SFMLWindow.getSize();
-    return glm::uvec2(window_size.x, window_size.y);
+    const auto windowSize = m_Data.m_SFMLWindow.getSize();
+    return glm::uvec2{ windowSize.x, windowSize.y };
 }
 void Window::setIcon(const Texture& texture) {
     m_Data.m_SFMLWindow.setIcon(texture.width(), texture.height(), const_cast<Texture&>(texture).pixels());
@@ -118,10 +119,9 @@ void Window::setIcon(const char* file) {
     m_Data.m_IconFile = file;
 }
 void Window::setIcon(const std::string& file) {
-    if (file.empty()) {
-        return;
+    if (!file.empty()) {
+        Window::setIcon(file.c_str());
     }
-    Window::setIcon(file.c_str());
 }
 void Window::setName(const char* name) {
     if (m_Data.m_WindowName == name) {
@@ -166,30 +166,14 @@ bool Window::isWindowOnSeparateThread() const {
     #endif
     return false;
 }
-bool Window::hasFocus() const {
-    return m_Data.m_SFMLWindow.hasFocus();
-}
-bool Window::isOpen() const {
-    return m_Data.m_SFMLWindow.isOpen();
-}
-bool Window::isActive() const {
-    return m_Data.m_Flags.has(Window_Flags::Active);
-}
-bool Window::isFullscreen() const {
-    return isFullscreenNonWindowed() || isFullscreenWindowed();
-}
-bool Window::isFullscreenWindowed() const {
-    return m_Data.m_Flags.has(Window_Flags::WindowedFullscreen);
-}
-bool Window::isFullscreenNonWindowed() const {
-    return m_Data.m_Flags.has(Window_Flags::Fullscreen);
-}
-bool Window::isMouseKeptInWindow() const {
-    return m_Data.m_Flags.has(Window_Flags::MouseGrabbed);
-}
-void Window::display() {
-    m_Data.m_SFMLWindow.display();
-}
+bool Window::hasFocus() const { return m_Data.m_SFMLWindow.hasFocus(); }
+bool Window::isOpen() const { return m_Data.m_SFMLWindow.isOpen(); }
+bool Window::isActive() const { return m_Data.m_Flags.has(Window_Flags::Active); }
+bool Window::isFullscreen() const { return isFullscreenNonWindowed() || isFullscreenWindowed(); }
+bool Window::isFullscreenWindowed() const { return m_Data.m_Flags.has(Window_Flags::WindowedFullscreen); }
+bool Window::isFullscreenNonWindowed() const { return m_Data.m_Flags.has(Window_Flags::Fullscreen); }
+bool Window::isMouseKeptInWindow() const { return m_Data.m_Flags.has(Window_Flags::MouseGrabbed); }
+void Window::display() { m_Data.m_SFMLWindow.display(); }
 bool Window::internal_return_window_placement_cmd(uint32_t cmd) const noexcept {
     #ifdef _WIN32
         WINDOWPLACEMENT info;
@@ -201,23 +185,19 @@ bool Window::internal_return_window_placement_cmd(uint32_t cmd) const noexcept {
     #endif
     return false;
 }
-bool Window::isMaximized() const noexcept {
-    return internal_return_window_placement_cmd(SW_MAXIMIZE);
-}
-bool Window::isMinimized() const noexcept {
-    return internal_return_window_placement_cmd(SW_MINIMIZE);
-}
+bool Window::isMaximized() const noexcept { return internal_return_window_placement_cmd(SW_MAXIMIZE); }
+bool Window::isMinimized() const noexcept { return internal_return_window_placement_cmd(SW_MINIMIZE); }
 bool Window::setActive(bool isToBeActive) {
     bool result = m_Data.m_SFMLWindow.setActive(isToBeActive);
     if (result) {
         if (isToBeActive) {
             m_Data.m_OpenGLThreadID = std::this_thread::get_id();
             m_Data.m_Flags.add(Window_Flags::Active);
-        }else{
+        } else {
             m_Data.m_Flags.remove(Window_Flags::Active);
         }
-    }else{
-        ENGINE_PRODUCTION_LOG("error: Window::setActive() failed when called from thread: " << std::this_thread::get_id())     
+    } else {
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): failed when called from thread: " << std::this_thread::get_id())     
     }
     return result;
 }
@@ -235,30 +215,24 @@ void Window::setSize(uint32_t width, uint32_t height) {
     dimensions.y = height;
     m_Data.m_SFMLWindow.setSize(dimensions);
 }
-void Window::internal_restore_state() {
-    m_Data.internal_restore_state(*this);
-}
+void Window::internal_restore_state() { m_Data.internal_restore_state(*this); }
 bool Window::setFullscreenWindowed(bool isToBeFullscreen) {
     if (isToBeFullscreen) {
         if (isFullscreenWindowed()) {
             return false;
         }
         m_Data.m_Style = sf::Style::None;    //windowed_fullscreen
+        m_Data.m_Flags.remove(Window_Flags::Fullscreen | Window_Flags::Windowed);
         m_Data.m_Flags.add(Window_Flags::WindowedFullscreen);
-        m_Data.m_Flags.remove(Window_Flags::Fullscreen);
-        m_Data.m_Flags.remove(Window_Flags::Windowed);
-    }else{
+    } else {
         if (!isFullscreen()) {
             return false;
         }
         m_Data.m_Style = sf::Style::Default; //windowed
+        m_Data.m_Flags.remove(Window_Flags::Fullscreen | Window_Flags::WindowedFullscreen);
         m_Data.m_Flags.add(Window_Flags::Windowed);
-        m_Data.m_Flags.remove(Window_Flags::Fullscreen);
-        m_Data.m_Flags.remove(Window_Flags::WindowedFullscreen);
     }
-    bool old_max = isMaximized();
-    bool old_min = isMinimized();
-    m_Data.internal_on_fullscreen(*this, isToBeFullscreen, old_max, old_min);
+    m_Data.internal_on_fullscreen(*this, isToBeFullscreen, isMaximized(), isMinimized());
     return true;
 }
 bool Window::setFullscreen(bool isToBeFullscreen) {
@@ -267,21 +241,17 @@ bool Window::setFullscreen(bool isToBeFullscreen) {
             return false;
         }
         m_Data.m_Style = sf::Style::Fullscreen; //fullscreen   
+        m_Data.m_Flags.remove(Window_Flags::WindowedFullscreen | Window_Flags::Windowed);
         m_Data.m_Flags.add(Window_Flags::Fullscreen);
-        m_Data.m_Flags.remove(Window_Flags::WindowedFullscreen);
-        m_Data.m_Flags.remove(Window_Flags::Windowed);
-    }else{
+    } else {
         if (!isFullscreen()) {
             return false;
         }
         m_Data.m_Style = sf::Style::Default;    //windowed
+        m_Data.m_Flags.remove(Window_Flags::Fullscreen | Window_Flags::WindowedFullscreen);
         m_Data.m_Flags.add(Window_Flags::Windowed);
-        m_Data.m_Flags.remove(Window_Flags::Fullscreen);
-        m_Data.m_Flags.remove(Window_Flags::WindowedFullscreen);
     }
-    bool old_max = isMaximized();
-    bool old_min = isMinimized();
-    m_Data.internal_on_fullscreen(*this, isToBeFullscreen, old_max, old_min);
+    m_Data.internal_on_fullscreen(*this, isToBeFullscreen, isMaximized(), isMinimized());
     return true;
 }
 void Window::keepMouseInWindow(bool isToBeKept) {
@@ -296,11 +266,14 @@ void Window::setFramerateLimit(uint32_t limit){
     m_Data.m_SFMLWindow.setFramerateLimit(limit);
     m_Data.m_FramerateLimit = limit;
 }
+void Window::setVisible(bool isVisible) { m_Data.m_SFMLWindow.setVisible(isVisible); }
+void Window::hide() { setVisible(false); }
+void Window::show() { setVisible(true); }
 void Window::internal_on_dynamic_resize() {
     #ifdef _WIN32
         WINDOWINFO wiInfo;
         GetWindowInfo(m_Data.m_SFMLWindow.getSystemHandle(), &wiInfo);
-        const glm::uvec2 current_size = glm::uvec2(wiInfo.rcClient.right - wiInfo.rcClient.left, wiInfo.rcClient.bottom - wiInfo.rcClient.top);
+        const glm::uvec2 current_size = glm::uvec2{ wiInfo.rcClient.right - wiInfo.rcClient.left, wiInfo.rcClient.bottom - wiInfo.rcClient.top };
         const glm::uvec2 old_size     = getSize();
 
         if (current_size.x != old_size.x || current_size.y != old_size.y) {
@@ -315,7 +288,7 @@ bool Window::pollEvents(sf::Event& e) {
         if (x) {
             e = std::move(*x);
         }
-        return (bool)x;
+        return static_cast<bool>(x);
     #else
         return m_Data.m_SFMLWindow.pollEvent(e);
     #endif

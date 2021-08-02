@@ -38,7 +38,7 @@ namespace Engine {
             template<typename... ARGS> 
             inline void emplace_push(ARGS&&... args) { m_Array[m_Count++] = T(std::forward<ARGS>(args)...); }
 
-            inline void pop() noexcept { m_Array[m_Count - 1] = T(); --m_Count; }
+            inline void pop() noexcept { --m_Count; }
 
             BUILD_TEMPLATE_BEGIN_END_ITR_CLASS_MEMBERS(ArrayType, m_Array)
     };

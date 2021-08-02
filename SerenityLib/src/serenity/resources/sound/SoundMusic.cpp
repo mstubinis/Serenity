@@ -168,7 +168,14 @@ void SoundMusic::setPosition(float x, float y, float z) {
     m_Sound.setPosition(x, y, z);
 }
 void SoundMusic::setPosition(const glm::vec3& position) {
-    m_Sound.setPosition(position.x, position.y, position.z);
+    SoundMusic::setPosition(position.x, position.y, position.z);
+}
+void SoundMusic::translate(float x, float y, float z) {
+    const auto pos = m_Sound.getPosition();
+    m_Sound.setPosition(pos.x + x, pos.y + y, pos.z + z);
+}
+void SoundMusic::translate(const glm::vec3& position) {
+    SoundMusic::translate(position.x, position.y, position.z);
 }
 float SoundMusic::getVolume() const {
     return m_Sound.getVolume();

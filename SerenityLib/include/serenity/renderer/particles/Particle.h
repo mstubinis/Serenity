@@ -54,5 +54,8 @@ class Particle final {
 
         void setPosition(const glm::vec3& newPosition) noexcept;
         void setPosition(float x, float y, float z) noexcept;
+
+        void translate(const glm::vec3& newPosition) noexcept;
+        void translate(float x, float y, float z) noexcept;
 };
 #endif

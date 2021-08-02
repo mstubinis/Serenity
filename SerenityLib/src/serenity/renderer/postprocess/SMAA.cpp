@@ -13,9 +13,9 @@
 Engine::priv::SMAA Engine::priv::SMAA::STATIC_SMAA;
 
 Engine::priv::SMAA::SMAA() {
-    m_Vertex_Shaders.resize(PassStage::_TOTAL, Handle{});
-    m_Fragment_Shaders.resize(PassStage::_TOTAL, Handle{});
-    m_Shader_Programs.resize(PassStage::_TOTAL, Handle{});
+    m_Vertex_Shaders.resize(PassStage::_TOTAL);
+    m_Fragment_Shaders.resize(PassStage::_TOTAL);
+    m_Shader_Programs.resize(PassStage::_TOTAL);
 
     m_Vertex_Shaders_Code.resize(PassStage::_TOTAL);
     m_Fragment_Shaders_Code.resize(PassStage::_TOTAL);
@@ -568,12 +568,12 @@ void main() {
 
     const TextureType textureType = TextureType::Texture2D;
     Engine::Renderer::genAndBindTexture(textureType, STATIC_SMAA.AreaTexture);
-    glTexImage2D(textureType.toGLType(), 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, SMAA_areaTexBytes);
+    glTexImage2D(textureType.toGLType(), 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, Engine::priv::SMAA_AreaTextureBytes);
     Texture::setFilter(textureType, TextureFilter::Linear);
     TextureBaseClass::setWrapping(textureType, TextureWrap::ClampToBorder);
 
     Engine::Renderer::genAndBindTexture(textureType, STATIC_SMAA.SearchTexture);
-    glTexImage2D(textureType.toGLType(), 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, SMAA_searchTexBytes);
+    glTexImage2D(textureType.toGLType(), 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, Engine::priv::SMAA_SearchTextureBytes);
     Texture::setFilter(textureType, TextureFilter::Linear);
     TextureBaseClass::setWrapping(textureType, TextureWrap::ClampToBorder);
 

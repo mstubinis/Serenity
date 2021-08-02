@@ -11,8 +11,7 @@ int main(int argc, char** argv) {
     freopen("CONOUT$", "w", stdout);
     freopen("CONOUT$", "w", stderr);
 
-    int result = 0;
-    result = Catch::Session().run(argc, argv);
+    int result = Catch::Session().run(argc, argv);
     std::cin.get();
 
     return result;
