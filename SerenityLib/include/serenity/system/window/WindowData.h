@@ -17,12 +17,6 @@ namespace Engine::priv {
 #include <serenity/types/Flag.h>
 #include <serenity/dependencies/glm.h>
 
-//#define ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS
-
-#if !defined(_APPLE_) && !defined(ENGINE_FORCE_DISABLE_THREAD_WINDOW_EVENTS) && !defined(ENGINE_THREAD_WINDOW_EVENTS)
-    #define ENGINE_THREAD_WINDOW_EVENTS
-#endif
-
 namespace Engine::priv {
     class WindowData final {
         friend class Engine::priv::EngineCore;
@@ -31,9 +25,7 @@ namespace Engine::priv {
         friend class Engine::priv::EngineEventHandler;
         friend class Window;
         private:
-            #ifdef ENGINE_THREAD_WINDOW_EVENTS
-                Engine::priv::WindowThread  m_WindowThread;
-            #endif
+            Engine::priv::WindowThread      m_WindowThread;
 
             sf::ContextSettings             m_SFContextSettings;
             glm::vec2                       m_MousePosition          = glm::vec2{ 0.0f };
@@ -58,7 +50,7 @@ namespace Engine::priv {
             [[nodiscard]] sf::VideoMode internal_get_default_desktop_video_mode();
             void internal_init_position(Window&);
             void internal_on_mouse_wheel_scrolled(float delta, int x, int y);
-            void internal_on_reset_events(const float dt);
+            void internal_update_on_reset_events(const float dt);
             void internal_on_close();
         public:
             WindowData();

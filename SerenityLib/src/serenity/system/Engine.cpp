@@ -140,7 +140,7 @@ void EngineCore::internal_pre_input_update(Window& window) {
 }
 void EngineCore::internal_update_logic(Scene& scene, Window& window, const float dt) {
     m_DebugManager.stop_clock();
-    window.internal_on_dynamic_resize();
+    window.internal_update_dynamic_resize();
     m_NetworkingModule.update(dt);
 
     m_Misc.m_QueuedCommands.for_each_and_clear([](std::function<void()>& item) mutable { item(); });
@@ -167,7 +167,7 @@ void EngineCore::internal_post_update(Scene& scene, Window& window, const float 
     Game::onPostUpdate(dt);
     scene.postUpdate(dt);
     m_EventModule.postUpdate();
-    window.m_Data.internal_on_reset_events(dt);
+    window.m_Data.internal_update_on_reset_events(dt);
 }
 void EngineCore::internal_render(Scene& scene, Window& window, const float dt, const double alpha) {
     m_DebugManager.stop_clock();

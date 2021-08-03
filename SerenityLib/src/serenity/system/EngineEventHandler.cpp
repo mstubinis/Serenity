@@ -61,7 +61,7 @@ void Engine::priv::EngineEventHandler::internal_on_event_lost_focus(Window& wind
 void Engine::priv::EngineEventHandler::internal_on_event_gained_focus(Window& window) {
     m_EventModule.onWindowGainedFocus();
     Game::onGainedFocus(window);
-    window.m_Data.internal_on_reset_events(0.0f);
+    window.m_Data.internal_update_on_reset_events(0.0f);
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowGainedFocus);
 }
 void Engine::priv::EngineEventHandler::internal_on_event_text_entered(Window& window, uint32_t unicode) {

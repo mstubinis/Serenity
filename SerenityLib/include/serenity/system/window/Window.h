@@ -21,7 +21,7 @@ class  Cursor;
 #include <serenity/system/window/WindowData.h>
 #include <serenity/dependencies/glm.h>
 
-class Window final{
+class Window final {
     friend class Engine::priv::EngineCore;
     friend class Engine::priv::EventManager;
     friend class Engine::priv::WindowData;
@@ -33,19 +33,16 @@ class Window final{
 
         //Whenever the window's size changes, this function executes. Different from SFML's onResize Event, this fires constantly if you are changing the size of the window via mouse dragging.
         //This currently only performs actions on the windows platform.
-        void internal_on_dynamic_resize();
+        void internal_update_dynamic_resize();
 
         void internal_restore_state();
-        void internal_init() noexcept;
         bool internal_return_window_placement_cmd(uint32_t cmd) const noexcept;
         bool internal_execute_show_window(uint32_t cmd) noexcept;
-        void internal_set_icon_from_options(const EngineOptions&);
         void internal_set_fullscreen_from_options(const EngineOptions&);
         void internal_set_minimized_or_maximized_from_options(const EngineOptions&);
 
         Window();
     public:
-        ~Window() = default;
         void init(const EngineOptions&) noexcept;
 
         [[nodiscard]] inline const std::string& name() const noexcept { return m_Data.m_WindowName; }
@@ -55,8 +52,11 @@ class Window final{
 
         void setMouseCursor(const Cursor&) noexcept;
 
-        void setJoystickProcessingActive(bool active);
-        [[nodiscard]] bool isJoystickProcessingActive() const;
+        //enables or disables joystick processing. Joystick processing is quite expensive and some games don't use them, thus disabling it can make sense in some use cases
+        inline void setJoystickProcessingActive(bool active) noexcept { m_Data.m_SFMLWindow.setJoystickManagerActive(active); }
+
+        [[nodiscard]] inline bool isJoystickProcessingActive() const noexcept { return m_Data.m_SFMLWindow.isJoystickManagerActive(); }
+
 
         [[nodiscard]] inline const glm::vec2& getMousePositionDifference() const noexcept { return m_Data.m_MouseDifference; }
         [[nodiscard]] inline const glm::vec2& getMousePositionPrevious() const noexcept { return m_Data.m_MousePosition_Previous; }
@@ -65,7 +65,7 @@ class Window final{
         [[nodiscard]] inline std::thread::id getOpenglThreadID() const noexcept { return m_Data.m_OpenGLThreadID; }
         [[nodiscard]] inline sf::WindowHandle getSystemHandle() const noexcept { return m_Data.m_SFMLWindow.getSystemHandle(); }
         [[nodiscard]] inline sf::RenderWindow& getSFMLHandle() noexcept { return m_Data.m_SFMLWindow; }
-        [[nodiscard]] inline unsigned int getFramerateLimit() const noexcept { return m_Data.m_FramerateLimit; }
+        [[nodiscard]] inline uint32_t getFramerateLimit() const noexcept { return m_Data.m_FramerateLimit; }
 
         bool pollEvents(sf::Event&);
         [[nodiscard]] bool hasFocus() const;
@@ -74,6 +74,8 @@ class Window final{
         //returns true if the window is in fullscreen OR windowed fullscreen mode
         [[nodiscard]] bool isFullscreen() const;
 
+        //returns true if the window's event loop is on a separate thread, this allows for resizing and manipulation of the window without pausing the rendering process
+        //TODO: using a separate thread for the event loop can be enabled by defining the preprocessor directive ENGINE_THREAD_WINDOW_EVENTS
         [[nodiscard]] bool isWindowOnSeparateThread() const;
 
         //returns true if the window is in windowed fullscreen mode
@@ -82,9 +84,9 @@ class Window final{
         //returns true if the window is in regular fullscreen mode
         [[nodiscard]] bool isFullscreenNonWindowed() const;
 
-        //currently specific to windows os only
+        //TODO: currently specific to windows os only
         [[nodiscard]] bool isMaximized() const noexcept;
-        //currently specific to windows os only
+        //TODO: currently specific to windows os only
         [[nodiscard]] bool isMinimized() const noexcept;
 
         [[nodiscard]] bool isActive() const;
@@ -101,9 +103,10 @@ class Window final{
         void setMouseCursorVisible(bool);
         void setPosition(uint32_t x, uint32_t y);
 
-        //currently specific to windows os only
+        //TODO: currently specific to windows os only
         bool maximize() noexcept;
-        //currently specific to windows os only
+
+        //TODO: currently specific to windows os only
         bool minimize() noexcept;
 
         //If key repeat is enabled, you will receive repeated KeyPressed events while keeping a key pressed.
@@ -139,27 +142,30 @@ class Window final{
         //sets the window to be windowed fullscreen, this is a window with no style, stretched to the monitor's size
         bool setFullscreenWindowed(bool isFullscreen = true);
 
-        /*
-        Display the rendered elements to the screen. This is called automatically during the Engine's render loop. You may want to call this yourself in certain parts of the update loop
-        when you want the window to display something and cannot wait for the render loop to begin, like non async loading.
-        */
+        //Display the rendered elements to the screen. This is called automatically during the Engine's render loop. You may want to call this yourself in certain parts of the update loop
+        //when you want the window to display something and cannot wait for the render loop to begin, like in async loading screens.
         void display();
 
         //Grab or release the mouse cursor. If set, grabs the mouse cursor inside this window's client area so it may no
         //longer be moved outside its bounds. Note that grabbing is only active while the window has focus.
-        void keepMouseInWindow(bool = true);
+        //This can be useful for games that use the mouse to steer vehicles, as it allows the user to continuously steer without
+        //the mouse leaving the window and thus the window losing focus.
+        void keepMouseInWindow(bool keepInWindow = true);
 
         //Limit the framerate to a maximum fixed frequency. If a limit is set, the window will use a small delay after
         //each call to display() to ensure that the current frame lasted long enough to match the framerate limit.
         //SFML will try to match the given limit as much as it can, but since it internally uses sf::sleep,
         //whose precision depends on the underlying OS, the results may be a little unprecise as well
-        //(for example, you can get 65 FPS when requesting 60).
+        //(for example, you can get 65 FPS when requesting 60). Pass in 0 to disable framerate limiting.
         void setFramerateLimit(uint32_t limit);
 
         //show or hide the window, the window is shown by default
         void setVisible(bool isVisible);
 
+        //hide the window, the window is shown by default
         void hide();
+
+        //show the window, the window is shown by default
         void show();
 
 };
