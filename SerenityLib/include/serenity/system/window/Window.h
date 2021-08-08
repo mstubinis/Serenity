@@ -9,7 +9,6 @@ namespace Engine::priv {
     class  EngineCore;
     class  EventManager;
     class  WindowData;
-    class  WindowThread;
     class  ResourceManager;
     class  EngineEventHandler;
 };
@@ -20,12 +19,12 @@ class  Cursor;
 
 #include <serenity/system/window/WindowData.h>
 #include <serenity/dependencies/glm.h>
+#include <thread>
 
 class Window final {
     friend class Engine::priv::EngineCore;
     friend class Engine::priv::EventManager;
     friend class Engine::priv::WindowData;
-    friend class Engine::priv::WindowThread;
     friend class Engine::priv::ResourceManager;
     friend class Engine::priv::EngineEventHandler;
     private:
@@ -39,8 +38,8 @@ class Window final {
         bool internal_return_window_placement_cmd(uint32_t cmd) const noexcept;
         bool internal_execute_show_window(uint32_t cmd) noexcept;
 
-        Window();
     public:
+        Window();
         void init(const EngineOptions&) noexcept;
 
         [[nodiscard]] inline const std::string& getTitle() const noexcept { return m_Data.m_WindowTitle; }
@@ -69,18 +68,11 @@ class Window final {
         [[nodiscard]] bool hasFocus() const;
         [[nodiscard]] bool isOpen() const;
         [[nodiscard]] bool isVsyncEnabled() const;
-        //returns true if the window is in fullscreen OR windowed fullscreen mode
-        [[nodiscard]] bool isFullscreen() const;
 
         //returns true if the window's event loop is on a separate thread, this allows for resizing and manipulation of the window without pausing the rendering process
         //TODO: using a separate thread for the event loop can be enabled by defining the preprocessor directive ENGINE_THREAD_WINDOW_EVENTS
         [[nodiscard]] bool isWindowOnSeparateThread() const;
 
-        //returns true if the window is in windowed fullscreen mode
-        [[nodiscard]] bool isFullscreenWindowed() const;
-
-        //returns true if the window is in regular fullscreen mode
-        [[nodiscard]] bool isFullscreenNonWindowed() const;
 
         //TODO: currently specific to windows os only
         [[nodiscard]] bool isMaximized() const noexcept;
@@ -96,7 +88,6 @@ class Window final {
         void setTitle(std::string_view title);
         void setSize(uint32_t width, uint32_t height);
         void setIcon(const Texture&);
-        void setIcon(const char* file);
         void setIcon(std::string_view file);
         void setMouseCursorVisible(bool);
         void setPosition(uint32_t x, uint32_t y);
@@ -134,14 +125,11 @@ class Window final {
         //This is not to be confused with requestFocus().
         bool setActive(bool active = true);
 
-        //sets the window to be full screen
-        bool setFullscreen(bool isFullscreen = true);
 
-        //sets the window to be windowed fullscreen, this is a window with no style, stretched to the monitor's size
-        bool setFullscreenWindowed(bool isFullscreen = true);
+        //sets the window to various different modes, like windowed, fullscreen, windowed fullscreen, etc. returns true if the mode was changed, false if it was not
+        bool setWindowMode(WindowMode::Mode);
 
-        //sets the window to various different modes, like windowed, fullscreen, windowed fullscreen, etc
-        void setWindowMode(WindowMode::Mode);
+        WindowMode::Mode getWindowMode() const noexcept;
 
         //Display the rendered elements to the screen. This is called automatically during the Engine's render loop. You may want to call this yourself in certain parts of the update loop
         //when you want the window to display something and cannot wait for the render loop to begin, like in async loading screens.

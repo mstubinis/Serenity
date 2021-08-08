@@ -726,7 +726,6 @@
     <ClCompile Include="src\serenity\system\EngineMisc.cpp" />
     <ClCompile Include="src\serenity\system\window\Window.cpp" />
     <ClCompile Include="src\serenity\system\window\WindowData.cpp" />
-    <ClCompile Include="src\serenity\system\window\WindowThread.cpp" />
     <ClCompile Include="src\serenity\Terrain.cpp" />
     <ClCompile Include="src\serenity\tests\main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -1028,7 +1027,6 @@
     <ClInclude Include="include\serenity\system\window\Window.h" />
     <ClInclude Include="include\serenity\system\window\WindowData.h" />
     <ClInclude Include="include\serenity\system\window\WindowIncludes.h" />
-    <ClInclude Include="include\serenity\system\window\WindowThread.h" />
     <ClInclude Include="include\serenity\Terrain.h" />
     <ClInclude Include="include\serenity\threading\ThreadingHelpers.h" />
     <ClInclude Include="include\serenity\threading\ThreadingModule.h" />

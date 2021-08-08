@@ -118,8 +118,6 @@ namespace Engine{
 
     void setTimeScale(float timeScale) noexcept;
     void stop() noexcept;
-    inline bool setFullscreen(bool fullscreen) noexcept { return Engine::Resources::getWindow().setFullscreen(fullscreen); }
-    inline bool setFullscreenWindowed(bool fullscreenWindowed) noexcept { return Engine::Resources::getWindow().setFullscreenWindowed(fullscreenWindowed); }
 };
 
 #endif

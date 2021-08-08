@@ -7,26 +7,35 @@ struct EngineOptions;
 namespace Engine::priv {
     class  EngineCore;
     class  EventManager;
-    class  WindowThread;
     class  EngineEventHandler;
 };
 
 #include <SFML/Window/VideoMode.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
-#include <serenity/system/window/WindowThread.h>
+#include <SFML/Window/Event.hpp>
 #include <serenity/types/Flag.h>
+#include <serenity/system/window/WindowIncludes.h>
+#include <serenity/containers/Queue_ts.h>
+#include <boost/thread/latch.hpp>
 #include <serenity/dependencies/glm.h>
+#include <atomic>
 
 namespace Engine::priv {
     class WindowData final {
+#if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
+        using WindowEventType         = std::optional<sf::Event>;
+        using WindowEventQueue        = Engine::queue_ts<sf::Event>;
+        using WindowEventCommandQueue = Engine::queue_ts<WindowEventThreadOnlyCommands>;
+#else
+        using WindowEventType         = std::optional<sf::Event>;
+        using WindowEventQueue        = std::queue<WindowEventType>;
+        using WindowEventCommandQueue = std::queue<WindowEventThreadOnlyCommands>;
+#endif
         friend class Engine::priv::EngineCore;
         friend class Engine::priv::EventManager;
-        friend class Engine::priv::WindowThread;
         friend class Engine::priv::EngineEventHandler;
         friend class Window;
         private:
-            Engine::priv::WindowThread      m_WindowThread;
-
             sf::ContextSettings             m_SFContextSettings;
             glm::vec2                       m_MousePosition          = glm::vec2{ 0.0f };
             glm::vec2                       m_MousePosition_Previous = glm::vec2{ 0.0f };
@@ -37,11 +46,26 @@ namespace Engine::priv {
             std::string                     m_WindowTitle;
             sf::RenderWindow                m_SFMLWindow;
             double                          m_MouseDelta             = 0.0;
-            uint32_t                        m_Style                  = 0U;
+            uint32_t                        m_Style                  = static_cast<uint32_t>(sf::Style::Default);
             uint32_t                        m_FramerateLimit         = 0U;
-            Engine::Flag<uint16_t>          m_Flags;
+            Engine::Flag<uint16_t>          m_Flags                  = (Window_Flags::Windowed | Window_Flags::MouseVisible | Window_Flags::KeyRepeat);
             std::thread::id                 m_OpenGLThreadID;
-            bool                            m_UndergoingClosing      = false;
+            std::atomic<bool>               m_UndergoingClosing      = false;
+
+
+            //window thread
+            WindowEventQueue                m_SFEventQueue;
+            WindowEventCommandQueue         m_MainThreadToEventThreadQueue;
+            std::unique_ptr<std::jthread>   m_EventThread = nullptr;
+
+            void internal_populate_sf_event_queue(bool isUndergoingClosing);
+            void internal_process_command_queue();
+            void internal_thread_startup(Window&, const std::string& name, boost::latch*);
+            void internal_push(WindowEventThreadOnlyCommands);
+            WindowEventType internal_try_pop() noexcept;
+            /////////////////////////////////
+
+
 
             void internal_restore_state(Window&);
             const sf::ContextSettings internal_create(Window&, const std::string& windowTitle);
@@ -53,7 +77,7 @@ namespace Engine::priv {
             void internal_update_on_reset_events(const float dt);
             void internal_on_close();
         public:
-            WindowData();
+            WindowData() = default;
             ~WindowData();
     };
 };

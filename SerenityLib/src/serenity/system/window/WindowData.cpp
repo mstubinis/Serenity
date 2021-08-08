@@ -6,16 +6,11 @@
 #include <serenity/system/Engine.h>
 #include <serenity/events/Event.h>
 
-Engine::priv::WindowData::WindowData()
-    : m_WindowThread{ *this }
-{
-    m_Flags = (Window_Flags::Windowed | Window_Flags::MouseVisible | Window_Flags::KeyRepeat);
-}
 Engine::priv::WindowData::~WindowData() {
     internal_on_close();
 }
 void Engine::priv::WindowData::internal_on_close() {
-    m_UndergoingClosing = true;
+    m_UndergoingClosing.store(true, std::memory_order_release);
     sf::Event dummyEvent;
     while (m_SFMLWindow.pollEvent(dummyEvent)); //clear all queued events
     m_SFMLWindow.close();
@@ -30,7 +25,7 @@ void Engine::priv::WindowData::internal_restore_state(Window& super) {
     super.setActive(m_Flags & Window_Flags::Active);
     super.setVerticalSyncEnabled(m_Flags & Window_Flags::Vsync);
     super.keepMouseInWindow(m_Flags & Window_Flags::MouseGrabbed);
-    //super.setKeyRepeatEnabled(m_Flags & Window_Flags::KeyRepeat);
+    super.setKeyRepeatEnabled(m_Flags & Window_Flags::KeyRepeat);
 }
 void Engine::priv::WindowData::internal_init_position(Window& super) {
     auto winSize               = glm::vec2{ super.getSize() };
@@ -41,12 +36,12 @@ void Engine::priv::WindowData::internal_init_position(Window& super) {
     float y_other              = 0.0f;
     #ifdef _WIN32
         //get the dimensions of the desktop's bottom task bar. Only tested on Windows 10
-        auto os_handle             = super.getSFMLHandle().getSystemHandle();
+        auto os_handle         = super.getSFMLHandle().getSystemHandle();
         //            left   right   top   bottom
         RECT rect; //[0,     1920,   0,    1040]  //bottom task bar
         SystemParametersInfoA(SPI_GETWORKAREA, 0, &rect, 0);
-        y_other               = final_desktop_height - float(rect.bottom);
-        final_desktop_height -= y_other;
+        y_other                = final_desktop_height - float(rect.bottom);
+        final_desktop_height  -= y_other;
     #endif
 
     super.setPosition(uint32_t((final_desktop_width - winSize.x) / 2.0f), uint32_t((final_desktop_height - winSize.y) / 2.0f));
@@ -54,7 +49,7 @@ void Engine::priv::WindowData::internal_init_position(Window& super) {
 const sf::ContextSettings Engine::priv::WindowData::internal_create(Window& super, const std::string& windowTitle) {
     internal_on_close();
     boost::latch bLatch{ 1 }; //TODO: replace with std::latch once it is avaiable for c++20 msvc compiler
-    m_WindowThread.internal_thread_startup(super, windowTitle, &bLatch); //calls window.setActive(false) on the created event thread, so we call setActive(true) below
+    internal_thread_startup(super, windowTitle, &bLatch); //calls window.setActive(false) on the created event thread, so we call setActive(true) below
     bLatch.wait();
     super.setActive(true);
     super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
@@ -64,7 +59,7 @@ void Engine::priv::WindowData::internal_update_mouse_position(Window& super, flo
     const auto sfml_size     = m_SFMLWindow.getSize();
     const auto winSize       = glm::vec2{ sfml_size.x, sfml_size.y };
     const glm::vec2 newPos   = glm::vec2{ x, winSize.y - y }; //opengl flipping y axis
-    m_MousePosition_Previous = (resetPrevious) ? newPos : m_MousePosition;
+    m_MousePosition_Previous = resetPrevious ? newPos : m_MousePosition;
     m_MousePosition          = newPos;
     m_MouseDifference       += (m_MousePosition - m_MousePosition_Previous);
     if (resetDifference) {
@@ -94,13 +89,9 @@ void Engine::priv::WindowData::internal_on_fullscreen(Window& super, bool isToBe
     if (isMaximized) {
         super.maximize();
     } 
-    //else if (isMinimized) {
-    //    super.minimize();
-    //}
     super.setVisible(true);
 
-    //event dispatch
-    Event ev{ EventType::WindowFullscreenChanged };
+    Event ev{ ::EventType::WindowFullscreenChanged };
     ev.eventWindowFullscreenChanged = Engine::priv::EventWindowFullscreenChanged{ isToBeFullscreen };
     Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
 }
@@ -112,4 +103,102 @@ void Engine::priv::WindowData::internal_update_on_reset_events(const float dt) {
     m_MouseDifference   = glm::vec2{ 0.0f };
     const double step   = 1.0 - double(dt);
     m_MouseDelta       *= (step * step * step);
+}
+
+
+
+
+//window thread
+void Engine::priv::WindowData::internal_push(WindowEventThreadOnlyCommands command) {
+    m_MainThreadToEventThreadQueue.push(command);
+}
+void Engine::priv::WindowData::internal_process_command_queue() {
+    while (!m_MainThreadToEventThreadQueue.empty()) {
+        auto command_ptr = m_MainThreadToEventThreadQueue.front();
+        m_MainThreadToEventThreadQueue.pop();
+        switch (command_ptr) {
+            case WindowEventThreadOnlyCommands::ShowMouse: {
+                m_SFMLWindow.setMouseCursorVisible(true);
+                m_Flags.add(Window_Flags::MouseVisible);
+                break;
+            } case WindowEventThreadOnlyCommands::HideMouse: {
+                m_SFMLWindow.setMouseCursorVisible(false);
+                m_Flags.remove(Window_Flags::MouseVisible);
+                break;
+            } case WindowEventThreadOnlyCommands::RequestFocus: {
+                m_SFMLWindow.requestFocus();
+                break;
+            } case WindowEventThreadOnlyCommands::KeepMouseInWindow: {
+                m_SFMLWindow.setMouseCursorGrabbed(true);
+                m_Flags.add(Window_Flags::MouseGrabbed);
+                break;
+            } case WindowEventThreadOnlyCommands::FreeMouseFromWindow: {
+                m_SFMLWindow.setMouseCursorGrabbed(false);
+                m_Flags.remove(Window_Flags::MouseGrabbed);
+                break;
+            }
+        }
+    }
+}
+void Engine::priv::WindowData::internal_populate_sf_event_queue(bool isUndergoingClosing) {
+    sf::Event e;
+    if (!isUndergoingClosing) {
+        while (m_SFMLWindow.pollEvent(e)) {
+            m_SFEventQueue.push(e);
+        }
+    }
+}
+
+Engine::priv::WindowData::WindowEventType Engine::priv::WindowData::internal_try_pop() noexcept {
+#if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
+    return m_SFEventQueue.try_pop();
+#else
+    const bool isUndergoingClosing = m_UndergoingClosing.load(std::memory_order_acquire);
+    if (!isUndergoingClosing) {
+        internal_populate_sf_event_queue(isUndergoingClosing);
+        internal_process_command_queue();
+    }
+    if (m_SFEventQueue.size() > 0) {
+        auto x = m_SFEventQueue.front();
+        m_SFEventQueue.pop();
+        return x;
+    }
+    return WindowEventType{};
+#endif
+}
+
+void Engine::priv::WindowData::internal_thread_startup(Window& super, const std::string& name, boost::latch* bLatch) {
+#if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
+    const bool isUndergoingClosing = m_UndergoingClosing.load(std::memory_order_acquire);
+    if (m_EventThread && !isUndergoingClosing) {
+        m_UndergoingClosing.store(true, std::memory_order_release);
+        if (m_EventThread->joinable()) {
+            m_EventThread->join();
+        }
+    }
+#endif
+    auto update_lambda_loop = [this, &super, &name, &bLatch]() {
+        m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
+        super.setIcon(m_IconFile);
+#if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
+        m_SFMLWindow.setActive(false);
+#endif
+        m_UndergoingClosing.store(false, std::memory_order_release);
+        if (bLatch) {
+            bLatch->count_down();
+        }
+#if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
+        const bool isUndergoingClosing = m_UndergoingClosing.load(std::memory_order_acquire);
+        while (!isUndergoingClosing) {
+            internal_populate_sf_event_queue(isUndergoingClosing);
+            internal_process_command_queue();
+        }
+#endif
+    };
+
+#if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
+    m_EventThread.reset(NEW std::jthread{ std::move(update_lambda_loop) });
+#else
+    update_lambda_loop();
+#endif
 }

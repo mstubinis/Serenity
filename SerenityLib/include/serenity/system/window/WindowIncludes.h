@@ -8,11 +8,11 @@ class WindowMode final { public: enum Mode : uint8_t {
     Windowed = 0,
     WindowedFullscreen,
     Fullscreen,
-};};
+_TOTAL,};};
 
 class Window_Flags final { public: enum Flag : uint16_t {
-    WindowedFullscreen = 1 << 0,
-    Windowed           = 1 << 1,
+    Windowed           = 1 << 0,
+    WindowedFullscreen = 1 << 1,
     Fullscreen         = 1 << 2,
     MouseVisible       = 1 << 3,
     Active             = 1 << 4,
@@ -22,7 +22,7 @@ class Window_Flags final { public: enum Flag : uint16_t {
 };};
 
 enum class WindowEventThreadOnlyCommands : uint32_t {
-    ShowMouse,
+    ShowMouse = 0,
     HideMouse,
     RequestFocus,
     KeepMouseInWindow,

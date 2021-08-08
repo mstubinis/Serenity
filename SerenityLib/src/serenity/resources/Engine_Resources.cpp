@@ -32,9 +32,8 @@ Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) {
     m_ResourceModule.registerResourceTypeID<SoundData>();
 }
 void Engine::priv::ResourceManager::init(const EngineOptions& options){
-    auto& window = m_Windows.emplace_back(std::unique_ptr<Window>(NEW Window{}));
-    window->init(options);
-    window->setJoystickProcessingActive(false);
+    m_Windows.push_back(std::make_unique<Window>());
+    m_Windows.back()->init(options);
 }
 void Engine::priv::ResourceManager::postUpdate() {
     if (m_ScenesToBeDeleted.size() > 0) {

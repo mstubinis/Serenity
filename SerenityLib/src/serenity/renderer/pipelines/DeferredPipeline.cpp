@@ -739,7 +739,7 @@ void DeferredPipeline::onFullscreen() {
     Engine::Renderer::GLEnable(GL_CULL_FACE);
     Engine::Renderer::GLEnable(GL_DEPTH_CLAMP);
 
-    auto winSize = Resources::getWindowSize();
+    auto winSize = Engine::Resources::getWindowSize();
     m_GBuffer.init(winSize.x, winSize.y);
 }
 void DeferredPipeline::onResize(uint32_t newWidth, uint32_t newHeight) {

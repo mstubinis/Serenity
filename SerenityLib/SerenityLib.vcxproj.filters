@@ -653,9 +653,6 @@
     <ClCompile Include="src\serenity\system\window\WindowData.cpp">
       <Filter>Source Files\Engine\Core\System\Window</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\system\window\WindowThread.cpp">
-      <Filter>Source Files\Engine\Core\System\Window</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\system\cursor\Cursor.cpp">
       <Filter>Source Files\Engine\Core\System\Cursor</Filter>
     </ClCompile>
@@ -1418,9 +1415,6 @@
       <Filter>Header Files\Engine\Core\System\Window</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\system\window\WindowIncludes.h">
-      <Filter>Header Files\Engine\Core\System\Window</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\system\window\WindowThread.h">
       <Filter>Header Files\Engine\Core\System\Window</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\threading\ThreadingHelpers.h">
