@@ -2,6 +2,8 @@
 #ifndef ENGINE_TYPES_STATIC_STRING_H
 #define ENGINE_TYPES_STATIC_STRING_H
 
+#include <string>
+
 namespace Engine {
     class static_string {
         private:
@@ -23,7 +25,7 @@ namespace Engine {
             inline constexpr size_t size() const noexcept { return m_Size; }
             inline constexpr const char* c_str() const noexcept { return m_Data; }
 
-            inline explicit operator std::string() const { return std::string(m_Data); }
+            inline explicit operator std::string() const { return std::string{ m_Data }; }
     };
 }
 

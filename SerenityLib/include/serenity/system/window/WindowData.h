@@ -34,7 +34,7 @@ namespace Engine::priv {
             glm::uvec2                      m_OldWindowSize          = glm::uvec2{ 0, 0 };
             sf::VideoMode                   m_VideoMode;
             std::string                     m_IconFile;
-            std::string                     m_WindowName;
+            std::string                     m_WindowTitle;
             sf::RenderWindow                m_SFMLWindow;
             double                          m_MouseDelta             = 0.0;
             uint32_t                        m_Style                  = 0U;

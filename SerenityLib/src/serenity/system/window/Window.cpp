@@ -19,20 +19,22 @@ Window::Window() {
     m_Data.m_Style = sf::Style::Default;
 }
 void Window::init(const EngineOptions& options) noexcept {
-    m_Data.m_WindowName        = options.window_title;
-    m_Data.m_VideoMode         = sf::VideoMode(options.width, options.height, m_Data.m_VideoMode.bitsPerPixel);
+    m_Data.m_WindowTitle       = options.window_title;
+    m_Data.m_VideoMode         = sf::VideoMode{ options.width, options.height, m_Data.m_VideoMode.bitsPerPixel };
     m_Data.m_SFContextSettings = m_Data.internal_create(*this, options.window_title);
     int opengl_version         = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
     Engine::priv::Core::m_Engine->m_RenderModule._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height);
 
     m_Data.internal_init_position(*this);
+    display();
     setVisible(false);
     setIcon(options.icon);
-    internal_set_fullscreen_from_options(options);
-    internal_set_minimized_or_maximized_from_options(options);
+    setWindowMode(options.window_mode);
+    if (options.maximized) {
+        maximize();
+    }
     requestFocus();
     setVisible(true);
-    display();
     setVerticalSyncEnabled(options.vsync);
     if (options.show_console) {
         ENGINE_PRODUCTION_LOG("Using OpenGL: " << m_Data.m_SFContextSettings.majorVersion << "." << m_Data.m_SFContextSettings.minorVersion <<
@@ -40,20 +42,15 @@ void Window::init(const EngineOptions& options) noexcept {
         )
     }
 }
-void Window::internal_set_minimized_or_maximized_from_options(const EngineOptions& options) {
-    if (options.maximized) {
-        maximize();
-    }
-}
-void Window::internal_set_fullscreen_from_options(const EngineOptions& options) {
-    switch (options.window_mode) {
-        case 1: {
+void Window::setWindowMode(WindowMode::Mode mode) {
+    switch (mode) {
+        case WindowMode::Fullscreen: {
             setFullscreen(true);
             break;
-        } case 2: {
+        } case WindowMode::WindowedFullscreen: {
             setFullscreenWindowed(true);
             break;
-        } default: {
+        } case WindowMode::Windowed: {
             setFullscreen(false);
             break;
         }
@@ -130,17 +127,18 @@ void Window::setIcon(const char* file) {
     m_Data.m_SFMLWindow.setIcon(texture.m_Resource->width(), texture.m_Resource->height(), texture.m_Resource->pixels());
     m_Data.m_IconFile = file;
 }
-void Window::setIcon(const std::string& file) {
-    if (!file.empty()) {
-        Window::setIcon(file.c_str());
+void Window::setIcon(std::string_view inFile) {
+    if (!inFile.empty()) {
+        Window::setIcon(inFile);
     }
 }
-void Window::setName(const char* name) {
-    if (m_Data.m_WindowName == name) {
+void Window::setTitle(std::string_view inTitle) {
+    if (m_Data.m_WindowTitle == inTitle) {
         return;
     }
-    m_Data.m_WindowName = name;
-    m_Data.m_SFMLWindow.setTitle(name);
+    std::string title{ inTitle };
+    m_Data.m_SFMLWindow.setTitle(title);
+    m_Data.m_WindowTitle = std::move(title);
 }
 void Window::setVerticalSyncEnabled(bool isToBeEnabled) {
     m_Data.m_SFMLWindow.setVerticalSyncEnabled(isToBeEnabled);

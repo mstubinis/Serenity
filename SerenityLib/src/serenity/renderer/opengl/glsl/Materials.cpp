@@ -546,6 +546,7 @@ float CalculateMetalness(Layer inLayer, float objectMetalness, vec2 inUVs) {
     }
     outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);
     outMetalness *= inLayer.data2.z;
+    outMetalness *= objectMetalness;
     return outMetalness;
 }
 float CalculateMetalnessLOD(Layer inLayer, float objectMetalness, vec2 inUVs, float lod) {
@@ -558,6 +559,7 @@ float CalculateMetalnessLOD(Layer inLayer, float objectMetalness, vec2 inUVs, fl
     }
     outMetalness = clamp(outMetalness, inLayer.data2.x, inLayer.data2.y);
     outMetalness *= inLayer.data2.z;
+    outMetalness *= objectMetalness;
     return outMetalness;
 }
 )", "void ProcessComponentMetalness(");
@@ -579,6 +581,7 @@ float CalculateSmoothness(Layer inLayer, float objectSmoothness, vec2 inUVs) {
     }
     outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);
     outSmoothness *= inLayer.data2.z;
+    outSmoothness *= objectSmoothness;
     return outSmoothness;
 }
 float CalculateSmoothnessLOD(Layer inLayer, float objectSmoothness, vec2 inUVs, float lod) {
@@ -591,6 +594,7 @@ float CalculateSmoothnessLOD(Layer inLayer, float objectSmoothness, vec2 inUVs, 
     }
     outSmoothness = clamp(outSmoothness, inLayer.data2.x, inLayer.data2.y);
     outSmoothness *= inLayer.data2.z;
+    outSmoothness *= objectSmoothness;
     return outSmoothness;
 }
 )", "void ProcessComponentSmoothness(");

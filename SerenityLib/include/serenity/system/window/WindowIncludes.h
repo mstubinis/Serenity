@@ -4,6 +4,12 @@
 
 #include <cstdint>
 
+class WindowMode final { public: enum Mode : uint8_t {
+    Windowed = 0,
+    WindowedFullscreen,
+    Fullscreen,
+};};
+
 class Window_Flags final { public: enum Flag : uint16_t {
     WindowedFullscreen = 1 << 0,
     Windowed           = 1 << 1,

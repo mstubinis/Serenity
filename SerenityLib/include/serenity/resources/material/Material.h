@@ -47,14 +47,14 @@ class Material final : public Resource<Material> {
         DiffuseModel                      m_DiffuseModel        = DiffuseModel::Lambert; //uint8_t
         SpecularModel                     m_SpecularModel       = SpecularModel::Cook_Torrance; //uint8_t
         uint8_t                           m_BaseGlow            = 1_uc;
-        uint8_t                           m_BaseMetalness       = 1_uc;
-        uint8_t                           m_BaseSmoothness      = 64_uc;
+        uint8_t                           m_BaseMetalness       = 254_uc;
+        uint8_t                           m_BaseSmoothness      = 254_uc;
         uint8_t                           m_BaseAO              = 254_uc;
         uint8_t                           m_BaseAlpha           = 254_uc;
         bool                              m_Shadeless           = false;
         bool                              m_UpdatedThisFrame    = false;
     private:
-        MaterialComponent* internal_add_component_generic(MaterialComponentType type, Handle texture, Handle mask = Handle{}, Handle cubemap = Handle{});
+        MaterialComponent* internal_add_component_generic(MaterialComponentType, Handle texture, Handle mask = Handle{}, Handle cubemap = Handle{});
         void internal_update_global_material_pool(bool addToDatabase) noexcept;
     public:
         Material();
@@ -88,7 +88,7 @@ class Material final : public Resource<Material> {
         inline const std::vector<MaterialComponent>& getComponents() const noexcept { return m_Components; }
         [[nodiscard]] inline MaterialComponent& getComponent(uint32_t index) { return m_Components[index]; }
 
-        MaterialComponent& addComponent(MaterialComponentType type, std::string_view textureFile = "", std::string_view maskFile = "", std::string_view cubemapFile = "");
+        MaterialComponent& addComponent(MaterialComponentType, std::string_view textureFile = "", std::string_view maskFile = "", std::string_view cubemapFile = "");
         MaterialComponent& addComponentDiffuse(std::string_view textureFile);
         MaterialComponent& addComponentNormal(std::string_view textureFile);
         MaterialComponent& addComponentGlow(std::string_view textureFile);

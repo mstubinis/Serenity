@@ -3,6 +3,7 @@
 #define ENGINE_ENGINE_OPTIONS_H
 
 #include <serenity/renderer/RendererIncludes.h>
+#include <serenity/system/window/WindowIncludes.h>
 #include <serenity/renderer/postprocess/HDR.h>
 #include <serenity/renderer/postprocess/SSAO.h>
 
@@ -14,9 +15,9 @@ struct EngineOptions final {
     AntiAliasingAlgorithm              aa_algorithm       = AntiAliasingAlgorithm::None;
     char**                             argv;
     int                                argc               = 0;
-    int                                window_mode        = 0; //0 = normal, 1 = fullscreen, 2 = windowed_fullscreen
     uint8_t                            ssao_level         = SSAOLevel::Medium;
     uint8_t                            hdr                = HDRAlgorithm::None;
+    WindowMode::Mode                   window_mode        = WindowMode::Windowed;
     bool                               editor_enabled     = false;
     bool                               god_rays_enabled   = true;
     bool                               fog_enabled        = false;

@@ -38,14 +38,12 @@ class Window final {
         void internal_restore_state();
         bool internal_return_window_placement_cmd(uint32_t cmd) const noexcept;
         bool internal_execute_show_window(uint32_t cmd) noexcept;
-        void internal_set_fullscreen_from_options(const EngineOptions&);
-        void internal_set_minimized_or_maximized_from_options(const EngineOptions&);
 
         Window();
     public:
         void init(const EngineOptions&) noexcept;
 
-        [[nodiscard]] inline const std::string& name() const noexcept { return m_Data.m_WindowName; }
+        [[nodiscard]] inline const std::string& getTitle() const noexcept { return m_Data.m_WindowTitle; }
 
         [[nodiscard]] glm::uvec2 getSize();
         [[nodiscard]] glm::uvec2 getPosition();
@@ -95,11 +93,11 @@ class Window final {
         void updateMousePosition(float x, float y, bool resetDifference = false, bool resetPreviousPosition = false);
         void updateMousePosition(const glm::vec2& position, bool resetDifference = false, bool resetPreviousPosition = false);
 
-        void setName(const char* name);
+        void setTitle(std::string_view title);
         void setSize(uint32_t width, uint32_t height);
         void setIcon(const Texture&);
         void setIcon(const char* file);
-        void setIcon(const std::string& file);
+        void setIcon(std::string_view file);
         void setMouseCursorVisible(bool);
         void setPosition(uint32_t x, uint32_t y);
 
@@ -141,6 +139,9 @@ class Window final {
 
         //sets the window to be windowed fullscreen, this is a window with no style, stretched to the monitor's size
         bool setFullscreenWindowed(bool isFullscreen = true);
+
+        //sets the window to various different modes, like windowed, fullscreen, windowed fullscreen, etc
+        void setWindowMode(WindowMode::Mode);
 
         //Display the rendered elements to the screen. This is called automatically during the Engine's render loop. You may want to call this yourself in certain parts of the update loop
         //when you want the window to display something and cannot wait for the render loop to begin, like in async loading screens.

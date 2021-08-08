@@ -30,7 +30,7 @@ void Engine::priv::WindowData::internal_restore_state(Window& super) {
     super.setActive(m_Flags & Window_Flags::Active);
     super.setVerticalSyncEnabled(m_Flags & Window_Flags::Vsync);
     super.keepMouseInWindow(m_Flags & Window_Flags::MouseGrabbed);
-    super.setKeyRepeatEnabled(m_Flags & Window_Flags::KeyRepeat);
+    //super.setKeyRepeatEnabled(m_Flags & Window_Flags::KeyRepeat);
 }
 void Engine::priv::WindowData::internal_init_position(Window& super) {
     auto winSize               = glm::vec2{ super.getSize() };
@@ -79,7 +79,7 @@ void Engine::priv::WindowData::internal_on_fullscreen(Window& super, bool isToBe
         m_VideoMode.width  = m_OldWindowSize.x;
         m_VideoMode.height = m_OldWindowSize.y;
     }
-    internal_create(super, m_WindowName);
+    internal_create(super, m_WindowTitle);
     m_SFMLWindow.requestFocus();
     super.setVisible(false);
     Engine::priv::Core::m_Engine->m_RenderModule._onFullscreen(m_VideoMode.width, m_VideoMode.height);
@@ -106,10 +106,10 @@ void Engine::priv::WindowData::internal_on_fullscreen(Window& super, bool isToBe
 }
 sf::VideoMode Engine::priv::WindowData::internal_get_default_desktop_video_mode() {
     const auto validModes = sf::VideoMode::getFullscreenModes();
-    return (validModes.size() > 0) ? validModes[0] : sf::VideoMode::getDesktopMode();
+    return validModes.size() > 0 ? validModes[0] : sf::VideoMode::getDesktopMode();
 }
 void Engine::priv::WindowData::internal_update_on_reset_events(const float dt) {
     m_MouseDifference   = glm::vec2{ 0.0f };
-    const double step   = (1.0 - double(dt));
+    const double step   = 1.0 - double(dt);
     m_MouseDelta       *= (step * step * step);
 }

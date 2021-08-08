@@ -108,8 +108,8 @@ void Engine::priv::EngineEventHandler::internal_on_event_mouse_button_released(W
     internal_dispatch_event(Event{ EventType::MouseButtonReleased, EventMouseButton{ (MouseButton::Button)(mouseButton + 1), window } });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_mouse_moved(Window& window, int mouseX, int mouseY) {
-    float mX = (float)mouseX;
-    float mY = (float)mouseY;
+    float mX = float(mouseX);
+    float mY = float(mouseY);
     if (window.hasFocus()) {
         window.updateMousePosition(mX, mY, false, false);
     }

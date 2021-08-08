@@ -4,12 +4,12 @@
 #include <serenity/system/window/Window.h>
 
 ::DiscordActivityEvent::DiscordActivityEvent() {
-    m_Activity = discord::Activity();
+    m_Activity = discord::Activity{};
 
     const auto& window = Engine::Resources::getWindow();
 
     m_Activity.SetApplicationId(Engine::Discord::getClientID());
-    m_Activity.SetName(window.name().c_str());
+    m_Activity.SetName(window.getTitle().c_str());
     m_Activity.SetDetails("");
     m_Activity.SetState("");
     m_Activity.SetInstance(false);
