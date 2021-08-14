@@ -4,8 +4,6 @@
 
 namespace Engine::priv {
     class WorkerThread;
-    class ThreadPoolFuture;
-    class ThreadPoolFutureCallback;
     class ThreadPoolFutureContainer;
     class ThreadPool;
 };
@@ -19,70 +17,29 @@ namespace Engine::priv {
 using ThreadJob = std::function<void()>;
 
 namespace Engine::priv {
-    using PoolTask      = std::packaged_task<void()>;
-    using PoolTaskPtr   = std::shared_ptr<PoolTask>;
-    using FutureType    = std::future<void>;
-    using TaskQueueType = std::queue<PoolTaskPtr>;
-    class ThreadPoolFuture final {
-        friend class Engine::priv::ThreadPool;
-        friend class Engine::priv::ThreadPoolFutureContainer;
-        private:
-            FutureType m_Future;
+    using PoolTask           = std::packaged_task<void()>;
+    using PoolTaskPtr        = std::shared_ptr<PoolTask>;
+    using FutureType         = std::future<void>;
+    using FutureCallbackType = std::pair<FutureType, ThreadJob>;
+    using TaskQueueType      = std::queue<PoolTaskPtr>;
 
-            ThreadPoolFuture() = delete;
-        public:
-            ThreadPoolFuture(FutureType&&);
-
-            ThreadPoolFuture(const ThreadPoolFuture&) noexcept            = delete;
-            ThreadPoolFuture& operator=(const ThreadPoolFuture&) noexcept = delete;
-            ThreadPoolFuture(ThreadPoolFuture&&) noexcept                 = default;
-            ThreadPoolFuture& operator=(ThreadPoolFuture&&) noexcept      = default;
-
-            [[nodiscard]] inline FutureType& getFuture() noexcept { return m_Future; }
-            [[nodiscard]] inline bool isReady() const noexcept { return (m_Future.valid() && m_Future.wait_for(0s) == std::future_status::ready); }
-    };
-    class ThreadPoolFutureCallback final {
-        friend class Engine::priv::ThreadPool;
-        friend class Engine::priv::ThreadPoolFutureContainer;
-        private:
-            FutureType  m_Future;
-            ThreadJob   m_Callback;
-
-            ThreadPoolFutureCallback() = delete;
-        public:
-            ThreadPoolFutureCallback(FutureType&&, ThreadJob&&);
-
-            ThreadPoolFutureCallback(const ThreadPoolFutureCallback&) noexcept            = delete;
-            ThreadPoolFutureCallback& operator=(const ThreadPoolFutureCallback&) noexcept = delete;
-            ThreadPoolFutureCallback(ThreadPoolFutureCallback&&) noexcept                 = default;
-            ThreadPoolFutureCallback& operator=(ThreadPoolFutureCallback&&) noexcept      = default;
-
-            [[nodiscard]] inline FutureType& getFuture() noexcept { return m_Future; }
-            [[nodiscard]] inline bool isReady() const noexcept { return (m_Future.valid() && m_Future.wait_for(0s) == std::future_status::ready); }
-
-            inline operator bool() const noexcept { return (bool)m_Callback; }
-            inline bool operator==(bool other) const noexcept { return (other && m_Callback); }
-
-            inline void operator()() const noexcept {
-                ASSERT(m_Callback, __FUNCTION__ << "(): m_Callback was invalid!");
-                m_Callback();
-            }
-    };
     class ThreadPool final{
         friend class Engine::priv::WorkerThread;
         private:
             WorkerThreadContainer                               m_WorkerThreads;
-            std::vector<std::vector<ThreadPoolFuture>>          m_FuturesBasic;
-            std::vector<std::vector<ThreadPoolFutureCallback>>  m_FuturesCallback;
+            std::vector<std::vector<FutureCallbackType>>        m_FuturesCallback;
             mutable std::mutex                                  m_Mutex;
             std::vector<TaskQueueType>                          m_TaskQueues;
             std::condition_variable_any                         m_ConditionVariableAny;
+            std::unique_ptr<std::vector<std::atomic<int32_t>>>  m_WaitCounters;
             bool                                                m_Stopped               = true;
       
+            void internal_update_single_threaded();
+            void internal_update_multi_threaded();
             bool internal_task_queue_is_empty() const noexcept;
-            [[nodiscard]] PoolTaskPtr internal_get_next_available_job() noexcept;
+            [[nodiscard]] std::pair<PoolTaskPtr, int> internal_get_next_available_job() noexcept; //first = task, second = section
         public:
-            ThreadPool(size_t sections = 2U);
+            ThreadPool(int sections = 2);
             ~ThreadPool();
 
             ThreadPool(const ThreadPool&) noexcept            = delete;
@@ -91,48 +48,46 @@ namespace Engine::priv {
             ThreadPool& operator=(ThreadPool&&) noexcept      = delete;
 
             //starts the threadpool. the threadpool is stopped by default
-            bool startup(size_t num_threads);
+            bool startup(int num_threads);
 
             void shutdown() noexcept;
 
             [[nodiscard]] size_t get_number_of_tasks_in_queue() const noexcept;
-            [[nodiscard]] inline size_t size() const noexcept { return m_WorkerThreads.size(); }
+            [[nodiscard]] inline int size() const noexcept { return static_cast<int>(m_WorkerThreads.size()); }
 
-            template<class JOB> [[nodiscard]] FutureType& add_job(JOB&& job, size_t section = 0U) {
+            template<class JOB> [[nodiscard]] void add_job(JOB&& job, int section = 0) {
                 if (size() > 0) {
-                    FutureType* ret;
+                    (*m_WaitCounters)[section] += 1;
                     {
                         std::lock_guard lock{ m_Mutex };
-                        auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
-                        ret = &m_FuturesBasic[section].emplace_back(task->get_future()).getFuture();
+                        m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
                     }
                     m_ConditionVariableAny.notify_one();
-                    return *ret;
-                }else{
+                } else {
                     //on single threaded, we just execute the tasks on the main thread below in update()
-                    auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
-                    return m_FuturesBasic[section].emplace_back(task->get_future()).getFuture();
+                    m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
                 }
             }
-            template<class JOB, class THEN> [[nodiscard]] FutureType& add_job(JOB&& job, THEN&& callback, size_t section = 0U) {
+            template<class JOB, class THEN> [[nodiscard]] FutureType& add_job(JOB&& job, THEN&& callback, int section = 0) {
                 if (size() > 0) {
+                    (*m_WaitCounters)[section] += 1;
                     FutureType* ret;
                     {
                         std::lock_guard lock{ m_Mutex };
                         auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
-                        ret = &m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback)).getFuture();
+                        ret = &m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback)).first;
                     }
                     m_ConditionVariableAny.notify_one();
                     return *ret;
-                }else{
+                } else {
                     //on single threaded, we just execute the tasks on the main thread below in update()
                     auto& task = m_TaskQueues[section].emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
-                    return m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback)).getFuture();
+                    return m_FuturesCallback[section].emplace_back(task->get_future(), std::forward<THEN>(callback)).first;
                 }
             }
 
             void update();
-            void wait_for_all(size_t section) noexcept;
+            void wait_for_all(int section) noexcept;
     };
 };
 #endif

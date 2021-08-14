@@ -16,9 +16,9 @@ namespace Engine::priv {
 #include <serenity/types/Flag.h>
 #include <serenity/system/window/WindowIncludes.h>
 #include <serenity/containers/Queue_ts.h>
-#include <boost/thread/latch.hpp>
 #include <serenity/dependencies/glm.h>
 #include <atomic>
+#include <latch>
 
 namespace Engine::priv {
     class WindowData final {
@@ -60,7 +60,7 @@ namespace Engine::priv {
 
             void internal_populate_sf_event_queue(bool isUndergoingClosing);
             void internal_process_command_queue();
-            void internal_thread_startup(Window&, const std::string& name, boost::latch*);
+            void internal_thread_startup(Window&, const std::string& name, std::latch*);
             void internal_push(WindowEventThreadOnlyCommands);
             WindowEventType internal_try_pop() noexcept;
             /////////////////////////////////

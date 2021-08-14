@@ -48,9 +48,9 @@ void Engine::priv::WindowData::internal_init_position(Window& super) {
 }
 const sf::ContextSettings Engine::priv::WindowData::internal_create(Window& super, const std::string& windowTitle) {
     internal_on_close();
-    boost::latch bLatch{ 1 }; //TODO: replace with std::latch once it is avaiable for c++20 msvc compiler
-    internal_thread_startup(super, windowTitle, &bLatch); //calls window.setActive(false) on the created event thread, so we call setActive(true) below
-    bLatch.wait();
+    std::latch ltch{ 1 };
+    internal_thread_startup(super, windowTitle, &ltch); //calls window.setActive(false) on the created event thread, so we call setActive(true) below
+    ltch.wait();
     super.setActive(true);
     super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
     return m_SFMLWindow.getSettings();
@@ -79,8 +79,7 @@ void Engine::priv::WindowData::internal_on_fullscreen(Window& super, bool isToBe
     super.setVisible(false);
     Engine::priv::Core::m_Engine->m_RenderModule._onFullscreen(m_VideoMode.width, m_VideoMode.height);
 
-    auto sfml_size = m_SFMLWindow.getSize();
-    auto winSize   = glm::uvec2{ sfml_size.x, sfml_size.y };
+    auto winSize = super.getSize();
 
     //this does not trigger the sfml event resize method automatically so we must call it here
     Engine::priv::Core::m_Engine->m_EngineEventHandler.internal_on_event_resize(super, winSize.x, winSize.y, false);
@@ -167,7 +166,7 @@ Engine::priv::WindowData::WindowEventType Engine::priv::WindowData::internal_try
 #endif
 }
 
-void Engine::priv::WindowData::internal_thread_startup(Window& super, const std::string& name, boost::latch* bLatch) {
+void Engine::priv::WindowData::internal_thread_startup(Window& super, const std::string& name, std::latch* ltch) {
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
     const bool isUndergoingClosing = m_UndergoingClosing.load(std::memory_order_acquire);
     if (m_EventThread && !isUndergoingClosing) {
@@ -177,15 +176,15 @@ void Engine::priv::WindowData::internal_thread_startup(Window& super, const std:
         }
     }
 #endif
-    auto update_lambda_loop = [this, &super, &name, &bLatch]() {
+    auto update_lambda_loop = [this, &super, &name, &ltch]() {
         m_SFMLWindow.create(m_VideoMode, name, m_Style, m_SFContextSettings);
         super.setIcon(m_IconFile);
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
         m_SFMLWindow.setActive(false);
 #endif
         m_UndergoingClosing.store(false, std::memory_order_release);
-        if (bLatch) {
-            bLatch->count_down();
+        if (ltch) {
+            ltch->count_down();
         }
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
         const bool isUndergoingClosing = m_UndergoingClosing.load(std::memory_order_acquire);

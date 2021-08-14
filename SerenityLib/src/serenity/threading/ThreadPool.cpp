@@ -1,63 +1,51 @@
 
 #include <serenity/threading/ThreadPool.h>
+#include <numeric>
 
-using namespace Engine;
-using namespace Engine::priv;
-
-#pragma region ThreadPoolFuture
-ThreadPoolFuture::ThreadPoolFuture(FutureType&& future) {
-    m_Future = std::move(future);
+namespace {
+    inline bool isFutureReady(const Engine::priv::FutureType& future) noexcept {
+        return (future.valid() && future.wait_for(0s) == std::future_status::ready);
+    }
 }
-#pragma endregion
 
-#pragma region ThreadPoolFutureCallback
-ThreadPoolFutureCallback::ThreadPoolFutureCallback(FutureType&& future, ThreadJob&& callback){
-    m_Future   = std::move(future);
-    m_Callback = std::move(callback);
-}
-#pragma endregion
-
-#pragma region ThreadPool
-
-ThreadPool::ThreadPool(size_t sections) {
-    m_FuturesBasic.resize(sections);
+Engine::priv::ThreadPool::ThreadPool(int sections) {
     m_FuturesCallback.resize(sections);
-    for (auto& section : m_FuturesBasic) { 
-        section.reserve(1200);
+    m_WaitCounters = std::make_unique<std::vector<std::atomic<int32_t>>>(sections);
+    for (auto& counter : *m_WaitCounters) {
+        counter = 0;
     }
     for (auto& section : m_FuturesCallback) {
         section.reserve(1200); 
     }
     m_TaskQueues.resize(sections);
 }
-ThreadPool::~ThreadPool() {
+Engine::priv::ThreadPool::~ThreadPool() {
     shutdown();
 }
-void ThreadPool::shutdown() noexcept {
+void Engine::priv::ThreadPool::shutdown() noexcept {
     if (!m_Stopped) {
+        for (auto& counter : *m_WaitCounters) {
+            counter = 0;
+        }
         m_Stopped = true;
         m_ConditionVariableAny.notify_all();// wake up all threads.
         m_WorkerThreads.clear();
     }
 }
-size_t ThreadPool::get_number_of_tasks_in_queue() const noexcept {
-    size_t count = 0;
-    for (const auto& taskQueue : m_TaskQueues) {
-        count += taskQueue.size();
-    }
-    return count;
+size_t Engine::priv::ThreadPool::get_number_of_tasks_in_queue() const noexcept {
+    return std::accumulate(std::begin(m_TaskQueues), std::end(m_TaskQueues), 0U, [](size_t c, const auto& data) { return c + data.size(); });
 }
-bool ThreadPool::startup(size_t numThreads) {
+bool Engine::priv::ThreadPool::startup(int numThreads) {
     if (numThreads != size()) { //only shutdown if we want a different amount of threads
         shutdown();
     }
     if (m_Stopped) { //only start up if we did not start up yet or if we shutdowned
         m_Stopped = false;
         m_WorkerThreads.reserve(numThreads);
-        for (size_t i = 0U; i < numThreads; ++i) {
+        for (int i = 0; i < numThreads; ++i) {
             m_WorkerThreads.add_thread([this]() {
                 while (!m_Stopped) {
-                    Engine::priv::PoolTaskPtr job;
+                    std::pair<Engine::priv::PoolTaskPtr, int> job;
                     {
                         std::unique_lock lock{ m_Mutex };
                         m_ConditionVariableAny.wait(lock, [this] { return m_Stopped || !internal_task_queue_is_empty(); });
@@ -66,8 +54,10 @@ bool ThreadPool::startup(size_t numThreads) {
                         }
                         job = internal_get_next_available_job();
                     }
-                    ASSERT((!m_Stopped && job) || (m_Stopped && !job), __FUNCTION__ << "(): job was nullptr!");
-                    job->operator()();
+                    ASSERT((!m_Stopped && job.first) || (m_Stopped && !job.first), __FUNCTION__ << "(): job was nullptr!");
+                    job.first->operator()();
+                    auto& counter = (*m_WaitCounters)[job.second];
+                    counter--;
                 }
             });
         }
@@ -75,75 +65,56 @@ bool ThreadPool::startup(size_t numThreads) {
     }
     return false;
 }
-bool ThreadPool::internal_task_queue_is_empty() const noexcept {
+bool Engine::priv::ThreadPool::internal_task_queue_is_empty() const noexcept {
     for (const auto& queue : m_TaskQueues) {
-        if (!queue.empty()) {
-            return false;
+        if (!queue.empty()) { 
+            return false; 
         }
     }
     return true;
 }
-Engine::priv::PoolTaskPtr ThreadPool::internal_get_next_available_job() noexcept {
+std::pair<Engine::priv::PoolTaskPtr, int> Engine::priv::ThreadPool::internal_get_next_available_job() noexcept {
+    for (int section = 0; section < static_cast<int>(m_TaskQueues.size()); ++section) {
+        if (!m_TaskQueues[section].empty()) {
+            PoolTaskPtr task = m_TaskQueues[section].front();
+            m_TaskQueues[section].pop();
+            return { task, section };
+        }
+    }
+    return { nullptr, -1 };
+}
+void Engine::priv::ThreadPool::internal_update_single_threaded() {
     for (auto& queue : m_TaskQueues) {
-        if (!queue.empty()) {
-            PoolTaskPtr task = queue.front();
+        while (queue.size() > 0) {
+            queue.front()->operator()();
             queue.pop();
-            return task;
-        }
-    }
-    return nullptr;
-}
-void ThreadPool::update() {
-    if (size() == 0) { //for single threaded stuff
-        for (auto& queue : m_TaskQueues) {
-            while (queue.size() > 0) {
-                queue.front()->operator()();
-                queue.pop();
-            }
-        }
-    }else{
-        std::lock_guard lock{ m_Mutex };
-        //this CANNOT be split up in different loops / steps: future is_ready MIGHT be false for the first run,
-        //and then true for the second run, in which case it gets removed without calling its then function
-        for (auto& callbackSection : m_FuturesCallback) {
-            auto it = callbackSection.begin();
-            while (it != callbackSection.end()) {
-                if ((*it).isReady()) {
-                    (*it)(); //calls the "then" function
-                    it = callbackSection.erase(it);
-                } else {
-                    ++it;
-                }
-            }
-        }
-        for (auto& basicSection : m_FuturesBasic) {
-            auto it = basicSection.begin();
-            while (it != basicSection.end()) {
-                if ((*it).isReady()) {
-                    it = basicSection.erase(it);
-                } else {
-                    ++it;
-                }
-            }
         }
     }
 }
-void ThreadPool::wait_for_all(size_t section) noexcept {
+void Engine::priv::ThreadPool::internal_update_multi_threaded() {
+    std::lock_guard lock{ m_Mutex };   
+    //this CANNOT be split up in different loops / steps: future is_ready MIGHT be false for the first run,
+    //and then true for the second run, in which case it gets removed without calling its then function
+    for (auto& callbackSection : m_FuturesCallback) {
+        callbackSection.erase(std::remove_if(std::begin(callbackSection), std::end(callbackSection), [](const auto& future) {
+            if (isFutureReady(future.first)) {
+                future.second();
+                return true;
+            }
+            return false;
+        }), std::end(callbackSection));
+    }
+}
+void Engine::priv::ThreadPool::update() {
+    if (size() == 0) {
+        internal_update_single_threaded();
+    } else {
+        internal_update_multi_threaded();
+    }
+}
+void Engine::priv::ThreadPool::wait_for_all(int section) noexcept {
     if (size() > 0) {
-        //TODO: use std::experimental::when_all when it becomes available, as it should be faster than individual wait's
-        for (auto& future : m_FuturesBasic[section]) {
-            if (!future.isReady()) {
-                future.m_Future.wait();
-            }
-        }
-        for (auto& callback : m_FuturesCallback[section]) {
-            if (!callback.isReady()) {
-                callback.m_Future.wait();
-            }
-        }
+        while ((*m_WaitCounters)[section].load(std::memory_order_relaxed) > 0);
     }
     update();
 }
-
-
-#pragma endregion

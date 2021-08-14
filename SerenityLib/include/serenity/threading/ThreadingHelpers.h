@@ -7,7 +7,7 @@
 #include <serenity/system/TypeDefs.h>
 
 namespace Engine {
-    [[nodiscard]] inline unsigned int hardware_concurrency() noexcept {
+    [[nodiscard]] inline uint32_t hardware_concurrency() noexcept {
         return std::max(1U, std::thread::hardware_concurrency());
         //return 1U;
     }
@@ -46,7 +46,7 @@ namespace Engine {
             auto splitSize = end - begin;
             outVec[i].resize(splitSize);
             for (auto j = 0; j < splitSize; ++j) {
-                outVec[i][j] = (uint32_t)(begin + j);
+                outVec[i][j] = uint32_t(begin + j);
             }
             begin = end;
         }
@@ -57,7 +57,7 @@ namespace Engine {
     [[nodiscard]] std::vector<std::pair<size_t, size_t>> splitVectorPairs(size_t vectorSize, size_t num_cores) noexcept;
 
     template<typename T> [[nodiscard]] std::vector<std::pair<size_t, size_t>> splitVectorPairs(const std::vector<T>& v, size_t num_cores = 0U) noexcept {
-        return Engine::splitVectorPairs((size_t)v.size(), num_cores);
+        return Engine::splitVectorPairs(static_cast<size_t>(v.size()), num_cores);
     }
 }
 

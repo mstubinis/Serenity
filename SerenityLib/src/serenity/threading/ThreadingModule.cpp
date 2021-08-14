@@ -25,7 +25,7 @@ void Engine::priv::ThreadingModule::update(const float dt) {
 void Engine::priv::threading::submitTaskForMainThread(std::function<void()>&& task) noexcept {
     Engine::priv::Core::m_Engine->m_Misc.m_QueuedCommands.push(std::move(task));
 }
-void Engine::priv::threading::waitForAll(size_t section) noexcept {
+void Engine::priv::threading::waitForAll(int section) noexcept {
     ThreadingModule::THREADING_MODULE->m_ThreadPool.wait_for_all(section);
 }
 bool Engine::priv::threading::isMainThread() noexcept {
