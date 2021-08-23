@@ -78,10 +78,10 @@ void MaterialRequest::request(bool inAsync) {
 
     if (m_Async || !Engine::priv::threading::isMainThread()) {
         if (Engine::priv::threading::isMainThread()) {
-            Engine::priv::threading::addJobWithPostCallback([]() {}, std::move(l_gpu), 1);
+            Engine::priv::threading::addJobWithPostCallback([]() {}, std::move(l_gpu));
         }else{
             Engine::priv::threading::submitTaskForMainThread([g{ std::move(l_gpu) }]() mutable { 
-                threading::addJobWithPostCallback([]() {}, std::move(g), 1); 
+                threading::addJobWithPostCallback([]() {}, std::move(g)); 
             });
         }
     }else{

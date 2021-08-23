@@ -28,9 +28,9 @@ void Engine::priv::PhysicsTaskScheduler::parallelFor(int iBegin, int iEnd, int g
             auto lambda = [&body, i, iBegin, &pairs]() {
                 body.forLoop((int)pairs[i].first + iBegin, (int)pairs[i].second + 1 + iBegin);
             };
-            Engine::priv::threading::addJob(lambda, 0);
+            Engine::priv::threading::addJob(lambda);
         }
-        Engine::priv::threading::waitForAll(0);
+        Engine::priv::threading::waitForAll();
     };
     if (m_DoConcurrency) {
         parallel();
@@ -52,9 +52,9 @@ btScalar Engine::priv::PhysicsTaskScheduler::parallelSum(int iBegin, int iEnd, i
                 m_sumRes = data;
 #endif
             };
-            Engine::priv::threading::addJob(lambda, 0);
+            Engine::priv::threading::addJob(lambda);
         }
-        Engine::priv::threading::waitForAll(0);
+        Engine::priv::threading::waitForAll();
         return m_sumRes;
     };
     btScalar res = 0.0;

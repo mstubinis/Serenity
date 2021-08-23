@@ -61,8 +61,8 @@ void TextureRequest::request(bool inAsync) {
 
     const bool isMainThread = Engine::priv::threading::isMainThread();
     if (m_Part.m_Async || !isMainThread) {
-        Engine::priv::threading::addJobWithPostCallback(l_cpu, l_gpu, 1);
-    }else{
+        Engine::priv::threading::addJobWithPostCallback(l_cpu, l_gpu);
+    } else {
         l_cpu();
         l_gpu();
     }

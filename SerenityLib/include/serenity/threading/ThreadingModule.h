@@ -28,21 +28,21 @@ namespace Engine::priv {
 
         void submitTaskForMainThread(std::function<void()>&& task) noexcept;
 
-        void waitForAll(int section = 0) noexcept;
+        void waitForAll() noexcept;
 
-        template<class JOB> inline void finalizeJob(JOB&& task, int section) {
-            ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task), section);
+        template<class JOB> inline void finalizeJob(JOB&& task) {
+            ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task));
         }
-        template<class JOB, class THEN> inline FutureType& finalizeJob(JOB&& task, THEN&& then, int section) {
-            return ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task), std::forward<THEN>(then), section);
+        template<class JOB, class THEN> inline Engine::view_ptr<FutureType> finalizeJob(JOB&& task, THEN&& then) {
+            return ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task), std::forward<THEN>(then));
         }
-        template<class JOB> inline void addJob(JOB&& job, int section = 0) {
-            finalizeJob(std::forward<JOB>(job), section);
+        template<class JOB> inline void addJob(JOB&& job) {
+            finalizeJob(std::forward<JOB>(job));
         }
-        template<class JOB, class THEN> inline FutureType& addJobWithPostCallback(JOB&& job, THEN&& then, int section = 0){
-            return finalizeJob(std::forward<JOB>(job), std::forward<THEN>(then), section);
+        template<class JOB, class THEN> inline Engine::view_ptr<FutureType> addJobWithPostCallback(JOB&& job, THEN&& then){
+            return finalizeJob(std::forward<JOB>(job), std::forward<THEN>(then));
         }
-        template<class JOB, class T> void addJobSplitVectored(JOB&& job, std::vector<T>& collection, bool waitForAll, int section = 0) {
+        template<class JOB, class T> void addJobSplitVectored(JOB&& job, std::vector<T>& collection, bool waitForAll) {
             if (Engine::hardware_concurrency() > 1) {
                 auto pairs = Engine::splitVectorPairs(collection);
                 for (size_t k = 0U; k < pairs.size(); ++k) {
@@ -50,10 +50,10 @@ namespace Engine::priv {
                         for (size_t j = pairs[k].first; j <= pairs[k].second; ++j) {
                             job(collection[j], j, k);
                         }  
-                    }, section);
+                    });
                 }
                 if (waitForAll) {
-                    Engine::priv::threading::waitForAll(section);
+                    Engine::priv::threading::waitForAll();
                 }
             }else{
                 for (size_t j = 0; j < collection.size(); ++j) {

@@ -84,10 +84,10 @@ void MeshRequest::request(bool inAsync) {
                 };
                 if (m_Async || !Engine::priv::threading::isMainThread()) {
                     if (Engine::priv::threading::isMainThread()) {
-                        threading::addJobWithPostCallback(l_cpu, l_gpu, 1U);
+                        threading::addJobWithPostCallback(l_cpu, l_gpu);
                     }else{
                         threading::submitTaskForMainThread([=]() mutable {
-                            threading::addJobWithPostCallback(l_cpu, l_gpu, 1U);
+                            threading::addJobWithPostCallback(l_cpu, l_gpu);
                         });
                     }
                 }else{

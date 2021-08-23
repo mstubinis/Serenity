@@ -71,8 +71,8 @@ class Texture final : public Resource<Texture>, public Engine::priv::TextureBase
             ASSERT(m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() was 0!");
             return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].height; 
         }
-        [[nodiscard]] inline glm::uvec2 size() const noexcept { return glm::uvec2(width(), height()); }
-        [[nodiscard]] inline glm::vec2 sizeAsRatio() const noexcept { const auto size_ = glm::vec2(size()); return glm::vec2(size_ / glm::max(size_.x, size_.y)); }
+        [[nodiscard]] inline glm::uvec2 size() const noexcept { return glm::uvec2{ width(), height() }; }
+        [[nodiscard]] inline glm::vec2 sizeAsRatio() const noexcept { const auto size_ = glm::vec2{ size() }; return glm::vec2(size_ / glm::max(size_.x, size_.y)); }
         [[nodiscard]] inline constexpr bool mipmapped() const noexcept { return m_CPUData.m_Mipmapped; }
         [[nodiscard]] bool compressed() const;
         void setAnisotropicFiltering(float anisotropicFiltering);

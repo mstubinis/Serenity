@@ -50,7 +50,7 @@ void Engine::priv::ParticleSystem::internal_update_emitters(const float dt) {
             emitter.update(j, dt, *this, true);
         }
     };
-    Engine::priv::threading::addJobSplitVectored(lamda_update_emitter, m_ParticleEmitters, true, 0U);
+    Engine::priv::threading::addJobSplitVectored(lamda_update_emitter, m_ParticleEmitters, true);
 }
 
 void Engine::priv::ParticleSystem::internal_update_particles(const float dt, Camera& camera) {
@@ -76,7 +76,7 @@ void Engine::priv::ParticleSystem::internal_update_particles(const float dt, Cam
             }
         }
     };
-    Engine::priv::threading::addJobSplitVectored(lamda_update_particle, m_Particles, true, 0U);
+    Engine::priv::threading::addJobSplitVectored(lamda_update_particle, m_Particles, true);
 }
 
 ParticleEmitter* Engine::priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
@@ -184,7 +184,7 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
             );
         }
     };
-    Engine::priv::threading::addJobSplitVectored(lamda_culler_particle, m_Particles, true, 0);
+    Engine::priv::threading::addJobSplitVectored(lamda_culler_particle, m_Particles, true);
 
     //merge the thread collections into the main collections
     for (auto& _1 : THREAD_PART_1) { 
