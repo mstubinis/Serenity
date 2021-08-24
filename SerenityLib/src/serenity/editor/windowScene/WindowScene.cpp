@@ -403,13 +403,14 @@ void Engine::priv::EditorWindowScene::internal_render_renderer(Scene& currentSce
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Bloom");
         static bool bloom_enabled = Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Active;
         ImGui::Checkbox("Bloom Enabled", &bloom_enabled);
+        ImGui::SliderFloat("Bloom Strength", &Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Strength, 0.0f, 5.0f);
         ImGui::SliderFloat("Bloom Exposure", &Engine::priv::Bloom::STATIC_BLOOM.m_Exposure, -5.0f, 5.0f);
         ImGui::SliderFloat("Bloom Threshold", &Engine::priv::Bloom::STATIC_BLOOM.m_Threshold, -5.0f, 5.0f);
         ImGui::SliderFloat("Bloom Scale", &Engine::priv::Bloom::STATIC_BLOOM.m_Scale, 0.0f, 5.0f);
         ImGui::SliderFloat("Bloom Blur Radius", &Engine::priv::Bloom::STATIC_BLOOM.m_Blur_Radius, 0.0f, 5.0f);
         ImGui::SliderFloat("Bloom Blur Strength", &Engine::priv::Bloom::STATIC_BLOOM.m_Blur_Strength, -5.0f, 5.0f);
         static int bloom_samples = Engine::priv::Bloom::STATIC_BLOOM.m_Num_Passes;
-        ImGui::SliderInt("Bloom Num Passes", &bloom_samples, 0, 8);
+        ImGui::SliderInt("Bloom Num Passes", &bloom_samples, 0, 16);
         Engine::Renderer::bloom::enable(bloom_enabled);
         Engine::Renderer::bloom::setNumPasses(uint32_t(bloom_samples));
         ImGui::Separator();

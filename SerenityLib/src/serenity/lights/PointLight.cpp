@@ -22,8 +22,9 @@ constexpr std::array<PointLightDefaultAttenuationData, (size_t)LightRange::_TOTA
 
 PointLight::PointLight(Scene* scene, LightType type, decimal x, decimal y, decimal z)
     : SunLight{ scene, x, y, z, type }
-    , m_CullingRadius{ calculateCullingRadius() }
-{}
+{
+    calculateCullingRadius();
+}
 PointLight::PointLight(Scene* scene, LightType type, const glm_vec3& pos)
     : PointLight{ scene, type, pos.x, pos.y, pos.z }
 {}
@@ -33,7 +34,7 @@ PointLight::PointLight(Scene* scene, decimal x, decimal y, decimal z)
 PointLight::PointLight(Scene* scene, const glm_vec3& pos)
     : PointLight{ scene, LightType::Point, pos.x, pos.y, pos.z }
 {}
-float PointLight::calculateCullingRadius() {
+void PointLight::calculateCullingRadius() {
     float lightMax   = Engine::Math::Max(m_Color.x, m_Color.y, m_Color.z);
     float almostDark = 256.0f / 5.0f;
     float radius     = 0;
@@ -59,25 +60,25 @@ float PointLight::calculateCullingRadius() {
     }
     auto& transform = *getComponent<ComponentTransform>();
     transform.setScale(radius);
-    return radius;
+    m_CullingRadius = radius;
 }
 void PointLight::setConstant(float constant) {
     m_C = constant;
-    m_CullingRadius = calculateCullingRadius(); 
+    calculateCullingRadius(); 
 }
 void PointLight::setLinear(float linear) {
     m_L = linear;
-    m_CullingRadius = calculateCullingRadius(); 
+    calculateCullingRadius(); 
 }
 void PointLight::setExponent(float exponent) { 
     m_E = exponent;
-    m_CullingRadius = calculateCullingRadius(); 
+    calculateCullingRadius(); 
 }
 void PointLight::setAttenuation(float constant, float linear, float exponent) {
     m_C = constant;
     m_L = linear;
     m_E = exponent;
-    m_CullingRadius = calculateCullingRadius(); 
+    calculateCullingRadius(); 
 }
 void PointLight::setAttenuation(LightRange r) { 
     const auto& data = LIGHT_RANGES[(uint32_t)r];
@@ -86,6 +87,6 @@ void PointLight::setAttenuation(LightRange r) {
 void PointLight::setAttenuationModel(LightAttenuation model) {
     if (m_AttenuationModel != model) {
         m_AttenuationModel = model;
-        m_CullingRadius    = calculateCullingRadius();
+        calculateCullingRadius();
     }
 }

@@ -26,13 +26,13 @@ namespace Engine::priv {
     class ThreadPool final{
         friend class Engine::priv::WorkerThread;
         private:
-            WorkerThreadContainer                               m_WorkerThreads;
-            std::vector<FutureCallbackType>                     m_FuturesCallback;
-            mutable std::mutex                                  m_Mutex;
-            TaskQueueType                                       m_TaskQueue;
-            std::condition_variable_any                         m_ConditionVariableAny;
-            std::atomic<int32_t>                                m_WaitCounter           = 0;
-            bool                                                m_Stopped               = true;
+            WorkerThreadContainer                        m_WorkerThreads;
+            std::vector<FutureCallbackType>              m_FuturesCallback;
+            mutable std::mutex                           m_Mutex;
+            TaskQueueType                                m_TaskQueue;
+            std::condition_variable_any                  m_ConditionVariableAny;
+            std::atomic<int32_t>                         m_WaitCounter           = 0;
+            bool                                         m_Stopped               = true;
       
             void internal_update_single_threaded();
             void internal_execute_callbacks();
@@ -63,11 +63,10 @@ namespace Engine::priv {
                         m_ConditionVariableAny.notify_one();
                         m_WaitCounter += 1;
                     } else {
-                        //on single threaded, we just execute the tasks on the main thread in update()
-                        m_TaskQueue.emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
+                #endif
+                        job();
+                #ifndef ENGINE_FORCE_NO_THEAD_POOL
                     }
-                #else
-                    job();
                 #endif
             }
             template<class JOB, class THEN> [[nodiscard]] Engine::view_ptr<FutureType> add_job(JOB&& job, THEN&& callback) {
@@ -83,15 +82,14 @@ namespace Engine::priv {
                         m_WaitCounter += 1;
                         return ret;
                     } else {
-                        //on single threaded, we just execute the tasks on the main thread in update()
-                        auto& task = m_TaskQueue.emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
-                        return &m_FuturesCallback.emplace_back(task->get_future(), std::forward<THEN>(callback)).first;
-                    }
-                #else
-                    job();
-                    callback();
-                    return nullptr;
                 #endif
+                        job();
+                        callback();
+                        return nullptr;
+                #ifndef ENGINE_FORCE_NO_THEAD_POOL
+                    }
+                #endif
+                    return nullptr;
             }
 
             void update();

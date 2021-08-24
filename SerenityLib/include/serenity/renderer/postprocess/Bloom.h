@@ -15,33 +15,33 @@ namespace Engine::priv {
     class  RenderModule;
     class  Bloom final {
         private:
-            std::string    m_GLSL_frag_code;
             Handle         m_Vertex_Shader;
             Handle         m_Fragment_Shader;
             Handle         m_Shader_Program;
-
-            void internal_init_fragment_code();
         public:
             uint32_t  m_Num_Passes       = 3;
-            bool      m_Bloom_Active     = true;
+            float     m_Bloom_Strength   = 0.0f;
             float     m_Blur_Radius      = 1.24f;
             float     m_Blur_Strength    = 0.62f;
             float     m_Scale            = 0.27f;
             float     m_Threshold        = 0.55f;
             float     m_Exposure         = 1.6f;
+            bool      m_Bloom_Active     = true;
+            bool      m_Init             = false;
 
-            static bool init();
-
-            void pass(GBuffer&, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer);
+            void init();
+            void pass(const GBuffer&, const Viewport&, uint32_t sceneTexture, const Engine::priv::RenderModule&);
 
             static Bloom STATIC_BLOOM;
     };
 };
 namespace Engine::Renderer::bloom {
+    inline float getStrength() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Strength; }
+    inline void setStrength(float strength) noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Strength = std::max(0.0f, strength); }
     inline float getThreshold() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Threshold; }
     inline void setThreshold(float threshold) noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Threshold = threshold; }
     inline float getExposure() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Exposure; }
-    inline void setExposure(float e) noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Exposure = e; }
+    inline void setExposure(float exposure) noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Exposure = exposure; }
     inline bool enabled() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Active; }
     inline uint32_t getNumPasses() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Num_Passes; }
     inline void setNumPasses(uint32_t numPasses) noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Num_Passes = numPasses; }

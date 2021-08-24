@@ -7,22 +7,18 @@ RodLight::RodLight(Scene* scene, const glm_vec3& pos, float rodLength)
     : PointLight{ scene, LightType::Rod, pos }
 {
     setRodLength(rodLength);
-
-    auto body = getComponent<ComponentTransform>();
-    if (body) { //evil, but needed. find out why...
-        body->setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
-    }
 }
 RodLight::~RodLight() {
 }
-float RodLight::calculateCullingRadius() {
-    float res = PointLight::calculateCullingRadius();
-    auto body = getComponent<ComponentTransform>();
-    body->setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
-    return res;
+void RodLight::recalculateTransformScale() {
+    auto transform = getComponent<ComponentTransform>();
+    transform->setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
+}
+void RodLight::calculateCullingRadius() {
+    PointLight::calculateCullingRadius();
+    recalculateTransformScale();
 }
 void RodLight::setRodLength(float length) {
     m_RodLength = length;
-    auto body = getComponent<ComponentTransform>();
-    body->setScale(m_CullingRadius, m_CullingRadius, (m_RodLength / 2.0f) + m_CullingRadius);
+    calculateCullingRadius();
 }

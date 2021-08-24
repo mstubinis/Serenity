@@ -16,8 +16,9 @@ class RodLight : public PointLight {
     friend class ::Engine::priv::RenderModule;
     private:
         float m_RodLength = ROD_LIGHT_DEFAULT_ROD_LENGTH;
-        float calculateCullingRadius() override;
 
+        void calculateCullingRadius() override;
+        void recalculateTransformScale();
     public:
         RodLight() = delete;
         RodLight(

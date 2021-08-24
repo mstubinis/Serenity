@@ -29,7 +29,7 @@ class PointLight : public SunLight {
         float              m_E                = POINT_LIGHT_DEFAULT_EXPONENT;
         float              m_CullingRadius    = 0.0f;
 
-        virtual float calculateCullingRadius();
+        virtual void calculateCullingRadius();
 
     public:
         PointLight() = delete;

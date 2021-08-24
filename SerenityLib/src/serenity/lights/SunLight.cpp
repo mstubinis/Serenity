@@ -10,7 +10,7 @@ SunLight::SunLight(Scene* scene, decimal x, decimal y, decimal z, LightType type
     , m_Type{ type }
 {
     addComponent<ComponentTransform>();
-    SunLight::setPosition(x, y, z);
+    setPosition(x, y, z);
 }
 SunLight::SunLight(Scene* scene, const glm_vec3& pos, LightType type)
     : SunLight{ scene, pos.x, pos.y, pos.z, type }

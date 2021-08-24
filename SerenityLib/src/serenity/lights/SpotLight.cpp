@@ -12,9 +12,7 @@ SpotLight::SpotLight(Scene* scene, const glm_vec3& position, const glm_vec3& dir
 }
 void SpotLight::setDirection(float xDir, float yDir, float zDir) noexcept {
     auto transform = getComponent<ComponentTransform>();
-    if (transform) {
-        transform->alignTo(xDir, yDir, zDir);
-    }
+    transform->alignTo(xDir, yDir, zDir);
 }
 void SpotLight::setDirection(const glm::vec3& direction) noexcept {
     setDirection(direction.x, direction.y, direction.z);

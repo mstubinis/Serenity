@@ -251,7 +251,7 @@ void DeferredPipeline::init() {
     SSAO::init();
     HDR::init();
     DepthOfField::init();
-    Bloom::init();
+    Bloom::STATIC_BLOOM.init();
     GodRays::init();
     SMAA::init();
 
@@ -1653,7 +1653,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         if (skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData()) {
             Engine::Renderer::sendTextureSafe("irradianceMap", *skybox->cubemap().get<TextureCubemap>()->getConvolutionTexture().get<TextureCubemap>(), 5);
             Engine::Renderer::sendTextureSafe("prefilterMap", *skybox->cubemap().get<TextureCubemap>()->getPreEnvTexture().get<TextureCubemap>(), 6);
-        }else{
+        } else {
             Engine::Renderer::sendTextureSafe("irradianceMap", *Texture::Black.get<Texture>(), 5);
             Engine::Renderer::sendTextureSafe("prefilterMap", *Texture::Black.get<Texture>(), 6);
         }
@@ -1670,7 +1670,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         if (skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData()) {
             Engine::Renderer::clearTexture(5, GL_TEXTURE_CUBE_MAP);
             Engine::Renderer::clearTexture(6, GL_TEXTURE_CUBE_MAP);
-        }else{
+        } else {
             Engine::Renderer::clearTexture(5, GL_TEXTURE_2D);
             Engine::Renderer::clearTexture(6, GL_TEXTURE_2D);
         }
@@ -2043,11 +2043,11 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         internal_render2DAPI(GBufferType::Diffuse, m_Background2DAPICommands, mainRenderFunction, viewport, false);
         glDepthRange(0.0f, 1.0f);
         internal_pass_forward(viewport, camera, depthPrepass);
-        //this is god awful and ugly, but it's needed. find a way to refactor this properly
-        for (GLint i = 0; i < OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS; ++i) {
-            Engine::Renderer::clearTexture(i, GL_TEXTURE_2D);
-            Engine::Renderer::clearTexture(i, GL_TEXTURE_CUBE_MAP);
-        }
+        //this is god awful and ugly, but it's needed. find a way to refactor this properly or eventually get rid of it
+        //for (GLint i = 0; i < OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS; ++i) {
+        //    Engine::Renderer::clearTexture(i, GL_TEXTURE_2D);
+        //    Engine::Renderer::clearTexture(i, GL_TEXTURE_CUBE_MAP);
+        //}
         Engine::Renderer::GLDisable(GL_DEPTH_TEST);
         internal_pass_god_rays(viewport, camera);
         internal_pass_normaless_diffuse();

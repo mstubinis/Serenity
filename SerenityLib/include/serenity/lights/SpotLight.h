@@ -22,12 +22,12 @@ class SpotLight : public PointLight {
         SpotLight() = delete;
         SpotLight(
             Scene* scene,
-            const glm_vec3& position = glm_vec3(0.0f, 0.0f, 0.0f),
-            const glm_vec3& direction = glm_vec3(0.0f, 0.0f, -1.0f),
+            const glm_vec3& position = glm_vec3{ 0.0f, 0.0f, 0.0f },
+            const glm_vec3& direction = glm_vec3{ 0.0f, 0.0f, -1.0f },
             float innerCutoffInDegrees = SPOT_LIGHT_DEFAULT_CUTOFF_DEGREES,
             float outerCutoffInDegrees = SPOT_LIGHT_DEFAULT_OUTER_CUTOFF_DEGREES
         );
-        virtual ~SpotLight() {}
+        virtual ~SpotLight() = default;
 
         //returns the inner cutoff in degrees
         [[nodiscard]] inline constexpr float getCutoff() const noexcept { return m_CutoffDegrees; }
@@ -38,17 +38,9 @@ class SpotLight : public PointLight {
         void setDirection(float xDir, float yDir, float zDir) noexcept;
         void setDirection(const glm::vec3& direction) noexcept;
 
-        void setCutoffRadians(float cutoffInRadians) noexcept { 
-            m_CutoffDegrees = glm::degrees(cutoffInRadians); 
-        }
-        void setCutoffOuterRadians(float outerCutoffInRadians) noexcept { 
-            m_OuterCutoffDegrees = glm::degrees(outerCutoffInRadians);
-        }
-        void setCutoffDegrees(float cutoffInDegrees) noexcept { 
-            m_CutoffDegrees = cutoffInDegrees; 
-        }
-        void setCutoffOuterDegrees(float outerCutoffInDegrees) noexcept { 
-            m_OuterCutoffDegrees = outerCutoffInDegrees; 
-        }
+        inline void setCutoffRadians(float cutoffInRadians) noexcept { m_CutoffDegrees = glm::degrees(cutoffInRadians); }
+        inline void setCutoffOuterRadians(float outerCutoffInRadians) noexcept { m_OuterCutoffDegrees = glm::degrees(outerCutoffInRadians); }
+        inline void setCutoffDegrees(float cutoffInDegrees) noexcept { m_CutoffDegrees = cutoffInDegrees; }
+        inline void setCutoffOuterDegrees(float outerCutoffInDegrees) noexcept { m_OuterCutoffDegrees = outerCutoffInDegrees; }
 };
 #endif
