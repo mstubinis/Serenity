@@ -12,15 +12,14 @@ constexpr const float   DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE   = 1024.0f;
 constexpr const uint8_t DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS = 4;
 constexpr const uint8_t DIRECTIONAL_LIGHT_NUM_FRUSTUM_CORNERS       = 8;
 
-class DirectionalLight : public SunLight {
+class DirectionalLight : public EntityBody, public LightBaseData<DirectionalLight> {
     friend class Engine::priv::RenderModule;
     public:
         DirectionalLight() = delete;
         DirectionalLight(Scene*, const glm::vec3& direction = glm::vec3{ 0.0f, 0.0f, -1.0f });
         DirectionalLight(Scene*, float directionX, float directionY, float directionZ);
-        virtual ~DirectionalLight();
 
-        bool setShadowCaster(bool castsShadow) noexcept override;
+        bool setShadowCaster(bool castsShadow) noexcept;
 
         void setDirection(const glm::vec3& direction);
         void setDirection(float directionX, float directionY, float directionZ);

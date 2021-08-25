@@ -5,24 +5,16 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/system/Engine.h>
 
-SunLight::SunLight(Scene* scene, decimal x, decimal y, decimal z, LightType type)
+SunLight::SunLight(Scene* scene, decimal x, decimal y, decimal z)
     : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
-    , m_Type{ type }
+    , LightBaseData<SunLight>{ LightType::Sun }
 {
     addComponent<ComponentTransform>();
     setPosition(x, y, z);
 }
-SunLight::SunLight(Scene* scene, const glm_vec3& pos, LightType type)
-    : SunLight{ scene, pos.x, pos.y, pos.z, type }
+SunLight::SunLight(Scene* scene, const glm_vec3& pos)
+    : SunLight{ scene, pos.x, pos.y, pos.z }
 {}
-glm_vec3 SunLight::getPosition() const { return getComponent<ComponentTransform>()->getPosition(); }
-void SunLight::setPosition(decimal x, decimal y, decimal z) { getComponent<ComponentTransform>()->setPosition(x, y, z); }
-void SunLight::setPosition(decimal position) { getComponent<ComponentTransform>()->setPosition(position, position, position); }
-void SunLight::setPosition(const glm_vec3& position) { getComponent<ComponentTransform>()->setPosition(position); }
-
-bool SunLight::isShadowCaster() const noexcept {
-    return m_IsShadowCaster; 
-}
 bool SunLight::setShadowCaster(bool castsShadow) noexcept {
     if ((m_IsShadowCaster && castsShadow == false) || (!m_IsShadowCaster && castsShadow == true)) {
         m_IsShadowCaster = castsShadow;

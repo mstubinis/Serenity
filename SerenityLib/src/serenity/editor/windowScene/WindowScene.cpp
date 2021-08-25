@@ -248,7 +248,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
     if (directionalLights.size() > 0 || sunLights.size() > 0 || pointLights.size() > 0 || spotLights.size() > 0 || rodLights.size() > 0) {
         if (ImGui::TreeNode("Lights")) {
 
-            auto lamda_point_light_data = [](PointLight& light) {
+            auto lamda_point_light_data = [](auto& light) {
                 auto transform = light.getComponent<ComponentTransform>();
                 ImGui::InputDouble3("Position", &transform->m_Position[0]);
                 auto constant_ = light.getConstant();

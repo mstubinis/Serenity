@@ -956,6 +956,9 @@
     <ClCompile Include="src\serenity\physics\btRigidBodyEnhanced.cpp">
       <Filter>Source Files\Engine\Core\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\lights\LightIncludes.cpp">
+      <Filter>Source Files\Engine\Core\Lights</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">

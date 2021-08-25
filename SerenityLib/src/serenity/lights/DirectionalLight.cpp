@@ -4,16 +4,16 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/system/Engine.h>
 
+DirectionalLight::DirectionalLight(Scene* scene, float directionX, float directionY, float directionZ)
+    : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
+    , LightBaseData<DirectionalLight>{ LightType::Directional }
+{
+    addComponent<ComponentTransform>();
+    setDirection(directionX, directionY, directionZ);
+}
 DirectionalLight::DirectionalLight(Scene* scene, const glm::vec3& direction)
     : DirectionalLight{ scene, direction.x, direction.y, direction.z }
 {}
-DirectionalLight::DirectionalLight(Scene* scene, float directionX, float directionY, float directionZ)
-    : SunLight{ scene, glm::vec3(0.0f), LightType::Directional }
-{
-    setDirection(directionX, directionY, directionZ);
-}
-DirectionalLight::~DirectionalLight() {
-}
 
 bool DirectionalLight::setShadowCaster(bool castsShadow) noexcept {
     if ((m_IsShadowCaster && castsShadow == false) || (!m_IsShadowCaster && castsShadow == true)) {

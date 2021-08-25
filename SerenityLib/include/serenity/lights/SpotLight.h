@@ -13,21 +13,38 @@ class SpotLightShadowData {
 
 };
 
-class SpotLight : public PointLight {
+class SpotLight : public EntityBody, public LightAttenuationData, public LightBaseData<SpotLight> {
     friend class ::Engine::priv::RenderModule;
     private:
         float   m_CutoffDegrees      = SPOT_LIGHT_DEFAULT_CUTOFF_DEGREES;
         float   m_OuterCutoffDegrees = SPOT_LIGHT_DEFAULT_OUTER_CUTOFF_DEGREES;
+
+        void calculateCullingRadius();
     public:
         SpotLight() = delete;
         SpotLight(
-            Scene* scene,
+            Scene*,
             const glm_vec3& position = glm_vec3{ 0.0f, 0.0f, 0.0f },
             const glm_vec3& direction = glm_vec3{ 0.0f, 0.0f, -1.0f },
             float innerCutoffInDegrees = SPOT_LIGHT_DEFAULT_CUTOFF_DEGREES,
             float outerCutoffInDegrees = SPOT_LIGHT_DEFAULT_OUTER_CUTOFF_DEGREES
         );
-        virtual ~SpotLight() = default;
+        SpotLight(
+            Scene*,
+            decimal x = 0.0, decimal y = 0.0, decimal z = 0.0,
+            const glm_vec3& direction = glm_vec3{ 0.0f, 0.0f, -1.0f },
+            float innerCutoffInDegrees = SPOT_LIGHT_DEFAULT_CUTOFF_DEGREES,
+            float outerCutoffInDegrees = SPOT_LIGHT_DEFAULT_OUTER_CUTOFF_DEGREES
+        );
+
+        void setConstant(float constant);
+        void setLinear(float linear);
+        void setExponent(float exponent);
+        void setAttenuation(float constant, float linear, float exponent);
+        void setAttenuation(LightRange);
+        void setAttenuationModel(LightAttenuation);
+
+        bool setShadowCaster(bool castsShadow) noexcept { return false; }
 
         //returns the inner cutoff in degrees
         [[nodiscard]] inline constexpr float getCutoff() const noexcept { return m_CutoffDegrees; }

@@ -607,6 +607,7 @@
     <ClCompile Include="src\serenity\input\Mouse\MouseButtons.cpp" />
     <ClCompile Include="src\serenity\input\Mouse\MouseModule.cpp" />
     <ClCompile Include="src\serenity\lights\DirectionalLight.cpp" />
+    <ClCompile Include="src\serenity\lights\LightIncludes.cpp" />
     <ClCompile Include="src\serenity\lights\LightProbe.cpp" />
     <ClCompile Include="src\serenity\lights\PointLight.cpp" />
     <ClCompile Include="src\serenity\lights\ProjectionLight.cpp" />

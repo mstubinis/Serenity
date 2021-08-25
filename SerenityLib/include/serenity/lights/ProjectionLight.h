@@ -20,19 +20,19 @@ class ProjectionLightShadowData {
 
 };
 
-class ProjectionLight : public SunLight {
+class ProjectionLight : public EntityBody, public LightBaseData<ProjectionLight> {
     friend class Engine::priv::RenderModule;
     friend class Engine::priv::IRenderingPipeline;
     protected:
-        Handle                         m_Texture    = Handle{};
+        Handle                         m_Texture;
 
         std::array<glm::vec3, 8>       m_FrustumPoints;
-        std::array<unsigned int, 36>   m_FrustumIndices;
+        std::array<uint32_t, 36>       m_FrustumIndices;
 
         float                          m_Near       = PROJECTION_LIGHT_DEFAULT_NEAR;
         float                          m_Far        = PROJECTION_LIGHT_DEFAULT_FAR;
-        glm::vec2                      m_NearScale  = glm::vec2(1.0f);
-        glm::vec2                      m_FarScale   = glm::vec2(1.0f);
+        glm::vec2                      m_NearScale  = glm::vec2{ 1.0f };
+        glm::vec2                      m_FarScale   = glm::vec2{ 1.0f };
 
         void recalc_frustum_points() noexcept;
         void recalc_frustum_indices() noexcept;
@@ -42,9 +42,8 @@ class ProjectionLight : public SunLight {
         ProjectionLight(
             Scene*,
             Handle textureHandle,
-            const glm::vec3& direction = glm::vec3(0.0f, 0.0f, -1.0f)
+            const glm::vec3& direction = glm::vec3{ 0.0f, 0.0f, -1.0f }
         );
-        virtual ~ProjectionLight();
 
         inline void setTexture(Handle textureHandle) noexcept { m_Texture = textureHandle; }
 

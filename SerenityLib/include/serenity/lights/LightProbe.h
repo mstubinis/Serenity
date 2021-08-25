@@ -44,13 +44,13 @@ class LightProbe : public Entity {
         Viewport            m_Viewport;
     public:
         LightProbe(
-            Scene* scene,
-            ProbeType::Type type,
+            Scene*,
+            ProbeType::Type,
             const glm::vec3& position   = glm::vec3(0.0f, 0.0f, 0.0f)
         );
-        virtual ~LightProbe();
+        ~LightProbe();
 
-        void addIgnoredEntity(Entity entity);
+        void addIgnoredEntity(Entity);
 
         [[nodiscard]] inline const Camera& getCamera() const noexcept { return m_Camera; }
         [[nodiscard]] inline const Viewport& getViewport() const noexcept { return m_Viewport; }

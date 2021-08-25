@@ -3,15 +3,16 @@
 #include <serenity/utils/Utils.h>
 #include <serenity/resources/texture/Texture.h>
 #include <serenity/scene/Scene.h>
+#include <serenity/resources/Engine_Resources.h>
 
 ProjectionLight::ProjectionLight(Scene* scene, Handle textureHandle, const glm::vec3& direction)
-    : SunLight{ scene, glm::vec3(0.0f), LightType::Projection }
+    : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
+    , LightBaseData<ProjectionLight>{ LightType::Projection }
 {
+    addComponent<ComponentTransform>();
     getComponent<ComponentTransform>()->alignTo(direction);
     setTexture(textureHandle);
     recalc_frustum_indices();
-}
-ProjectionLight::~ProjectionLight() {
 }
 void ProjectionLight::recalc_frustum_points() noexcept {
     //0-3 : near plane
@@ -19,19 +20,19 @@ void ProjectionLight::recalc_frustum_points() noexcept {
     //both in order: top left, top right, btm left, btm right
 
     Texture* texture = m_Texture.get<Texture>();
-    glm::vec2 texture_dimension_ratio = (texture) ? texture->sizeAsRatio() : glm::vec2(1.0f);
+    glm::vec2 texture_dimension_ratio = (texture) ? texture->sizeAsRatio() : glm::vec2{ 1.0f };
     std::array<glm::vec2, 4> offsets = {
-        glm::vec2(-1.0f,  1.0f),
-        glm::vec2( 1.0f,  1.0f),
-        glm::vec2(-1.0f, -1.0f),
-        glm::vec2( 1.0f, -1.0f),
+        glm::vec2{-1.0f,  1.0f},
+        glm::vec2{ 1.0f,  1.0f},
+        glm::vec2{-1.0f, -1.0f},
+        glm::vec2{ 1.0f, -1.0f},
     };
-    for (int i = 0; i <= 3; ++i) {
+    for (size_t i = 0; i < m_FrustumPoints.size() / 2; ++i) {
         m_FrustumPoints[i].x = m_NearScale.x * offsets[i].x;
         m_FrustumPoints[i].y = m_NearScale.y * offsets[i].y;
         m_FrustumPoints[i].z = -m_Near;
     }
-    for (int i = 4; i <= 7; ++i) {
+    for (size_t i = 4; i < m_FrustumPoints.size(); ++i) {
         m_FrustumPoints[i].x = m_FarScale.x * offsets[i - 4].x;
         m_FrustumPoints[i].y = m_FarScale.y * offsets[i - 4].y;
         m_FrustumPoints[i].z = -m_Far;
