@@ -51,9 +51,9 @@ constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](const Material& m) {
         const auto& component = components[i];
         component.bind(i, textureUnit);
     }
-    Engine::Renderer::sendUniform1Safe("numComponents", (int)numComponents);
-    Engine::Renderer::sendUniform1Safe("Shadeless", (int)m.getShadeless());
-    Engine::Renderer::sendUniform4Safe("Material_F0AndID", m.getF0().r(), m.getF0().g(), m.getF0().b(), (float)m.getID());
+    Engine::Renderer::sendUniform1Safe("numComponents", int(numComponents));
+    Engine::Renderer::sendUniform1Safe("Shadeless", int(m.getShadeless()));
+    Engine::Renderer::sendUniform4Safe("Material_F0AndID", m.getF0().r(), m.getF0().g(), m.getF0().b(), float(m.getID()));
     Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne", m.getGlowFloat(), m.getAOFloat(), m.getMetalnessFloat(), m.getSmoothnessFloat());
     Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", m.getAlphaFloat(), m.getDiffuseModelFloat(), m.getSpecularModelFloat(), 0.0f);
 };
@@ -126,7 +126,7 @@ void opengl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsize
 }
 #endif 
 
-constexpr std::array<glm::mat4, 6> CAPTURE_VIEWS = {
+constexpr const std::array<const glm::mat4, 6> CAPTURE_VIEWS = {
     glm::mat4{  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
     glm::mat4{  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
     glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
@@ -202,27 +202,27 @@ DeferredPipeline::~DeferredPipeline() {
     //TODO: add cleanup() from ssao / smaa here?
 }
 void DeferredPipeline::internal_gl_scissor_reset() noexcept {
-    auto winSize          = Engine::Resources::getWindowSize();
-    m_CurrentScissorState = glm::vec4(-1.0f);
+    const auto winSize    = Engine::Resources::getWindowSize();
+    m_CurrentScissorState = glm::vec4{ -1.0f };
     m_CurrentScissorDepth = std::numeric_limits<float>().min();
     glScissor(0, 0, winSize.x, winSize.y);
 }
 void DeferredPipeline::internal_gl_scissor(const glm::vec4& scissor, float depth) noexcept {
-    if (scissor == glm::vec4(-1.0f)) {
+    if (scissor == glm::vec4{ -1.0f }) {
         internal_gl_scissor_reset();
-    }else{
+    } else {
         m_CurrentScissorState = scissor;
         m_CurrentScissorDepth = depth;
-        glScissor((GLint)scissor.x, (GLint)scissor.y, (GLsizei)scissor.z, (GLsizei)scissor.w);
+        glScissor(GLint(scissor.x), GLint(scissor.y), GLsizei(scissor.z), GLsizei(scissor.w));
     }
 }
 void DeferredPipeline::init() {
     const auto window_size = Engine::Resources::getWindowSize();
-    m_2DProjectionMatrix   = glm::ortho(0.0f, (float)window_size.x, 0.0f, (float)window_size.y, 0.005f, 99999999.0f);
+    m_2DProjectionMatrix   = glm::ortho(0.0f, float(window_size.x), 0.0f, float(window_size.y), 0.005f, 99999999.0f);
 
-    float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    m_InternalShaders.resize(ShaderEnum::_TOTAL, Handle{});
-    m_InternalShaderPrograms.resize(ShaderProgramEnum::_TOTAL, Handle{});
+    const float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    m_InternalShaders.resize(ShaderEnum::_TOTAL);
+    m_InternalShaderPrograms.resize(ShaderProgramEnum::_TOTAL);
 
     glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &UniformBufferObject::MAX_UBO_BINDINGS);
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, init_border_color);
@@ -607,58 +607,58 @@ void DeferredPipeline::sendTextureSafe(const char* location, uint32_t textureObj
     Engine::Renderer::sendUniform1Safe(location, unit);
 }
 void DeferredPipeline::sendTextures(const char* location, const Texture** textures, int slot, const int arrSize) {
-    std::vector<int> slots(arrSize);
+    m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
         m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(textures[i]->getTextureType().toGLType(), textures[i]->address());
-        slots[i] = slot + i;
+        m_TextureSlotsBuffer[i] = slot + i;
     }
-    Engine::Renderer::sendUniform1v(location, slots.data(), arrSize);
+    Engine::Renderer::sendUniform1v(location, m_TextureSlotsBuffer.data(), arrSize);
 }
 void DeferredPipeline::sendTextures(const char* location, const TextureCubemap** cubemaps, int slot, const int arrSize) {
-    std::vector<int> slots(arrSize);
+    m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
         m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(GL_TEXTURE_CUBE_MAP, cubemaps[i]->address());
-        slots[i] = slot + i;
+        m_TextureSlotsBuffer[i] = slot + i;
     }
-    Engine::Renderer::sendUniform1v(location, slots.data(), arrSize);
+    Engine::Renderer::sendUniform1v(location, m_TextureSlotsBuffer.data(), arrSize);
 }
 void DeferredPipeline::sendTextures(const char* location, const GLuint* addresses, int slot, GLuint glTextureType, const int arrSize) {
-    std::vector<int> slots(arrSize);
+    m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
         m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(glTextureType, addresses[i]);
-        slots[i] = slot + i;
+        m_TextureSlotsBuffer[i] = slot + i;
     }
-    Engine::Renderer::sendUniform1v(location, slots.data(), arrSize);
+    Engine::Renderer::sendUniform1v(location, m_TextureSlotsBuffer.data(), arrSize);
 }
 void DeferredPipeline::sendTexturesSafe(const char* location, const Texture** textures, int slot, const int arrSize) {
-    std::vector<int> slots(arrSize);
+    m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
         m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(textures[i]->getTextureType().toGLType(), textures[i]->address());
-        slots[i] = slot + i;
+        m_TextureSlotsBuffer[i] = slot + i;
     }
-    Engine::Renderer::sendUniform1vSafe(location, slots.data(), arrSize);
+    Engine::Renderer::sendUniform1vSafe(location, m_TextureSlotsBuffer.data(), arrSize);
 }
 void DeferredPipeline::sendTexturesSafe(const char* location, const TextureCubemap** cubemaps, int slot, const int arrSize) {
-    std::vector<int> slots(arrSize);
+    m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
         m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(GL_TEXTURE_CUBE_MAP, cubemaps[i]->address());
-        slots[i] = slot + i;
+        m_TextureSlotsBuffer[i] = slot + i;
     }
-    Engine::Renderer::sendUniform1vSafe(location, slots.data(), arrSize);
+    Engine::Renderer::sendUniform1vSafe(location, m_TextureSlotsBuffer.data(), arrSize);
 }
 void DeferredPipeline::sendTexturesSafe(const char* location, const GLuint* data, int slot, GLuint glTextureType, const int arrSize) {
-    std::vector<int> slots(arrSize);
+    m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
         m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(glTextureType, data[i]);
-        slots[i] = slot + i;
+        m_TextureSlotsBuffer[i] = slot + i;
     }
-    Engine::Renderer::sendUniform1vSafe(location, slots.data(), arrSize);
+    Engine::Renderer::sendUniform1vSafe(location, m_TextureSlotsBuffer.data(), arrSize);
 }
 bool DeferredPipeline::cullFace(uint32_t face) {
     return m_OpenGLStateMachine.GL_glCullFace(face);
@@ -1189,9 +1189,12 @@ void DeferredPipeline::internal_render_2d_text_left(std::string_view text, const
     }
 }
 void DeferredPipeline::internal_render_2d_text_center(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    std::vector<std::string>  lines;
-    std::vector<uint16_t>     lines_sizes;
-    std::string               line_accumulator;
+    static std::vector<std::string>  lines;
+    static std::vector<uint16_t>     lines_sizes;
+    static std::string               line_accumulator;
+    lines.clear();
+    lines_sizes.clear();
+    line_accumulator.clear();
     for (const auto character : text) {
         if (character == '\n') {
             lines.emplace_back(line_accumulator);
@@ -1245,8 +1248,10 @@ void DeferredPipeline::internal_render_2d_text_center(std::string_view text, con
     }
 }
 void DeferredPipeline::internal_render_2d_text_right(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    std::vector<std::string>  lines;
-    std::string               line_accumulator;
+    static std::vector<std::string>  lines;
+    static std::string               line_accumulator;
+    lines.clear();
+    line_accumulator.clear();
     for (const auto character : text) {
         if (character == '\n') {
             lines.emplace_back(line_accumulator);
@@ -1327,9 +1332,9 @@ void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, 
 
     if (textAlignment == TextAlignment::Left) {
         internal_render_2d_text_left(text, font, -newLineGlyphHeight, x, y, z);
-    }else if (textAlignment == TextAlignment::Right) {
+    } else if (textAlignment == TextAlignment::Right) {
         internal_render_2d_text_right(text, font, -newLineGlyphHeight, x, y, z);
-    }else if (textAlignment == TextAlignment::Center) {
+    } else if (textAlignment == TextAlignment::Center) {
         internal_render_2d_text_center(text, font, -newLineGlyphHeight, x, y, z);
     }
     fontPlane.modifyVertices(0, m_Text_Points.data(), m_Text_Points.size(), MeshModifyFlags::None); //prevent gpu upload until after all the data is collected
@@ -1354,7 +1359,7 @@ void DeferredPipeline::render2DTexture(Handle textureHandle, const glm::vec2& po
         totalSizeY *= texture->height();
         Engine::Renderer::sendTexture("DiffuseTexture", *texture, 0);
         Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
-    }else{
+    } else {
         Engine::Renderer::sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
         Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 0);
     }
@@ -1600,7 +1605,7 @@ void DeferredPipeline::internal_pass_stencil() {
 void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera, bool mainRenderFunction) {
     const Scene& scene = viewport.getScene();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLighting].get<ShaderProgram>());
-    auto winSize = glm::vec2(Engine::Resources::getWindowSize());
+    auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
     Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
 
     Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
@@ -1681,7 +1686,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
 void DeferredPipeline::internal_pass_lighting_basic(Viewport& viewport, Camera& camera, bool mainRenderFunction) {
     const Scene& scene = viewport.getScene();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingBasic].get<ShaderProgram>());
-    auto winSize = glm::vec2(Engine::Resources::getWindowSize());
+    auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
 
     Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
 
@@ -1738,14 +1743,14 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
     auto& godRaysPlatform = GodRays::STATIC_GOD_RAYS;
     auto sun = Engine::Renderer::godRays::getSun();
     if (!sun.null() && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
-        auto transform        = sun.getComponent<ComponentTransform>();
+        auto transform    = sun.getComponent<ComponentTransform>();
         if (!transform) {
             return;
         }
-        glm::vec3 oPos   = transform->getPosition();
-        glm::vec3 camPos = camera.getPosition();
-        glm::vec3 camVec = camera.getViewVector();
-        bool infront     = Engine::Math::isPointWithinCone(camPos, -camVec, oPos, Engine::Math::toRadians(godRaysPlatform.fovDegrees));
+        glm::vec3 oPos    = transform->getPosition();
+        glm::vec3 camPos  = camera.getPosition();
+        glm::vec3 camVec  = camera.getViewVector();
+        bool infront      = Engine::Math::isPointWithinCone(camPos, -camVec, oPos, Engine::Math::toRadians(godRaysPlatform.fovDegrees));
         if (infront) {
             const auto sp = Engine::Math::getScreenCoordinates(oPos, camera, false);
             const auto b  = glm::normalize(camPos - oPos);
@@ -1756,7 +1761,7 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
                 alpha     = 0.01f;
             }
             alpha = 1.0f - alpha;
-            godRaysPlatform.pass(m_GBuffer, viewport, glm::vec2(sp.x, sp.y), alpha, m_Renderer);
+            godRaysPlatform.pass(m_GBuffer, viewport, glm::vec2{ sp.x, sp.y }, alpha, m_Renderer);
         }
     }
 }
@@ -1929,6 +1934,7 @@ void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCo
             Engine::Renderer::Settings::clear(false, clearDepth, false); //clear depth only
             m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI].get<ShaderProgram>());
             Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
+
             if (commands.size() > 0) {
                 Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
                 for (const auto& command : commands) {
@@ -2029,7 +2035,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         if (m_Renderer.m_Lighting) {
             if (renderer.m_LightingAlgorithm == LightingAlgorithm::PBR) {
                 internal_pass_lighting(viewport, camera, mainRenderFunction);
-            }else{
+            } else {
                 internal_pass_lighting_basic(viewport, camera, mainRenderFunction);
             }
         }
@@ -2043,11 +2049,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         internal_render2DAPI(GBufferType::Diffuse, m_Background2DAPICommands, mainRenderFunction, viewport, false);
         glDepthRange(0.0f, 1.0f);
         internal_pass_forward(viewport, camera, depthPrepass);
-        //this is god awful and ugly, but it's needed. find a way to refactor this properly or eventually get rid of it
-        //for (GLint i = 0; i < OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS; ++i) {
-        //    Engine::Renderer::clearTexture(i, GL_TEXTURE_2D);
-        //    Engine::Renderer::clearTexture(i, GL_TEXTURE_CUBE_MAP);
-        //}
+
         Engine::Renderer::GLDisable(GL_DEPTH_TEST);
         internal_pass_god_rays(viewport, camera);
         internal_pass_normaless_diffuse();
@@ -2061,8 +2063,8 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
         internal_pass_aa(mainRenderFunction, viewport, camera, sceneTexture, outTexture);
     }
     renderPhysicsAPI(mainRenderFunction, viewport, camera, scene);
-    m_GBuffer.bindBackbuffer(viewport);
 
+    m_GBuffer.bindBackbuffer(viewport);
     internal_render2DAPI(GBufferType::BackBuffer, m_2DAPICommands, mainRenderFunction, viewport);
 }
 void DeferredPipeline::internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>& commands, Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
@@ -2083,10 +2085,10 @@ void DeferredPipeline::internal_renderBorder(std::vector<IRenderingPipeline::API
     Engine::Renderer::alignmentOffset(align, translationX, translationY, w, h);
     const glm::vec2 newPos{ translationX, translationY };
 
-    internal_renderRectangle(commands, newPos - glm::vec2(halfWidth, 0.0f), col, borderSize, h + doubleBorder, angle, depth, Alignment::Right, scissor);
-    internal_renderRectangle(commands, newPos + glm::vec2(halfWidth, 0.0f), col, borderSize, h + doubleBorder, angle, depth, Alignment::Left, scissor);
-    internal_renderRectangle(commands, newPos - glm::vec2(0.0f, halfHeight), col, w, borderSize, angle, depth, Alignment::TopCenter, scissor);
-    internal_renderRectangle(commands, newPos + glm::vec2(0.0f, halfHeight + borderSize), col, w, borderSize, angle, depth, Alignment::BottomCenter, scissor);
+    internal_renderRectangle(commands, newPos - glm::vec2{ halfWidth, 0.0f }, col, borderSize, h + doubleBorder, angle, depth, Alignment::Right, scissor);
+    internal_renderRectangle(commands, newPos + glm::vec2{ halfWidth, 0.0f }, col, borderSize, h + doubleBorder, angle, depth, Alignment::Left, scissor);
+    internal_renderRectangle(commands, newPos - glm::vec2{ 0.0f, halfHeight }, col, w, borderSize, angle, depth, Alignment::TopCenter, scissor);
+    internal_renderRectangle(commands, newPos + glm::vec2{ 0.0f, halfHeight + borderSize }, col, w, borderSize, angle, depth, Alignment::BottomCenter, scissor);
 }
 void DeferredPipeline::internal_renderRectangle(std::vector<IRenderingPipeline::API2DCommand>& commands, const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     commands.emplace_back([=]() { DeferredPipeline::render2DTexture(Handle{}, pos, col, angle, glm::vec2(width, height), depth, align, scissor); }, depth);
@@ -2112,6 +2114,7 @@ void DeferredPipeline::renderRectangle(const glm::vec2& pos, const glm::vec4& co
 void DeferredPipeline::renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     internal_renderTriangle(m_2DAPICommands, position, color, angle, width, height, depth, align, scissor);
 }
+
 void DeferredPipeline::renderBackgroundTexture(Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
     internal_renderTexture(m_Background2DAPICommands, textureHandle, p, c, a, s, d, align, scissor);
 }
@@ -2127,6 +2130,7 @@ void DeferredPipeline::renderBackgroundRectangle(const glm::vec2& pos, const glm
 void DeferredPipeline::renderBackgroundTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) {
     internal_renderTriangle(m_Background2DAPICommands, position, color, angle, width, height, depth, align, scissor);
 }
+
 void DeferredPipeline::renderFullscreenTriangle() {
     const glm::vec2 winSize{ Engine::Resources::getWindowSize() };
     Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4{ 1.0f });

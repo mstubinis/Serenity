@@ -34,6 +34,7 @@ Viewport::Viewport(Viewport&& other) noexcept
     , m_ID                 { std::move(other.m_ID) }
     , m_RenderFlags        { std::move(other.m_RenderFlags) }
     , m_RenderFuncPointer  { std::move(other.m_RenderFuncPointer) }
+    , m_ResizeFuncPointer  { std::move(other.m_ResizeFuncPointer) }
 {}
 Viewport& Viewport::operator=(Viewport&& other) noexcept {
     m_Scene               = std::move(other.m_Scene);
@@ -45,6 +46,7 @@ Viewport& Viewport::operator=(Viewport&& other) noexcept {
     m_ID                  = std::move(other.m_ID);
     m_RenderFlags         = std::move(other.m_RenderFlags);
     m_RenderFuncPointer   = std::move(other.m_RenderFuncPointer);
+    m_ResizeFuncPointer   = std::move(other.m_ResizeFuncPointer);
     return *this;
 }
 

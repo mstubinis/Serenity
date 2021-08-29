@@ -72,19 +72,19 @@ EngineCore::~EngineCore() {
     internal_cleanup_os_specific();
 }
 void EngineCore::internal_init_os_specific(const EngineOptions& options) {
-    #ifdef _WIN32
-        //get args from shortcut, etc
-        std::unordered_set<std::string> args;
-        std::locale loc;
-        args.reserve(options.argc);
-        for (int i = 0; i < options.argc; i++) {
-            std::string key      = std::string(options.argv[i]);
-            std::string lowerKey;
-            for (size_t j = 0; j < key.length(); ++j) {
-                lowerKey += std::tolower(key[j], loc);
-            }
-            args.insert(std::move(lowerKey));
+    //get args from shortcut, etc
+    std::unordered_set<std::string> args;
+    std::locale loc;
+    args.reserve(options.argc);
+    for (int i = 0; i < options.argc; i++) {
+        const std::string key = std::string(options.argv[i]);
+        std::string lowerKey;
+        for (size_t j = 0; j < key.length(); ++j) {
+            lowerKey += std::tolower(key[j], loc);
         }
+        args.insert(std::move(lowerKey));
+    }
+    #ifdef _WIN32
         //show console if applicable
         if (options.show_console) {
             if (GetConsoleWindow() == NULL) {
@@ -134,13 +134,12 @@ void EngineCore::init(const EngineOptions& options) {
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
-void EngineCore::internal_pre_input_update(Window& window) {
+void EngineCore::internal_pre_input_update() {
     m_EventModule.m_KeyboardModule.update();
     m_EventModule.m_MouseModule.update();
 }
-void EngineCore::internal_update_logic(Scene& scene, Window& window, const float dt) {
+void EngineCore::internal_update_logic(Scene& scene, const float dt) {
     m_DebugManager.stop_clock();
-    window.internal_update_dynamic_resize();
     m_NetworkingModule.update(dt);
 
     m_Misc.m_QueuedCommands.for_each_and_clear([](std::function<void()>& item) mutable { item(); });
@@ -151,15 +150,12 @@ void EngineCore::internal_update_logic(Scene& scene, Window& window, const float
     m_DiscordModule.update();
     m_DebugManager.calculate_logic();
 }
-void EngineCore::internal_update_sounds(Scene& scene, Window& window, const float dt) {
+void EngineCore::internal_update_sounds(Scene& scene, const float dt) {
     m_DebugManager.stop_clock();
     m_SoundModule.update(scene, dt);
     m_DebugManager.calculate_sounds();
 }
-void EngineCore::internal_pre_update(Scene& scene, Window& window, const float dt) {
-    if (Engine::priv::PublicScene::IsSkipRenderThisFrame(scene)) {
-        scene.m_SkipRenderThisFrame = false;
-    }
+void EngineCore::internal_pre_update(Scene& scene, const float dt) {
     Game::onPreUpdate(dt);
     scene.preUpdate(dt);
 }
@@ -188,12 +184,13 @@ void EngineCore::internal_render(Scene& scene, Window& window, const float dt, c
     m_Editor.render(window);
 
     window.display();
+
     m_RenderModule._clear2DAPICommands();
     m_DebugManager.calculate_render();
 
     m_Misc.m_FPS.incrementFPSCount();
 }
-void EngineCore::internal_cleanup(Window& window, const float dt) {
+void EngineCore::internal_cleanup() {
     m_ResourceManager.postUpdate();
 }
 bool Engine::paused() noexcept {
@@ -220,42 +217,44 @@ void EngineCore::run() {
     using  millisecs         = std::chrono::duration<double, std::milli>;
     double accumulator       = ENGINE_FIXED_TIMESTEP_VALUE_D;
     auto   currentTime       = m_Misc.m_Timer.now();
-    auto   updateSimulation  = [this](const float timeElasped) {
-        for (const auto& window_itr : m_ResourceManager.m_Windows) {
-            auto& window = *window_itr;
-            auto& scene = *Engine::Resources::getCurrentScene();
-            internal_pre_input_update(window);
-            m_EngineEventHandler.poll_events(window);
-            internal_pre_update(scene, window, timeElasped);
-            m_Editor.update(window, timeElasped);
-            internal_update_logic(scene, window, timeElasped);
-            internal_update_sounds(scene, window, timeElasped);
-            internal_post_update(scene, window, timeElasped);
-            internal_cleanup(window, timeElasped);
+
+    auto   updateWindows     = [this](const float timeElasped, Scene& scene) {
+        internal_pre_input_update();
+        for (const auto& window : m_ResourceManager.m_Windows) {
+            internal_post_update(scene, *window, timeElasped);
+            m_EngineEventHandler.poll_events(*window);
+            m_Editor.update(*window, timeElasped);
+            window->internal_update_dynamic_resize();
         }
     };
-    auto   renderSimulation  = [this, accumulator]() {
+    auto   updateSimulation  = [this](const float timeElasped, Scene& scene) {
+        internal_pre_update(scene, timeElasped);
+        internal_update_logic(scene, timeElasped);
+        internal_update_sounds(scene, timeElasped);
+    };
+    auto   renderSimulation  = [this, accumulator](Scene& scene) {
         const double alpha = accumulator / ENGINE_FIXED_TIMESTEP_VALUE_D;
         //State state = currentState * alpha + previousState * (1.0 - alpha);
-        for (const auto& window_itr : m_ResourceManager.m_Windows) {
-            auto& window = *window_itr;
-            auto& scene  = *Engine::Resources::getCurrentScene();
-            internal_render(scene, window, (float)m_Misc.m_Dt, alpha/*, state*/);
+        for (const auto& window : m_ResourceManager.m_Windows) {
+            internal_render(scene, *window, float(m_Misc.m_Dt), alpha/*, state*/);
         }
     };
-    updateSimulation(ENGINE_FIXED_TIMESTEP_VALUE); //initially call update once to get user code in place before the first render.
+    updateSimulation(ENGINE_FIXED_TIMESTEP_VALUE, *Engine::Resources::getCurrentScene()); //initially call update once to get user code in place before the first render.
     while (!m_Misc.m_Destroyed) {
         auto newTime  = m_Misc.m_Timer.now();
         m_Misc.m_Dt   = std::chrono::duration_cast<millisecs>(newTime - currentTime).count() * 0.001; // * 0.001 converts from millisecs to secs
         m_Misc.m_Dt   = std::min(m_Misc.m_Dt, 0.25); //not sure if this is needed or what this purpose is... if alot of time was "lost" due to a slow hardware fault, we should not throw away that time
         currentTime   = newTime;
         accumulator  += m_Misc.m_Dt;
+        auto& scene   = *Engine::Resources::getCurrentScene();
+        scene.m_SkipRenderThisFrame = false;
+        updateWindows(ENGINE_FIXED_TIMESTEP_VALUE, scene);
         while (accumulator >= ENGINE_FIXED_TIMESTEP_VALUE_D) {
-            updateSimulation(ENGINE_FIXED_TIMESTEP_VALUE);
+            updateSimulation(ENGINE_FIXED_TIMESTEP_VALUE, scene);
             accumulator -= ENGINE_FIXED_TIMESTEP_VALUE_D;
         }
-        renderSimulation();
-
+        renderSimulation(scene);
+        internal_cleanup();
         m_DebugManager.calculate();
         m_Misc.m_FPS.update(m_Misc.m_Dt);  
     }

@@ -592,7 +592,6 @@
     <ClCompile Include="src\serenity\editor\core\EditorCore.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui-SFML.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui.cpp" />
-    <ClCompile Include="src\serenity\editor\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui_widgets.cpp" />

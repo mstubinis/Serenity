@@ -280,8 +280,21 @@ namespace Engine::Renderer {
 
 
 
+
     void renderBackgroundTexture(
         Handle texture,
+        const glm::vec2& position,
+        const glm::vec4& color,
+        float angle,
+        const glm::vec2& scale,
+        float depth,
+        Alignment = Alignment::Center,
+        const glm::vec4& scissor = NO_SCISSOR
+    );
+    void renderBackgroundTexture(
+        uint32_t textureAddress,
+        int textureWidth,
+        int textureHeight,
         const glm::vec2& position,
         const glm::vec4& color,
         float angle,
@@ -332,6 +345,8 @@ namespace Engine::Renderer {
         Alignment = Alignment::Center,
         const glm::vec4& scissor = NO_SCISSOR
     );
+
+
 
     #pragma region UniformSending
     //Uniform 1

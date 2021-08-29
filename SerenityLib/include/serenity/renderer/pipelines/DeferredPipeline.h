@@ -65,9 +65,11 @@ namespace Engine::priv {
 
             std::vector<Handle>                                m_InternalShaders;
             std::vector<Handle>                                m_InternalShaderPrograms;
+            std::vector<int>                                   m_TextureSlotsBuffer;
 
-            std::vector<IRenderingPipeline::API2DCommand>      m_Background2DAPICommands;
+
             std::vector<IRenderingPipeline::API2DCommand>      m_2DAPICommands;
+            std::vector<IRenderingPipeline::API2DCommand>      m_Background2DAPICommands;
             //particle instancing
             uint32_t                                           m_Particle_Instance_VBO = 0U;
 
@@ -108,6 +110,7 @@ namespace Engine::priv {
             void internal_renderBorder(std::vector<IRenderingPipeline::API2DCommand>&, float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment, const glm::vec4& scissor);
             void internal_renderRectangle(std::vector<IRenderingPipeline::API2DCommand>&, const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment, const glm::vec4& scissor);
             void internal_renderTriangle(std::vector<IRenderingPipeline::API2DCommand>&, const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment, const glm::vec4& scissor);
+
 
             void internal_render2DAPI(uint32_t diffuseBuffer, const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport&, bool clearDepth = true);
 
@@ -242,11 +245,11 @@ namespace Engine::priv {
             void renderTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment, const glm::vec4& scissor) override;
 
 
-            void renderBackgroundTexture(Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment, const glm::vec4& scissor) override;
-            void renderBackgroundText(const std::string& t, Handle font, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment, const glm::vec4& scissor) override;
-            void renderBackgroundBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment, const glm::vec4& scissor) override;
-            void renderBackgroundRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment, const glm::vec4& scissor) override;
-            void renderBackgroundTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment, const glm::vec4& scissor) override;
+            void renderBackgroundTexture(Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) override;
+            void renderBackgroundText(const std::string& t, Handle fontHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) override;
+            void renderBackgroundBorder(float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
+            void renderBackgroundRectangle(const glm::vec2& pos, const glm::vec4& col, float width, float height, float angle, float depth, Alignment align, const glm::vec4& scissor) override;
+            void renderBackgroundTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) override;
 
 
             void renderFullscreenTriangle() override;

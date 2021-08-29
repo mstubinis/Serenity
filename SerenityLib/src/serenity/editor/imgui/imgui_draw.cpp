@@ -172,8 +172,7 @@ using namespace IMGUI_STB_NAMESPACE;
 // [SECTION] Style functions
 //-----------------------------------------------------------------------------
 
-void ImGui::StyleColorsDark(ImGuiStyle* dst)
-{
+void ImGui::StyleColorsDark(ImGuiStyle* dst) {
     ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
     ImVec4* colors = style->Colors;
 
@@ -227,8 +226,7 @@ void ImGui::StyleColorsDark(ImGuiStyle* dst)
     colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }
 
-void ImGui::StyleColorsClassic(ImGuiStyle* dst)
-{
+void ImGui::StyleColorsClassic(ImGuiStyle* dst) {
     ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
     ImVec4* colors = style->Colors;
 
@@ -283,8 +281,7 @@ void ImGui::StyleColorsClassic(ImGuiStyle* dst)
 }
 
 // Those light colors are better suited with a thicker font than the default one + FrameBorder
-void ImGui::StyleColorsLight(ImGuiStyle* dst)
-{
+void ImGui::StyleColorsLight(ImGuiStyle* dst) {
     ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
     ImVec4* colors = style->Colors;
 
@@ -342,8 +339,7 @@ void ImGui::StyleColorsLight(ImGuiStyle* dst)
 // ImDrawList
 //-----------------------------------------------------------------------------
 
-ImDrawListSharedData::ImDrawListSharedData()
-{
+ImDrawListSharedData::ImDrawListSharedData() {
     Font = NULL;
     FontSize = 0.0f;
     CurveTessellationTol = 0.0f;
@@ -352,21 +348,18 @@ ImDrawListSharedData::ImDrawListSharedData()
     InitialFlags = ImDrawListFlags_None;
 
     // Lookup tables
-    for (int i = 0; i < IM_ARRAYSIZE(ArcFastVtx); i++)
-    {
+    for (int i = 0; i < IM_ARRAYSIZE(ArcFastVtx); i++) {
         const float a = ((float)i * 2 * IM_PI) / (float)IM_ARRAYSIZE(ArcFastVtx);
         ArcFastVtx[i] = ImVec2(ImCos(a), ImSin(a));
     }
     memset(CircleSegmentCounts, 0, sizeof(CircleSegmentCounts)); // This will be set by SetCircleSegmentMaxError()
 }
 
-void ImDrawListSharedData::SetCircleSegmentMaxError(float max_error)
-{
+void ImDrawListSharedData::SetCircleSegmentMaxError(float max_error) {
     if (CircleSegmentMaxError == max_error)
         return;
     CircleSegmentMaxError = max_error;
-    for (int i = 0; i < IM_ARRAYSIZE(CircleSegmentCounts); i++)
-    {
+    for (int i = 0; i < IM_ARRAYSIZE(CircleSegmentCounts); i++) {
         const float radius = i + 1.0f;
         const int segment_count = IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_CALC(radius, CircleSegmentMaxError);
         CircleSegmentCounts[i] = (ImU8)ImMin(segment_count, 255);
@@ -374,8 +367,7 @@ void ImDrawListSharedData::SetCircleSegmentMaxError(float max_error)
 }
 
 // Initialize before use in a new frame. We always have a command ready in the buffer.
-void ImDrawList::_ResetForNewFrame()
-{
+void ImDrawList::_ResetForNewFrame() {
     // Verify that the ImDrawCmd fields we want to memcmp() are contiguous in memory.
     // (those should be IM_STATIC_ASSERT() in theory but with our pre C++11 setup the whole check doesn't compile with GCC)
     IM_ASSERT(IM_OFFSETOF(ImDrawCmd, ClipRect) == 0);
@@ -397,8 +389,7 @@ void ImDrawList::_ResetForNewFrame()
     CmdBuffer.push_back(ImDrawCmd());
 }
 
-void ImDrawList::_ClearFreeMemory()
-{
+void ImDrawList::_ClearFreeMemory() {
     CmdBuffer.clear();
     IdxBuffer.clear();
     VtxBuffer.clear();
@@ -412,8 +403,7 @@ void ImDrawList::_ClearFreeMemory()
     _Splitter.ClearFreeMemory();
 }
 
-ImDrawList* ImDrawList::CloneOutput() const
-{
+ImDrawList* ImDrawList::CloneOutput() const {
     ImDrawList* dst = IM_NEW(ImDrawList(_Data));
     dst->CmdBuffer = CmdBuffer;
     dst->IdxBuffer = IdxBuffer;
@@ -422,8 +412,7 @@ ImDrawList* ImDrawList::CloneOutput() const
     return dst;
 }
 
-void ImDrawList::AddDrawCmd()
-{
+void ImDrawList::AddDrawCmd() {
     ImDrawCmd draw_cmd;
     draw_cmd.ClipRect = _CmdHeader.ClipRect;    // Same as calling ImDrawCmd_HeaderCopy()
     draw_cmd.TextureId = _CmdHeader.TextureId;
@@ -436,8 +425,7 @@ void ImDrawList::AddDrawCmd()
 
 // Pop trailing draw command (used before merging or presenting to user)
 // Note that this leaves the ImDrawList in a state unfit for further commands, as most code assume that CmdBuffer.Size > 0 && CmdBuffer.back().UserCallback == NULL
-void ImDrawList::_PopUnusedDrawCmd()
-{
+void ImDrawList::_PopUnusedDrawCmd() {
     if (CmdBuffer.Size == 0)
         return;
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
@@ -445,12 +433,10 @@ void ImDrawList::_PopUnusedDrawCmd()
         CmdBuffer.pop_back();
 }
 
-void ImDrawList::AddCallback(ImDrawCallback callback, void* callback_data)
-{
+void ImDrawList::AddCallback(ImDrawCallback callback, void* callback_data) {
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
     IM_ASSERT(curr_cmd->UserCallback == NULL);
-    if (curr_cmd->ElemCount != 0)
-    {
+    if (curr_cmd->ElemCount != 0) {
         AddDrawCmd();
         curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
     }
@@ -467,12 +453,10 @@ void ImDrawList::AddCallback(ImDrawCallback callback, void* callback_data)
 
 // Our scheme may appears a bit unusual, basically we want the most-common calls AddLine AddRect etc. to not have to perform any check so we always have a command ready in the stack.
 // The cost of figuring out if a new command has to be added or if we can merge is paid in those Update** functions only.
-void ImDrawList::_OnChangedClipRect()
-{
+void ImDrawList::_OnChangedClipRect() {
     // If current command is used with different settings we need to add a new command
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
-    if (curr_cmd->ElemCount != 0 && memcmp(&curr_cmd->ClipRect, &_CmdHeader.ClipRect, sizeof(ImVec4)) != 0)
-    {
+    if (curr_cmd->ElemCount != 0 && memcmp(&curr_cmd->ClipRect, &_CmdHeader.ClipRect, sizeof(ImVec4)) != 0) {
         AddDrawCmd();
         return;
     }
@@ -480,8 +464,7 @@ void ImDrawList::_OnChangedClipRect()
 
     // Try to merge with previous command if it matches, else use current command
     ImDrawCmd* prev_cmd = curr_cmd - 1;
-    if (curr_cmd->ElemCount == 0 && CmdBuffer.Size > 1 && ImDrawCmd_HeaderCompare(&_CmdHeader, prev_cmd) == 0 && prev_cmd->UserCallback == NULL)
-    {
+    if (curr_cmd->ElemCount == 0 && CmdBuffer.Size > 1 && ImDrawCmd_HeaderCompare(&_CmdHeader, prev_cmd) == 0 && prev_cmd->UserCallback == NULL) {
         CmdBuffer.pop_back();
         return;
     }
@@ -489,12 +472,10 @@ void ImDrawList::_OnChangedClipRect()
     curr_cmd->ClipRect = _CmdHeader.ClipRect;
 }
 
-void ImDrawList::_OnChangedTextureID()
-{
+void ImDrawList::_OnChangedTextureID() {
     // If current command is used with different settings we need to add a new command
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
-    if (curr_cmd->ElemCount != 0 && curr_cmd->TextureId != _CmdHeader.TextureId)
-    {
+    if (curr_cmd->ElemCount != 0 && curr_cmd->TextureId != _CmdHeader.TextureId) {
         AddDrawCmd();
         return;
     }
@@ -502,8 +483,7 @@ void ImDrawList::_OnChangedTextureID()
 
     // Try to merge with previous command if it matches, else use current command
     ImDrawCmd* prev_cmd = curr_cmd - 1;
-    if (curr_cmd->ElemCount == 0 && CmdBuffer.Size > 1 && ImDrawCmd_HeaderCompare(&_CmdHeader, prev_cmd) == 0 && prev_cmd->UserCallback == NULL)
-    {
+    if (curr_cmd->ElemCount == 0 && CmdBuffer.Size > 1 && ImDrawCmd_HeaderCompare(&_CmdHeader, prev_cmd) == 0 && prev_cmd->UserCallback == NULL) {
         CmdBuffer.pop_back();
         return;
     }
@@ -511,14 +491,12 @@ void ImDrawList::_OnChangedTextureID()
     curr_cmd->TextureId = _CmdHeader.TextureId;
 }
 
-void ImDrawList::_OnChangedVtxOffset()
-{
+void ImDrawList::_OnChangedVtxOffset() {
     // We don't need to compare curr_cmd->VtxOffset != _CmdHeader.VtxOffset because we know it'll be different at the time we call this.
     _VtxCurrentIdx = 0;
     ImDrawCmd* curr_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
     IM_ASSERT(curr_cmd->VtxOffset != _CmdHeader.VtxOffset);
-    if (curr_cmd->ElemCount != 0)
-    {
+    if (curr_cmd->ElemCount != 0) {
         AddDrawCmd();
         return;
     }
@@ -527,11 +505,9 @@ void ImDrawList::_OnChangedVtxOffset()
 }
 
 // Render-level scissoring. This is passed down to your render function but not used for CPU-side coarse clipping. Prefer using higher-level ImGui::PushClipRect() to affect logic (hit-testing and widget culling)
-void ImDrawList::PushClipRect(ImVec2 cr_min, ImVec2 cr_max, bool intersect_with_current_clip_rect)
-{
+void ImDrawList::PushClipRect(ImVec2 cr_min, ImVec2 cr_max, bool intersect_with_current_clip_rect) {
     ImVec4 cr(cr_min.x, cr_min.y, cr_max.x, cr_max.y);
-    if (intersect_with_current_clip_rect)
-    {
+    if (intersect_with_current_clip_rect) {
         ImVec4 current = _CmdHeader.ClipRect;
         if (cr.x < current.x) cr.x = current.x;
         if (cr.y < current.y) cr.y = current.y;
@@ -546,27 +522,23 @@ void ImDrawList::PushClipRect(ImVec2 cr_min, ImVec2 cr_max, bool intersect_with_
     _OnChangedClipRect();
 }
 
-void ImDrawList::PushClipRectFullScreen()
-{
+void ImDrawList::PushClipRectFullScreen() {
     PushClipRect(ImVec2(_Data->ClipRectFullscreen.x, _Data->ClipRectFullscreen.y), ImVec2(_Data->ClipRectFullscreen.z, _Data->ClipRectFullscreen.w));
 }
 
-void ImDrawList::PopClipRect()
-{
+void ImDrawList::PopClipRect() {
     _ClipRectStack.pop_back();
     _CmdHeader.ClipRect = (_ClipRectStack.Size == 0) ? _Data->ClipRectFullscreen : _ClipRectStack.Data[_ClipRectStack.Size - 1];
     _OnChangedClipRect();
 }
 
-void ImDrawList::PushTextureID(ImTextureID texture_id)
-{
+void ImDrawList::PushTextureID(ImTextureID texture_id) {
     _TextureIdStack.push_back(texture_id);
     _CmdHeader.TextureId = texture_id;
     _OnChangedTextureID();
 }
 
-void ImDrawList::PopTextureID()
-{
+void ImDrawList::PopTextureID() {
     _TextureIdStack.pop_back();
     _CmdHeader.TextureId = (_TextureIdStack.Size == 0) ? (ImTextureID)NULL : _TextureIdStack.Data[_TextureIdStack.Size - 1];
     _OnChangedTextureID();
@@ -575,12 +547,10 @@ void ImDrawList::PopTextureID()
 // Reserve space for a number of vertices and indices.
 // You must finish filling your reserved data before calling PrimReserve() again, as it may reallocate or
 // submit the intermediate results. PrimUnreserve() can be used to release unused allocations.
-void ImDrawList::PrimReserve(int idx_count, int vtx_count)
-{
+void ImDrawList::PrimReserve(int idx_count, int vtx_count) {
     // Large mesh support (when enabled)
     IM_ASSERT_PARANOID(idx_count >= 0 && vtx_count >= 0);
-    if (sizeof(ImDrawIdx) == 2 && (_VtxCurrentIdx + vtx_count >= (1 << 16)) && (Flags & ImDrawListFlags_AllowVtxOffset))
-    {
+    if (sizeof(ImDrawIdx) == 2 && (_VtxCurrentIdx + vtx_count >= (1 << 16)) && (Flags & ImDrawListFlags_AllowVtxOffset)) {
         _CmdHeader.VtxOffset = VtxBuffer.Size;
         _OnChangedVtxOffset();
     }
@@ -598,8 +568,7 @@ void ImDrawList::PrimReserve(int idx_count, int vtx_count)
 }
 
 // Release the a number of reserved vertices/indices from the end of the last reservation made with PrimReserve().
-void ImDrawList::PrimUnreserve(int idx_count, int vtx_count)
-{
+void ImDrawList::PrimUnreserve(int idx_count, int vtx_count) {
     IM_ASSERT_PARANOID(idx_count >= 0 && vtx_count >= 0);
 
     ImDrawCmd* draw_cmd = &CmdBuffer.Data[CmdBuffer.Size - 1];
@@ -609,8 +578,7 @@ void ImDrawList::PrimUnreserve(int idx_count, int vtx_count)
 }
 
 // Fully unrolled with inline call to keep our debug builds decently fast.
-void ImDrawList::PrimRect(const ImVec2& a, const ImVec2& c, ImU32 col)
-{
+void ImDrawList::PrimRect(const ImVec2& a, const ImVec2& c, ImU32 col) {
     ImVec2 b(c.x, a.y), d(a.x, c.y), uv(_Data->TexUvWhitePixel);
     ImDrawIdx idx = (ImDrawIdx)_VtxCurrentIdx;
     _IdxWritePtr[0] = idx; _IdxWritePtr[1] = (ImDrawIdx)(idx+1); _IdxWritePtr[2] = (ImDrawIdx)(idx+2);
@@ -624,8 +592,7 @@ void ImDrawList::PrimRect(const ImVec2& a, const ImVec2& c, ImU32 col)
     _IdxWritePtr += 6;
 }
 
-void ImDrawList::PrimRectUV(const ImVec2& a, const ImVec2& c, const ImVec2& uv_a, const ImVec2& uv_c, ImU32 col)
-{
+void ImDrawList::PrimRectUV(const ImVec2& a, const ImVec2& c, const ImVec2& uv_a, const ImVec2& uv_c, ImU32 col) {
     ImVec2 b(c.x, a.y), d(a.x, c.y), uv_b(uv_c.x, uv_a.y), uv_d(uv_a.x, uv_c.y);
     ImDrawIdx idx = (ImDrawIdx)_VtxCurrentIdx;
     _IdxWritePtr[0] = idx; _IdxWritePtr[1] = (ImDrawIdx)(idx+1); _IdxWritePtr[2] = (ImDrawIdx)(idx+2);
@@ -639,8 +606,7 @@ void ImDrawList::PrimRectUV(const ImVec2& a, const ImVec2& c, const ImVec2& uv_a
     _IdxWritePtr += 6;
 }
 
-void ImDrawList::PrimQuadUV(const ImVec2& a, const ImVec2& b, const ImVec2& c, const ImVec2& d, const ImVec2& uv_a, const ImVec2& uv_b, const ImVec2& uv_c, const ImVec2& uv_d, ImU32 col)
-{
+void ImDrawList::PrimQuadUV(const ImVec2& a, const ImVec2& b, const ImVec2& c, const ImVec2& d, const ImVec2& uv_a, const ImVec2& uv_b, const ImVec2& uv_c, const ImVec2& uv_d, ImU32 col) {
     ImDrawIdx idx = (ImDrawIdx)_VtxCurrentIdx;
     _IdxWritePtr[0] = idx; _IdxWritePtr[1] = (ImDrawIdx)(idx+1); _IdxWritePtr[2] = (ImDrawIdx)(idx+2);
     _IdxWritePtr[3] = idx; _IdxWritePtr[4] = (ImDrawIdx)(idx+2); _IdxWritePtr[5] = (ImDrawIdx)(idx+3);
@@ -660,8 +626,7 @@ void ImDrawList::PrimQuadUV(const ImVec2& a, const ImVec2& b, const ImVec2& c, c
 
 // TODO: Thickness anti-aliased lines cap are missing their AA fringe.
 // We avoid using the ImVec2 math operators here to reduce cost to a minimum for debug/non-inlined builds.
-void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32 col, bool closed, float thickness)
-{
+void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32 col, bool closed, float thickness) {
     if (points_count < 2)
         return;
 
@@ -671,8 +636,7 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
         count = points_count - 1;
 
     const bool thick_line = (thickness > 1.0f);
-    if (Flags & ImDrawListFlags_AntiAliasedLines)
-    {
+    if (Flags & ImDrawListFlags_AntiAliasedLines) {
         // Anti-aliased stroke
         const float AA_SIZE = 1.0f;
         const ImU32 col_trans = col & ~IM_COL32_A_MASK;
@@ -697,10 +661,8 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
         if (!closed)
             temp_normals[points_count - 1] = temp_normals[points_count - 2];
 
-        if (!thick_line)
-        {
-            if (!closed)
-            {
+        if (!thick_line) {
+            if (!closed) {
                 temp_points[0] = points[0] + temp_normals[0] * AA_SIZE;
                 temp_points[1] = points[0] - temp_normals[0] * AA_SIZE;
                 temp_points[(points_count-1)*2+0] = points[points_count-1] + temp_normals[points_count-1] * AA_SIZE;
@@ -709,8 +671,7 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
 
             // FIXME-OPT: Merge the different loops, possibly remove the temporary buffer.
             unsigned int idx1 = _VtxCurrentIdx;
-            for (int i1 = 0; i1 < count; i1++)
-            {
+            for (int i1 = 0; i1 < count; i1++) {
                 const int i2 = (i1 + 1) == points_count ? 0 : i1 + 1;
                 unsigned int idx2 = (i1 + 1) == points_count ? _VtxCurrentIdx : idx1 + 3;
 
@@ -739,19 +700,15 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
             }
 
             // Add vertices
-            for (int i = 0; i < points_count; i++)
-            {
+            for (int i = 0; i < points_count; i++) {
                 _VtxWritePtr[0].pos = points[i];          _VtxWritePtr[0].uv = opaque_uv; _VtxWritePtr[0].col = col;
                 _VtxWritePtr[1].pos = temp_points[i*2+0]; _VtxWritePtr[1].uv = opaque_uv; _VtxWritePtr[1].col = col_trans;
                 _VtxWritePtr[2].pos = temp_points[i*2+1]; _VtxWritePtr[2].uv = opaque_uv; _VtxWritePtr[2].col = col_trans;
                 _VtxWritePtr += 3;
             }
-        }
-        else
-        {
+        } else {
             const float half_inner_thickness = (thickness - AA_SIZE) * 0.5f;
-            if (!closed)
-            {
+            if (!closed) {
                 const int points_last = points_count - 1;
                 temp_points[0] = points[0] + temp_normals[0] * (half_inner_thickness + AA_SIZE);
                 temp_points[1] = points[0] + temp_normals[0] * (half_inner_thickness);
@@ -765,8 +722,7 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
 
             // FIXME-OPT: Merge the different loops, possibly remove the temporary buffer.
             unsigned int idx1 = _VtxCurrentIdx;
-            for (int i1 = 0; i1 < count; i1++)
-            {
+            for (int i1 = 0; i1 < count; i1++) {
                 const int i2 = (i1 + 1) == points_count ? 0 : (i1 + 1); // i2 is the second point of the line segment
                 const unsigned int idx2 = (i1 + 1) == points_count ? _VtxCurrentIdx : (idx1 + 4); // Vertex index for end of segment
 
@@ -803,8 +759,7 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
             }
 
             // Add vertices
-            for (int i = 0; i < points_count; i++)
-            {
+            for (int i = 0; i < points_count; i++) {
                 _VtxWritePtr[0].pos = temp_points[i * 4 + 0]; _VtxWritePtr[0].uv = opaque_uv; _VtxWritePtr[0].col = col_trans;
                 _VtxWritePtr[1].pos = temp_points[i * 4 + 1]; _VtxWritePtr[1].uv = opaque_uv; _VtxWritePtr[1].col = col;
                 _VtxWritePtr[2].pos = temp_points[i * 4 + 2]; _VtxWritePtr[2].uv = opaque_uv; _VtxWritePtr[2].col = col;
@@ -813,16 +768,13 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
             }
         }
         _VtxCurrentIdx += (ImDrawIdx)vtx_count;
-    }
-    else
-    {
+    } else {
         // Non Anti-aliased Stroke
         const int idx_count = count * 6;
         const int vtx_count = count * 4;    // FIXME-OPT: Not sharing edges
         PrimReserve(idx_count, vtx_count);
 
-        for (int i1 = 0; i1 < count; i1++)
-        {
+        for (int i1 = 0; i1 < count; i1++) {
             const int i2 = (i1 + 1) == points_count ? 0 : i1 + 1;
             const ImVec2& p1 = points[i1];
             const ImVec2& p2 = points[i2];
@@ -848,15 +800,13 @@ void ImDrawList::AddPolyline(const ImVec2* points, const int points_count, ImU32
 }
 
 // We intentionally avoid using ImVec2 and its math operators here to reduce cost to a minimum for debug/non-inlined builds.
-void ImDrawList::AddConvexPolyFilled(const ImVec2* points, const int points_count, ImU32 col)
-{
+void ImDrawList::AddConvexPolyFilled(const ImVec2* points, const int points_count, ImU32 col) {
     if (points_count < 3)
         return;
 
     const ImVec2 uv = _Data->TexUvWhitePixel;
 
-    if (Flags & ImDrawListFlags_AntiAliasedFill)
-    {
+    if (Flags & ImDrawListFlags_AntiAliasedFill) {
         // Anti-aliased Fill
         const float AA_SIZE = 1.0f;
         const ImU32 col_trans = col & ~IM_COL32_A_MASK;
@@ -867,16 +817,14 @@ void ImDrawList::AddConvexPolyFilled(const ImVec2* points, const int points_coun
         // Add indexes for fill
         unsigned int vtx_inner_idx = _VtxCurrentIdx;
         unsigned int vtx_outer_idx = _VtxCurrentIdx + 1;
-        for (int i = 2; i < points_count; i++)
-        {
+        for (int i = 2; i < points_count; i++) {
             _IdxWritePtr[0] = (ImDrawIdx)(vtx_inner_idx); _IdxWritePtr[1] = (ImDrawIdx)(vtx_inner_idx + ((i - 1) << 1)); _IdxWritePtr[2] = (ImDrawIdx)(vtx_inner_idx + (i << 1));
             _IdxWritePtr += 3;
         }
 
         // Compute normals
         ImVec2* temp_normals = (ImVec2*)alloca(points_count * sizeof(ImVec2)); //-V630
-        for (int i0 = points_count - 1, i1 = 0; i1 < points_count; i0 = i1++)
-        {
+        for (int i0 = points_count - 1, i1 = 0; i1 < points_count; i0 = i1++) {
             const ImVec2& p0 = points[i0];
             const ImVec2& p1 = points[i1];
             float dx = p1.x - p0.x;
@@ -886,8 +834,7 @@ void ImDrawList::AddConvexPolyFilled(const ImVec2* points, const int points_coun
             temp_normals[i0].y = -dx;
         }
 
-        for (int i0 = points_count - 1, i1 = 0; i1 < points_count; i0 = i1++)
-        {
+        for (int i0 = points_count - 1, i1 = 0; i1 < points_count; i0 = i1++) {
             // Average normals
             const ImVec2& n0 = temp_normals[i0];
             const ImVec2& n1 = temp_normals[i1];
@@ -908,20 +855,16 @@ void ImDrawList::AddConvexPolyFilled(const ImVec2* points, const int points_coun
             _IdxWritePtr += 6;
         }
         _VtxCurrentIdx += (ImDrawIdx)vtx_count;
-    }
-    else
-    {
+    } else {
         // Non Anti-aliased Fill
         const int idx_count = (points_count - 2)*3;
         const int vtx_count = points_count;
         PrimReserve(idx_count, vtx_count);
-        for (int i = 0; i < vtx_count; i++)
-        {
+        for (int i = 0; i < vtx_count; i++) {
             _VtxWritePtr[0].pos = points[i]; _VtxWritePtr[0].uv = uv; _VtxWritePtr[0].col = col;
             _VtxWritePtr++;
         }
-        for (int i = 2; i < points_count; i++)
-        {
+        for (int i = 2; i < points_count; i++) {
             _IdxWritePtr[0] = (ImDrawIdx)(_VtxCurrentIdx); _IdxWritePtr[1] = (ImDrawIdx)(_VtxCurrentIdx + i - 1); _IdxWritePtr[2] = (ImDrawIdx)(_VtxCurrentIdx + i);
             _IdxWritePtr += 3;
         }
@@ -929,10 +872,8 @@ void ImDrawList::AddConvexPolyFilled(const ImVec2* points, const int points_coun
     }
 }
 
-void ImDrawList::PathArcToFast(const ImVec2& center, float radius, int a_min_of_12, int a_max_of_12)
-{
-    if (radius == 0.0f || a_min_of_12 > a_max_of_12)
-    {
+void ImDrawList::PathArcToFast(const ImVec2& center, float radius, int a_min_of_12, int a_max_of_12) {
+    if (radius == 0.0f || a_min_of_12 > a_max_of_12) {
         _Path.push_back(center);
         return;
     }
@@ -945,17 +886,14 @@ void ImDrawList::PathArcToFast(const ImVec2& center, float radius, int a_min_of_
 #endif
 
     _Path.reserve(_Path.Size + (a_max_of_12 - a_min_of_12 + 1));
-    for (int a = a_min_of_12; a <= a_max_of_12; a++)
-    {
+    for (int a = a_min_of_12; a <= a_max_of_12; a++) {
         const ImVec2& c = _Data->ArcFastVtx[a % IM_ARRAYSIZE(_Data->ArcFastVtx)];
         _Path.push_back(ImVec2(center.x + c.x * radius, center.y + c.y * radius));
     }
 }
 
-void ImDrawList::PathArcTo(const ImVec2& center, float radius, float a_min, float a_max, int num_segments)
-{
-    if (radius == 0.0f)
-    {
+void ImDrawList::PathArcTo(const ImVec2& center, float radius, float a_min, float a_max, int num_segments) {
+    if (radius == 0.0f) {
         _Path.push_back(center);
         return;
     }
@@ -963,15 +901,13 @@ void ImDrawList::PathArcTo(const ImVec2& center, float radius, float a_min, floa
     // Note that we are adding a point at both a_min and a_max.
     // If you are trying to draw a full closed circle you don't want the overlapping points!
     _Path.reserve(_Path.Size + (num_segments + 1));
-    for (int i = 0; i <= num_segments; i++)
-    {
+    for (int i = 0; i <= num_segments; i++) {
         const float a = a_min + ((float)i / (float)num_segments) * (a_max - a_min);
         _Path.push_back(ImVec2(center.x + ImCos(a) * radius, center.y + ImSin(a) * radius));
     }
 }
 
-ImVec2 ImBezierCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, float t)
-{
+ImVec2 ImBezierCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, float t) {
     float u = 1.0f - t;
     float w1 = u*u*u;
     float w2 = 3*u*u*t;
@@ -981,20 +917,16 @@ ImVec2 ImBezierCalc(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const 
 }
 
 // Closely mimics BezierClosestPointCasteljauStep() in imgui.cpp
-static void PathBezierToCasteljau(ImVector<ImVec2>* path, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tess_tol, int level)
-{
+static void PathBezierToCasteljau(ImVector<ImVec2>* path, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tess_tol, int level) {
     float dx = x4 - x1;
     float dy = y4 - y1;
     float d2 = ((x2 - x4) * dy - (y2 - y4) * dx);
     float d3 = ((x3 - x4) * dy - (y3 - y4) * dx);
     d2 = (d2 >= 0) ? d2 : -d2;
     d3 = (d3 >= 0) ? d3 : -d3;
-    if ((d2 + d3) * (d2 + d3) < tess_tol * (dx * dx + dy * dy))
-    {
+    if ((d2 + d3) * (d2 + d3) < tess_tol * (dx * dx + dy * dy)) {
         path->push_back(ImVec2(x4, y4));
-    }
-    else if (level < 10)
-    {
+    } else if (level < 10) {
         float x12 = (x1 + x2)*0.5f,       y12 = (y1 + y2)*0.5f;
         float x23 = (x2 + x3)*0.5f,       y23 = (y2 + y3)*0.5f;
         float x34 = (x3 + x4)*0.5f,       y34 = (y3 + y4)*0.5f;
@@ -1006,35 +938,27 @@ static void PathBezierToCasteljau(ImVector<ImVec2>* path, float x1, float y1, fl
     }
 }
 
-void ImDrawList::PathBezierCurveTo(const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, int num_segments)
-{
+void ImDrawList::PathBezierCurveTo(const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, int num_segments) {
     ImVec2 p1 = _Path.back();
-    if (num_segments == 0)
-    {
+    if (num_segments == 0) {
         PathBezierToCasteljau(&_Path, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y, _Data->CurveTessellationTol, 0); // Auto-tessellated
-    }
-    else
-    {
+    } else {
         float t_step = 1.0f / (float)num_segments;
         for (int i_step = 1; i_step <= num_segments; i_step++)
             _Path.push_back(ImBezierCalc(p1, p2, p3, p4, t_step * i_step));
     }
 }
 
-void ImDrawList::PathRect(const ImVec2& a, const ImVec2& b, float rounding, ImDrawCornerFlags rounding_corners)
-{
+void ImDrawList::PathRect(const ImVec2& a, const ImVec2& b, float rounding, ImDrawCornerFlags rounding_corners) {
     rounding = ImMin(rounding, ImFabs(b.x - a.x) * ( ((rounding_corners & ImDrawCornerFlags_Top)  == ImDrawCornerFlags_Top)  || ((rounding_corners & ImDrawCornerFlags_Bot)   == ImDrawCornerFlags_Bot)   ? 0.5f : 1.0f ) - 1.0f);
     rounding = ImMin(rounding, ImFabs(b.y - a.y) * ( ((rounding_corners & ImDrawCornerFlags_Left) == ImDrawCornerFlags_Left) || ((rounding_corners & ImDrawCornerFlags_Right) == ImDrawCornerFlags_Right) ? 0.5f : 1.0f ) - 1.0f);
 
-    if (rounding <= 0.0f || rounding_corners == 0)
-    {
+    if (rounding <= 0.0f || rounding_corners == 0) {
         PathLineTo(a);
         PathLineTo(ImVec2(b.x, a.y));
         PathLineTo(b);
         PathLineTo(ImVec2(a.x, b.y));
-    }
-    else
-    {
+    } else {
         const float rounding_tl = (rounding_corners & ImDrawCornerFlags_TopLeft) ? rounding : 0.0f;
         const float rounding_tr = (rounding_corners & ImDrawCornerFlags_TopRight) ? rounding : 0.0f;
         const float rounding_br = (rounding_corners & ImDrawCornerFlags_BotRight) ? rounding : 0.0f;
@@ -1046,8 +970,7 @@ void ImDrawList::PathRect(const ImVec2& a, const ImVec2& b, float rounding, ImDr
     }
 }
 
-void ImDrawList::AddLine(const ImVec2& p1, const ImVec2& p2, ImU32 col, float thickness)
-{
+void ImDrawList::AddLine(const ImVec2& p1, const ImVec2& p2, ImU32 col, float thickness) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
     PathLineTo(p1 + ImVec2(0.5f, 0.5f));
@@ -1057,8 +980,7 @@ void ImDrawList::AddLine(const ImVec2& p1, const ImVec2& p2, ImU32 col, float th
 
 // p_min = upper-left, p_max = lower-right
 // Note we don't render 1 pixels sized rectangles properly.
-void ImDrawList::AddRect(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawCornerFlags rounding_corners, float thickness)
-{
+void ImDrawList::AddRect(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawCornerFlags rounding_corners, float thickness) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
     if (Flags & ImDrawListFlags_AntiAliasedLines)
@@ -1068,25 +990,20 @@ void ImDrawList::AddRect(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, fl
     PathStroke(col, true, thickness);
 }
 
-void ImDrawList::AddRectFilled(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawCornerFlags rounding_corners)
-{
+void ImDrawList::AddRectFilled(const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawCornerFlags rounding_corners) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
-    if (rounding > 0.0f)
-    {
+    if (rounding > 0.0f) {
         PathRect(p_min, p_max, rounding, rounding_corners);
         PathFillConvex(col);
-    }
-    else
-    {
+    } else {
         PrimReserve(6, 4);
         PrimRect(p_min, p_max, col);
     }
 }
 
 // p_min = upper-left, p_max = lower-right
-void ImDrawList::AddRectFilledMultiColor(const ImVec2& p_min, const ImVec2& p_max, ImU32 col_upr_left, ImU32 col_upr_right, ImU32 col_bot_right, ImU32 col_bot_left)
-{
+void ImDrawList::AddRectFilledMultiColor(const ImVec2& p_min, const ImVec2& p_max, ImU32 col_upr_left, ImU32 col_upr_right, ImU32 col_bot_right, ImU32 col_bot_left) {
     if (((col_upr_left | col_upr_right | col_bot_right | col_bot_left) & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1100,8 +1017,7 @@ void ImDrawList::AddRectFilledMultiColor(const ImVec2& p_min, const ImVec2& p_ma
     PrimWriteVtx(ImVec2(p_min.x, p_max.y), uv, col_bot_left);
 }
 
-void ImDrawList::AddQuad(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col, float thickness)
-{
+void ImDrawList::AddQuad(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col, float thickness) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1112,8 +1028,7 @@ void ImDrawList::AddQuad(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, c
     PathStroke(col, true, thickness);
 }
 
-void ImDrawList::AddQuadFilled(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col)
-{
+void ImDrawList::AddQuadFilled(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1124,8 +1039,7 @@ void ImDrawList::AddQuadFilled(const ImVec2& p1, const ImVec2& p2, const ImVec2&
     PathFillConvex(col);
 }
 
-void ImDrawList::AddTriangle(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col, float thickness)
-{
+void ImDrawList::AddTriangle(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col, float thickness) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1135,8 +1049,7 @@ void ImDrawList::AddTriangle(const ImVec2& p1, const ImVec2& p2, const ImVec2& p
     PathStroke(col, true, thickness);
 }
 
-void ImDrawList::AddTriangleFilled(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col)
-{
+void ImDrawList::AddTriangleFilled(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, ImU32 col) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1146,23 +1059,19 @@ void ImDrawList::AddTriangleFilled(const ImVec2& p1, const ImVec2& p2, const ImV
     PathFillConvex(col);
 }
 
-void ImDrawList::AddCircle(const ImVec2& center, float radius, ImU32 col, int num_segments, float thickness)
-{
+void ImDrawList::AddCircle(const ImVec2& center, float radius, ImU32 col, int num_segments, float thickness) {
     if ((col & IM_COL32_A_MASK) == 0 || radius <= 0.0f)
         return;
 
     // Obtain segment count
-    if (num_segments <= 0)
-    {
+    if (num_segments <= 0) {
         // Automatic segment count
         const int radius_idx = (int)radius - 1;
         if (radius_idx < IM_ARRAYSIZE(_Data->CircleSegmentCounts))
             num_segments = _Data->CircleSegmentCounts[radius_idx]; // Use cached value
         else
             num_segments = IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_CALC(radius, _Data->CircleSegmentMaxError);
-    }
-    else
-    {
+    } else {
         // Explicit segment count (still clamp to avoid drawing insanely tessellated shapes)
         num_segments = ImClamp(num_segments, 3, IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_MAX);
     }
@@ -1176,23 +1085,19 @@ void ImDrawList::AddCircle(const ImVec2& center, float radius, ImU32 col, int nu
     PathStroke(col, true, thickness);
 }
 
-void ImDrawList::AddCircleFilled(const ImVec2& center, float radius, ImU32 col, int num_segments)
-{
+void ImDrawList::AddCircleFilled(const ImVec2& center, float radius, ImU32 col, int num_segments) {
     if ((col & IM_COL32_A_MASK) == 0 || radius <= 0.0f)
         return;
 
     // Obtain segment count
-    if (num_segments <= 0)
-    {
+    if (num_segments <= 0) {
         // Automatic segment count
         const int radius_idx = (int)radius - 1;
         if (radius_idx < IM_ARRAYSIZE(_Data->CircleSegmentCounts))
             num_segments = _Data->CircleSegmentCounts[radius_idx]; // Use cached value
         else
             num_segments = IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_CALC(radius, _Data->CircleSegmentMaxError);
-    }
-    else
-    {
+    } else {
         // Explicit segment count (still clamp to avoid drawing insanely tessellated shapes)
         num_segments = ImClamp(num_segments, 3, IM_DRAWLIST_CIRCLE_AUTO_SEGMENT_MAX);
     }
@@ -1207,8 +1112,7 @@ void ImDrawList::AddCircleFilled(const ImVec2& center, float radius, ImU32 col, 
 }
 
 // Guaranteed to honor 'num_segments'
-void ImDrawList::AddNgon(const ImVec2& center, float radius, ImU32 col, int num_segments, float thickness)
-{
+void ImDrawList::AddNgon(const ImVec2& center, float radius, ImU32 col, int num_segments, float thickness) {
     if ((col & IM_COL32_A_MASK) == 0 || num_segments <= 2)
         return;
 
@@ -1219,8 +1123,7 @@ void ImDrawList::AddNgon(const ImVec2& center, float radius, ImU32 col, int num_
 }
 
 // Guaranteed to honor 'num_segments'
-void ImDrawList::AddNgonFilled(const ImVec2& center, float radius, ImU32 col, int num_segments)
-{
+void ImDrawList::AddNgonFilled(const ImVec2& center, float radius, ImU32 col, int num_segments) {
     if ((col & IM_COL32_A_MASK) == 0 || num_segments <= 2)
         return;
 
@@ -1231,8 +1134,7 @@ void ImDrawList::AddNgonFilled(const ImVec2& center, float radius, ImU32 col, in
 }
 
 // Cubic Bezier takes 4 controls points
-void ImDrawList::AddBezierCurve(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col, float thickness, int num_segments)
-{
+void ImDrawList::AddBezierCurve(const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, ImU32 col, float thickness, int num_segments) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1241,8 +1143,7 @@ void ImDrawList::AddBezierCurve(const ImVec2& p1, const ImVec2& p2, const ImVec2
     PathStroke(col, false, thickness);
 }
 
-void ImDrawList::AddText(const ImFont* font, float font_size, const ImVec2& pos, ImU32 col, const char* text_begin, const char* text_end, float wrap_width, const ImVec4* cpu_fine_clip_rect)
-{
+void ImDrawList::AddText(const ImFont* font, float font_size, const ImVec2& pos, ImU32 col, const char* text_begin, const char* text_end, float wrap_width, const ImVec4* cpu_fine_clip_rect) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1270,13 +1171,11 @@ void ImDrawList::AddText(const ImFont* font, float font_size, const ImVec2& pos,
     font->RenderText(this, font_size, pos, col, clip_rect, text_begin, text_end, wrap_width, cpu_fine_clip_rect != NULL);
 }
 
-void ImDrawList::AddText(const ImVec2& pos, ImU32 col, const char* text_begin, const char* text_end)
-{
+void ImDrawList::AddText(const ImVec2& pos, ImU32 col, const char* text_begin, const char* text_end) {
     AddText(NULL, 0.0f, pos, col, text_begin, text_end);
 }
 
-void ImDrawList::AddImage(ImTextureID user_texture_id, const ImVec2& p_min, const ImVec2& p_max, const ImVec2& uv_min, const ImVec2& uv_max, ImU32 col)
-{
+void ImDrawList::AddImage(ImTextureID user_texture_id, const ImVec2& p_min, const ImVec2& p_max, const ImVec2& uv_min, const ImVec2& uv_max, ImU32 col) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -1291,8 +1190,7 @@ void ImDrawList::AddImage(ImTextureID user_texture_id, const ImVec2& p_min, cons
         PopTextureID();
 }
 
-void ImDrawList::AddImageQuad(ImTextureID user_texture_id, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, const ImVec2& uv1, const ImVec2& uv2, const ImVec2& uv3, const ImVec2& uv4, ImU32 col)
-{
+void ImDrawList::AddImageQuad(ImTextureID user_texture_id, const ImVec2& p1, const ImVec2& p2, const ImVec2& p3, const ImVec2& p4, const ImVec2& uv1, const ImVec2& uv2, const ImVec2& uv3, const ImVec2& uv4, ImU32 col) {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
 
@@ -3639,8 +3537,7 @@ static const char proggy_clean_ttf_compressed_data_base85[11980 + 1] =
     "GT4CPGT4CPGT4CPGT4CPGT4CPGT4CP-qekC`.9kEg^+F$kwViFJTB&5KTB&5KTB&5KTB&5KTB&5KTB&5KTB&5KTB&5KTB&5KTB&5KTB&5KTB&5KTB&5KTB&5KTB&5o,^<-28ZI'O?;xp"
     "O?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xpO?;xp;7q-#lLYI:xvD=#";
 
-static const char* GetDefaultCompressedFontDataTTFBase85()
-{
+static const char* GetDefaultCompressedFontDataTTFBase85() {
     return proggy_clean_ttf_compressed_data_base85;
 }
 

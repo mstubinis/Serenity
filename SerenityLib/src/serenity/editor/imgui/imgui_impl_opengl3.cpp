@@ -208,19 +208,16 @@ bool    ImGui_ImplOpenGL3_Init(const char* glsl_version)
     return true;
 }
 
-void    ImGui_ImplOpenGL3_Shutdown()
-{
+void ImGui_ImplOpenGL3_Shutdown() {
     ImGui_ImplOpenGL3_DestroyDeviceObjects();
 }
 
-void    ImGui_ImplOpenGL3_NewFrame()
-{
+void ImGui_ImplOpenGL3_NewFrame() {
     if (!g_ShaderHandle)
         ImGui_ImplOpenGL3_CreateDeviceObjects();
 }
 
-static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_width, int fb_height, GLuint vertex_array_object)
-{
+static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_width, int fb_height, GLuint vertex_array_object) {
     // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, polygon fill
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
@@ -248,8 +245,7 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
     float T = draw_data->DisplayPos.y;
     float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
     if (!clip_origin_lower_left) { float tmp = T; T = B; B = tmp; } // Swap top and bottom if origin is upper left
-    const float ortho_projection[4][4] =
-    {
+    const float ortho_projection[4][4] = {
         { 2.0f/(R-L),   0.0f,         0.0f,   0.0f },
         { 0.0f,         2.0f/(T-B),   0.0f,   0.0f },
         { 0.0f,         0.0f,        -1.0f,   0.0f },
@@ -281,8 +277,7 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
 // OpenGL3 Render function.
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
 // Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so.
-void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
-{
+void ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data) {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
     int fb_width = (int)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
     int fb_height = (int)(draw_data->DisplaySize.y * draw_data->FramebufferScale.y);
@@ -331,28 +326,23 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
     ImVec2 clip_scale = draw_data->FramebufferScale; // (1,1) unless using retina display which are often (2,2)
 
     // Render command lists
-    for (int n = 0; n < draw_data->CmdListsCount; n++)
-    {
+    for (int n = 0; n < draw_data->CmdListsCount; n++) {
         const ImDrawList* cmd_list = draw_data->CmdLists[n];
 
         // Upload vertex/index buffers
         glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)cmd_list->VtxBuffer.Size * (int)sizeof(ImDrawVert), (const GLvoid*)cmd_list->VtxBuffer.Data, GL_STREAM_DRAW);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)cmd_list->IdxBuffer.Size * (int)sizeof(ImDrawIdx), (const GLvoid*)cmd_list->IdxBuffer.Data, GL_STREAM_DRAW);
 
-        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
-        {
+        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
-            if (pcmd->UserCallback != NULL)
-            {
+            if (pcmd->UserCallback != NULL) {
                 // User callback, registered via ImDrawList::AddCallback()
                 // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
                 if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
                     ImGui_ImplOpenGL3_SetupRenderState(draw_data, fb_width, fb_height, vertex_array_object);
                 else
                     pcmd->UserCallback(cmd_list, pcmd);
-            }
-            else
-            {
+            } else {
                 // Project scissor/clipping rectangles into framebuffer space
                 ImVec4 clip_rect;
                 clip_rect.x = (pcmd->ClipRect.x - clip_off.x) * clip_scale.x;
@@ -360,8 +350,7 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
                 clip_rect.z = (pcmd->ClipRect.z - clip_off.x) * clip_scale.x;
                 clip_rect.w = (pcmd->ClipRect.w - clip_off.y) * clip_scale.y;
 
-                if (clip_rect.x < fb_width && clip_rect.y < fb_height && clip_rect.z >= 0.0f && clip_rect.w >= 0.0f)
-                {
+                if (clip_rect.x < fb_width && clip_rect.y < fb_height && clip_rect.z >= 0.0f && clip_rect.w >= 0.0f) {
                     // Apply scissor/clipping rectangle
                     glScissor((int)clip_rect.x, (int)(fb_height - clip_rect.w), (int)(clip_rect.z - clip_rect.x), (int)(clip_rect.w - clip_rect.y));
 
@@ -407,8 +396,7 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
     glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);
 }
 
-bool ImGui_ImplOpenGL3_CreateFontsTexture()
-{
+bool ImGui_ImplOpenGL3_CreateFontsTexture() {
     // Build texture atlas
     ImGuiIO& io = ImGui::GetIO();
     unsigned char* pixels;
@@ -436,10 +424,8 @@ bool ImGui_ImplOpenGL3_CreateFontsTexture()
     return true;
 }
 
-void ImGui_ImplOpenGL3_DestroyFontsTexture()
-{
-    if (g_FontTexture)
-    {
+void ImGui_ImplOpenGL3_DestroyFontsTexture() {
+    if (g_FontTexture) {
         ImGuiIO& io = ImGui::GetIO();
         glDeleteTextures(1, &g_FontTexture);
         io.Fonts->TexID = 0;
@@ -448,15 +434,13 @@ void ImGui_ImplOpenGL3_DestroyFontsTexture()
 }
 
 // If you get an error please report on github. You may try different GL context version or GLSL version. See GL<>GLSL version table at the top of this file.
-static bool CheckShader(GLuint handle, const char* desc)
-{
+static bool CheckShader(GLuint handle, const char* desc) {
     GLint status = 0, log_length = 0;
     glGetShaderiv(handle, GL_COMPILE_STATUS, &status);
     glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &log_length);
     if ((GLboolean)status == GL_FALSE)
         fprintf(stderr, "ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to compile %s!\n", desc);
-    if (log_length > 1)
-    {
+    if (log_length > 1) {
         ImVector<char> buf;
         buf.resize((int)(log_length + 1));
         glGetShaderInfoLog(handle, log_length, NULL, (GLchar*)buf.begin());
@@ -466,15 +450,13 @@ static bool CheckShader(GLuint handle, const char* desc)
 }
 
 // If you get an error please report on GitHub. You may try different GL context version or GLSL version.
-static bool CheckProgram(GLuint handle, const char* desc)
-{
+static bool CheckProgram(GLuint handle, const char* desc) {
     GLint status = 0, log_length = 0;
     glGetProgramiv(handle, GL_LINK_STATUS, &status);
     glGetProgramiv(handle, GL_INFO_LOG_LENGTH, &log_length);
     if ((GLboolean)status == GL_FALSE)
         fprintf(stderr, "ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to link %s! (with GLSL '%s')\n", desc, g_GlslVersionString);
-    if (log_length > 1)
-    {
+    if (log_length > 1) {
         ImVector<char> buf;
         buf.resize((int)(log_length + 1));
         glGetProgramInfoLog(handle, log_length, NULL, (GLchar*)buf.begin());
@@ -483,8 +465,7 @@ static bool CheckProgram(GLuint handle, const char* desc)
     return (GLboolean)status == GL_TRUE;
 }
 
-bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
-{
+bool ImGui_ImplOpenGL3_CreateDeviceObjects() {
     // Backup GL state
     GLint last_texture, last_array_buffer;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
@@ -505,8 +486,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "attribute vec4 Color;\n"
         "varying vec2 Frag_UV;\n"
         "varying vec4 Frag_Color;\n"
-        "void main()\n"
-        "{\n"
+        "void main() {\n"
         "    Frag_UV = UV;\n"
         "    Frag_Color = Color;\n"
         "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
@@ -519,8 +499,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "in vec4 Color;\n"
         "out vec2 Frag_UV;\n"
         "out vec4 Frag_Color;\n"
-        "void main()\n"
-        "{\n"
+        "void main() {\n"
         "    Frag_UV = UV;\n"
         "    Frag_Color = Color;\n"
         "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
@@ -534,8 +513,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "uniform mat4 ProjMtx;\n"
         "out vec2 Frag_UV;\n"
         "out vec4 Frag_Color;\n"
-        "void main()\n"
-        "{\n"
+        "void main() {\n"
         "    Frag_UV = UV;\n"
         "    Frag_Color = Color;\n"
         "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
@@ -548,8 +526,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "uniform mat4 ProjMtx;\n"
         "out vec2 Frag_UV;\n"
         "out vec4 Frag_Color;\n"
-        "void main()\n"
-        "{\n"
+        "void main() {\n"
         "    Frag_UV = UV;\n"
         "    Frag_Color = Color;\n"
         "    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
@@ -562,8 +539,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "uniform sampler2D Texture;\n"
         "varying vec2 Frag_UV;\n"
         "varying vec4 Frag_Color;\n"
-        "void main()\n"
-        "{\n"
+        "void main() {\n"
         "    gl_FragColor = Frag_Color * texture2D(Texture, Frag_UV.st);\n"
         "}\n";
 
@@ -572,8 +548,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "in vec2 Frag_UV;\n"
         "in vec4 Frag_Color;\n"
         "out vec4 Out_Color;\n"
-        "void main()\n"
-        "{\n"
+        "void main() {\n"
         "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
         "}\n";
 
@@ -583,8 +558,7 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "in vec2 Frag_UV;\n"
         "in vec4 Frag_Color;\n"
         "layout (location = 0) out vec4 Out_Color;\n"
-        "void main()\n"
-        "{\n"
+        "void main() {\n"
         "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
         "}\n";
 
@@ -593,31 +567,23 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
         "in vec4 Frag_Color;\n"
         "uniform sampler2D Texture;\n"
         "layout (location = 0) out vec4 Out_Color;\n"
-        "void main()\n"
-        "{\n"
+        "void main() {\n"
         "    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
         "}\n";
 
     // Select shaders matching our GLSL versions
     const GLchar* vertex_shader = NULL;
     const GLchar* fragment_shader = NULL;
-    if (glsl_version < 130)
-    {
+    if (glsl_version < 130) {
         vertex_shader = vertex_shader_glsl_120;
         fragment_shader = fragment_shader_glsl_120;
-    }
-    else if (glsl_version >= 410)
-    {
+    } else if (glsl_version >= 410) {
         vertex_shader = vertex_shader_glsl_410_core;
         fragment_shader = fragment_shader_glsl_410_core;
-    }
-    else if (glsl_version == 300)
-    {
+    } else if (glsl_version == 300) {
         vertex_shader = vertex_shader_glsl_300_es;
         fragment_shader = fragment_shader_glsl_300_es;
-    }
-    else
-    {
+    } else {
         vertex_shader = vertex_shader_glsl_130;
         fragment_shader = fragment_shader_glsl_130;
     }
@@ -659,12 +625,10 @@ bool    ImGui_ImplOpenGL3_CreateDeviceObjects()
 #ifndef IMGUI_IMPL_OPENGL_ES2
     glBindVertexArray(last_vertex_array);
 #endif
-
     return true;
 }
 
-void    ImGui_ImplOpenGL3_DestroyDeviceObjects()
-{
+void ImGui_ImplOpenGL3_DestroyDeviceObjects() {
     if (g_VboHandle)        { glDeleteBuffers(1, &g_VboHandle); g_VboHandle = 0; }
     if (g_ElementsHandle)   { glDeleteBuffers(1, &g_ElementsHandle); g_ElementsHandle = 0; }
     if (g_ShaderHandle && g_VertHandle) { glDetachShader(g_ShaderHandle, g_VertHandle); }

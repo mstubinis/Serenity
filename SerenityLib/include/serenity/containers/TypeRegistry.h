@@ -5,6 +5,9 @@
 #include <unordered_map>
 #include <typeindex>
 
+/*
+* Outdated - consider using CRTP to implement a basic index based type id
+*/
 namespace Engine {
     class type_registry final {
         private:
@@ -18,7 +21,7 @@ namespace Engine {
                     m_SlotMap.emplace(
                         std::piecewise_construct,
                         std::forward_as_tuple(inType), 
-                        std::forward_as_tuple((uint32_t)m_SlotMap.size())
+                        std::forward_as_tuple(static_cast<uint32_t>(m_SlotMap.size()))
                     );
                 }
                 return m_SlotMap.at(inType);

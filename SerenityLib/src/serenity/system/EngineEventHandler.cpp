@@ -10,6 +10,7 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/ecs/components/ComponentCamera.h>
 #include <serenity/editor/core/EditorCore.h>
+#include <serenity/system/Engine.h>
 
 Engine::priv::EngineEventHandler::EngineEventHandler(EditorCore& editorCore, EventModule& eventModule, RenderModule& renderModule, ResourceManager& resourceManager)
     : m_EditorCore      { editorCore }
@@ -33,7 +34,11 @@ void Engine::priv::EngineEventHandler::internal_on_event_resize(Window& window, 
         if (scene) {
             scene->onResize(newWindowWidth, newWindowHeight);
             PublicScene::GetECS(*scene).onResize<ComponentCamera>(newWindowWidth, newWindowHeight);
-            PublicScene::GetViewports(*scene)[0].setViewportDimensions(0.0f, 0.0f, (float)newWindowWidth, (float)newWindowHeight);
+            for (auto& viewport : PublicScene::GetViewports(*scene)) {
+                if (viewport.m_ResizeFuncPointer) {
+                    viewport.m_ResizeFuncPointer(0.0f, 0.0f, float(newWindowWidth), float(newWindowHeight), viewport, viewport.m_ResizeFuncPointerUserData);
+                }
+            }
         }
     }
     Game::onResize(window, newWindowWidth, newWindowHeight);
@@ -45,8 +50,9 @@ void Engine::priv::EngineEventHandler::internal_on_event_game_ended() {
 }
 void Engine::priv::EngineEventHandler::internal_on_event_window_closed(Window& window) {
     Game::onWindowClosed(window);
-    window.m_Data.internal_on_close();
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowHasClosed);
+    window.m_Data.internal_on_close();
+    Engine::stop();
 }
 void Engine::priv::EngineEventHandler::internal_on_event_window_requested_closed(Window& window) {
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowRequestedToBeClosed);

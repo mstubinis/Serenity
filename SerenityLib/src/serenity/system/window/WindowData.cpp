@@ -9,8 +9,11 @@
 Engine::priv::WindowData::~WindowData() {
     internal_on_close();
 }
-void Engine::priv::WindowData::internal_on_close() {
-    m_UndergoingClosing.store(true, std::memory_order_release);
+void Engine::priv::WindowData::internal_on_close(bool skipRenderThisFrame) {
+    m_UndergoingClosing = true;
+    if (skipRenderThisFrame) {
+        Engine::priv::PublicScene::SkipRenderThisFrame(*Engine::Resources::getCurrentScene());
+    }
     sf::Event dummyEvent;
     while (m_SFMLWindow.pollEvent(dummyEvent)); //clear all queued events
     m_SFMLWindow.close();
@@ -47,7 +50,7 @@ void Engine::priv::WindowData::internal_init_position(Window& super) {
     super.setPosition(uint32_t((final_desktop_width - winSize.x) / 2.0f), uint32_t((final_desktop_height - winSize.y) / 2.0f));
 }
 const sf::ContextSettings Engine::priv::WindowData::internal_create(Window& super, const std::string& windowTitle) {
-    internal_on_close();
+    internal_on_close(false);
     std::latch ltch{ 1 };
     internal_thread_startup(super, windowTitle, &ltch); //calls window.setActive(false) on the created event thread, so we call setActive(true) below
     ltch.wait();
@@ -152,7 +155,7 @@ Engine::priv::WindowData::WindowEventType Engine::priv::WindowData::internal_try
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
     return m_SFEventQueue.try_pop();
 #else
-    const bool isUndergoingClosing = m_UndergoingClosing.load(std::memory_order_acquire);
+    const bool isUndergoingClosing = m_UndergoingClosing;
     if (!isUndergoingClosing) {
         internal_populate_sf_event_queue(isUndergoingClosing);
         internal_process_command_queue();
@@ -168,9 +171,9 @@ Engine::priv::WindowData::WindowEventType Engine::priv::WindowData::internal_try
 
 void Engine::priv::WindowData::internal_thread_startup(Window& super, const std::string& name, std::latch* ltch) {
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
-    const bool isUndergoingClosing = m_UndergoingClosing.load(std::memory_order_acquire);
+    const bool isUndergoingClosing = m_UndergoingClosing;
     if (m_EventThread && !isUndergoingClosing) {
-        m_UndergoingClosing.store(true, std::memory_order_release);
+        m_UndergoingClosing = true;
         if (m_EventThread->joinable()) {
             m_EventThread->join();
         }
@@ -182,13 +185,13 @@ void Engine::priv::WindowData::internal_thread_startup(Window& super, const std:
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
         m_SFMLWindow.setActive(false);
 #endif
-        m_UndergoingClosing.store(false, std::memory_order_release);
+        m_UndergoingClosing = false;
         if (ltch) {
             ltch->count_down();
         }
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
-        const bool isUndergoingClosing = m_UndergoingClosing.load(std::memory_order_acquire);
-        while (!isUndergoingClosing) {
+        while (!m_UndergoingClosing) {
+            const bool isUndergoingClosing = m_UndergoingClosing;
             internal_populate_sf_event_queue(isUndergoingClosing);
             internal_process_command_queue();
         }

@@ -8,6 +8,7 @@ class  Viewport;
 class  LightProbe;
 namespace Engine::priv {
     class RenderModule;
+    class EngineEventHandler;
 };
 
 #include <serenity/system/TypeDefs.h>
@@ -32,10 +33,12 @@ struct ViewportRenderingFlag final { enum Flag: uint16_t {
 class Viewport final {
     friend class Scene;
     friend class Engine::priv::RenderModule;
+    friend class Engine::priv::EngineEventHandler;
     friend class LightProbe;
 
     public:
         using RenderFunc = void(*)(Engine::priv::RenderModule&, Viewport&, bool);
+        using ResizeFunc = void(*)(float x, float y, float newWidth, float newHeight, Viewport&, void* resizeUserPointer);
     private:
         struct StateFlags final { enum Flag : uint8_t {
             Active              = 1 << 0,
@@ -43,13 +46,15 @@ class Viewport final {
             DepthMaskActive     = 1 << 2,
         };};
 
-        glm::vec4                     m_Viewport_Dimensions = glm::vec4(0.0f, 0.0f, 256.0f, 256.0f);
-        glm::vec4                     m_BackgroundColor     = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        RenderFunc                    m_RenderFuncPointer   = nullptr;
-        Scene*                        m_Scene               = nullptr;
-        Camera*                       m_Camera              = nullptr;
-        float                         m_DepthMaskValue      = 50.0f;
-        uint32_t                      m_ID                  = 0;
+        glm::vec4                     m_Viewport_Dimensions        = glm::vec4(0.0f, 0.0f, 256.0f, 256.0f);
+        glm::vec4                     m_BackgroundColor            = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        RenderFunc                    m_RenderFuncPointer          = nullptr;
+        ResizeFunc                    m_ResizeFuncPointer          = [](float x, float y, float newWidth, float newHeight, Viewport&, void*) {};
+        void*                         m_ResizeFuncPointerUserData  = nullptr;
+        Scene*                        m_Scene                      = nullptr;
+        Camera*                       m_Camera                     = nullptr;
+        float                         m_DepthMaskValue             = 50.0f;
+        uint32_t                      m_ID                         = 0;
         Engine::Flag<uint16_t>        m_RenderFlags;
         Engine::Flag<uint8_t>         m_StateFlags;
 
@@ -67,6 +72,8 @@ class Viewport final {
 
         void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunc) const noexcept;
         inline void setRenderFunc(RenderFunc renderFuncPtr) noexcept { m_RenderFuncPointer = renderFuncPtr; }
+        inline void setResizeFunc(ResizeFunc resizeFuncPtr) noexcept { m_ResizeFuncPointer = resizeFuncPtr; }
+        inline void setResizeFuncUserPointer(void* userPointer) noexcept { m_ResizeFuncPointerUserData = userPointer; }
 
         [[nodiscard]] inline Engine::Flag<uint16_t> getRenderFlags() const noexcept { return m_RenderFlags; }
         inline void setRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags = flag; }

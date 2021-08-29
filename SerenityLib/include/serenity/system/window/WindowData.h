@@ -75,7 +75,7 @@ namespace Engine::priv {
             void internal_init_position(Window&);
             void internal_on_mouse_wheel_scrolled(float delta, int x, int y);
             void internal_update_on_reset_events(const float dt);
-            void internal_on_close();
+            void internal_on_close(bool skipRenderThisFrame = true);
         public:
             WindowData() = default;
             ~WindowData();

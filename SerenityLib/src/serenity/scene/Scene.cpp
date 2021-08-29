@@ -342,7 +342,10 @@ Camera* Scene::getActiveCamera() const {
 }
 void Scene::setActiveCamera(Camera& camera){
     if (m_Viewports.size() == 0) {
-        m_Viewports.emplace_back(*this, camera);
+        auto& mainViewport = m_Viewports.emplace_back(*this, camera);
+        mainViewport.setResizeFunc([](float x, float y, float width, float height, Viewport& viewport, void* userPointer) {
+            viewport.setViewportDimensions(0.0f, 0.0f, width, height);
+        });
         return;
     }
     m_Viewports[0].setCamera(camera);

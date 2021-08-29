@@ -33,14 +33,14 @@ namespace Engine::priv {
             void internal_init_os_specific(const EngineOptions&);
             void internal_cleanup_os_specific();
 
-            void internal_pre_input_update(Window&);
-            void internal_pre_update(Scene&, Window&, const float dt);
+            void internal_pre_input_update();
+            void internal_pre_update(Scene&, const float dt);
             void internal_post_update(Scene&, Window&, const float dt);
 
-            void internal_update_logic(Scene&, Window&, const float dt);
-            void internal_update_sounds(Scene&, Window&, const float dt);
+            void internal_update_logic(Scene&, const float dt);
+            void internal_update_sounds(Scene&, const float dt);
             void internal_render(Scene&, Window&, const float dt, const double alpha);
-            void internal_cleanup(Window&, const float dt);
+            void internal_cleanup();
         public:
             class FPSTimer final {
                 private:

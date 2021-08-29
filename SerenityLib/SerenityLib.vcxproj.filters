@@ -887,9 +887,6 @@
     <ClCompile Include="src\serenity\editor\imgui\imgui.cpp">
       <Filter>Source Files\Engine\Core\Editor\Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\editor\imgui\imgui_demo.cpp">
-      <Filter>Source Files\Engine\Core\Editor\Imgui</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\editor\imgui\imgui_draw.cpp">
       <Filter>Source Files\Engine\Core\Editor\Imgui</Filter>
     </ClCompile>

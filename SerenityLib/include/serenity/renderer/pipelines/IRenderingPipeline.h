@@ -275,60 +275,60 @@ namespace Engine::priv {
 
 
 
-
-
             virtual void renderBackgroundTexture(
-                Handle texture,
-                const glm::vec2& p,
+                Handle textureHandle, 
+                const glm::vec2& p, 
                 const glm::vec4& c,
                 float a,
-                const glm::vec2& s,
-                float d,
-                Alignment align,
+                const glm::vec2& s, 
+                float d, 
+                Alignment align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderBackgroundText(
                 const std::string& t,
-                Handle font,
+                Handle fontHandle, 
                 const glm::vec2& p,
-                const glm::vec4& c,
+                const glm::vec4& c, 
                 float a,
-                const glm::vec2& s,
-                float d,
+                const glm::vec2& s, 
+                float d, 
                 TextAlignment align,
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderBackgroundBorder(
                 float borderSize,
-                const glm::vec2& pos,
-                const glm::vec4& col,
-                float w,
-                float h,
-                float angle,
+                const glm::vec2& pos, 
+                const glm::vec4& col, 
+                float w, 
+                float h, 
+                float angle, 
                 float depth,
-                Alignment align,
+                Alignment align, 
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderBackgroundRectangle(
                 const glm::vec2& pos,
-                const glm::vec4& col,
-                float width,
-                float height,
+                const glm::vec4& col, 
+                float width, 
+                float height, 
                 float angle,
                 float depth,
                 Alignment align,
                 const glm::vec4& scissor
             ) = 0;
             virtual void renderBackgroundTriangle(
-                const glm::vec2& position,
-                const glm::vec4& color,
-                float angle,
-                float width,
+                const glm::vec2& position, 
+                const glm::vec4& color, 
+                float angle, 
+                float width, 
                 float height,
-                float depth,
-                Alignment align,
+                float depth, 
+                Alignment align, 
                 const glm::vec4& scissor
             ) = 0;
+
+
 
             virtual void renderFullscreenTriangle() = 0;
             virtual void renderFullscreenQuad(float width, float height) = 0;
