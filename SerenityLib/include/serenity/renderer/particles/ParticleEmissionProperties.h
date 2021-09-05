@@ -29,33 +29,33 @@ class ParticleEmissionProperties final {
     using initial_scale_func              = glm::vec2(*)(Particle&);
     using initial_angular_velocity_func   = float(*)(Particle&);
     private:
-        color_func                      m_ColorFunctor                   = [](const float, Particle&) { return Engine::color_vector_4(255_uc); };
+        color_func                      m_ColorFunctor                   = [](const float, Particle&) { return Engine::color_vector_4{ 255_uc }; };
         change_in_angular_velocity_func m_ChangeInAngularVelocityFunctor = [](const float, Particle&) { return 0.0f; };
-        change_in_velocity_func         m_ChangeInVelocityFunctor        = [](const float, Particle&) { return glm::vec3(0.0f); };
-        change_in_scale_func            m_ChangeInScaleFunctor           = [](const float, Particle&) { return glm::vec2(0.0f); };
-        initial_velocity_func           m_InitialVelocityFunctor         = [](Particle&) { return glm::vec3(0.0f); };
-        initial_scale_func              m_InitialScaleFunctor            = [](Particle&) { return glm::vec2(0.3f); };
+        change_in_velocity_func         m_ChangeInVelocityFunctor        = [](const float, Particle&) { return glm::vec3{ 0.0f }; };
+        change_in_scale_func            m_ChangeInScaleFunctor           = [](const float, Particle&) { return glm::vec2{ 0.0f }; };
+        initial_velocity_func           m_InitialVelocityFunctor         = [](Particle&) { return glm::vec3{ 0.0f }; };
+        initial_scale_func              m_InitialScaleFunctor            = [](Particle&) { return glm::vec2{ 0.3f }; };
         initial_angular_velocity_func   m_InitialAngularVelocityFunctor  = [](Particle&) { return 0.0f; };
 
         std::vector<Material*>  m_ParticleMaterials;
         float                   m_Lifetime             = 4.0f;
         float                   m_SpawnRate            = 0.4f;
-        unsigned int            m_ParticlesPerSpawn    = 0;
+        uint32_t                m_ParticlesPerSpawn    = 0;
     public:
         ParticleEmissionProperties() = default;
-        ParticleEmissionProperties(Handle materialHandle, float lifeTime, float spawnRate, unsigned int ParticlesPerSpawn = 1, float drag = 1.0f);
+        ParticleEmissionProperties(Handle materialHandle, float lifeTime, float spawnRate, uint32_t ParticlesPerSpawn = 1, float drag = 1.0f);
         ~ParticleEmissionProperties() = default;
  
-        ParticleEmissionProperties(const ParticleEmissionProperties& other)                = delete;
-        ParticleEmissionProperties& operator=(const ParticleEmissionProperties& other)     = delete;
-        ParticleEmissionProperties(ParticleEmissionProperties&& other) noexcept            = default;
-        ParticleEmissionProperties& operator=(ParticleEmissionProperties&& other) noexcept = default;
+        ParticleEmissionProperties(const ParticleEmissionProperties&)                = delete;
+        ParticleEmissionProperties& operator=(const ParticleEmissionProperties&)     = delete;
+        ParticleEmissionProperties(ParticleEmissionProperties&&) noexcept            = default;
+        ParticleEmissionProperties& operator=(ParticleEmissionProperties&&) noexcept = default;
         
-        inline constexpr float getLifetime() const noexcept { return m_Lifetime; }
-        inline constexpr float getSpawnRate() const noexcept { return m_SpawnRate; }
+        inline float getLifetime() const noexcept { return m_Lifetime; }
+        inline float getSpawnRate() const noexcept { return m_SpawnRate; }
 
         bool addMaterial(Handle materialHandle);
-        bool addMaterial(Material& material);
+        bool addMaterial(Material&);
 
         const Material& getParticleMaterialRandom() const noexcept;
         const Material& getParticleMaterial(size_t index = 0) const noexcept;

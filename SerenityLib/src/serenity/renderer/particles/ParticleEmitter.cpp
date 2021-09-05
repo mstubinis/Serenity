@@ -26,8 +26,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& 
 void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     setProperties(properties);
     //removeAllChildren();
-    float maxFloat = std::numeric_limits<float>().max();
-    setPosition(maxFloat, maxFloat, maxFloat);
+    setPosition(std::numeric_limits<float>().max());
     if (!parent.null()) {
         parent.addChild(*this);
     }
@@ -39,15 +38,15 @@ void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene,
 }
 
 ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept 
-    : EntityBody{ std::move(other) }
+    : EntityBody     { std::move(other) }
     , m_SpawningTimer{ std::move(other.m_SpawningTimer) }
-    , m_Active{ std::move(other.m_Active) }
-    , m_Timer{ std::move(other.m_Timer) }
-    , m_Lifetime{ std::move(other.m_Lifetime) }
-    , m_Parent{ std::move(other.m_Parent) }
+    , m_Active       { std::move(other.m_Active) }
+    , m_Timer        { std::move(other.m_Timer) }
+    , m_Lifetime     { std::move(other.m_Lifetime) }
+    , m_Parent       { std::move(other.m_Parent) }
     , m_UpdateFunctor{ std::move(other.m_UpdateFunctor) }
-    , m_UserData{ std::move(other.m_UserData) }
-    , m_Properties{ std::move(other.m_Properties) }
+    , m_UserData     { std::move(other.m_UserData) }
+    , m_Properties   { std::move(other.m_Properties) }
 {}
 ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {  
     EntityBody::operator=(std::move(other));
@@ -74,11 +73,11 @@ void ParticleEmitter::update(size_t index, const float dt, Engine::priv::Particl
         m_UpdateFunctor(this, dt, particleSystem.m_Mutex);
         if (m_Properties && m_SpawningTimer > m_Properties->m_SpawnRate) {
             if (multi_threaded) {
-                std::lock_guard lock(particleSystem.m_Mutex);
+                std::lock_guard lock{ particleSystem.m_Mutex };
                 for (uint32_t i = 0; i < m_Properties->m_ParticlesPerSpawn; ++i) {
                     particleSystem.add_particle(*this);
                 }
-            }else{
+            } else {
                 for (uint32_t i = 0; i < m_Properties->m_ParticlesPerSpawn; ++i) {
                     particleSystem.add_particle(*this);
                 }
@@ -89,33 +88,33 @@ void ParticleEmitter::update(size_t index, const float dt, Engine::priv::Particl
             m_Active = false;
             m_Timer  = 0.0;
             if (multi_threaded) {
-                std::lock_guard lock(particleSystem.m_Mutex);
+                std::lock_guard lock{ particleSystem.m_Mutex };
                 particleSystem.m_ParticleEmitterFreelist.emplace(index);
-            }else{
+            } else {
                 particleSystem.m_ParticleEmitterFreelist.emplace(index);
             }
         }
     }
 }
 
-void ParticleEmitter::applyLinearVelocity(decimal x, decimal y, decimal z, bool local) {
+//void ParticleEmitter::applyLinearVelocity(decimal x, decimal y, decimal z, bool local) {
     /*
-    auto& body = *getComponent<ComponentTransform>();
-    const auto currVel = body.getLinearVelocity();
+    auto& transform = *getComponent<ComponentTransform>();
+    const auto currVel = transform.getLinearVelocity();
     auto newVel = glm_vec3(x, y, z);
     if (local) {
-        newVel = body.getRotation() * newVel;
+        newVel = transform.getRotation() * newVel;
     }
-    body.setLinearVelocity(currVel + newVel, false);
+    transform.setLinearVelocity(currVel + newVel, false);
     */
-}
-void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) {
+//}
+//void ParticleEmitter::applyLinearVelocity(glm_vec3& velocity, const bool local) {
     /*
-    auto& body = *getComponent<ComponentTransform>();
-    const auto currVel = body.getLinearVelocity();
+    auto& transform = *getComponent<ComponentTransform>();
+    const auto currVel = transform.getLinearVelocity();
     if (local) {
-        velocity = body.getRotation() * velocity;
+        velocity = transform.getRotation() * velocity;
     }
-    body.setLinearVelocity(currVel + velocity, false);
+    transform.setLinearVelocity(currVel + velocity, false);
     */
-}
+//}

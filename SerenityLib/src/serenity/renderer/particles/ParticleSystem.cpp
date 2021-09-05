@@ -22,15 +22,14 @@ Engine::priv::ParticleSystem::ParticleSystem(uint32_t maxEmitters, uint32_t maxP
     m_Particles.reserve(maxParticles);
     ParticlesDOD.resize(std::min(maxParticles, 300U));
 
+    const auto num_cores        = Engine::hardware_concurrency();
     const auto maxMaterialSlots = std::min(Engine::priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME);
 
-    MaterialToIndex.reserve(maxMaterialSlots);
-    MaterialToIndexReverse.reserve(maxMaterialSlots);
+    BimapMaterialToIndex.reserve(maxMaterialSlots);
+    BimapMaterialToIndexReverse.reserve(maxMaterialSlots);
     MaterialIDToIndex.reserve(maxMaterialSlots);
 
-    const auto num_cores = Engine::hardware_concurrency();
     THREAD_PART_1.resize(num_cores);
-
     THREAD_PART_4.resize(num_cores);
     THREAD_PART_5.resize(num_cores);
     for (auto& _4 : THREAD_PART_4) {
@@ -118,8 +117,8 @@ bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const 
     return false;
 }
 bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter) {
-    auto body = emitter.getComponent<ComponentTransform>();
-    return (body) ? add_particle(emitter, body->getPosition(), body->getRotation()) : false;
+    auto transform = emitter.getComponent<ComponentTransform>();
+    return transform ? add_particle(emitter, transform->getPosition(), transform->getRotation()) : false;
 }
 
 void Engine::priv::ParticleSystem::update(const float dt, Camera& camera) {
@@ -137,8 +136,8 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
     auto& planeMesh = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().get<Mesh>();
     ParticlesDOD.clear();
 
-    MaterialToIndex.clear();
-    MaterialToIndexReverse.clear();
+    BimapMaterialToIndex.clear();
+    BimapMaterialToIndexReverse.clear();
     MaterialIDToIndex.clear();
 
     if (ParticlesDOD.capacity() < particles_size) {
@@ -154,7 +153,7 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
 
     for (auto& _1 : THREAD_PART_1) _1.reserve(reserve_size);
 
-    glm::vec3 camPos           = glm::vec3(camera.getPosition());
+    glm::vec3 camPos           = glm::vec3{ camera.getPosition() };
     auto lamda_culler_particle = [&](Particle& particle, size_t j, size_t k) {
         float radius           = planeMesh.getRadius() * Math::Max(particle.m_Scale.x, particle.m_Scale.y);
         const glm::vec3& pos   = particle.position();
@@ -175,7 +174,7 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
                 particle.m_Scale.x, 
                 particle.m_Scale.y, 
                 particle.m_Angle,
-                (ParticleSystem::ParticleIDType)THREAD_PART_4[k].at(particle.m_Material), 
+                static_cast<ParticleIDType>(THREAD_PART_4[k].at(particle.m_Material)), 
 #if defined(ENGINE_PARTICLES_HALF_SIZE)
                 particle.m_Color.toPackedShort()
 #else
@@ -188,16 +187,16 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
 
     //merge the thread collections into the main collections
     for (auto& _1 : THREAD_PART_1) { 
-        for (auto& itemPod : _1) {
-            ParticlesDOD.push(std::move(itemPod));
+        for (auto& particleDOD : _1) {
+            ParticlesDOD.push(std::move(particleDOD));
         }
         //ParticlesDOD.insert(ParticlesDOD.end(), std::make_move_iterator(_1.begin()), std::make_move_iterator(_1.end())); 
     }
     for (auto& _4 : THREAD_PART_4) { 
-        MaterialToIndex.merge(_4); 
+        BimapMaterialToIndex.merge(_4);
     }
     for (auto& _5 : THREAD_PART_5) { 
-        MaterialToIndexReverse.merge(_5); 
+        BimapMaterialToIndexReverse.merge(_5);
     }
 
     //auto z = (chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now() - start));
@@ -210,8 +209,8 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
         glm::vec3 lPos{ Math::Float32From16(l.PositionX), Math::Float32From16(l.PositionY), Math::Float32From16(l.PositionZ) };
         glm::vec3 rPos{ Math::Float32From16(r.PositionX), Math::Float32From16(r.PositionY), Math::Float32From16(r.PositionZ) };
 #else
-        glm::vec3 lPos(l.PositionX, l.PositionY, l.PositionZ);
-        glm::vec3 rPos(r.PositionX, r.PositionY, r.PositionZ);
+        glm::vec3 lPos{ l.PositionX, l.PositionY, l.PositionZ };
+        glm::vec3 rPos{ r.PositionX, r.PositionY, r.PositionZ };
 #endif
         return glm::length2(lPos) > glm::length2(rPos);
     };

@@ -26,8 +26,8 @@ void Particle::init(const glm::vec3& emitterPosition, const glm::quat& emitterRo
     m_EmitterSource               = &emitter;
     m_Material                    = &const_cast<Material&>(emitter.m_Properties->getParticleMaterialRandom());
 
-    auto& emitterBody             = *emitter.getComponent<ComponentTransform>();
-    auto emitterScale             = glm::vec3(emitterBody.getScale());
+    auto& emitterTransform        = *emitter.getComponent<ComponentTransform>();
+    auto emitterScale             = emitterTransform.getScale();
 
     m_Velocity                    = emitter.m_Properties->m_InitialVelocityFunctor(*this) * emitterScale;
     auto rotated_initial_velocity = Engine::Math::rotate_vec3(emitter.getRotation(), m_Velocity);
@@ -69,6 +69,13 @@ Particle& Particle::operator=(Particle&& other) noexcept {
 }
 float Particle::lifetime() const noexcept {
     return m_EmitterSource->m_Properties->m_Lifetime;
+}
+void Particle::setScale(float x, float y) noexcept {
+    m_Scale.x = x;
+    m_Scale.y = y;
+}
+void Particle::setScale(const glm::vec2& newScale) noexcept {
+    setScale(newScale.x, newScale.y);
 }
 void Particle::setPosition(const glm::vec3& newPosition) noexcept {
     setPosition(newPosition.x, newPosition.y, newPosition.z);

@@ -3,7 +3,7 @@
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/resources/material/Material.h>
 
-ParticleEmissionProperties::ParticleEmissionProperties(Handle materialHandle, float lifeTime, float spawnRate, unsigned int ParticlesPerSpawn, float drag)
+ParticleEmissionProperties::ParticleEmissionProperties(Handle materialHandle, float lifeTime, float spawnRate, uint32_t ParticlesPerSpawn, float drag)
     : m_Lifetime{ lifeTime }
     , m_SpawnRate{ spawnRate }
     , m_ParticlesPerSpawn{ ParticlesPerSpawn }
@@ -11,13 +11,13 @@ ParticleEmissionProperties::ParticleEmissionProperties(Handle materialHandle, fl
     m_ParticleMaterials.emplace_back(materialHandle.get<Material>());
 }
 
-bool ParticleEmissionProperties::addMaterial(Material& material) {
-    for (const auto& mat : m_ParticleMaterials) {
-        if (&material == mat) {
+bool ParticleEmissionProperties::addMaterial(Material& inMaterial) {
+    for (const auto& material : m_ParticleMaterials) {
+        if (&inMaterial == material) {
             return false;
         }
     }
-    m_ParticleMaterials.emplace_back(&material);
+    m_ParticleMaterials.emplace_back(&inMaterial);
     return true;
 }
 bool ParticleEmissionProperties::addMaterial(Handle materialHandle) {

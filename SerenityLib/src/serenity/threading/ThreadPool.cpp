@@ -9,7 +9,7 @@ namespace {
 }
 
 Engine::priv::ThreadPool::ThreadPool() {
-    #ifndef ENGINE_FORCE_NO_THEAD_POOL
+    #if !defined(ENGINE_FORCE_NO_THEAD_POOL)
         m_FuturesCallback.reserve(1200);
     #endif
 }
@@ -25,7 +25,7 @@ void Engine::priv::ThreadPool::shutdown() noexcept {
     }
 }
 bool Engine::priv::ThreadPool::startup(int numThreads) {
-#ifdef ENGINE_FORCE_NO_THEAD_POOL
+#if defined(ENGINE_FORCE_NO_THEAD_POOL)
     numThreads = 0;
 #endif
     if (numThreads != size()) { //only shutdown if we want a different amount of threads
@@ -33,7 +33,7 @@ bool Engine::priv::ThreadPool::startup(int numThreads) {
     }
     if (m_Stopped) { //only start up if we did not start up yet or if we shutdowned
         m_Stopped = false;
-#ifndef ENGINE_FORCE_NO_THEAD_POOL
+#if !defined(ENGINE_FORCE_NO_THEAD_POOL)
         m_WorkerThreads.reserve(numThreads);
         for (int i = 0; i < numThreads; ++i) {
             m_WorkerThreads.add_thread([this]() {
@@ -89,9 +89,10 @@ void Engine::priv::ThreadPool::update() {
     }
 }
 void Engine::priv::ThreadPool::wait_for_all() noexcept {
-#ifndef ENGINE_FORCE_NO_THEAD_POOL
+#if !defined(ENGINE_FORCE_NO_THEAD_POOL)
     if (size() > 0) {
-        while (m_WaitCounter.load(std::memory_order_relaxed) > 0);
+        while (m_WaitCounter > 0);
+        //while (m_WaitCounter.load(std::memory_order_relaxed) > 0);
     }
 #endif
     update();

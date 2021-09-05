@@ -7,8 +7,8 @@ class ModelInstance;
 
 class ModelInstanceHandle final {
     private:
-        size_t          m_Index          = 0;
-        ComponentModel* m_ComponentModel = nullptr;
+        size_t            m_Index          = 0;
+        ComponentModel*   m_ComponentModel = nullptr;
     public:
         ModelInstanceHandle() = default;
         ModelInstanceHandle(size_t Index, ComponentModel& componentModel)

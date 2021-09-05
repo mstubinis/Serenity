@@ -54,7 +54,7 @@ namespace Engine::priv {
             [[nodiscard]] inline int size() const noexcept { return static_cast<int>(m_WorkerThreads.size()); }
 
             template<class JOB> [[nodiscard]] void add_job(JOB&& job) {
-                #ifndef ENGINE_FORCE_NO_THEAD_POOL
+                #if !defined(ENGINE_FORCE_NO_THEAD_POOL)
                     if (size() > 0) {
                         {
                             std::lock_guard lock{ m_Mutex };
@@ -65,12 +65,12 @@ namespace Engine::priv {
                     } else {
                 #endif
                         job();
-                #ifndef ENGINE_FORCE_NO_THEAD_POOL
+                #if !defined(ENGINE_FORCE_NO_THEAD_POOL)
                     }
                 #endif
             }
             template<class JOB, class THEN> [[nodiscard]] Engine::view_ptr<FutureType> add_job(JOB&& job, THEN&& callback) {
-                #ifndef ENGINE_FORCE_NO_THEAD_POOL
+                #if !defined(ENGINE_FORCE_NO_THEAD_POOL)
                     if (size() > 0) {
                         FutureType* ret = nullptr;
                         {
@@ -86,7 +86,7 @@ namespace Engine::priv {
                         job();
                         callback();
                         return nullptr;
-                #ifndef ENGINE_FORCE_NO_THEAD_POOL
+                #if !defined(ENGINE_FORCE_NO_THEAD_POOL)
                     }
                 #endif
                     return nullptr;

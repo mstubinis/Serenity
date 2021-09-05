@@ -360,30 +360,28 @@ void DeferredPipeline::init() {
     //particle instancing
     Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().get<Mesh>()->getVertexData().bind();
     glGenBuffers(1, &m_Particle_Instance_VBO);
-
     glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
     glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STREAM_DRAW);
 
-    auto sizeofOne = sizeof(ParticleSystem::ParticleFloatType) * 4;
-    auto sizeofTwo = sizeof(ParticleSystem::ParticleFloatType) * 2;
+    auto sizeofOne = sizeof(Engine::priv::ParticleFloatType) * 4;
+    auto sizeofTwo = sizeof(Engine::priv::ParticleFloatType) * 2;
 
 
 #if defined(ENGINE_PARTICLES_HALF_SIZE)
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_HALF_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)0  );
+    glVertexAttribPointer(2, 4, GL_HALF_FLOAT,        GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)0  );
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_HALF_FLOAT,        GL_FALSE, sizeof(ParticleSystem::ParticleDOD),  (void*)sizeofOne);
+    glVertexAttribPointer(3, 2, GL_HALF_FLOAT,        GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)sizeofOne);
     glEnableVertexAttribArray(4);
-    glVertexAttribIPointer(4, 2, GL_UNSIGNED_SHORT, sizeof(ParticleSystem::ParticleDOD), (void*)(sizeofOne + sizeofTwo));
+    glVertexAttribIPointer(4, 2, GL_UNSIGNED_SHORT, sizeof(Engine::priv::ParticleDOD), (void*)(sizeofOne + sizeofTwo));
 #else
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleSystem::ParticleDOD), (void*)0);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Engine::priv::ParticleDOD), (void*)0);
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(ParticleSystem::ParticleDOD), (void*)sizeofOne);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Engine::priv::ParticleDOD), (void*)sizeofOne);
     glEnableVertexAttribArray(4);
-    glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, sizeof(ParticleSystem::ParticleDOD), (void*)(sizeofOne + sizeofTwo));
+    glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, sizeof(Engine::priv::ParticleDOD), (void*)(sizeofOne + sizeofTwo));
 #endif
-
     glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
@@ -833,7 +831,7 @@ void DeferredPipeline::setShadowDirectionalLightDirection(DirectionalLight& dire
         m_ShadowCasters.m_ShadowCastersDirectionalHashed[&directionalLight]->setLookAt(direction);
     }
 }
-void DeferredPipeline::sendGPUDataAllLights(Scene& scene, Camera& camera) {
+void DeferredPipeline::sendGPUDataAllLights(const Scene& scene, const Camera& camera) {
     int maxLights = glm::min(int(scene.getNumLights()), MAX_LIGHTS_PER_PASS);
     Engine::Renderer::sendUniform1Safe("numLights", maxLights);
     int i = 0;
@@ -862,13 +860,13 @@ void DeferredPipeline::sendGPUDataGI(Skybox* skybox) {
     if (skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData()) {
         Engine::Renderer::sendTextureSafe("irradianceMap", *skybox->cubemap().get<TextureCubemap>()->getConvolutionTexture().get<TextureCubemap>(), maxTextures - 2);
         Engine::Renderer::sendTextureSafe("prefilterMap", *skybox->cubemap().get<TextureCubemap>()->getPreEnvTexture().get<TextureCubemap>(), maxTextures - 1);
-    }else{
+    } else {
         Engine::Renderer::sendTextureSafe("irradianceMap", *Texture::Black.get<Texture>(), maxTextures - 2);
         Engine::Renderer::sendTextureSafe("prefilterMap", *Texture::Black.get<Texture>(), maxTextures - 1);
     }
     Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures);
 }
-void DeferredPipeline::sendGPUDataLight(Camera& camera, SunLight& sunLight, const std::string& start) {
+void DeferredPipeline::sendGPUDataLight(const Camera& camera, const SunLight& sunLight, const std::string& start) {
     auto transform   = sunLight.getComponent<ComponentTransform>();
     auto pos         = glm::vec3{ transform->getPosition() };
     const auto& col  = sunLight.getColor();
@@ -878,7 +876,7 @@ void DeferredPipeline::sendGPUDataLight(Camera& camera, SunLight& sunLight, cons
     sendUniform1Safe("Type", 0.0f);
     sendUniform1Safe("ShadowEnabled", 0);
 }
-int DeferredPipeline::sendGPUDataLight(Camera& camera, PointLight& pointLight, const std::string& start) {
+int DeferredPipeline::sendGPUDataLight(const Camera& camera, const PointLight& pointLight, const std::string& start) {
     auto transform  = pointLight.getComponent<ComponentTransform>();
     auto pos        = glm::vec3{ transform->getPosition() };
     auto cull       = pointLight.getCullingRadius();
@@ -901,7 +899,7 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, PointLight& pointLight, c
     }
     return 2;
 }
-void DeferredPipeline::sendGPUDataLight(Camera& camera, DirectionalLight& directionalLight, const std::string& start) {
+void DeferredPipeline::sendGPUDataLight(const Camera& camera, const DirectionalLight& directionalLight, const std::string& start) {
     auto transform  = directionalLight.getComponent<ComponentTransform>();
     auto forward    = transform->getForward();
     const auto& col = directionalLight.getColor();
@@ -912,14 +910,14 @@ void DeferredPipeline::sendGPUDataLight(Camera& camera, DirectionalLight& direct
     sendUniform1Safe("ShadowEnabled", 0);
     if (m_Renderer.m_Lighting) {
         if (m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
-            const auto& data = *m_ShadowCasters.m_ShadowCastersDirectionalHashed.at(&directionalLight);
+            auto& data = *m_ShadowCasters.m_ShadowCastersDirectionalHashed.at(&directionalLight);
             if (data.m_Enabled) {
                 data.bindUniformsReading(5, camera);
             }
         }
     }
 }
-int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, const std::string& start) {
+int DeferredPipeline::sendGPUDataLight(const Camera& camera, const SpotLight& spotLight, const std::string& start) {
     auto transform = spotLight.getComponent<ComponentTransform>();
     auto pos       = glm::vec3{ transform->getPosition() };
     auto forward   = transform->getForward();
@@ -948,7 +946,7 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, SpotLight& spotLight, con
     }
     return 2;
 }
-int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const std::string& start) {
+int DeferredPipeline::sendGPUDataLight(const Camera& camera, const RodLight& rodLight, const std::string& start) {
     auto transform       = rodLight.getComponent<ComponentTransform>();
     auto pos             = glm::vec3{ transform->getPosition() };
     auto cullingDistance = rodLight.getRodLength() + (rodLight.getCullingRadius() * 2.0f);
@@ -973,7 +971,7 @@ int DeferredPipeline::sendGPUDataLight(Camera& camera, RodLight& rodLight, const
     }
     return 2;
 }
-int DeferredPipeline::sendGPUDataLight(Camera& camera, ProjectionLight& rodLight, const std::string& start) {
+int DeferredPipeline::sendGPUDataLight(const Camera& camera, const ProjectionLight& rodLight, const std::string& start) {
     return 2;
 }
 void DeferredPipeline::renderDirectionalLight(Camera& camera, DirectionalLight& directionalLight, Viewport& viewport) {
@@ -1124,14 +1122,14 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, H
     const size_t particle_count = system.ParticlesDOD.size();
     if (particle_count > 0) {
         m_Renderer.bind(program.get<ShaderProgram>());
-        for (auto& [id, mat] : system.MaterialToIndexReverse) {
+        for (auto& [id, mat] : system.BimapMaterialToIndexReverse) {
             system.MaterialIDToIndex.try_emplace(id, (uint32_t)system.MaterialIDToIndex.size());
         }
         for (auto& pod : system.ParticlesDOD) {
             pod.MatID = system.MaterialIDToIndex.at(pod.MatID);
         }
         for (auto& [id, index] : system.MaterialIDToIndex) {
-            Material* mat         = system.MaterialToIndexReverse.at(id);
+            Material* mat         = system.BimapMaterialToIndexReverse.at(id);
             Texture& texture      = *mat->getComponent((uint32_t)MaterialComponentType::Diffuse).getTexture(0).get<Texture>();
             std::string location  = "DiffuseTexture" + std::to_string(index) + "";
             Engine::Renderer::sendTextureSafe(location.c_str(), texture, index);
@@ -1140,7 +1138,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, H
         Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
 
         glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
-        glBufferData(GL_ARRAY_BUFFER, particle_count * sizeof(ParticleSystem::ParticleDOD), system.ParticlesDOD.data(), GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, particle_count * sizeof(Engine::priv::ParticleDOD), system.ParticlesDOD.data(), GL_STREAM_DRAW);
 
         auto& particleMesh = *Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().get<Mesh>();
         m_Renderer.bind(&particleMesh);
@@ -1157,164 +1155,10 @@ void DeferredPipeline::renderMesh(Mesh& mesh, uint32_t mode) {
 void DeferredPipeline::renderLightProbe(LightProbe& lightProbe) {
     //goal: render all 6 sides into a fbo and into a cubemap, and have that cubemap stored in the light probe to be used for Global Illumination
 }
-void DeferredPipeline::internal_render_2d_text_left(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    uint32_t i = 0;
-    for (const auto character : text) {
-        if (character == '\n') {
-            y += newLineGlyphHeight;
-            x  = 0.0f;
-        }else if (character != '\0') {
-            uint32_t accum     = i * 4;
-            const CharGlyph& glyph = font.getGlyphData(character);
-            float startingY        = y - (glyph.height + glyph.yoffset);
-            ++i;
-
-            m_Text_Indices.push(accum + 0);
-            m_Text_Indices.push(accum + 1);
-            m_Text_Indices.push(accum + 2);
-            m_Text_Indices.push(accum + 3);
-            m_Text_Indices.push(accum + 1);
-            m_Text_Indices.push(accum + 0);
-
-            float startingX = x + glyph.xoffset;
-            x += glyph.xadvance;
-
-            for (uint32_t i = 0; i < 4; ++i) {
-                m_Text_Points.emplace_push(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
-            }
-            for (uint32_t i = 0; i < 4; ++i) {
-                m_Text_UVs.emplace_push(glyph.uvs[i].x, glyph.uvs[i].y);
-            }
-        }
-    }
-}
-void DeferredPipeline::internal_render_2d_text_center(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    static std::vector<std::string>  lines;
-    static std::vector<uint16_t>     lines_sizes;
-    static std::string               line_accumulator;
-    lines.clear();
-    lines_sizes.clear();
-    line_accumulator.clear();
-    for (const auto character : text) {
-        if (character == '\n') {
-            lines.emplace_back(line_accumulator);
-            lines_sizes.emplace_back((uint16_t)x);
-            line_accumulator.clear();
-            x = 0.0f;
-            continue;
-        }else if (character != '\0') {
-            const CharGlyph& chr = font.getGlyphData(character);
-            line_accumulator += character;
-            x += chr.xadvance;
-        }
-    }
-    if (!line_accumulator.empty()) {
-        lines.emplace_back(line_accumulator);
-        lines_sizes.emplace_back((uint16_t)x);
-    }
-
-    x = 0.0f;
-    uint32_t i = 0;
-    for (size_t l = 0; l < lines.size(); ++l) {
-        const auto& line = lines[l];
-        const auto& line_size = lines_sizes[l] / 2;
-        for (auto& character : line) {
-            if (character != '\0') {
-                uint32_t accum         = i * 4;
-                const CharGlyph& glyph = font.getGlyphData(character);
-                float startingY        = y - (glyph.height + glyph.yoffset);
-                ++i;
-
-                m_Text_Indices.push(accum + 0);
-                m_Text_Indices.push(accum + 1);
-                m_Text_Indices.push(accum + 2);
-                m_Text_Indices.push(accum + 3);
-                m_Text_Indices.push(accum + 1);
-                m_Text_Indices.push(accum + 0);
-
-                float startingX = x + glyph.xoffset;
-                x += glyph.xadvance;
-
-                for (uint32_t i = 0; i < 4; ++i) {
-                    m_Text_Points.emplace_push(startingX + glyph.pts[i].x - line_size, startingY + glyph.pts[i].y, z);
-                }
-                for (uint32_t i = 0; i < 4; ++i) {
-                    m_Text_UVs.emplace_push(glyph.uvs[i].x, glyph.uvs[i].y);
-                }
-            }
-        }
-        y += newLineGlyphHeight;
-        x = 0.0f;
-    }
-}
-void DeferredPipeline::internal_render_2d_text_right(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
-    static std::vector<std::string>  lines;
-    static std::string               line_accumulator;
-    lines.clear();
-    line_accumulator.clear();
-    for (const auto character : text) {
-        if (character == '\n') {
-            lines.emplace_back(line_accumulator);
-            line_accumulator.clear();
-            continue;
-        }else if (character != '\0') {
-            line_accumulator += character;
-        }
-    }
-    if (lines.size() == 0) {
-        lines.emplace_back(line_accumulator);
-    }
-
-    uint32_t i = 0;
-    for (auto& line : lines) {
-        int line_size = (int)line.size();
-        int k = 0;
-        for (int j = line_size; j >= 0; --j) {
-            auto character = line[j];
-            if (character != '\0') {
-                uint32_t accum = i * 4;
-                ++i;
-                const CharGlyph& glyph = font.getGlyphData(character);
-                float startingY  = y - (glyph.height + glyph.yoffset);
-
-                m_Text_Indices.push(accum + 0);
-                m_Text_Indices.push(accum + 1);
-                m_Text_Indices.push(accum + 2);
-                m_Text_Indices.push(accum + 3);
-                m_Text_Indices.push(accum + 1);
-                m_Text_Indices.push(accum + 0);
-
-                if (k == 0) {
-                    x -= glyph.width;
-                }
-                float startingX = x + glyph.xoffset;
-                x -= glyph.xadvance;
-
-                for (uint32_t i = 0; i < 4; ++i) {
-                    m_Text_Points.emplace_push(startingX + glyph.pts[i].x, startingY + glyph.pts[i].y, z);
-                }
-                for (uint32_t i = 0; i < 4; ++i) {
-                    m_Text_UVs.emplace_push(glyph.uvs[i].x, glyph.uvs[i].y);
-                }
-                ++k;
-            }
-        }
-        y += newLineGlyphHeight;
-        x = 0.0f;
-    }
-}
 void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, TextAlignment textAlignment, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);
 
-    m_Text_Points.clear();
-    m_Text_UVs.clear();
-    m_Text_Indices.clear();
-
-    Mesh& fontPlane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh().get<Mesh>();
-    m_Renderer.bind(&fontPlane);
-
     Font& font = *fontHandle.get<Font>();
-    auto  newLineGlyphHeight = font.getMaxHeight() + font.getLineHeight();
     Handle textureHandle = font.getGlyphTexture();
     float y = 0.0f;
     float x = 0.0f;
@@ -1330,19 +1174,11 @@ void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, 
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
-    if (textAlignment == TextAlignment::Left) {
-        internal_render_2d_text_left(text, font, -newLineGlyphHeight, x, y, z);
-    } else if (textAlignment == TextAlignment::Right) {
-        internal_render_2d_text_right(text, font, -newLineGlyphHeight, x, y, z);
-    } else if (textAlignment == TextAlignment::Center) {
-        internal_render_2d_text_center(text, font, -newLineGlyphHeight, x, y, z);
-    }
-    fontPlane.modifyVertices(0, m_Text_Points.data(), m_Text_Points.size(), MeshModifyFlags::None); //prevent gpu upload until after all the data is collected
-    fontPlane.modifyVertices(1, m_Text_UVs.data(), m_Text_UVs.size(), MeshModifyFlags::UploadToGPU);
-    fontPlane.modifyIndices(m_Text_Indices.data(), m_Text_Indices.size(), MeshModifyFlags::UploadToGPU);
+    Mesh& fontPlane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh().get<Mesh>();
+    m_TextRenderer.renderText(fontPlane, m_Renderer, text, font, textAlignment, x, y, z);
+
     renderMesh(fontPlane);
     m_Renderer.unbind(&fontPlane);
-
 }
 void DeferredPipeline::render2DTexture(Handle textureHandle, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);

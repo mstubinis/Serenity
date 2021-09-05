@@ -421,7 +421,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -679,6 +679,7 @@
     <ClCompile Include="src\serenity\renderer\postprocess\SSAO.cpp" />
     <ClCompile Include="src\serenity\renderer\Renderer.cpp" />
     <ClCompile Include="src\serenity\renderer\RenderGraph.cpp" />
+    <ClCompile Include="src\serenity\renderer\text\TextRenderer.cpp" />
     <ClCompile Include="src\serenity\resources\Engine_BuiltInShaders.cpp" />
     <ClCompile Include="src\serenity\resources\Engine_Resources.cpp" />
     <ClCompile Include="src\serenity\resources\font\Font.cpp" />
@@ -763,6 +764,7 @@
     <ClCompile Include="src\serenity\threading\ThreadingModule.cpp" />
     <ClCompile Include="src\serenity\threading\ThreadPool.cpp" />
     <ClCompile Include="src\serenity\threading\WorkerThreadContainer.cpp" />
+    <ClCompile Include="src\serenity\types\Timer.cpp" />
     <ClCompile Include="src\serenity\utils\Engine_Debugging.cpp" />
     <ClCompile Include="src\serenity\utils\Utils.cpp" />
   </ItemGroup>
@@ -959,6 +961,7 @@
     <ClInclude Include="include\serenity\renderer\RendererState.h" />
     <ClInclude Include="include\serenity\renderer\RenderGraph.h" />
     <ClInclude Include="include\serenity\renderer\SMAA_LUT.h" />
+    <ClInclude Include="include\serenity\renderer\text\TextRenderer.h" />
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h" />
     <ClInclude Include="include\serenity\resources\Engine_Resources.h" />
     <ClInclude Include="include\serenity\resources\font\Font.h" />
@@ -1036,6 +1039,7 @@
     <ClInclude Include="include\serenity\types\Flag.h" />
     <ClInclude Include="include\serenity\types\SmallMap.h" />
     <ClInclude Include="include\serenity\types\StaticString.h" />
+    <ClInclude Include="include\serenity\types\Timer.h" />
     <ClInclude Include="include\serenity\types\Types.h" />
     <ClInclude Include="include\serenity\types\ViewPointer.h" />
     <ClInclude Include="include\serenity\utils\BlockProfiler.h" />

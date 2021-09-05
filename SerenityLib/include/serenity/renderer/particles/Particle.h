@@ -33,24 +33,27 @@ class Particle final {
         float                     m_Timer           = 0.0f;            //  32 bits
 
         Particle() = delete;
-        Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& emitter);
+        Particle(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter&);
         ~Particle() = default;
 
-        Particle(const Particle& other)                = delete;
-        Particle& operator=(const Particle& other)     = delete;
-        Particle(Particle&& other) noexcept;
-        Particle& operator=(Particle&& other) noexcept;
+        Particle(const Particle&)                = delete;
+        Particle& operator=(const Particle&)     = delete;
+        Particle(Particle&&) noexcept;
+        Particle& operator=(Particle&&) noexcept;
 
         void init(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& parent) noexcept;
 
-        inline constexpr bool isActive() const noexcept { return (m_Timer > 0.0f); }
-        inline constexpr Material* getMaterial() const noexcept { return m_Material; }
-        inline constexpr float angle() const noexcept { return m_Angle; }
-        inline constexpr const glm::vec2& getScale() const noexcept { return m_Scale; }
-        inline constexpr const glm::vec3& position() const noexcept { return m_Position; }
-        inline constexpr const Engine::color_vector_4& color() const noexcept { return m_Color; }
-        inline constexpr const glm::vec3& velocity() const noexcept { return m_Velocity; }
-        float lifetime() const noexcept;
+        [[nodiscard]] inline bool isActive() const noexcept { return (m_Timer > 0.0f); }
+        [[nodiscard]] inline Material* getMaterial() const noexcept { return m_Material; }
+        [[nodiscard]] inline float angle() const noexcept { return m_Angle; }
+        [[nodiscard]] inline const glm::vec2& getScale() const noexcept { return m_Scale; }
+        [[nodiscard]] inline const glm::vec3& position() const noexcept { return m_Position; }
+        [[nodiscard]] inline const Engine::color_vector_4& color() const noexcept { return m_Color; }
+        [[nodiscard]] inline const glm::vec3& velocity() const noexcept { return m_Velocity; }
+        [[nodiscard]] float lifetime() const noexcept;
+
+        void setScale(const glm::vec2& newScale) noexcept;
+        void setScale(float x, float y) noexcept;
 
         void setPosition(const glm::vec3& newPosition) noexcept;
         void setPosition(float x, float y, float z) noexcept;

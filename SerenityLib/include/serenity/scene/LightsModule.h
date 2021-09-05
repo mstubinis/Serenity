@@ -6,21 +6,32 @@
 
 namespace Engine::priv {
     class LightsModule final {
-        using LightContainers = std::vector<std::unique_ptr<ILightContainer>>;
+        using LightContainers = std::vector<ILightContainer*>;
         private:
-            LightContainers        m_Lights;
-            uint32_t               m_RegisteredLights = 0;
+            LightContainers          m_Lights;
+            static inline uint32_t   m_RegisteredLights = 0;
 
             template<class LIGHT> inline void internal_assert_registered_light_type() noexcept {
                 ASSERT(LIGHT::TYPE_ID > 0, __FUNCTION__ << "(): type: " << typeid(LIGHT).name() << " must be registered first!");
             }
-            template<class LIGHT> [[nodiscard]] inline LightContainer<LIGHT>* internal_get_light_container() noexcept {
-                return static_cast<LightContainer<LIGHT>*>(m_Lights[LIGHT::TYPE_ID - 1].get());
+            template<class LIGHT> [[nodiscard]] LightContainer<LIGHT>* internal_get_light_container() noexcept {
+                const auto index = LIGHT::TYPE_ID - 1;
+                if (index < m_Lights.size()) {
+                    return static_cast<LightContainer<LIGHT>*>(m_Lights[index]);
+                }
+                return nullptr;
             }
         public:
-            template<class LIGHT> [[nodiscard]] inline LightContainer<LIGHT>& getLights() noexcept {
+            LightsModule() = default;
+            ~LightsModule() {
+                SAFE_DELETE_VECTOR(m_Lights);
+            }
+
+            template<class LIGHT> [[nodiscard]] LightContainer<LIGHT>& getLights() noexcept {
                 internal_assert_registered_light_type<LIGHT>();
-                return *internal_get_light_container<LIGHT>();
+                auto container = internal_get_light_container<LIGHT>();
+                ASSERT(container != nullptr, __FUNCTION__ << "(): container was nullptr!");
+                return *container;
             }
             template<class LIGHT> uint32_t registerLightType() {
                 if (LIGHT::TYPE_ID == 0) {
@@ -28,21 +39,33 @@ namespace Engine::priv {
                 }
                 internal_assert_registered_light_type<LIGHT>();
                 if (LIGHT::TYPE_ID > m_Lights.size()) {
-                    m_Lights.emplace_back(std::make_unique<Engine::priv::LightContainer<LIGHT>>());
+                    m_Lights.emplace_back(NEW Engine::priv::LightContainer<LIGHT>{});
                 }
                 return LIGHT::TYPE_ID - 1;
             }
             template<class LIGHT, class ... ARGS> [[nodiscard]] inline Engine::view_ptr<LIGHT> createLight(ARGS&&... args) {
                 internal_assert_registered_light_type<LIGHT>();
-                return internal_get_light_container<LIGHT>()->createLight(std::forward<ARGS>(args)...);
+                auto container = internal_get_light_container<LIGHT>();
+                if (container) {
+                    return container->createLight(std::forward<ARGS>(args)...);
+                }
+                return nullptr;
             }
-            template<class LIGHT> inline bool deleteLight(LIGHT* light) noexcept {
+            template<class LIGHT> bool deleteLight(LIGHT* light) noexcept {
                 internal_assert_registered_light_type<LIGHT>();
-                return internal_get_light_container<LIGHT>()->deleteLight(light);
+                auto container = internal_get_light_container<LIGHT>();
+                if (container) {
+                    return container->deleteLight(light);
+                }
+                return false;
             }
-            template<class LIGHT> inline bool setShadowCaster(LIGHT* light, bool isShadowCaster) {
+            template<class LIGHT> bool setShadowCaster(LIGHT* light, bool isShadowCaster) {
                 internal_assert_registered_light_type<LIGHT>();
-                return internal_get_light_container<LIGHT>()->setShadowCaster(light, isShadowCaster);
+                auto container = internal_get_light_container<LIGHT>();
+                if (container) {
+                    return container->setShadowCaster(light, isShadowCaster);
+                }
+                return false;
             }
 
             inline LightContainers::iterator begin() noexcept { return m_Lights.begin(); }

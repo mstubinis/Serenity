@@ -25,6 +25,114 @@ using namespace Engine::priv;
 
 Engine::view_ptr<RenderModule> RenderModule::RENDER_MODULE = nullptr;
 
+
+namespace {
+
+    std::vector<float>    BufferFloat;
+    std::vector<double>   BufferDouble;
+    std::vector<int>      BufferInt;
+    std::vector<uint32_t> BufferUInt;
+
+    template<class T> inline std::vector<T>&        getBuffer() noexcept = delete;
+    template<>        inline std::vector<float>&    getBuffer() noexcept { return BufferFloat; }
+    template<>        inline std::vector<double>&   getBuffer() noexcept { return BufferDouble; }
+    template<>        inline std::vector<int>&      getBuffer() noexcept { return BufferInt; }
+    template<>        inline std::vector<uint32_t>& getBuffer() noexcept { return BufferUInt; }
+
+    inline uint32_t getNumElements(const auto& matrix) noexcept {
+        return matrix.length() * matrix[0].length();
+    }
+
+    inline void sendUniformValues1(const char* location, const auto x, const auto func) {
+        func(Engine::Renderer::getUniformLocUnsafe(location), x);
+    }
+    inline void sendUniformValues2(const char* location, const auto x, const auto y, const auto func) {
+        func(Engine::Renderer::getUniformLocUnsafe(location), x, y);
+    }
+    inline void sendUniformValues3(const char* location, const auto x, const auto y, const auto z, const auto func) {
+        func(Engine::Renderer::getUniformLocUnsafe(location), x, y, z);
+    }
+    inline void sendUniformValues4(const char* location, const auto x, const auto y, const auto z, const auto w, const auto func) {
+        func(Engine::Renderer::getUniformLocUnsafe(location), x, y, z, w);
+    }
+    template<class ... ARGS>
+    void executeSafeFunction(const char* location, const auto func, ARGS&&... args) {
+        const auto o = Engine::Renderer::getUniformLoc(location);
+        if (o == -1)
+            return;
+        func(o, std::forward<ARGS>(args)...);
+    }
+
+
+    inline void sendUniformValues1Safe(const char* location, const auto x, const auto func) {
+        executeSafeFunction(location, func, x);
+    }
+    inline void sendUniformValues2Safe(const char* location, const auto x, const auto y, const auto func) {
+        executeSafeFunction(location, func, x, y);
+    }
+    inline void sendUniformValues3Safe(const char* location, const auto x, const auto y, const auto z, const auto func) {
+        executeSafeFunction(location, func, x, y, z);
+    }
+    inline void sendUniformValues4Safe(const char* location, const auto x, const auto y, const auto z, const auto w, const auto func) {
+        executeSafeFunction(location, func, x, y, z, w);
+    }
+    inline void sendUniformValues(const char* location, auto* values, const uint32_t i, const auto func) {
+        func(Engine::Renderer::getUniformLocUnsafe(location), i, glm::value_ptr(values[0]));
+    }
+    inline void sendUniformValuesSafe(const char* location, auto* values, const uint32_t i, const auto func) {
+        executeSafeFunction(location, func, i, glm::value_ptr(values[0]));
+    }
+    inline void sendUniformValuesBasic(const char* location, auto* values, const uint32_t i, const auto func) {
+        func(Engine::Renderer::getUniformLocUnsafe(location), i, values);
+    }
+    inline void sendUniformValuesSafeBasic(const char* location, auto* values, const uint32_t i, const auto func) {
+        executeSafeFunction(location, func, i, values);
+    }
+
+
+
+    inline void sendUniformMatrix(const char* l, const auto& matrix, const auto func) {
+        func(Engine::Renderer::getUniformLocUnsafe(l), 1, 0, glm::value_ptr(matrix));
+    }
+    template<class VAL_TYPE>
+    void sendUniformMatrixV(const char* location, const auto& matrices, const uint32_t count, const auto func) {
+        const uint32_t numElements = getNumElements(matrices[0]);
+        auto& buffer = getBuffer<VAL_TYPE>();
+        buffer.resize(matrices.size() * numElements);
+        uint32_t inc = 0;
+        for (auto& matrix : matrices) {
+            auto* values = glm::value_ptr(matrix);
+            for (uint32_t i = 0; i < numElements; ++i) {
+                buffer[inc] = values[i];
+                ++inc;
+            }
+        }
+        func(Engine::Renderer::getUniformLoc(location), count, 0, &buffer[0]);
+    }
+    inline void sendUniformMatrixSafe(const char* location, const auto& matrix, const auto func) {
+        executeSafeFunction(location, func, 1, 0, glm::value_ptr(matrix));
+    }
+    template<class VAL_TYPE>
+    void sendUniformMatrixVSafe(const char* location, const auto& matrices, const uint32_t count, const auto func) {
+        const auto o = Engine::Renderer::getUniformLoc(location);
+        if (o == -1 || matrices.size() == 0)
+            return;
+        const uint32_t numElements = getNumElements(matrices[0]);
+        auto& buffer = getBuffer<VAL_TYPE>();
+        buffer.resize(matrices.size() * numElements);
+        uint32_t inc = 0;
+        for (auto& matrix : matrices) {
+            auto* values = glm::value_ptr(matrix);
+            for (uint32_t i = 0; i < numElements; ++i) {
+                buffer[inc] = values[i];
+                ++inc;
+            }
+        }
+        func(o, count, 0, &buffer[0]);
+    }
+}
+
+
 RenderModule::RenderModule(const EngineOptions& options)
     : m_GI_Pack{ Engine::Compression::pack3FloatsInto1FloatUnsigned(m_GI_Diffuse, m_GI_Specular, m_GI_Global) }
 {
@@ -487,3 +595,420 @@ void Engine::Renderer::renderFullscreenQuad(float width, float height) {
 void Engine::Renderer::renderFullscreenTriangle() {
     Engine::priv::RenderModule::RENDER_MODULE->m_Pipeline->renderFullscreenTriangle();
 }
+
+
+
+#pragma region UniformSending
+void Engine::Renderer::sendUniform1(const char* l, double x) {
+    sendUniformValues1(l, x, glUniform1d);
+}
+void Engine::Renderer::sendUniform1(const char* l, int x) {
+    sendUniformValues1(l, x, glUniform1i);
+}
+void Engine::Renderer::sendUniform1(const char* l, float x) {
+    sendUniformValues1(l, x, glUniform1f);
+}
+void Engine::Renderer::sendUniform1(const char* l, uint32_t x) {
+    sendUniformValues1(l, x, glUniform1ui);
+}
+void Engine::Renderer::sendUniform1Safe(const char* l, double x) {
+    sendUniformValues1Safe(l, x, glUniform1d);
+}
+void Engine::Renderer::sendUniform1Safe(const char* l, int x) {
+    sendUniformValues1Safe(l, x, glUniform1i);
+}
+void Engine::Renderer::sendUniform1Safe(const char* l, float x) {
+    sendUniformValues1Safe(l, x, glUniform1f);
+}
+void Engine::Renderer::sendUniform1Safe(const char* l, uint32_t x) {
+    sendUniformValues1Safe(l, x, glUniform1ui);
+}
+void Engine::Renderer::sendUniform1v(const char* l, const std::vector<double>& d, const uint32_t i) {
+    sendUniformValuesBasic(l, d.data(), i, glUniform1dv);
+}
+void Engine::Renderer::sendUniform1v(const char* l, const std::vector<int>& d, const uint32_t i) {
+    sendUniformValuesBasic(l, d.data(), i, glUniform1iv);
+}
+void Engine::Renderer::sendUniform1v(const char* l, const std::vector<float>& d, const uint32_t i) {
+    sendUniformValuesBasic(l, d.data(), i, glUniform1fv);
+}
+void Engine::Renderer::sendUniform1v(const char* l, double* d, const uint32_t i) {
+    sendUniformValuesBasic(l, d, i, glUniform1dv);
+}
+void Engine::Renderer::sendUniform1v(const char* l, int* d, const uint32_t i) {
+    sendUniformValuesBasic(l, d, i, glUniform1iv);
+}
+void Engine::Renderer::sendUniform1v(const char* l, float* d, const uint32_t i) {
+    sendUniformValuesBasic(l, d, i, glUniform1fv);
+}
+void Engine::Renderer::sendUniform1vSafe(const char* l, const std::vector<float>& d, const uint32_t i) {
+    sendUniformValuesSafeBasic(l, d.data(), i, glUniform1fv);
+}
+void Engine::Renderer::sendUniform1vSafe(const char* l, const std::vector<double>& d, const uint32_t i) {
+    sendUniformValuesSafeBasic(l, d.data(), i, glUniform1dv);
+}
+void Engine::Renderer::sendUniform1vSafe(const char* l, const std::vector<int>& d, const uint32_t i) {
+    sendUniformValuesSafeBasic(l, d.data(), i, glUniform1iv);
+}
+void Engine::Renderer::sendUniform1vSafe(const char* l, float* d, const uint32_t i) {
+    sendUniformValuesSafeBasic(l, d, i, glUniform1fv);
+}
+void Engine::Renderer::sendUniform1vSafe(const char* l, double* d, const uint32_t i) {
+    sendUniformValuesSafeBasic(l, d, i, glUniform1dv);
+}
+void Engine::Renderer::sendUniform1vSafe(const char* l, int* d, const uint32_t i) {
+    sendUniformValuesSafeBasic(l, d, i, glUniform1iv);
+}
+
+
+
+
+
+void Engine::Renderer::sendUniform2(const char* l, const glm::dvec2& v) {
+    sendUniformValues2(l, v.x, v.y, glUniform2d);
+}
+void Engine::Renderer::sendUniform2(const char* l, const glm::ivec2& v) {
+    sendUniformValues2(l, v.x, v.y, glUniform2i);
+}
+void Engine::Renderer::sendUniform2(const char* l, const glm::vec2& v) {
+    sendUniformValues2(l, v.x, v.y, glUniform2f);
+}
+void Engine::Renderer::sendUniform2(const char* l, const glm::uvec2& v) {
+    sendUniformValues2(l, v.x, v.y, glUniform2ui);
+}
+void Engine::Renderer::sendUniform2Safe(const char* l, const glm::dvec2& v) {
+    sendUniformValues2Safe(l, v.x, v.y, glUniform2d);
+}
+void Engine::Renderer::sendUniform2Safe(const char* l, const glm::ivec2& v) {
+    sendUniformValues2Safe(l, v.x, v.y, glUniform2i);
+}
+void Engine::Renderer::sendUniform2Safe(const char* l, const glm::vec2& v) {
+    sendUniformValues2Safe(l, v.x, v.y, glUniform2f);
+}
+void Engine::Renderer::sendUniform2Safe(const char* l, const glm::uvec2& v) {
+    sendUniformValues2Safe(l, v.x, v.y, glUniform2ui);
+}
+void Engine::Renderer::sendUniform2(const char* l, double x, double y) {
+    sendUniformValues2(l, x, y, glUniform2d);
+}
+void Engine::Renderer::sendUniform2(const char* l, int x, int y) {
+    sendUniformValues2(l, x, y, glUniform2i);
+}
+void Engine::Renderer::sendUniform2(const char* l, float x, float y) {
+    sendUniformValues2(l, x, y, glUniform2f);
+}
+void Engine::Renderer::sendUniform2(const char* l, uint32_t x, uint32_t y) {
+    sendUniformValues2(l, x, y, glUniform2ui);
+}
+void Engine::Renderer::sendUniform2Safe(const char* l, double x, double y) {
+    sendUniformValues2Safe(l, x, y, glUniform2d);
+}
+void Engine::Renderer::sendUniform2Safe(const char* l, int x, int y) {
+    sendUniformValues2Safe(l, x, y, glUniform2i);
+}
+void Engine::Renderer::sendUniform2Safe(const char* l, float x, float y) {
+    sendUniformValues2Safe(l, x, y, glUniform2f);
+}
+void Engine::Renderer::sendUniform2Safe(const char* l, uint32_t x, uint32_t y) {
+    sendUniformValues2Safe(l, x, y, glUniform2ui);
+}
+void Engine::Renderer::sendUniform2v(const char* l, const std::vector<glm::dvec2>& d, const uint32_t i) {
+    sendUniformValues(l, d.data(), i, glUniform2dv);
+}
+void Engine::Renderer::sendUniform2v(const char* l, const std::vector<glm::ivec2>& d, const uint32_t i) {
+    sendUniformValues(l, d.data(), i, glUniform2iv);
+}
+void Engine::Renderer::sendUniform2v(const char* l, const std::vector<glm::vec2>& d, const uint32_t i) {
+    sendUniformValues(l, d.data(), i, glUniform2fv);
+}
+void Engine::Renderer::sendUniform2v(const char* l, glm::dvec2* d, const uint32_t i) {
+    sendUniformValues(l, d, i, glUniform2dv);
+}
+void Engine::Renderer::sendUniform2v(const char* l, glm::ivec2* d, const uint32_t i) {
+    sendUniformValues(l, d, i, glUniform2iv);
+}
+void Engine::Renderer::sendUniform2v(const char* l, glm::vec2* d, const uint32_t i) {
+    sendUniformValues(l, d, i, glUniform2fv);
+}
+void Engine::Renderer::sendUniform2vSafe(const char* l, const std::vector<glm::vec2>& d, const uint32_t i) {
+    sendUniformValuesSafe(l, d.data(), i, glUniform2fv);
+}
+void Engine::Renderer::sendUniform2vSafe(const char* l, glm::vec2* d, const uint32_t i) {
+    sendUniformValuesSafe(l, d, i, glUniform2fv);
+}
+void Engine::Renderer::sendUniform2vSafe(const char* l, const std::vector<glm::dvec2>& d, const uint32_t i) {
+    sendUniformValuesSafe(l, d.data(), i, glUniform2dv);
+}
+void Engine::Renderer::sendUniform2vSafe(const char* l, glm::dvec2* d, const uint32_t i) {
+    sendUniformValuesSafe(l, d, i, glUniform2dv);
+}
+void Engine::Renderer::sendUniform2vSafe(const char* l, const std::vector<glm::ivec2>& d, const uint32_t i) {
+    sendUniformValuesSafe(l, d.data(), i, glUniform2iv);
+}
+void Engine::Renderer::sendUniform2vSafe(const char* l, glm::ivec2* d, const uint32_t i) {
+    sendUniformValuesSafe(l, d, i, glUniform2iv);
+}
+
+
+
+
+
+
+void Engine::Renderer::sendUniform3(const char* l, const glm::dvec3& v) {
+    sendUniformValues3(l, v.x, v.y, v.z, glUniform3d);
+}
+void Engine::Renderer::sendUniform3(const char* l, const glm::ivec3& v) {
+    sendUniformValues3(l, v.x, v.y, v.z, glUniform3i);
+}
+void Engine::Renderer::sendUniform3(const char* l, const glm::vec3& v) {
+    sendUniformValues3(l, v.x, v.y, v.z, glUniform3f);
+}
+void Engine::Renderer::sendUniform3(const char* l, const glm::uvec3& v) {
+    sendUniformValues3(l, v.x, v.y, v.z, glUniform3ui);
+}
+void Engine::Renderer::sendUniform3Safe(const char* l, const glm::dvec3& v) {
+    sendUniformValues3Safe(l, v.x, v.y, v.z, glUniform3d);
+}
+void Engine::Renderer::sendUniform3Safe(const char* l, const glm::ivec3& v) {
+    sendUniformValues3Safe(l, v.x, v.y, v.z, glUniform3i);
+}
+void Engine::Renderer::sendUniform3Safe(const char* l, const glm::vec3& v) {
+    sendUniformValues3Safe(l, v.x, v.y, v.z, glUniform3f);
+}
+void Engine::Renderer::sendUniform3Safe(const char* l, const glm::uvec3& v) {
+    sendUniformValues3Safe(l, v.x, v.y, v.z, glUniform3ui);
+}
+void Engine::Renderer::sendUniform3(const char* l, double x, double y, double z) {
+    sendUniformValues3(l, x, y, z, glUniform3d);
+}
+void Engine::Renderer::sendUniform3(const char* l, int x, int y, int z) {
+    sendUniformValues3(l, x, y, z, glUniform3i);
+}
+void Engine::Renderer::sendUniform3(const char* l, float x, float y, float z) {
+    sendUniformValues3(l, x, y, z, glUniform3f);
+}
+void Engine::Renderer::sendUniform3(const char* l, uint32_t x, uint32_t y, uint32_t z) {
+    sendUniformValues3(l, x, y, z, glUniform3ui);
+}
+void Engine::Renderer::sendUniform3Safe(const char* l, double x, double y, double z) {
+    sendUniformValues3Safe(l, x, y, z, glUniform3d);
+}
+void Engine::Renderer::sendUniform3Safe(const char* l, int x, int y, int z) {
+    sendUniformValues3Safe(l, x, y, z, glUniform3i);
+}
+void Engine::Renderer::sendUniform3Safe(const char* l, float x, float y, float z) {
+    sendUniformValues3Safe(l, x, y, z, glUniform3f);
+}
+void Engine::Renderer::sendUniform3Safe(const char* l, uint32_t x, uint32_t y, uint32_t z) {
+    sendUniformValues3Safe(l, x, y, z, glUniform3ui);
+}
+void Engine::Renderer::sendUniform3v(const char* l, const std::vector<glm::dvec3>& d, const uint32_t i) {
+    sendUniformValues(l, d.data(), i, glUniform3dv);
+}
+void Engine::Renderer::sendUniform3v(const char* l, const std::vector<glm::ivec3>& d, const uint32_t i) {
+    sendUniformValues(l, d.data(), i, glUniform3iv);
+}
+void Engine::Renderer::sendUniform3v(const char* l, const std::vector<glm::vec3>& d, const uint32_t i) {
+    sendUniformValues(l, d.data(), i, glUniform3fv);
+}
+void Engine::Renderer::sendUniform3v(const char* l, glm::dvec3* d, const uint32_t i) {
+    sendUniformValues(l, d, i, glUniform3dv);
+}
+void Engine::Renderer::sendUniform3v(const char* l, glm::ivec3* d, const uint32_t i) {
+    sendUniformValues(l, d, i, glUniform3iv);
+}
+void Engine::Renderer::sendUniform3v(const char* l, glm::vec3* d, const uint32_t i) {
+    sendUniformValues(l, d, i, glUniform3fv);
+}
+void Engine::Renderer::sendUniform3vSafe(const char* l, const std::vector<glm::vec3>& d, const uint32_t i) {
+    sendUniformValuesSafe(l, d.data(), i, glUniform3fv);
+}
+void Engine::Renderer::sendUniform3vSafe(const char* l, glm::vec3* d, const uint32_t i) {
+    sendUniformValuesSafe(l, d, i, glUniform3fv);
+}
+void Engine::Renderer::sendUniform3vSafe(const char* l, const std::vector<glm::dvec3>& d, const uint32_t i) {
+    sendUniformValuesSafe(l, d.data(), i, glUniform3dv);
+}
+void Engine::Renderer::sendUniform3vSafe(const char* l, glm::dvec3* d, const uint32_t i) {
+    sendUniformValuesSafe(l, d, i, glUniform3dv);
+}
+void Engine::Renderer::sendUniform3vSafe(const char* l, const std::vector<glm::ivec3>& d, const uint32_t i) {
+    sendUniformValuesSafe(l, d.data(), i, glUniform3iv);
+}
+void Engine::Renderer::sendUniform3vSafe(const char* l, glm::ivec3* d, const uint32_t i) {
+    sendUniformValuesSafe(l, d, i, glUniform3iv);
+}
+
+
+
+
+void Engine::Renderer::sendUniform4(const char* l, const glm::dvec4& v) {
+    sendUniformValues4(l, v.x, v.y, v.z, v.w, glUniform4d);
+}
+void Engine::Renderer::sendUniform4(const char* l, const glm::ivec4& v) {
+    sendUniformValues4(l, v.x, v.y, v.z, v.w, glUniform4i);
+}
+void Engine::Renderer::sendUniform4(const char* l, const glm::vec4& v) {
+    sendUniformValues4(l, v.x, v.y, v.z, v.w, glUniform4f);
+}
+void Engine::Renderer::sendUniform4(const char* l, const glm::uvec4& v) {
+    sendUniformValues4(l, v.x, v.y, v.z, v.w, glUniform4ui);
+}
+void Engine::Renderer::sendUniform4Safe(const char* l, const glm::dvec4& v) {
+    sendUniformValues4Safe(l, v.x, v.y, v.z, v.w, glUniform4d);
+}
+void Engine::Renderer::sendUniform4Safe(const char* l, const glm::ivec4& v) {
+    sendUniformValues4Safe(l, v.x, v.y, v.z, v.w, glUniform4i);
+}
+void Engine::Renderer::sendUniform4Safe(const char* l, const glm::vec4& v) {
+    sendUniformValues4Safe(l, v.x, v.y, v.z, v.w, glUniform4f);
+}
+void Engine::Renderer::sendUniform4Safe(const char* l, const glm::uvec4& v) {
+    sendUniformValues4Safe(l, v.x, v.y, v.z, v.w, glUniform4ui);
+}
+void Engine::Renderer::sendUniform4(const char* l, double x, double y, double z, double w) {
+    sendUniformValues4(l, x, y, z, w, glUniform4d);
+}
+void Engine::Renderer::sendUniform4(const char* l, int x, int y, int z, int w) {
+    sendUniformValues4(l, x, y, z, w, glUniform4i);
+}
+void Engine::Renderer::sendUniform4(const char* l, float x, float y, float z, float w) {
+    sendUniformValues4(l, x, y, z, w, glUniform4f);
+}
+void Engine::Renderer::sendUniform4(const char* l, uint32_t x, uint32_t y, uint32_t z, uint32_t w) {
+    sendUniformValues4(l, x, y, z, w, glUniform4ui);
+}
+void Engine::Renderer::sendUniform4Safe(const char* l, double x, double y, double z, double w) {
+    sendUniformValues4Safe(l, x, y, z, w, glUniform4d);
+}
+void Engine::Renderer::sendUniform4Safe(const char* l, int x, int y, int z, int w) {
+    sendUniformValues4Safe(l, x, y, z, w, glUniform4i);
+}
+void Engine::Renderer::sendUniform4Safe(const char* l, float x, float y, float z, float w) {
+    sendUniformValues4Safe(l, x, y, z, w, glUniform4f);
+}
+void Engine::Renderer::sendUniform4Safe(const char* l, uint32_t x, uint32_t y, uint32_t z, uint32_t w) {
+    sendUniformValues4Safe(l, x, y, z, w, glUniform4ui);
+}
+void Engine::Renderer::sendUniform4v(const char* l, const std::vector<glm::dvec4>& d, const uint32_t i) {
+    sendUniformValues(l, d.data(), i, glUniform4dv);
+}
+void Engine::Renderer::sendUniform4v(const char* l, const std::vector<glm::ivec4>& d, const uint32_t i) {
+    sendUniformValues(l, d.data(), i, glUniform4iv);
+}
+void Engine::Renderer::sendUniform4v(const char* l, const std::vector<glm::vec4>& d, const uint32_t i) {
+    sendUniformValues(l, d.data(), i, glUniform4fv);
+}
+void Engine::Renderer::sendUniform4v(const char* l, glm::dvec4* d, const uint32_t i) {
+    sendUniformValues(l, d, i, glUniform4dv);
+}
+void Engine::Renderer::sendUniform4v(const char* l, glm::ivec4* d, const uint32_t i) {
+    sendUniformValues(l, d, i, glUniform4iv);
+}
+void Engine::Renderer::sendUniform4v(const char* l, glm::vec4* d, const uint32_t i) {
+    sendUniformValues(l, d, i, glUniform4fv);
+}
+void Engine::Renderer::sendUniform4vSafe(const char* l, const std::vector<glm::vec4>& d, const uint32_t i) {
+    sendUniformValuesSafe(l, d.data(), i, glUniform4fv);
+}
+void Engine::Renderer::sendUniform4vSafe(const char* l, glm::vec4* d, const uint32_t i) {
+    sendUniformValuesSafe(l, d, i, glUniform4fv);
+}
+void Engine::Renderer::sendUniform4vSafe(const char* l, const std::vector<glm::dvec4>& d, const uint32_t i) {
+    sendUniformValuesSafe(l, d.data(), i, glUniform4dv);
+}
+void Engine::Renderer::sendUniform4vSafe(const char* l, glm::dvec4* d, const uint32_t i) {
+    sendUniformValuesSafe(l, d, i, glUniform4dv);
+}
+void Engine::Renderer::sendUniform4vSafe(const char* l, const std::vector<glm::ivec4>& d, const uint32_t i) {
+    sendUniformValuesSafe(l, d.data(), i, glUniform4iv);
+}
+void Engine::Renderer::sendUniform4vSafe(const char* l, glm::ivec4* d, const uint32_t i) {
+    sendUniformValuesSafe(l, d, i, glUniform4iv);
+}
+
+
+
+void Engine::Renderer::sendUniformMatrix2(const char* l, const glm::mat2& m) {
+    sendUniformMatrix(l, m, glUniformMatrix2fv);
+}
+void Engine::Renderer::sendUniformMatrix2v(const char* l, const std::vector<glm::mat2>& m, const uint32_t count) {
+    sendUniformMatrixV<glm::mat2::value_type>(l, m, count, glUniformMatrix2fv);
+}
+void Engine::Renderer::sendUniformMatrix2(const char* l, const glm::dmat2& m) {
+    sendUniformMatrix(l, m, glUniformMatrix2dv);
+}
+void Engine::Renderer::sendUniformMatrix2v(const char* l, const std::vector<glm::dmat2>& m, const uint32_t count) {
+    sendUniformMatrixV<glm::dmat2::value_type>(l, m, count, glUniformMatrix2dv);
+}
+void Engine::Renderer::sendUniformMatrix2Safe(const char* l, const glm::mat2& m) {
+    sendUniformMatrixSafe(l, m, glUniformMatrix2fv);
+}
+void Engine::Renderer::sendUniformMatrix2vSafe(const char* l, const std::vector<glm::mat2>& m, const uint32_t count) {
+    sendUniformMatrixVSafe<glm::mat2::value_type>(l, m, count, glUniformMatrix2fv);
+}
+void Engine::Renderer::sendUniformMatrix2Safe(const char* l, const glm::dmat2& m) {
+    sendUniformMatrixSafe(l, m, glUniformMatrix2dv);
+}
+void Engine::Renderer::sendUniformMatrix2vSafe(const char* l, const std::vector<glm::dmat2>& m, const uint32_t count) {
+    sendUniformMatrixVSafe<glm::dmat2::value_type>(l, m, count, glUniformMatrix2dv);
+}
+
+
+
+
+void Engine::Renderer::sendUniformMatrix3(const char* l, const glm::mat3& m) {
+    sendUniformMatrix(l, m, glUniformMatrix3fv);
+}
+void Engine::Renderer::sendUniformMatrix3v(const char* l, const std::vector<glm::mat3>& m, const uint32_t count) {
+    sendUniformMatrixV<glm::mat3::value_type>(l, m, count, glUniformMatrix3fv);
+}
+void Engine::Renderer::sendUniformMatrix3(const char* l, const glm::dmat3& m) {
+    sendUniformMatrix(l, m, glUniformMatrix3dv);
+}
+void Engine::Renderer::sendUniformMatrix3v(const char* l, const std::vector<glm::dmat3>& m, const uint32_t count) {
+    sendUniformMatrixV<glm::dmat3::value_type>(l, m, count, glUniformMatrix3dv);
+}
+void Engine::Renderer::sendUniformMatrix3Safe(const char* l, const glm::mat3& m) {
+    sendUniformMatrixSafe(l, m, glUniformMatrix3fv);
+}
+void Engine::Renderer::sendUniformMatrix3vSafe(const char* l, const std::vector<glm::mat3>& m, const uint32_t count) {
+    sendUniformMatrixVSafe<glm::mat3::value_type>(l, m, count, glUniformMatrix3fv);
+}
+void Engine::Renderer::sendUniformMatrix3Safe(const char* l, const glm::dmat3& m) {
+    sendUniformMatrixSafe(l, m, glUniformMatrix3dv);
+}
+void Engine::Renderer::sendUniformMatrix3vSafe(const char* l, const std::vector<glm::dmat3>& m, const uint32_t count) {
+    sendUniformMatrixVSafe<glm::dmat3::value_type>(l, m, count, glUniformMatrix3dv);
+}
+
+
+
+
+
+void Engine::Renderer::sendUniformMatrix4(const char* l, const glm::mat4& m) {
+    sendUniformMatrix(l, m, glUniformMatrix4fv);
+}
+void Engine::Renderer::sendUniformMatrix4v(const char* l, const std::vector<glm::mat4>& m, const uint32_t count) {
+    sendUniformMatrixV<glm::mat4::value_type>(l, m, count, glUniformMatrix4fv);
+}
+void Engine::Renderer::sendUniformMatrix4(const char* l, const glm::dmat4& m) {
+    sendUniformMatrix(l, m, glUniformMatrix4dv);
+}
+void Engine::Renderer::sendUniformMatrix4v(const char* l, const std::vector<glm::dmat4>& m, const uint32_t count) {
+    sendUniformMatrixV<glm::dmat4::value_type>(l, m, count, glUniformMatrix4dv);
+}
+void Engine::Renderer::sendUniformMatrix4Safe(const char* l, const glm::mat4& m) {
+    sendUniformMatrixSafe(l, m, glUniformMatrix4fv);
+}
+void Engine::Renderer::sendUniformMatrix4vSafe(const char* l, const std::vector<glm::mat4>& m, const uint32_t count) {
+    sendUniformMatrixVSafe<glm::mat4::value_type>(l, m, count, glUniformMatrix4fv);
+}
+void Engine::Renderer::sendUniformMatrix4Safe(const char* l, const glm::dmat4& m) {
+    sendUniformMatrixSafe(l, m, glUniformMatrix4dv);
+}
+void Engine::Renderer::sendUniformMatrix4vSafe(const char* l, const std::vector<glm::dmat4>& m, const uint32_t count) {
+    sendUniformMatrixVSafe<glm::dmat4::value_type>(l, m, count, glUniformMatrix4dv);
+}
+
+#pragma endregion

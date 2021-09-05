@@ -3,7 +3,7 @@
 
 #pragma region Directional Light
 
-Engine::priv::GLDeferredDirectionalLightShadowInfo::GLDeferredDirectionalLightShadowInfo(Camera& camera, DirectionalLight& directionalLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, float orthographicRadius, float orthoNear, float orthoFar)
+Engine::priv::GLDeferredDirectionalLightShadowInfo::GLDeferredDirectionalLightShadowInfo(const Camera& camera, const DirectionalLight& directionalLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, float orthographicRadius, float orthoNear, float orthoFar)
     : m_TexelSize{ glm::vec2{1.0f / static_cast<float>(shadowMapWidth), 1.0f / static_cast<float>(shadowMapHeight)} }
 {
     m_ShadowWidth  = shadowMapWidth;
@@ -15,7 +15,7 @@ Engine::priv::GLDeferredDirectionalLightShadowInfo::GLDeferredDirectionalLightSh
     setLookAt(directionalLight.getComponent<ComponentTransform>()->getForward());
     initGL();
 }
-void Engine::priv::GLDeferredDirectionalLightShadowInfo::calculateSplits(Camera& camera) {
+void Engine::priv::GLDeferredDirectionalLightShadowInfo::calculateSplits(const Camera& camera) {
     float nd     = camera.getNear();
     float fd     = camera.getFar();
     float lambda = 0.3f;
@@ -59,17 +59,15 @@ bool Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return true;
 }
-void Engine::priv::GLDeferredDirectionalLightShadowInfo::bindUniformsReading(int textureStartSlot, Camera& camera) const noexcept {
-    std::vector<glm::mat4> lightMatrices(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS);
-    std::vector<float> vClips(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS);
+void Engine::priv::GLDeferredDirectionalLightShadowInfo::bindUniformsReading(int textureStartSlot, const Camera& camera) noexcept {
     for (uint32_t i = 0; i < (uint32_t)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS; ++i) {
-        glm::vec4 vView{ 0.0f, 0.0f, m_CascadeDistances[i + 1], 1.0f };
-        glm::vec4 vClip = camera.getProjection() * vView;
-        lightMatrices[i] = m_LightOrthoProjection[i] * m_LightViewMatrix;
-        vClips[i] = vClip.z;
+        const glm::vec4 vView{ 0.0f, 0.0f, m_CascadeDistances[i + 1], 1.0f };
+        const glm::vec4 vClip = camera.getProjection() * vView;
+        m_BufferLightMatrices[i] = m_LightOrthoProjection[i] * m_LightViewMatrix;
+        m_BufferVClips[i] = vClip.z;
     }
-    Engine::Renderer::sendUniformMatrix4vSafe("LightMatrix[0]", lightMatrices, (uint32_t)lightMatrices.size());
-    Engine::Renderer::sendUniform1vSafe("CascadeEndClipSpace[0]", vClips, (uint32_t)vClips.size());
+    Engine::Renderer::sendUniformMatrix4vSafe("LightMatrix[0]", m_BufferLightMatrices, (uint32_t)m_BufferLightMatrices.size());
+    Engine::Renderer::sendUniform1vSafe("CascadeEndClipSpace[0]", m_BufferVClips, (uint32_t)m_BufferVClips.size());
     Engine::Renderer::sendTexturesSafe("ShadowTexture[0]", m_DepthTexture.data(), textureStartSlot, GL_TEXTURE_2D, (int)m_DepthTexture.size());
 
     Engine::Renderer::sendUniform1Safe("ShadowEnabled", 1);
@@ -81,11 +79,11 @@ void Engine::priv::GLDeferredDirectionalLightShadowInfo::bindUniformsWriting(int
     Engine::Renderer::Settings::clear(false, true, false);
     Engine::Renderer::sendUniformMatrix4Safe("LightMatrix", m_LightOrthoProjection[cascadeMapIndex] * m_LightViewMatrix);
 }
-void Engine::priv::GLDeferredDirectionalLightShadowInfo::calculateOrthographicProjections(Camera& camera, DirectionalLight& directionalLight) {
-    const float angleRadians = (camera.getAngle() / 2.0f) + 0.5f;
-    const float tanHalfHFOV  = glm::tan(angleRadians);
-    const float tanHalfVFOV  = glm::tan(angleRadians) / camera.getAspectRatio();
-    auto cameraViewInverse   = glm::inverse(camera.getView());
+void Engine::priv::GLDeferredDirectionalLightShadowInfo::calculateOrthographicProjections(const Camera& camera, const DirectionalLight& directionalLight) {
+    const float angleRadians       = (camera.getAngle() / 2.0f) + 0.5f;
+    const float tanHalfHFOV        = glm::tan(angleRadians);
+    const float tanHalfVFOV        = glm::tan(angleRadians) / camera.getAspectRatio();
+    const auto cameraViewInverse   = glm::inverse(camera.getView());
     for (uint32_t i = 0; i < (uint32_t)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS; i++) {
         const float xNear = std::max((m_CascadeDistances[i + 0] - 1.0f), 0.0f) * tanHalfHFOV;
         const float yNear = std::max((m_CascadeDistances[i + 0] - 1.0f), 0.0f) * tanHalfVFOV;

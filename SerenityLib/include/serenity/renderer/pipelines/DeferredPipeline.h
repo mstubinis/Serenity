@@ -22,6 +22,7 @@ namespace Engine::priv {
 #include <serenity/renderer/FullscreenItems.h>
 #include <serenity/containers/PartialArray.h>
 #include <serenity/resources/font/Font.h>
+#include <serenity/renderer/text/TextRenderer.h>
 
 namespace Engine::priv {
     class DeferredPipeline final : public IRenderingPipeline {
@@ -54,9 +55,7 @@ namespace Engine::priv {
             FullscreenQuad                                     m_FullscreenQuad;
             FullscreenTriangle                                 m_FullscreenTriangle;
 
-            Engine::partial_array<glm::vec3, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_Points;  // 4 points per char
-            Engine::partial_array<glm::vec2, Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 4>    m_Text_UVs;     // 4 uvs per char
-            Engine::partial_array<uint32_t,  Font::MAX_CHARACTERS_RENDERED_PER_FRAME * 6>    m_Text_Indices; // 6 ind per char
+            TextRenderer                                       m_TextRenderer;
 
             UniformBufferObject*                               m_UBOCamera = nullptr;
             UBOCameraDataStruct*                               m_CameraUBODataPtr = nullptr;
@@ -99,10 +98,6 @@ namespace Engine::priv {
 
             void internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, TextureCubemap&, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeTextureSize, uint32_t preEnvFilterSize);
             void internal_generate_brdf_lut(Handle shaderProgram, uint32_t brdfSize, int numSamples);
-
-            void internal_render_2d_text_left(std::string_view text, const Font&, float newLineGlyphHeight, float& x, float& y, float z);
-            void internal_render_2d_text_center(std::string_view text, const Font&, float newLineGlyphHeight, float& x, float& y, float z);
-            void internal_render_2d_text_right(std::string_view text, const Font&, float newLineGlyphHeight, float& x, float& y, float z);
 
             void internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>&, Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment, const glm::vec4& scissor);
             void internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>&, uint32_t textureAddress,int textureWidth, int textureHeight, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment, const glm::vec4& scissor);
@@ -208,14 +203,14 @@ namespace Engine::priv {
             bool buildShadowCaster(ProjectionLight&) override;
             void setShadowDirectionalLightDirection(DirectionalLight&, const glm::vec3& direction) override;
 
-            void sendGPUDataAllLights(Scene&, Camera&) override;
+            void sendGPUDataAllLights(const Scene&, const Camera&) override;
             void sendGPUDataGI(Skybox*) override;
-            void sendGPUDataLight(Camera&, SunLight&,         const std::string& start) override;
-            int  sendGPUDataLight(Camera&, PointLight&,       const std::string& start) override;
-            void sendGPUDataLight(Camera&, DirectionalLight&, const std::string& start) override;
-            int  sendGPUDataLight(Camera&, SpotLight&,        const std::string& start) override;
-            int  sendGPUDataLight(Camera&, RodLight&,         const std::string& start) override;
-            int  sendGPUDataLight(Camera&, ProjectionLight&,  const std::string& start) override;
+            void sendGPUDataLight(const Camera&, const SunLight&,         const std::string& start) override;
+            int  sendGPUDataLight(const Camera&, const PointLight&,       const std::string& start) override;
+            void sendGPUDataLight(const Camera&, const DirectionalLight&, const std::string& start) override;
+            int  sendGPUDataLight(const Camera&, const SpotLight&,        const std::string& start) override;
+            int  sendGPUDataLight(const Camera&, const RodLight&,         const std::string& start) override;
+            int  sendGPUDataLight(const Camera&, const ProjectionLight&,  const std::string& start) override;
 
             void renderSkybox(Skybox*, Handle shaderProgram, Scene&, Viewport&, Camera&) override;
             void renderSunLight(Camera&, SunLight&, Viewport&) override;

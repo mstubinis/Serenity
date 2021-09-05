@@ -93,7 +93,7 @@ class ModelInstance final : public Observer {
 
         ~ModelInstance();
 
-        void onEvent(const Event& e) override;
+        void onEvent(const Event&) override;
 
         inline void setShadowCaster(bool isShadowCaster) noexcept { m_IsShadowCaster = isShadowCaster; }
         inline bool isShadowCaster() const noexcept { return m_IsShadowCaster; }
@@ -143,7 +143,7 @@ class ModelInstance final : public Observer {
         inline void setPassedRenderCheck(bool passed) noexcept { m_PassedRenderCheck = passed; }
 
 
-        void setStage(RenderStage stage, ComponentModel& componentModel);
+        void setStage(RenderStage, ComponentModel&);
 
         inline void playAnimation(std::string_view animName, float startTime, float endTime = -1.0f, uint32_t requestedLoops = 1) {
             m_Animations.emplace_animation(m_MeshHandle, animName, startTime, endTime, requestedLoops);
@@ -168,7 +168,7 @@ class ModelInstance final : public Observer {
 
         void setPosition(float x, float y, float z);
 
-        void setOrientation(const glm::quat& orientation);
+        void setOrientation(const glm::quat&);
         void setOrientation(float x, float y, float z);
 
         void setScale(float x, float y, float z);

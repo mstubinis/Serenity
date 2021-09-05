@@ -25,10 +25,7 @@ void Engine::priv::EngineEventHandler::internal_dispatch_event(Event&& inEvent) 
 
 void Engine::priv::EngineEventHandler::internal_on_event_resize(Window& window, uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize) {
     m_RenderModule._resize(newWindowWidth, newWindowHeight);
-    if (saveSize) {
-        window.m_Data.m_VideoMode.width  = newWindowWidth;
-        window.m_Data.m_VideoMode.height = newWindowHeight;
-    }
+    window.m_Data.internal_on_resize(newWindowWidth, newWindowHeight, saveSize);
     //resize cameras and viewports here
     for (auto& scene : m_ResourceManager.scenes()) {
         if (scene) {
@@ -75,10 +72,11 @@ void Engine::priv::EngineEventHandler::internal_on_event_text_entered(Window& wi
     internal_dispatch_event(Event{ EventType::TextEntered, EventTextEntered{ unicode } });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_key_pressed(Window& window, uint32_t key) {
-    m_EventModule.onEventKeyPressed(key + 1);
-    Game::onKeyPressed(window, key + 1);
+    ++key;
+    m_EventModule.onEventKeyPressed(key);
+    Game::onKeyPressed(window, key);
 
-    EventKeyboard e{ (KeyboardKey::Key)(key + 1) };
+    EventKeyboard e{ KeyboardKey::Key(key) };
     if (Engine::isKeyDown(KeyboardKey::LeftControl) || Engine::isKeyDown(KeyboardKey::RightControl)) e.control = true;
     if (Engine::isKeyDown(KeyboardKey::LeftAlt)     || Engine::isKeyDown(KeyboardKey::RightAlt))     e.alt     = true;
     if (Engine::isKeyDown(KeyboardKey::LeftShift)   || Engine::isKeyDown(KeyboardKey::RightShift))   e.shift   = true;
@@ -87,10 +85,11 @@ void Engine::priv::EngineEventHandler::internal_on_event_key_pressed(Window& win
     internal_dispatch_event(Event{ EventType::KeyPressed, std::move(e) });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_key_released(Window& window, uint32_t key) {
-    m_EventModule.onEventKeyReleased(key + 1);
-    Game::onKeyReleased(window, key + 1);
+    ++key;
+    m_EventModule.onEventKeyReleased(key);
+    Game::onKeyReleased(window, key);
 
-    EventKeyboard e{ (KeyboardKey::Key)(key + 1) };
+    EventKeyboard e{ KeyboardKey::Key(key) };
     if (Engine::isKeyDown(KeyboardKey::LeftControl) || Engine::isKeyDown(KeyboardKey::RightControl)) e.control = true;
     if (Engine::isKeyDown(KeyboardKey::LeftAlt)     || Engine::isKeyDown(KeyboardKey::RightAlt))     e.alt     = true;
     if (Engine::isKeyDown(KeyboardKey::LeftShift)   || Engine::isKeyDown(KeyboardKey::RightShift))   e.shift   = true;
@@ -104,18 +103,20 @@ void Engine::priv::EngineEventHandler::internal_on_event_mouse_wheel_scrolled(Wi
     internal_dispatch_event(Event{ EventType::MouseWheelMoved, EventMouseWheel{ delta, mouseWheelX, mouseWheelY } });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_mouse_button_pressed(Window& window, uint32_t mouseButton) {
-    m_EventModule.onEventMouseButtonPressed(mouseButton + 1);
-    Game::onMouseButtonPressed(window, mouseButton + 1);
-    internal_dispatch_event(Event{ EventType::MouseButtonPressed, EventMouseButton{ (MouseButton::Button)(mouseButton + 1), window } });
+    ++mouseButton;
+    m_EventModule.onEventMouseButtonPressed(mouseButton);
+    Game::onMouseButtonPressed(window, mouseButton);
+    internal_dispatch_event(Event{ EventType::MouseButtonPressed, EventMouseButton{ MouseButton::Button(mouseButton), window } });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_mouse_button_released(Window& window, uint32_t mouseButton) {
-    m_EventModule.onEventMouseButtonReleased(mouseButton + 1);
-    Game::onMouseButtonReleased(window, mouseButton + 1);
-    internal_dispatch_event(Event{ EventType::MouseButtonReleased, EventMouseButton{ (MouseButton::Button)(mouseButton + 1), window } });
+    ++mouseButton;
+    m_EventModule.onEventMouseButtonReleased(mouseButton);
+    Game::onMouseButtonReleased(window, mouseButton);
+    internal_dispatch_event(Event{ EventType::MouseButtonReleased, EventMouseButton{ MouseButton::Button(mouseButton), window } });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_mouse_moved(Window& window, int mouseX, int mouseY) {
-    float mX = float(mouseX);
-    float mY = float(mouseY);
+    const float mX = float(mouseX);
+    const float mY = float(mouseY);
     if (window.hasFocus()) {
         window.updateMousePosition(mX, mY, false, false);
     }
@@ -157,39 +158,39 @@ void Engine::priv::EngineEventHandler::poll_events(Window& window) {
         switch (e.type) {
             case sf::Event::Closed: {
                 internal_on_event_window_requested_closed(window); break;
-            }case sf::Event::LostFocus: {
+            } case sf::Event::LostFocus: {
                 internal_on_event_lost_focus(window); break;
-            }case sf::Event::GainedFocus: {
+            } case sf::Event::GainedFocus: {
                 internal_on_event_gained_focus(window); break;
-            }case sf::Event::KeyReleased: {
+            } case sf::Event::KeyReleased: {
                 internal_on_event_key_released(window, e.key.code); break;
-            }case sf::Event::KeyPressed: {
+            } case sf::Event::KeyPressed: {
                 internal_on_event_key_pressed(window, e.key.code); break;
-            }case sf::Event::MouseButtonPressed: {
+            } case sf::Event::MouseButtonPressed: {
                 internal_on_event_mouse_button_pressed(window, e.mouseButton.button); break;
-            }case sf::Event::MouseButtonReleased: {
+            } case sf::Event::MouseButtonReleased: {
                 internal_on_event_mouse_button_released(window, e.mouseButton.button); break;
-            }case sf::Event::MouseEntered: {
+            } case sf::Event::MouseEntered: {
                 internal_on_event_mouse_entered(window); break;
-            }case sf::Event::MouseLeft: {
+            } case sf::Event::MouseLeft: {
                 internal_on_event_mouse_left(window); break;
-            }case sf::Event::MouseWheelScrolled: {
+            } case sf::Event::MouseWheelScrolled: {
                 internal_on_event_mouse_wheel_scrolled(window, e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y); break;
-            }case sf::Event::MouseMoved: {
+            } case sf::Event::MouseMoved: {
                 internal_on_event_mouse_moved(window, e.mouseMove.x, e.mouseMove.y); break;
-            }case sf::Event::Resized: {
+            } case sf::Event::Resized: {
                 internal_on_event_resize(window, e.size.width, e.size.height, true); break;
-            }case sf::Event::TextEntered: {
+            } case sf::Event::TextEntered: {
                 internal_on_event_text_entered(window, e.text.unicode); break;
-            }case sf::Event::JoystickButtonPressed: {
+            } case sf::Event::JoystickButtonPressed: {
                 internal_on_event_joystick_button_pressed(window, e.joystickButton.button, e.joystickButton.joystickId); break;
-            }case sf::Event::JoystickButtonReleased: {
+            } case sf::Event::JoystickButtonReleased: {
                 internal_on_event_joystick_button_released(window, e.joystickButton.button, e.joystickButton.joystickId); break;
-            }case sf::Event::JoystickConnected: {
+            } case sf::Event::JoystickConnected: {
                 internal_on_event_joystick_connected(window, e.joystickConnect.joystickId); break;
-            }case sf::Event::JoystickDisconnected: {
+            } case sf::Event::JoystickDisconnected: {
                 internal_on_event_joystick_disconnected(window, e.joystickConnect.joystickId); break;
-            }case sf::Event::JoystickMoved: {
+            } case sf::Event::JoystickMoved: {
                 internal_on_event_joystick_moved(window, e.joystickMove.joystickId, e.joystickMove.position, e.joystickMove.axis); break;
             }
         }

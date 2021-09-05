@@ -22,13 +22,13 @@ uint32_t ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 decimal ModelInstance::m_GlobalDistanceFactor = (decimal)1100.0;
 
 constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
-    auto stage                   = i->getStage();
-    auto& scene                  = *Engine::Resources::getCurrentScene();
-    auto* camera                 = scene.getActiveCamera();
-    Entity parent                = i->getParent();
-    auto transform               = parent.getComponent<ComponentTransform>();
-    glm::mat4 parentWorldMatrix  = transform->getWorldMatrixRendering();
-    auto& animationContainer     = i->getRunningAnimations();
+    const auto stage                   = i->getStage();
+    auto& scene                        = *Engine::Resources::getCurrentScene();
+    auto* camera                       = scene.getActiveCamera();
+    const Entity parent                = i->getParent();
+    const auto transform               = parent.getComponent<ComponentTransform>();
+    const glm::mat4 parentWorldMatrix  = transform->getWorldMatrixRendering();
+    const auto& animationContainer     = i->getRunningAnimations();
 
     Engine::Renderer::sendUniform1Safe("Object_Color", i->getColor().toPackedInt());
     Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->getGodRaysColor().toPackedInt());
@@ -41,19 +41,19 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     if (animationContainer.size() > 0) {
         Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
         Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getTransforms(), (uint32_t)animationContainer.getTransforms().size());
-    }else{
+    } else {
         Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
     }
-    glm::mat4 renderingMatrix = parentWorldMatrix * i->getModelMatrix();
+    const glm::mat4 renderingMatrix = parentWorldMatrix * i->getModelMatrix();
 
     //world space normals
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ renderingMatrix }));
+    const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ renderingMatrix }));
 
     //view space normals
-    //glm::mat4 view = cam.getView();
-    //glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ view * model }));
+    //const glm::mat4 view = cam.getView();
+    //const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ view * model }));
 
-    Engine::Renderer::sendUniformMatrix4Safe("Model", renderingMatrix);
+    Engine::Renderer::sendUniformMatrix4("Model", renderingMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
 };
 constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {

@@ -18,6 +18,12 @@ void Engine::priv::WindowData::internal_on_close(bool skipRenderThisFrame) {
     while (m_SFMLWindow.pollEvent(dummyEvent)); //clear all queued events
     m_SFMLWindow.close();
 }
+void Engine::priv::WindowData::internal_on_resize(uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize) {
+    if (saveSize) {
+        m_VideoMode.width  = newWindowWidth;
+        m_VideoMode.height = newWindowHeight;
+    }
+}
 void Engine::priv::WindowData::internal_on_mouse_wheel_scrolled(float delta, int x, int y) {
     m_MouseDelta += double(delta) * 10.0;
 }

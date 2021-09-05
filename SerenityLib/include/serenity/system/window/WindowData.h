@@ -40,7 +40,7 @@ namespace Engine::priv {
             glm::vec2                       m_MousePosition          = glm::vec2{ 0.0f };
             glm::vec2                       m_MousePosition_Previous = glm::vec2{ 0.0f };
             glm::vec2                       m_MouseDifference        = glm::vec2{ 0.0f };
-            glm::uvec2                      m_OldWindowSize          = glm::uvec2{ 0, 0 };
+            glm::uvec2                      m_OldWindowSize          = glm::uvec2{ 0 };
             sf::VideoMode                   m_VideoMode;
             std::string                     m_IconFile;
             std::string                     m_WindowTitle;
@@ -58,6 +58,7 @@ namespace Engine::priv {
             WindowEventCommandQueue         m_MainThreadToEventThreadQueue;
             std::unique_ptr<std::jthread>   m_EventThread = nullptr;
 
+            void internal_on_resize(uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize);
             void internal_populate_sf_event_queue(bool isUndergoingClosing);
             void internal_process_command_queue();
             void internal_thread_startup(Window&, const std::string& name, std::latch*);

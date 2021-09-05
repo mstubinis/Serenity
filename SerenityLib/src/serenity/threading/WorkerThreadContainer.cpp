@@ -1,9 +1,6 @@
 
 #include <serenity/threading/WorkerThreadContainer.h>
 
-Engine::priv::WorkerThreadContainer::~WorkerThreadContainer() {
-
-}
 void Engine::priv::WorkerThreadContainer::clear() noexcept {
     m_WorkerThreadsHashed.clear();
     m_WorkerThreads.clear();

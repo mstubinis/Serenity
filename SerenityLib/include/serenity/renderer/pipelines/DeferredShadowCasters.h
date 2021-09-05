@@ -12,19 +12,22 @@ namespace Engine::priv {
     class GLDeferredDirectionalLightShadowInfo final : public DirectionalLightShadowData {
         private:
             bool initGL();
-            void calculateSplits(Camera&);
+            void calculateSplits(const Camera&);
         public:
-            glm::vec2  m_TexelSize      = glm::vec2{ 1.0f / DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE, 1.0f / DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE };
-            GLuint     m_FBO            = 0;
-            std::array<GLuint, (size_t)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS>      m_DepthTexture = { 0 };
+            std::array<GLuint, (size_t)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS>  m_DepthTexture        = { 0 };
+            std::vector<glm::mat4>                                                   m_BufferLightMatrices = std::vector<glm::mat4>(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS);
+            std::vector<float>                                                       m_BufferVClips        = std::vector<float>(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS);
+            glm::vec2                                                                m_TexelSize           = glm::vec2{ 1.0f / DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE, 1.0f / DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE };
+            GLuint                                                                   m_FBO                 = 0;
+
 
             GLDeferredDirectionalLightShadowInfo() = delete;
-            GLDeferredDirectionalLightShadowInfo(Camera&, DirectionalLight&, uint32_t shadowMapWidth, uint32_t shadowMapHeight, float orthographicRadius, float orthoNear, float orthoFar);
+            GLDeferredDirectionalLightShadowInfo(const Camera&, const DirectionalLight&, uint32_t shadowMapWidth, uint32_t shadowMapHeight, float orthographicRadius, float orthoNear, float orthoFar);
             ~GLDeferredDirectionalLightShadowInfo();
 
-            void bindUniformsReading(int textureStartSlot, Camera&) const noexcept;
+            void bindUniformsReading(int textureStartSlot, const Camera&) noexcept;
             void bindUniformsWriting(int cascadeMapIndex);
-            void calculateOrthographicProjections(Camera&, DirectionalLight&);
+            void calculateOrthographicProjections(const Camera&, const DirectionalLight&);
     };
     class GLDeferredSunLightShadowInfo final : public SunLightShadowData {
 
@@ -48,7 +51,7 @@ namespace Engine::priv {
             class CasterContainer : public std::vector<std::tuple<LIGHT*, SHADOW_DATA*>> {};
 
             template<class LIGHT, class SHADOW_DATA>
-            class CasterHashMap : public std::unordered_map<LIGHT*, SHADOW_DATA*> {}; //bool is shadow casting enabled or disabled
+            class CasterHashMap : public std::unordered_map<const LIGHT*, SHADOW_DATA*> {}; //bool is shadow casting enabled or disabled
         public:
             CasterContainer<DirectionalLight, GLDeferredDirectionalLightShadowInfo>  m_ShadowCastersDirectional;
             CasterContainer<SunLight,         GLDeferredSunLightShadowInfo>          m_ShadowCastersSun;

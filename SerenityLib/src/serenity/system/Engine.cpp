@@ -230,7 +230,6 @@ void EngineCore::run() {
     auto   updateSimulation  = [this](const float timeElasped, Scene& scene) {
         internal_pre_update(scene, timeElasped);
         internal_update_logic(scene, timeElasped);
-        internal_update_sounds(scene, timeElasped);
     };
     auto   renderSimulation  = [this, accumulator](Scene& scene) {
         const double alpha = accumulator / ENGINE_FIXED_TIMESTEP_VALUE_D;
@@ -248,11 +247,12 @@ void EngineCore::run() {
         accumulator  += m_Misc.m_Dt;
         auto& scene   = *Engine::Resources::getCurrentScene();
         scene.m_SkipRenderThisFrame = false;
-        updateWindows(ENGINE_FIXED_TIMESTEP_VALUE, scene);
+        updateWindows(m_Misc.m_Dt, scene);
         while (accumulator >= ENGINE_FIXED_TIMESTEP_VALUE_D) {
             updateSimulation(ENGINE_FIXED_TIMESTEP_VALUE, scene);
             accumulator -= ENGINE_FIXED_TIMESTEP_VALUE_D;
         }
+        internal_update_sounds(scene, m_Misc.m_Dt);
         renderSimulation(scene);
         internal_cleanup();
         m_DebugManager.calculate();

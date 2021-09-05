@@ -140,14 +140,14 @@ namespace Engine::priv {
             virtual bool buildShadowCaster(ProjectionLight&) = 0;
             virtual void setShadowDirectionalLightDirection(DirectionalLight&, const glm::vec3& direction) = 0;
 
-            virtual void sendGPUDataAllLights(Scene&, Camera&) = 0;
+            virtual void sendGPUDataAllLights(const Scene&, const Camera&) = 0;
             virtual void sendGPUDataGI(Skybox*) = 0;
-            virtual void sendGPUDataLight(Camera&, SunLight&,         const std::string& start) = 0;
-            virtual int  sendGPUDataLight(Camera&, PointLight&,       const std::string& start) = 0;
-            virtual void sendGPUDataLight(Camera&, DirectionalLight&, const std::string& start) = 0;
-            virtual int  sendGPUDataLight(Camera&, SpotLight&,        const std::string& start) = 0;
-            virtual int  sendGPUDataLight(Camera&, RodLight&,         const std::string& start) = 0;
-            virtual int  sendGPUDataLight(Camera&, ProjectionLight&,  const std::string& start) = 0;
+            virtual void sendGPUDataLight(const Camera&, const SunLight&,         const std::string& start) = 0;
+            virtual int  sendGPUDataLight(const Camera&, const PointLight&,       const std::string& start) = 0;
+            virtual void sendGPUDataLight(const Camera&, const DirectionalLight&, const std::string& start) = 0;
+            virtual int  sendGPUDataLight(const Camera&, const SpotLight&,        const std::string& start) = 0;
+            virtual int  sendGPUDataLight(const Camera&, const RodLight&,         const std::string& start) = 0;
+            virtual int  sendGPUDataLight(const Camera&, const ProjectionLight&,  const std::string& start) = 0;
 
             virtual void renderSunLight(Camera&, SunLight&, Viewport&) = 0;
             virtual void renderPointLight(Camera&, PointLight&) = 0;

@@ -257,6 +257,10 @@ Engine::priv::EShaders::particle_vertex =
     "flat varying uint MaterialIndex;\n"
     "flat varying vec4 ParticleColor;\n"
 
+    "const vec3 ParticlePosition = ParticlePositionAndScaleX.xyz;\n"
+    "const float ScaleX = ParticlePositionAndScaleX.w;\n"
+    "const float ScaleY = ParticleScaleYAndRotation.x;\n"
+
     "void main(){\n"
     "    float sine = sin(ParticleScaleYAndRotation.y);\n"
     "    float cose = cos(ParticleScaleYAndRotation.y);\n"
@@ -266,7 +270,7 @@ Engine::priv::EShaders::particle_vertex =
 
     "    vec3 CameraRight = vec3(CameraView[0][0], CameraView[1][0], CameraView[2][0]);\n"
     "    vec3 CameraUp = vec3(CameraView[0][1], CameraView[1][1], CameraView[2][1]);\n"
-    "    vec3 VertexWorldSpace = (ParticlePositionAndScaleX.xyz) + CameraRight * (xPrime) * ParticlePositionAndScaleX.w + CameraUp * (yPrime) * ParticleScaleYAndRotation.x;\n"
+    "    vec3 VertexWorldSpace = (ParticlePosition) + CameraRight * xPrime * ScaleX + CameraUp * yPrime * ScaleY;\n"
 
     "    vec4 worldPos = vec4(VertexWorldSpace, 1.0);\n"
     "    gl_Position = CameraViewProj * worldPos;\n"
@@ -880,19 +884,17 @@ priv::EShaders::particle_frag +=
 "    float alpha = clamp(dist, 0.0, 1.0);\n"
 //////////////////////////////////////////////////////////////////////////
 "    vec4 finalColor = ParticleColor;\n"
-
 "    if(MaterialIndex == 0U)\n"
 "        finalColor *= texture2D(DiffuseTexture0, UV); \n";
-
 for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
-        "    else if (MaterialIndex == " + std::to_string(i) + "U)\n"
-        "        finalColor *= texture2D(DiffuseTexture" + std::to_string(i) + ", UV); \n";
+"    else if (MaterialIndex == " + std::to_string(i) + "U)\n"
+"        finalColor *= texture2D(DiffuseTexture" + std::to_string(i) + ", UV); \n";
 }
-
 priv::EShaders::particle_frag +=
 "    else\n"
-"        finalColor *= texture2D(DiffuseTexture0, UV); \n"
+//"        finalColor *= texture2D(DiffuseTexture0, UV); \n"
+"        finalColor = vec4(1.0, 0.0, 0.0, 1.0); \n"
 
 "    finalColor.a *= alpha;\n"
 

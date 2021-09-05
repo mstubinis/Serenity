@@ -339,6 +339,15 @@
     <Filter Include="Header Files\Engine\Core\Editor\EmbeddedImages">
       <UniqueIdentifier>{8b7133fd-59c3-45f4-a5e9-40a56ba01b4c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Types">
+      <UniqueIdentifier>{24bdb988-38e6-4f18-8313-f99fcae78250}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Renderer\text">
+      <UniqueIdentifier>{b0ef965a-fe68-496c-81fe-ea79cbd3a147}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Renderer\text">
+      <UniqueIdentifier>{a60a1450-2b1d-47a3-b7cb-e1b533298d8a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp">
@@ -955,6 +964,12 @@
     </ClCompile>
     <ClCompile Include="src\serenity\lights\LightIncludes.cpp">
       <Filter>Source Files\Engine\Core\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\types\Timer.cpp">
+      <Filter>Source Files\Engine\Core\Types</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\text\TextRenderer.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\text</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1782,6 +1797,12 @@
     </ClInclude>
     <ClInclude Include="include\serenity\physics\Raycast.h">
       <Filter>Header Files\Engine\Core\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\types\Timer.h">
+      <Filter>Header Files\Engine\Core\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\text\TextRenderer.h">
+      <Filter>Header Files\Engine\Core\Renderer\text</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
