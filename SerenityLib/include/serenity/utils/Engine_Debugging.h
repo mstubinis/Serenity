@@ -9,10 +9,12 @@
 #include <SFML/System.hpp>
 #include <vector>
 #include <string>
+#include <sstream>
 
 namespace Engine::priv {
     class DebugManager {
         private:
+            std::stringstream m_Strm;
             sf::Clock m_Clock;
             sf::Clock m_ClockPhysics;
             sf::Int64 m_LogicTime         = 0;
@@ -33,7 +35,6 @@ namespace Engine::priv {
 
             //general text debugging
             std::vector<std::string> m_Text_Queue;
-
         public:
             void _init();
 
@@ -52,11 +53,12 @@ namespace Engine::priv {
             inline void calculate_sounds() noexcept { m_SoundTime = m_Clock.restart().asMicroseconds(); }
             inline void calculate_render() noexcept { m_RenderTime = m_Clock.restart().asMicroseconds(); }
 
-            [[nodiscard]] std::string updateTimeInMs() const noexcept;
-            [[nodiscard]] std::string physicsTimeInMs() const noexcept;
-            [[nodiscard]] std::string soundsTimeInMs() const noexcept;
-            [[nodiscard]] std::string renderTimeInMs() const noexcept;
-            [[nodiscard]] std::string deltaTimeInMs() const noexcept;
+            [[nodiscard]] std::string updateTimeInMs() noexcept;
+            [[nodiscard]] std::string physicsTimeInMs() noexcept;
+            [[nodiscard]] std::string soundsTimeInMs() noexcept;
+            [[nodiscard]] std::string renderTimeInMs() noexcept;
+            [[nodiscard]] std::string deltaTimeInMs() noexcept;
+
             [[nodiscard]] std::string fps() const noexcept;
 
             [[nodiscard]] inline constexpr double logicTime() const noexcept { return (double)((double)m_LogicTime / m_Divisor); }

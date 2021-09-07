@@ -247,12 +247,12 @@ void EngineCore::run() {
         accumulator  += m_Misc.m_Dt;
         auto& scene   = *Engine::Resources::getCurrentScene();
         scene.m_SkipRenderThisFrame = false;
-        updateWindows(m_Misc.m_Dt, scene);
+        updateWindows(float(m_Misc.m_Dt), scene);
         while (accumulator >= ENGINE_FIXED_TIMESTEP_VALUE_D) {
             updateSimulation(ENGINE_FIXED_TIMESTEP_VALUE, scene);
             accumulator -= ENGINE_FIXED_TIMESTEP_VALUE_D;
         }
-        internal_update_sounds(scene, m_Misc.m_Dt);
+        internal_update_sounds(scene, float(m_Misc.m_Dt));
         renderSimulation(scene);
         internal_cleanup();
         m_DebugManager.calculate();

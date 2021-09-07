@@ -6,6 +6,9 @@ class  Scene;
 namespace Engine::priv {
     class EditorWindowSceneFunctions;
 }
+
+#include <sstream>
+
 namespace Engine::priv {
     class EditorWindowScene final {
         friend class EditorWindowSceneFunctions;
@@ -18,7 +21,9 @@ namespace Engine::priv {
                 Network,
             _TOTAL,};
          private:
-            int  m_Tab = 0;
+            std::stringstream  m_Strm;
+            int                m_Tab = 0;
+
 
             void internal_render_entities(Scene& currentScene);
             void internal_render_renderer(Scene& currentScene);

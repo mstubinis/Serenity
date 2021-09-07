@@ -300,7 +300,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
     ImGui::EndChild();
 }
 void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentScene) {
-    const auto& debugging = Engine::priv::Core::m_Engine->m_DebugManager;
+    auto& debugging = Engine::priv::Core::m_Engine->m_DebugManager;
     const ImVec4 yellow   = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     ImGui::TextColored(yellow, ("Update Time:  " + debugging.updateTimeInMs() + " ms").c_str());
     ImGui::TextColored(yellow, ("Physics Time: " + debugging.physicsTimeInMs() + " ms").c_str());
@@ -311,17 +311,20 @@ void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentSce
 
 #ifdef _WIN32
 
-    auto byte_format = [](DWORDLONG input) {
-        std::stringstream strm;
+    m_Strm.str({});
+    m_Strm.clear();
+    m_Strm << std::fixed << std::setprecision(4);
+
+    auto byte_format = [](DWORDLONG input, std::stringstream& strm) {
         if (input >= 1099511627776) {
-            strm << std::fixed << std::setprecision(4) << ((double)input / 1099511627776.0) << " TB";
-        }else if (input >= 1073741824) {
-            strm << std::fixed << std::setprecision(4) << ((double)input / 1073741824.0) << " GB";
-        }else if (input >= 1048576) {
-            strm << std::fixed << std::setprecision(4) << ((double)input / 1048576.0) << " MB";
-        }else if (input >= 1024) {
-            strm << std::fixed << std::setprecision(4) << ((double)input / 1024.0) << " KB";
-        }else{
+            strm << (double(input) / 1099511627776.0) << " TB";
+        } else if (input >= 1073741824) {
+            strm << (double(input) / 1073741824.0) << " GB";
+        } else if (input >= 1048576) {
+            strm << (double(input) / 1048576.0) << " MB";
+        } else if (input >= 1024) {
+            strm << (double(input) / 1024.0) << " KB";
+        } else {
             strm << input << " bytes";
         }
         return strm.str();
@@ -336,18 +339,18 @@ void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentSce
     DWORDLONG totalPhysMem    = memInfo.ullTotalPhys; //Total Physical Memory (RAM)
     DWORDLONG physMemUsed     = memInfo.ullTotalPhys - memInfo.ullAvailPhys; //Physical Memory currently used
 
-    ImGui::TextColored(yellow, ("Total Virtual Memory: " + byte_format(totalVirtualMem)).c_str());
-    ImGui::TextColored(yellow, ("Virtual Memory Used: " + byte_format(virtualMemUsed)).c_str());
-    ImGui::TextColored(yellow, ("Total Physical Memory (RAM): " + byte_format(totalPhysMem)).c_str());
-    ImGui::TextColored(yellow, ("Physical Memory Used: " + byte_format(physMemUsed)).c_str());
+    ImGui::TextColored(yellow, ("Total Virtual Memory: " + byte_format(totalVirtualMem, m_Strm)).c_str());
+    ImGui::TextColored(yellow, ("Virtual Memory Used: " + byte_format(virtualMemUsed, m_Strm)).c_str());
+    ImGui::TextColored(yellow, ("Total Physical Memory (RAM): " + byte_format(totalPhysMem, m_Strm)).c_str());
+    ImGui::TextColored(yellow, ("Physical Memory Used: " + byte_format(physMemUsed, m_Strm)).c_str());
 
     PROCESS_MEMORY_COUNTERS_EX pmc;
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
 
     SIZE_T virtualMemUsedByMe = pmc.PrivateUsage; //Virtual Memory currently used by current process
     SIZE_T physMemUsedByMe    = pmc.WorkingSetSize; //Physical Memory currently used by current process
-    ImGui::TextColored(yellow, ("Virtual Memory used by current process: " + byte_format(virtualMemUsedByMe)).c_str());
-    ImGui::TextColored(yellow, ("Physical Memory used by current process: " + byte_format(physMemUsedByMe)).c_str());
+    ImGui::TextColored(yellow, ("Virtual Memory used by current process: " + byte_format(virtualMemUsedByMe, m_Strm)).c_str());
+    ImGui::TextColored(yellow, ("Physical Memory used by current process: " + byte_format(physMemUsedByMe, m_Strm)).c_str());
 #endif
 
 }

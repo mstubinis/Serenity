@@ -1171,11 +1171,11 @@ void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, 
 
     Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
     Engine::Renderer::sendTexture("DiffuseTexture", *textureHandle.get<Texture>(), 0);
-    Engine::Renderer::sendUniform4("Object_Color", color);
+    Engine::Renderer::sendUniform4("Object_Color", glm::vec4{1.0f, 1.0f, 1.0f, 1.0f});
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
     Mesh& fontPlane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh().get<Mesh>();
-    m_TextRenderer.renderText(fontPlane, m_Renderer, text, font, textAlignment, x, y, z);
+    m_TextRenderer.renderText(fontPlane, m_Renderer, text, font, color, textAlignment, x, y, z);
 
     renderMesh(fontPlane);
     m_Renderer.unbind(&fontPlane);

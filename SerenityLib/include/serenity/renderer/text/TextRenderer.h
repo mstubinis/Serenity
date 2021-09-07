@@ -32,7 +32,7 @@ namespace Engine::priv {
             void internal_render_text_center(std::string_view text, const Font&, float newLineGlyphHeight, float& x, float& y, float z);
             void internal_render_text_right(std::string_view text, const Font&, float newLineGlyphHeight, float& x, float& y, float z);
         public:
-            void renderText(Mesh&, RenderModule&, const std::string& text, Font&, TextAlignment, float& x, float& y, float z);
+            void renderText(Mesh&, RenderModule&, const std::string& text, Font&, const glm::vec4& color, TextAlignment, float& x, float& y, float z);
 
     };
 }

@@ -59,7 +59,19 @@ class TextStringBuilderColor {
             : TextStringBuilderColor{ std::forward<STRING>(msg), color.r, color.g, color.b, static_cast<uint8_t>(255) }
         {}
 
-        operator std::string();
+        operator std::string() const;
+
+        inline std::string str() const { return operator std::string(); }
+
+        inline std::string operator+(const std::string& rhs) const { return str() + rhs; }
 };
+
+inline std::ostream& operator <<(std::ostream& stream, const TextStringBuilderColor& t) {
+    return stream << t.str();
+}
+inline std::string operator +(const std::string& str, const TextStringBuilderColor& t) {
+    return str + t.str();
+}
+
 
 #endif

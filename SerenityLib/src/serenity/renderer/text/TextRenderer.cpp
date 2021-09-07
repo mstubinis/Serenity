@@ -9,7 +9,7 @@ namespace {
 
 namespace {
     std::vector<std::pair<uint32_t, uint16_t>> BufferNewLineIndices;
-    std::vector<glm::u8vec4>                   BufferColorStack = { WHITE };
+    std::vector<glm::u8vec4>                   BufferColorStack;
 
     uint8_t internal_hex_to_color(const std::string& hex) {
         uint8_t res = 0;
@@ -139,11 +139,18 @@ void Engine::priv::TextRenderer::internal_render_text_right(std::string_view tex
         internal_process_line(text, int(BufferNewLineIndices[t - 1].first) + 1, int(BufferNewLineIndices[t].first), x, y, z, font, newLineGlyphHeight, w, -int(BufferNewLineIndices[t].second));
     }
 }
-void Engine::priv::TextRenderer::renderText(Mesh& fontPlane, RenderModule& renderModule, const std::string& text, Font& font, TextAlignment textAlignment, float& x, float& y, float z) {
+void Engine::priv::TextRenderer::renderText(Mesh& fontPlane, RenderModule& renderModule, const std::string& text, Font& font, const glm::vec4& color, TextAlignment textAlignment, float& x, float& y, float z) {
     m_Text_Points.clear();
     m_Text_UVs.clear();
     m_Text_Colors.clear();
     m_Text_Indices.clear();
+
+    BufferColorStack.emplace_back(
+        static_cast<uint8_t>(color.r * 255.0f), 
+        static_cast<uint8_t>(color.g * 255.0f),
+        static_cast<uint8_t>(color.b * 255.0f),
+        static_cast<uint8_t>(color.a * 255.0f)
+    );
 
     renderModule.bind(&fontPlane);
 
@@ -160,4 +167,6 @@ void Engine::priv::TextRenderer::renderText(Mesh& fontPlane, RenderModule& rende
     fontPlane.modifyVertices(1, m_Text_UVs.data(), m_Text_UVs.size(), MeshModifyFlags::None); //prevent gpu upload until after all the data is collected
     fontPlane.modifyVertices(2, m_Text_Colors.data(), m_Text_Colors.size(), MeshModifyFlags::UploadToGPU);
     fontPlane.modifyIndices(m_Text_Indices.data(), m_Text_Indices.size(), MeshModifyFlags::UploadToGPU);
+
+    BufferColorStack.pop_back();
 }
