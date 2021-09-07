@@ -80,11 +80,11 @@ void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const a
         }
     }
 }
-void Engine::priv::MeshLoader::FinalizeData(MeshCPUData& cpuData, MeshImportedData& data, float threshold) {
-    cpuData.m_Threshold = threshold;
-    PublicMesh::FinalizeVertexData(cpuData, data);
-    cpuData.internal_calculate_radius();
-    cpuData.m_CollisionFactory = (NEW MeshCollisionFactory{ cpuData });
+void Engine::priv::MeshLoader::FinalizeData(MeshCPUData& meshCpuData, MeshImportedData& meshImportedData, float threshold) {
+    meshCpuData.m_Threshold = threshold;
+    PublicMesh::FinalizeVertexData(meshCpuData, meshImportedData);
+    meshCpuData.internal_calculate_radius();
+    meshCpuData.m_CollisionFactory = NEW MeshCollisionFactory{ meshCpuData };
 }
 
 bool Engine::priv::MeshLoader::GetSimilarVertexIndex(glm::vec3& in_pos, glm::vec2& in_uv, glm::vec3& in_norm, std::vector<glm::vec3>& pts, std::vector<glm::vec2>& uvs, std::vector<glm::vec3>& norms, uint32_t& result, float thrshld) {

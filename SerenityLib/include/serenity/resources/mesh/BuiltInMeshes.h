@@ -15,6 +15,7 @@ namespace Engine::priv {
             Triangle,
             Cube,
             Plane,
+            Plane2D,
             Font,
             Particle,
         _TOTAL};
@@ -29,6 +30,7 @@ namespace Engine::priv {
             bool build_triangle_mesh();
             bool build_cube_mesh();
             bool build_plane_mesh();
+            bool build_plane_2d_mesh();
             bool build_font_mesh();
             bool build_particle_mesh();
 
@@ -40,6 +42,7 @@ namespace Engine::priv {
             [[nodiscard]] Handle getTriangleMesh();
             [[nodiscard]] Handle getCubeMesh();
             [[nodiscard]] Handle getPlaneMesh();
+            [[nodiscard]] Handle getPlane2DMesh();
             [[nodiscard]] Handle getFontMesh();
             [[nodiscard]] Handle getParticleMesh();
 

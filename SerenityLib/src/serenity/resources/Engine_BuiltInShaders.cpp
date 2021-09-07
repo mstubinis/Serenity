@@ -488,14 +488,20 @@ void main(){
 
 #pragma region Vertex2DAPI
 Engine::priv::EShaders::vertex_2DAPI = R"(
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec2 uv;
+layout (location = 0) in vec3 aPosition;
+layout (location = 1) in vec2 aUV;
+layout (location = 2) in vec4 aColor;
+
 uniform mat4 VP;
 uniform mat4 Model;
-varying vec2 UV;
-void main(){
-    UV = uv;
-    gl_Position = VP * Model * vec4(position, 1.0);
+
+varying vec2 vUV;
+varying vec4 vColor;
+
+void main() {
+    vUV = aUV;
+    vColor = aColor;
+    gl_Position = VP * Model * vec4(aPosition, 1.0);
 }
 )";
 #pragma endregion
@@ -1036,13 +1042,16 @@ Engine::priv::EShaders::deferred_frag_hud = R"(
 uniform SAMPLER_TYPE_2D DiffuseTexture;
 uniform int DiffuseTextureEnabled;
 uniform vec4 Object_Color;
-varying vec2 UV;
-void main(){
+
+varying vec2 vUV;
+varying vec4 vColor;
+
+void main() {
     gl_FragColor = Object_Color;
     if(DiffuseTextureEnabled == 1){
-        vec4 color = texture2D(DiffuseTexture, UV);
-        gl_FragColor *= color;
+        gl_FragColor *= texture2D(DiffuseTexture, vUV);
     }
+    gl_FragColor *= vColor;
     gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(1.0 / RendererInfo1.y));
 }
 )";

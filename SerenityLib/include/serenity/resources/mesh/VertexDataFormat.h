@@ -45,8 +45,9 @@ struct VertexDataFormat {
     void unbind() const noexcept;
 
     static VertexDataFormat   VertexDataPositionsOnly, 
-                              VertexDataNoLighting, 
-                              VertexDataBasic, 
+                              VertexData2D,
+                              VertexDataNoLighting,
+                              VertexDataBasic,
                               VertexDataAnimated;
 };
 

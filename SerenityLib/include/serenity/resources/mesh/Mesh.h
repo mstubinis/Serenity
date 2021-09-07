@@ -22,6 +22,7 @@ namespace Engine::priv {
     class  ModelInstanceAnimation;
     class  ModelInstanceAnimationContainer;
     class  RenderModule;
+    class  BuiltInMeshses;
 };
 
 #include <serenity/resources/mesh/VertexData.h>
@@ -40,7 +41,6 @@ namespace Engine::priv {
         private:
             static btCollisionShape* internal_build_collision(Handle meshHandle, ModelInstance*, CollisionType, bool isCompoundChild) noexcept;
         public:
-            static void InitBlankMesh(Mesh&);
             static void LoadGPU(Mesh&);
             static void UnloadCPU(Mesh&);
             static void UnloadGPU(Mesh&);
@@ -85,6 +85,7 @@ struct MeshCPUData final {
 };
 
 class Mesh final: public Resource<Mesh>, public Observer {
+    friend class  Engine::priv::BuiltInMeshses;
     friend class  Engine::priv::PublicMesh;
     friend struct Engine::priv::PublicMeshRequest;
     friend class  Engine::priv::AnimationData;
@@ -110,7 +111,7 @@ class Mesh final: public Resource<Mesh>, public Observer {
     public:
         Mesh();
         Mesh(VertexData&, std::string_view name, float threshold = MESH_DEFAULT_THRESHOLD);
-        Mesh(std::string_view name, float width, float height, float threshold); //plane
+        Mesh(std::string_view name, float width, float height, float threshold, const VertexDataFormat& = VertexDataFormat::VertexDataNoLighting); //plane
         Mesh(std::string_view fileOrData, float threshold = MESH_DEFAULT_THRESHOLD); //file or data
         Mesh(std::string_view name, const Terrain& terrain, float threshold);
 
@@ -121,8 +122,8 @@ class Mesh final: public Resource<Mesh>, public Observer {
         ~Mesh();
 
         inline void setCustomBindFunctor(const BindFunc& functor) noexcept { m_CustomBindFunctor = functor; }
-        inline void setCustomUnbindFunctor(const UnbindFunc& functor) noexcept { m_CustomUnbindFunctor = functor; }
         inline void setCustomBindFunctor(BindFunc&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
+        inline void setCustomUnbindFunctor(const UnbindFunc& functor) noexcept { m_CustomUnbindFunctor = functor; }
         inline void setCustomUnbindFunctor(UnbindFunc&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
 
         [[nodiscard]] Engine::priv::MeshSkeleton::AnimationDataMap& getAnimationData();
@@ -136,11 +137,11 @@ class Mesh final: public Resource<Mesh>, public Observer {
         void load();
         void unload();
 
-        template<typename T> 
-        void modifyVertices(uint32_t attrIdx, const T* modifications, size_t bufferCount, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
+        template<class T> 
+        inline void modifyVertices(uint32_t attrIdx, const T* modifications, size_t bufferCount, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
             m_CPUData.m_VertexData->setData<T>(attrIdx, modifications, bufferCount, (MeshModifyFlags::Flag)MeshModifyFlags);
         }
-        void modifyIndices(const uint32_t* modifiedIndices, size_t bufferCount, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
+        inline void modifyIndices(const uint32_t* modifiedIndices, size_t bufferCount, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
             m_CPUData.m_VertexData->setIndices(modifiedIndices, bufferCount, (MeshModifyFlags::Flag)MeshModifyFlags);
         }
 

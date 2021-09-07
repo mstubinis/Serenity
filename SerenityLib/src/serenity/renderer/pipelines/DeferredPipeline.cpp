@@ -1209,10 +1209,10 @@ void DeferredPipeline::render2DTexture(Handle textureHandle, const glm::vec2& po
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
-    Mesh& plane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().get<Mesh>();
-    m_Renderer.bind(&plane);
-    renderMesh(plane);
-    m_Renderer.unbind(&plane);
+    Mesh& plane2D = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlane2DMesh().get<Mesh>();
+    m_Renderer.bind(&plane2D);
+    renderMesh(plane2D);
+    m_Renderer.unbind(&plane2D);
 }
 void DeferredPipeline::render2DTexture(uint32_t textureAddress, int textureWidth, int textureHeight, const glm::vec2& position, const glm::vec4& color, float angle, const glm::vec2& scale, float depth, Alignment align, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);
@@ -1237,10 +1237,10 @@ void DeferredPipeline::render2DTexture(uint32_t textureAddress, int textureWidth
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
-    Mesh& plane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().get<Mesh>();
-    m_Renderer.bind(&plane);
-    renderMesh(plane);
-    m_Renderer.unbind(&plane);
+    Mesh& plane2D = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlane2DMesh().get<Mesh>();
+    m_Renderer.bind(&plane2D);
+    renderMesh(plane2D);
+    m_Renderer.unbind(&plane2D);
 }
 void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment alignment, const glm::vec4& scissor) {
     internal_gl_scissor(scissor, depth);

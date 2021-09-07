@@ -680,6 +680,7 @@
     <ClCompile Include="src\serenity\renderer\Renderer.cpp" />
     <ClCompile Include="src\serenity\renderer\RenderGraph.cpp" />
     <ClCompile Include="src\serenity\renderer\text\TextRenderer.cpp" />
+    <ClCompile Include="src\serenity\renderer\text\TextStringBuilderColor.cpp" />
     <ClCompile Include="src\serenity\resources\Engine_BuiltInShaders.cpp" />
     <ClCompile Include="src\serenity\resources\Engine_Resources.cpp" />
     <ClCompile Include="src\serenity\resources\font\Font.cpp" />
@@ -962,6 +963,8 @@
     <ClInclude Include="include\serenity\renderer\RenderGraph.h" />
     <ClInclude Include="include\serenity\renderer\SMAA_LUT.h" />
     <ClInclude Include="include\serenity\renderer\text\TextRenderer.h" />
+    <ClInclude Include="include\serenity\renderer\text\TextRendererIncludes.h" />
+    <ClInclude Include="include\serenity\renderer\text\TextStringBuilderColor.h" />
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h" />
     <ClInclude Include="include\serenity\resources\Engine_Resources.h" />
     <ClInclude Include="include\serenity\resources\font\Font.h" />

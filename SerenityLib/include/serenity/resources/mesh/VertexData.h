@@ -63,12 +63,12 @@ struct VertexData final {
         if (attributeIndex >= m_Data.size()) {
             return;
         }
-        auto& destination_data = m_Data[attributeIndex].m_Buffer;
-        const auto totalSize   = (bufferCount * sizeof(T));
+        auto& destination_data      = m_Data[attributeIndex].m_Buffer;
+        const auto totalSizeInBytes = bufferCount * sizeof(T);
         destination_data.clear();
-        destination_data.reserve(totalSize);
+        destination_data.reserve(totalSizeInBytes);
         const uint8_t* raw_src_data_uchar = reinterpret_cast<const uint8_t*>(source_new_data);
-        std::copy(raw_src_data_uchar, raw_src_data_uchar + totalSize, std::back_inserter(destination_data));
+        std::copy(raw_src_data_uchar, raw_src_data_uchar + totalSizeInBytes, std::back_inserter(destination_data));
         m_Data[attributeIndex].m_Size = bufferCount;
         if (flags & MeshModifyFlags::UploadToGPU) {
             sendDataToGPU(flags & MeshModifyFlags::Orphan, m_Format.m_InterleavingType == VertexAttributeLayout::Interleaved ? -1 : (int)attributeIndex);

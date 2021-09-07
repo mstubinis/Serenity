@@ -24,6 +24,9 @@ Handle Engine::priv::BuiltInMeshses::getCubeMesh() {
 Handle Engine::priv::BuiltInMeshses::getPlaneMesh() {
     return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane];
 }
+Handle Engine::priv::BuiltInMeshses::getPlane2DMesh() {
+    return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane2D];
+}
 Handle Engine::priv::BuiltInMeshses::getFontMesh() {
     return m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font];
 }
@@ -49,6 +52,8 @@ bool Engine::priv::BuiltInMeshses::init() {
     if (!build_cube_mesh())
         return false;
     if (!build_plane_mesh())
+        return false;
+    if (!build_plane_2d_mesh())
         return false;
     if (!build_font_mesh())
         return false;
@@ -975,21 +980,41 @@ bool Engine::priv::BuiltInMeshses::build_projection_light_mesh() {
 bool Engine::priv::BuiltInMeshses::build_triangle_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle])
         return false;
-    std::string triangleMesh;
-    {
-        triangleMesh = R"(
-v 0.0 -0.948008 0.0
-v -1.0 0.689086 0.0
-v 1.0 0.689086 0.0
-vt 0.5 0.0
-vt 1.0 1.0
-vt 0.0 1.0
-vn 0.0 0.0 1.0
-f 1/1/1 3/2/1 2/3/1
-)";
-    }
+    auto& vertexData = *(NEW VertexData{ VertexDataFormat::VertexData2D });
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle] = Engine::Resources::addResource<Mesh>(vertexData, "TriangleMesh", 0.0005f);
+    auto& mesh = *m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle].get<Mesh>();
 
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Triangle] = Engine::Resources::addResource<Mesh>(triangleMesh, 0.0005f);
+    auto positions = Engine::create_and_reserve<std::vector<glm::vec3>>(3);
+    auto uvs       = Engine::create_and_reserve<std::vector<glm::vec2>>(3);
+    auto colors    = Engine::create_and_resize<std::vector<glm::u8vec4>>(3, glm::u8vec4{ 255_uc });
+    auto indices   = Engine::create_and_reserve<std::vector<uint32_t>>(3);
+
+    uvs.emplace_back(0.5f, 0.0f);
+    uvs.emplace_back(1.0f, 1.0f);
+    uvs.emplace_back(0.0f, 1.0f);
+
+    positions.emplace_back(0.0f, -0.948008f, 0.0f);
+    positions.emplace_back(1.0f, 0.689086, 0.0f);
+    positions.emplace_back(-1.0f, 0.689086f, 0.0f);
+
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+
+    vertexData.clearData();
+    vertexData.bind();
+    vertexData.setData(0, positions.data(), positions.size(), MeshModifyFlags::None);
+    vertexData.setData(1, uvs.data(), uvs.size(), MeshModifyFlags::None);
+    if (vertexData.m_Format.m_Attributes[2].type == GL_UNSIGNED_BYTE) {
+        vertexData.setData(2, colors.data(), colors.size(), MeshModifyFlags::None);
+    }
+    vertexData.setIndices(indices.data(), indices.size(), MeshModifyFlags::RecalculateTriangles);
+
+    mesh.m_CPUData.internal_calculate_radius();
+    mesh.m_CPUData.m_CollisionFactory = NEW MeshCollisionFactory{ mesh.m_CPUData };
+
+    mesh.load();
+
     return true;
 }
 bool Engine::priv::BuiltInMeshses::build_cube_mesh() {
@@ -1056,10 +1081,16 @@ bool Engine::priv::BuiltInMeshses::build_plane_mesh() {
     m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane] = Engine::Resources::addResource<Mesh>("Plane", 1.0f, 1.0f, 0.0005f);
     return true;
 }
+bool Engine::priv::BuiltInMeshses::build_plane_2d_mesh() {
+    if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane2D])
+        return false;
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Plane2D] = Engine::Resources::addResource<Mesh>("Plane", 1.0f, 1.0f, 0.0005f, VertexDataFormat::VertexData2D);
+    return true;
+}
 bool Engine::priv::BuiltInMeshses::build_font_mesh() {
     if (m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font])
         return false;
-    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font] = Engine::Resources::addResource<Mesh>("FontPlane", 1.0f, 1.0f, 0.0005f);
+    m_BuiltInMeshes[(size_t)BuiltInMeshEnum::Font] = Engine::Resources::addResource<Mesh>("FontPlane", 1.0f, 1.0f, 0.0005f, VertexDataFormat::VertexData2D);
     return true;
 }
 bool Engine::priv::BuiltInMeshses::build_particle_mesh() {

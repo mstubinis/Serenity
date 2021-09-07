@@ -34,12 +34,21 @@ VertexDataFormat VertexDataFormat::VertexDataPositionsOnly = []() {
     data.add(3, GL_FLOAT, false, stride, 0, sizeof(glm::vec3)); //positions
     return data;
 }();
+VertexDataFormat VertexDataFormat::VertexData2D = []() {
+    VertexDataFormat data;
+    const size_t stride = sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(glm::u8vec4);
+    data.m_InterleavingType = VertexAttributeLayout::Interleaved;
+    data.add(3, GL_FLOAT,         false, stride, 0, sizeof(glm::vec3)); //positions
+    data.add(2, GL_FLOAT,         false, stride, 12, sizeof(glm::vec2)); //uvs
+    data.add(4, GL_UNSIGNED_BYTE, true,  stride, 20, sizeof(glm::u8vec4)); //colors (normalized to transfer color from [0.0 - 255.0] to [0.0 - 1.0]
+    return data;
+}();
 VertexDataFormat VertexDataFormat::VertexDataNoLighting = []() {
     VertexDataFormat data;
     const size_t stride     = sizeof(glm::vec3) + sizeof(glm::vec2);
     data.m_InterleavingType = VertexAttributeLayout::Interleaved;
-    data.add(3, GL_FLOAT, false, stride, 0,  sizeof(glm::vec3)); //positions
-    data.add(2, GL_FLOAT, false, stride, 12, sizeof(glm::vec2)); //uvs
+    data.add(3, GL_FLOAT, false, stride, 0,  sizeof(glm::vec3));   //positions
+    data.add(2, GL_FLOAT, false, stride, 12, sizeof(glm::vec2));   //uvs
     return data;
 }();
 VertexDataFormat VertexDataFormat::VertexDataBasic = []() {
