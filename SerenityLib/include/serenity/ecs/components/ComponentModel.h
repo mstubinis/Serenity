@@ -44,7 +44,7 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
 
         ComponentModel() = delete;
     public:
-        ComponentModel(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{}, RenderStage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{}, RenderStage::Stage = RenderStage::GeometryOpaque);
        
         ComponentModel(const ComponentModel&)                = delete;
         ComponentModel& operator=(const ComponentModel&)     = delete;
@@ -67,14 +67,14 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
         inline void hide() noexcept { show(false); }
 
         [[nodiscard]] inline ModelInstance& getModel(size_t index = 0) noexcept { return *m_ModelInstances[index].get(); }
-        ModelInstanceHandle addModel(Handle mesh, Handle material, Handle shaderProgram = Handle{}, RenderStage = RenderStage::GeometryOpaque);
+        ModelInstanceHandle addModel(Handle mesh, Handle material, Handle shaderProgram = Handle{}, RenderStage::Stage = RenderStage::GeometryOpaque);
         inline void removeModel(size_t index) noexcept { m_ModelInstances.erase(m_ModelInstances.begin() + index); }
 
-        void setStage(RenderStage stage, size_t index = 0);
-        void setModel(Handle mesh, Handle material, size_t index, Handle = Handle{}, RenderStage = RenderStage::GeometryOpaque);
-        void setModelMesh(Handle mesh, size_t index, RenderStage = RenderStage::GeometryOpaque);
-        void setModelMaterial(Handle material, size_t index, RenderStage = RenderStage::GeometryOpaque);
-        void setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage = RenderStage::GeometryOpaque);
+        void setStage(RenderStage::Stage stage, size_t index = 0);
+        void setModel(Handle mesh, Handle material, size_t index, Handle = Handle{}, RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModelMesh(Handle mesh, size_t index, RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModelMaterial(Handle material, size_t index, RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage::Stage = RenderStage::GeometryOpaque);
 
         [[nodiscard]] bool rayIntersectSphere(const ComponentCamera& camera) const noexcept;
 

@@ -37,7 +37,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
     fileSize = stream.tellg();
     stream.seekg(0, std::ios::beg);
 
-    auto file_data = Engine::create_and_reserve<std::vector<uint8_t>>((uint32_t)fileSize);
+    auto file_data = Engine::create_and_reserve<std::vector<uint8_t>>(fileSize);
 
     file_data.insert(std::begin(file_data), std::istream_iterator<uint8_t>(stream), std::istream_iterator<uint8_t>());
     stream.close();

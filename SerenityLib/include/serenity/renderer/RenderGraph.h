@@ -13,6 +13,8 @@ namespace Engine::priv {
     class  RenderGraph;
     class  RenderGraphContainer;
     class  RenderModule;
+    class  MeshNode;
+    class  MaterialNode;
     struct PublicScene;
 };
 
@@ -35,6 +37,12 @@ namespace Engine::priv {
             MeshNode(Handle mesh_)
                 : mesh{ mesh_ }
             {}
+            
+            inline bool operator<(const MeshNode& other) const noexcept { return mesh < other.mesh; }
+            inline bool operator>(const MeshNode& other) const noexcept { return mesh > other.mesh; }
+            inline bool operator<=(const MeshNode& other) const noexcept { return mesh <= other.mesh; }
+            inline bool operator>=(const MeshNode& other) const noexcept { return mesh >= other.mesh; }
+            
     };
     class MaterialNode final {
         friend class  RenderGraph;
@@ -48,6 +56,12 @@ namespace Engine::priv {
             MaterialNode(Handle material_)
                 : material{ material_ }
             {}
+            
+            inline bool operator<(const MaterialNode& other) const noexcept { return material < other.material; }
+            inline bool operator>(const MaterialNode& other) const noexcept { return material > other.material; }
+            inline bool operator<=(const MaterialNode& other) const noexcept { return material <= other.material; }
+            inline bool operator>=(const MaterialNode& other) const noexcept { return material >= other.material; }
+            
     };
     class RenderGraph final {
         friend class  Scene;

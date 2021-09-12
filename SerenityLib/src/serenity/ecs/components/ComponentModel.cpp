@@ -58,7 +58,7 @@ std::pair<glm::vec3, float> ComponentModel_Functions::CalculateRadi(const std::v
     for (const auto entity : entities) {
         auto body         = entity.getComponent<ComponentTransform>();
         auto model        = entity.getComponent<ComponentModel>();
-        auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)ComponentModel_Functions::GetTotalVertexCount(*model));
+        auto points_total = Engine::create_and_reserve<std::vector<glm::vec3>>(ComponentModel_Functions::GetTotalVertexCount(*model));
         for (const auto& modelInstance : *model) {
             const Mesh& mesh = *modelInstance->getMesh().get<Mesh>();
             if (!mesh.isLoaded()) {
@@ -109,7 +109,7 @@ void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& modelC
 
 #pragma region Component
 
-ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, RenderStage stage)
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, RenderStage::Stage stage)
     : m_Owner{ entity }
 {
     addModel(mesh, material, shaderProgram, stage);
@@ -139,7 +139,7 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
 }
 void ComponentModel::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
-        auto unfinishedMeshes = Engine::create_and_reserve<std::vector<Handle>>((uint32_t)m_ModelInstances.size());
+        auto unfinishedMeshes = Engine::create_and_reserve<std::vector<Handle>>(m_ModelInstances.size());
         for (auto& instance : m_ModelInstances) {
             auto& mesh = *instance->m_MeshHandle.get<Mesh>();
             if (!mesh.isLoaded()) {
@@ -167,7 +167,7 @@ void ComponentModel::show(bool shown) noexcept {
         modelInstance->show(shown);
     }
 }
-ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, Handle shaderProgram, RenderStage renderStage) {
+ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, Handle shaderProgram, RenderStage::Stage renderStage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
     auto& modelInstance        = *m_ModelInstances.emplace_back(std::make_unique<ModelInstance>(m_Owner, mesh, material, shaderProgram));
@@ -179,7 +179,7 @@ ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, Handl
     ComponentModel_Functions::CalculateRadius(*this);
     return { modelInstance.m_Index, *this };
 }
-void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle shaderProgram, RenderStage renderStage) {
+void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle shaderProgram, RenderStage::Stage renderStage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
     auto& model_instance                 = *m_ModelInstances[index];
@@ -194,7 +194,7 @@ void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
     ComponentModel_Functions::CalculateRadius(*this);
 }
-void ComponentModel::setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage renderStage) {
+void ComponentModel::setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage::Stage renderStage) {
     auto& model_instance                 = *m_ModelInstances[index];
     auto& scene                          = *m_Owner.scene();
     PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
@@ -205,7 +205,7 @@ void ComponentModel::setModelShaderProgram(Handle shaderProgram, size_t index, R
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
     ComponentModel_Functions::CalculateRadius(*this);
 }
-void ComponentModel::setStage(RenderStage renderStage, size_t index) {
+void ComponentModel::setStage(RenderStage::Stage renderStage, size_t index) {
     auto& model_instance   = *m_ModelInstances[index];
     auto& scene            = *m_Owner.scene();
     PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
@@ -214,7 +214,7 @@ void ComponentModel::setStage(RenderStage renderStage, size_t index) {
 
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
 }
-void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage renderStage) {
+void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage::Stage renderStage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
     auto& model_instance        = *m_ModelInstances[index];
@@ -228,7 +228,7 @@ void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage renderS
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
     ComponentModel_Functions::CalculateRadius(*this);
 }
-void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage renderStage) {
+void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage::Stage renderStage) {
     auto& model_instance            = *m_ModelInstances[index];
     auto& scene                     = *m_Owner.scene();
     PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
@@ -239,8 +239,8 @@ void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
 }
 bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) const noexcept {
-    auto body = m_Owner.getComponent<ComponentTransform>();
-    return Math::rayIntersectSphere(body->getPosition(), m_Radius, camera.m_Eye, camera.getViewVector());
+    auto transform = m_Owner.getComponent<ComponentTransform>();
+    return Math::rayIntersectSphere(transform->getPosition(), m_Radius, camera.m_Eye, camera.getViewVector());
 }
 void ComponentModel::setUserPointer(void* UserPointer) noexcept {
     for (auto& instance : m_ModelInstances) {

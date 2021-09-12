@@ -5,9 +5,11 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <iomanip>
+#include <locale>
+#include <sstream>
 
 namespace Engine {
-    template<typename LOGGER, typename DURATION_TYPE = std::chrono::nanoseconds>
+    template<class LOGGER, class DURATION_TYPE = std::chrono::nanoseconds>
     class block_profiler final {
         private:
             LOGGER&                                              m_Logger;
@@ -20,12 +22,15 @@ namespace Engine {
                 , m_Tag{ tag }
             {}
             ~block_profiler() {
-                m_Logger << m_Tag << (std::chrono::duration_cast<DURATION_TYPE>(std::chrono::high_resolution_clock::now() - m_Start)).count() << '\n';
+                std::stringstream ss;
+                ss.imbue(std::locale(""));
+                ss << std::fixed << (std::chrono::duration_cast<DURATION_TYPE>(std::chrono::high_resolution_clock::now() - m_Start)).count();
+                m_Logger << m_Tag << ss.str() << '\n';
             }
     };
 
 
-    template<typename LOGGER>
+    template<class LOGGER>
     class block_profiler_opengl final {
         private:
             LOGGER&              m_Logger;

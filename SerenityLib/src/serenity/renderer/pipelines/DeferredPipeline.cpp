@@ -410,6 +410,7 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
     for (uint32_t i = 0; i < captureViews.size(); ++i) {
         Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, convolutionTexture.address(), 0);
+        fbo.checkStatus();
         Engine::Renderer::Settings::clear(true, true, false);
         Skybox::bindMesh();
     }
@@ -427,8 +428,8 @@ void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeSha
         const uint32_t mipSize(size * (uint32_t)glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
         fbo.resize(mipSize, mipSize);
         const float roughness = float(m) / float(maxMipLevels - 1);
-        Engine::Renderer::sendUniform1("roughness", roughness);
         const float a = roughness * roughness;
+        Engine::Renderer::sendUniform1("roughness", roughness);
         Engine::Renderer::sendUniform1("a2", a * a);
         for (uint32_t i = 0; i < captureViews.size(); ++i) {
             Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
@@ -1910,7 +1911,9 @@ void DeferredPipeline::internal_renderTexture(std::vector<IRenderingPipeline::AP
     commands.emplace_back([textureAddress, textureWidth, textureHeight, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(textureAddress, textureWidth, textureHeight, p, c, a, s, d, align, scissor); }, d);
 }
 void DeferredPipeline::internal_renderText(std::vector<IRenderingPipeline::API2DCommand>& commands, const std::string& t, Handle fontHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, TextAlignment align, const glm::vec4& scissor) {
-    commands.emplace_back([t, fontHandle, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DText(t, fontHandle, p, c, a, s, d, align, scissor); }, d);
+    if (!t.empty()) {
+        commands.emplace_back([t, fontHandle, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DText(t, fontHandle, p, c, a, s, d, align, scissor); }, d);
+    }
 }
 void DeferredPipeline::internal_renderBorder(std::vector<IRenderingPipeline::API2DCommand>& commands, float borderSize, const glm::vec2& pos, const glm::vec4& col, float w, float h, float angle, float depth, Alignment align, const glm::vec4& scissor) {
     const float doubleBorder = borderSize * 2.0f;

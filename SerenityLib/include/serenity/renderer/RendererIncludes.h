@@ -7,9 +7,9 @@
 #include <serenity/system/TypeDefs.h>
 #include <serenity/dependencies/glm.h>
 
-constexpr const glm::vec4 NO_SCISSOR = glm::vec4(-1.0f);
+constexpr const glm::vec4 NO_SCISSOR = glm::vec4{ -1.0f };
 
-struct ScreenBoxCoordinates final {
+struct ScreenBoxCoordinates {
     bool      inBounds    = false;
     glm::vec2 topLeft     = glm::vec2{ 0.0f, 0.0f };
     glm::vec2 topRight    = glm::vec2{ 0.0f, 0.0f };
@@ -55,7 +55,7 @@ enum class Alignment : uint32_t {
     BottomCenter,
     BottomRight,
 };
-enum class RenderStage : uint32_t {
+class RenderStage { public: enum Stage : uint32_t {
     GeometryOpaque = 0,
     GeometryOpaque_2,
     GeometryOpaque_3,
@@ -96,6 +96,7 @@ enum class RenderStage : uint32_t {
     Decals_3,
     Decals_4,
 
-_TOTAL};
+    _TOTAL
+};};
 
 #endif

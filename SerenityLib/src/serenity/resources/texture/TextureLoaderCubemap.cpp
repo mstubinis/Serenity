@@ -25,7 +25,7 @@ void TextureLoaderCubemap::ImportIntoOpengl(TextureCubemap& texture, const Engin
     }
 }
 bool TextureLoaderCubemap::LoadDDSFile(TextureCubemapCPUData& cpuData, ImageData& image_loaded_struct) {
-    std::ifstream stream(image_loaded_struct.m_Filename.c_str(), std::ios::binary);
+    std::ifstream stream{ image_loaded_struct.m_Filename.c_str(), std::ios::binary };
     if (!stream) {
         return false;
     }
@@ -35,16 +35,15 @@ bool TextureLoaderCubemap::LoadDDSFile(TextureCubemapCPUData& cpuData, ImageData
     fileSize = stream.tellg();
     stream.seekg(0, std::ios::beg);
 
-    auto file_data = Engine::create_and_reserve<std::vector<uint8_t>>((uint32_t)fileSize);
+    auto file_data = Engine::create_and_reserve<std::vector<uint8_t>>(fileSize);
 
     file_data.insert(std::begin(file_data), std::istream_iterator<uint8_t>(stream), std::istream_iterator<uint8_t>());
     stream.close();
 
     std::array<uint8_t, 128> header_buffer;
     uint32_t progress = 0;
-    for (size_t i = 0; i < header_buffer.size(); ++i) {
-        header_buffer[i] = file_data[i];
-        ++progress;
+    for (; progress < header_buffer.size(); ++progress) {
+        header_buffer[progress] = file_data[progress];
     }
 
     DDS::DDS_Header head{ header_buffer };
@@ -55,90 +54,90 @@ bool TextureLoaderCubemap::LoadDDSFile(TextureCubemapCPUData& cpuData, ImageData
     DDS::DDS_Header_DX10 headDX10;
     if ((head.header_flags & DDS::DDPF_FOURCC) && head.format.fourCC == FourCC_DX10) {
         std::array<uint8_t, 20> header_buffer_DX10;
-        for (size_t i = 0; i < header_buffer_DX10.size(); ++i) {
-            header_buffer_DX10[i] = file_data[i + progress];
-            ++progress;
+        for (size_t i = 0; i < header_buffer_DX10.size(); ++i, ++progress) {
+            //header_buffer_DX10[i] = file_data[i + progress];
+            header_buffer_DX10[i] = file_data[progress];
         }
         headDX10.fill(header_buffer_DX10);
     }
-    uint32_t factor, blockSize, offset = progress;
+    uint32_t factor, blockSize;
     //TODO: fill the rest of these out
     switch (head.format.fourCC) {
-    case FourCC_DXT1: {
-        factor = 2;
-        blockSize = 8;
-        image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT;
-        break;
-    }case FourCC_DXT2: {
-        factor = 4;
-        blockSize = 16;
-        break;
-    }case FourCC_DXT3: {
-        factor = 4;
-        blockSize = 16;
-        image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
-        break;
-    }case FourCC_DXT4: {
-        factor = 4;
-        blockSize = 16;
-        break;
-    }case FourCC_DXT5: {
-        factor = 4;
-        blockSize = 16;
-        image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
-        break;
-    }case FourCC_DX10: {
-        break;
-    }case FourCC_ATI1: { //useful for 1 channel textures (greyscales, glow / specular / ao / smoothness / metalness etc)
-        factor = 2;
-        blockSize = 8;
-        image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RED_RGTC1;
-        break;
-    }case FourCC_ATI2: {//aka ATI2n aka 3Dc aka LATC2 aka BC5 - used for normal maps (store x,y recalc z) z = sqrt( 1-x*x-y*y )
-        blockSize = 16;
-        image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;
-        break;
-    }case FourCC_RXGB: { //By its design, it is just a DXT5 image with reading it in the shader differently
-        //As I recall, the most you would have to do in the shader is something like:
-        //vec3 normal;
-        //normal.xy = texture2D(RXGBnormalmap, texcoord).ag;
-        //normal.z = sqrt(1.0 - normal.x * normal.x - normal.y * normal.y);
-        factor = 4;
-        blockSize = 16;
-        image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
-        break;
-    }case FourCC_$: {
-        break;
-    }case FourCC_o: {
-        break;
-    }case FourCC_p: {
-        break;
-    }case FourCC_q: {
-        break;
-    }case FourCC_r: {
-        break;
-    }case FourCC_s: {
-        break;
-    }case FourCC_t: {
-        break;
-    }case FourCC_BC4U: {
-        break;
-    }case FourCC_BC4S: {
-        break;
-    }case FourCC_BC5U: {
-        break;
-    }case FourCC_BC5S: {
-        break;
-    }case FourCC_RGBG: {
-        break;
-    }case FourCC_GRGB: {
-        break;
-    }case FourCC_YUY2: {
-        break;
-    }default: {
-        ENGINE_PRODUCTION_LOG("TextureLoader::LoadDDSFile(): could not evalutate switch statement for head.format.fourCC!")
+        case FourCC_DXT1: {
+            factor = 2;
+            blockSize = 8;
+            image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT;
+            break;
+        }case FourCC_DXT2: {
+            factor = 4;
+            blockSize = 16;
+            break;
+        }case FourCC_DXT3: {
+            factor = 4;
+            blockSize = 16;
+            image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+            break;
+        }case FourCC_DXT4: {
+            factor = 4;
+            blockSize = 16;
+            break;
+        }case FourCC_DXT5: {
+            factor = 4;
+            blockSize = 16;
+            image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+            break;
+        }case FourCC_DX10: {
+            break;
+        }case FourCC_ATI1: { //useful for 1 channel textures (greyscales, glow / specular / ao / smoothness / metalness etc)
+            factor = 2;
+            blockSize = 8;
+            image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RED_RGTC1;
+            break;
+        }case FourCC_ATI2: {//aka ATI2n aka 3Dc aka LATC2 aka BC5 - used for normal maps (store x,y recalc z) z = sqrt( 1-x*x-y*y )
+            blockSize = 16;
+            image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;
+            break;
+        }case FourCC_RXGB: { //By its design, it is just a DXT5 image with reading it in the shader differently
+            //As I recall, the most you would have to do in the shader is something like:
+            //vec3 normal;
+            //normal.xy = texture2D(RXGBnormalmap, texcoord).ag;
+            //normal.z = sqrt(1.0 - normal.x * normal.x - normal.y * normal.y);
+            factor = 4;
+            blockSize = 16;
+            image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
+            break;
+        }case FourCC_$: {
+            break;
+        }case FourCC_o: {
+            break;
+        }case FourCC_p: {
+            break;
+        }case FourCC_q: {
+            break;
+        }case FourCC_r: {
+            break;
+        }case FourCC_s: {
+            break;
+        }case FourCC_t: {
+            break;
+        }case FourCC_BC4U: {
+            break;
+        }case FourCC_BC4S: {
+            break;
+        }case FourCC_BC5U: {
+            break;
+        }case FourCC_BC5S: {
+            break;
+        }case FourCC_RGBG: {
+            break;
+        }case FourCC_GRGB: {
+            break;
+        }case FourCC_YUY2: {
+            break;
+        }default: {
+            ENGINE_PRODUCTION_LOG("TextureLoader::LoadDDSFile(): could not evalutate switch statement for head.format.fourCC!")
             return false;
-    }
+        }
     }
 
     uint32_t numberOfMainImages = 1;
@@ -166,17 +165,15 @@ bool TextureLoaderCubemap::LoadDDSFile(TextureCubemapCPUData& cpuData, ImageData
         ImageData* imgPtr = nullptr;
         if (i == 0) {
             imgPtr = &image_loaded_struct;
-        }
-        else if (i >= cpuData.m_ImagesDatas.size()) {
+        } else if (i >= cpuData.m_ImagesDatas.size()) {
             imgPtr = &cpuData.m_ImagesDatas.emplace_back();
-            imgPtr->m_PixelFormat = image_loaded_struct.m_PixelFormat;
-            imgPtr->m_PixelType = image_loaded_struct.m_PixelType;
+            imgPtr->m_PixelFormat    = image_loaded_struct.m_PixelFormat;
+            imgPtr->m_PixelType      = image_loaded_struct.m_PixelType;
             imgPtr->m_InternalFormat = image_loaded_struct.m_InternalFormat;
-        }
-        else {
+        } else {
             imgPtr = &cpuData.m_ImagesDatas[i];
         }
-        width_ = head.w;
+        width_  = head.w;
         height_ = head.h;
         for (uint32_t level = 0; level < head.mipMapCount && (width_ || height_); ++level) {
             if (level > 0 && (width_ < 64 || height_ < 64)) {
@@ -185,24 +182,22 @@ bool TextureLoaderCubemap::LoadDDSFile(TextureCubemapCPUData& cpuData, ImageData
             ImageMipmap* mipmap = nullptr;
             if (level > 0) {
                 mipmap = &imgPtr->m_Mipmaps.emplace_back();
-            }
-            else {
+            } else {
                 mipmap = &imgPtr->m_Mipmaps[0];
             }
-            mipmap->level = level;
-            mipmap->width = width_;
+            mipmap->level  = level;
+            mipmap->width  = width_;
             mipmap->height = height_;
             const uint32_t compressed_size = ((width_ + 3U) / 4U) * ((height_ + 3U) / 4U) * blockSize;
             mipmap->compressedSize = compressed_size;
 
             auto& pixels = mipmap->pixels;
             pixels.reserve(compressed_size);
-            for (uint32_t t = 0; t < compressed_size; ++t) {
-                pixels.emplace_back(file_data[offset + t]);
+            for (uint32_t t = 0; t < compressed_size; ++t, ++progress) {
+                pixels.emplace_back(file_data[progress]);
             }
-            width_ = std::max(width_ / 2U, 1U);
-            height_ = std::max(height_ / 2U, 1U);
-            offset += compressed_size;
+            width_    = std::max(width_ / 2U, 1U);
+            height_   = std::max(height_ / 2U, 1U);
         }
     }
     return true;

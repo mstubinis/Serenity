@@ -61,7 +61,7 @@ class ModelInstance final : public Observer {
         Handle                                            m_ShaderProgramHandle;
         Handle                                            m_MeshHandle;
         Handle                                            m_MaterialHandle;
-        RenderStage                                       m_Stage               = RenderStage::GeometryOpaque;
+        RenderStage::Stage                                m_Stage               = RenderStage::GeometryOpaque;
         Engine::color_vector_4                            m_GodRaysColor        = Engine::color_vector_4(0_uc);
         Engine::color_vector_4                            m_Color               = Engine::color_vector_4(255_uc);
         void*                                             m_UserPointer         = nullptr;
@@ -135,7 +135,7 @@ class ModelInstance final : public Observer {
         [[nodiscard]] inline Handle getShaderProgram() const noexcept { return m_ShaderProgramHandle; }
         [[nodiscard]] inline Handle getMesh() const noexcept { return m_MeshHandle; }
         [[nodiscard]] inline Handle getMaterial() const noexcept { return m_MaterialHandle; }
-        [[nodiscard]] inline RenderStage getStage() const noexcept { return m_Stage; }
+        [[nodiscard]] inline RenderStage::Stage getStage() const noexcept { return m_Stage; }
         inline void show(bool shown = true) noexcept { m_Visible = shown; }
         inline void hide() noexcept { m_Visible = false; }
         [[nodiscard]] inline bool isVisible() const noexcept { return m_Visible; }
@@ -143,7 +143,7 @@ class ModelInstance final : public Observer {
         inline void setPassedRenderCheck(bool passed) noexcept { m_PassedRenderCheck = passed; }
 
 
-        void setStage(RenderStage, ComponentModel&);
+        void setStage(RenderStage::Stage, ComponentModel&);
 
         inline void playAnimation(std::string_view animName, float startTime, float endTime = -1.0f, uint32_t requestedLoops = 1) {
             m_Animations.emplace_animation(m_MeshHandle, animName, startTime, endTime, requestedLoops);

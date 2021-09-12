@@ -75,11 +75,14 @@ double Engine::Resources::applicationTime() {
 Engine::view_ptr<Scene> Engine::Resources::getCurrentScene() {
     return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_CurrentScene;
 }
-Window& Engine::Resources::getWindow(){
+Window& Engine::Resources::getWindow() {
     return *Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Windows[0];
 }
-glm::uvec2 Engine::Resources::getWindowSize(){
-    return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Windows[0]->getSize();
+glm::uvec2 Engine::Resources::getWindowSize() {
+    return getWindow().getSize();
+}
+size_t Engine::Resources::getNumWindows() {
+    return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Windows.size();
 }
 
 Window& Engine::Resources::getWindow(uint32_t index) {
@@ -116,7 +119,7 @@ Engine::view_ptr<Scene> Engine::Resources::getScene(std::string_view sceneName){
 std::vector<Handle> Engine::Resources::loadMesh(std::string_view fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags) {
     MeshRequest request{ fileOrData, threshhold, flags, [](const std::vector<Handle>&) {} };
     request.request();
-    auto handles = Engine::create_and_reserve<std::vector<Handle>>((uint32_t)request.m_Parts.size());
+    auto handles = Engine::create_and_reserve<std::vector<Handle>>(request.m_Parts.size());
     for (auto& part : request.m_Parts) {
         handles.emplace_back(part.handle);
     }
@@ -125,7 +128,7 @@ std::vector<Handle> Engine::Resources::loadMesh(std::string_view fileOrData, flo
 std::vector<Handle> Engine::Resources::loadMeshAsync(std::string_view fileOrData, float threshhold, MeshCollisionLoadingFlag::Flag flags, MeshRequestCallback callback) {
     MeshRequest request{ fileOrData, threshhold, flags, std::move(callback) };
     request.request(true);
-    auto handles = Engine::create_and_reserve<std::vector<Handle>>((uint32_t)request.m_Parts.size());
+    auto handles = Engine::create_and_reserve<std::vector<Handle>>(request.m_Parts.size());
     for (auto& part : request.m_Parts) {
         handles.emplace_back(part.handle);
     }

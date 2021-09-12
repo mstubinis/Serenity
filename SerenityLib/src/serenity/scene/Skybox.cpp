@@ -5,47 +5,73 @@
 #include <serenity/resources/texture/TextureLoaderCubemap.h>
 #include <serenity/events/Event.h>
 
-GLuint m_Buffer   = 0;
-GLuint m_VAO      = 0;
+namespace {
 
-constexpr std::array<glm::vec3, 36> VERTICES = {
-    glm::vec3(-1, 1, 1),
-    glm::vec3(1, 1, 1),
-    glm::vec3(1, -1, 1),
-    glm::vec3(-1, 1, 1),
-    glm::vec3(1, -1, 1),
-    glm::vec3(-1, -1, 1),
-    glm::vec3(-1, 1, -1),
-    glm::vec3(-1, -1, -1),
-    glm::vec3(1, -1, -1),
-    glm::vec3(-1, 1, -1),
-    glm::vec3(1, -1, -1),
-    glm::vec3(1, 1, -1),
-    glm::vec3(-1, 1, 1),
-    glm::vec3(-1, -1, 1),
-    glm::vec3(-1, -1, -1),
-    glm::vec3(-1, 1, 1),
-    glm::vec3(-1, -1, -1),
-    glm::vec3(-1, 1, -1),
-    glm::vec3(-1, -1, 1),
-    glm::vec3(1, -1, 1),
-    glm::vec3(1, -1, -1),
-    glm::vec3(-1, -1, 1),
-    glm::vec3(1, -1, -1),
-    glm::vec3(-1, -1, -1),
-    glm::vec3(1, -1, 1),
-    glm::vec3(1, 1, 1),
-    glm::vec3(1, 1, -1),
-    glm::vec3(1, -1, 1),
-    glm::vec3(1, 1, -1),
-    glm::vec3(1, -1, -1),
-    glm::vec3(1, 1, 1),
-    glm::vec3(-1, 1, 1),
-    glm::vec3(-1, 1, -1),
-    glm::vec3(1, 1, 1),
-    glm::vec3(-1, 1, -1),
-    glm::vec3(1, 1, -1),
-};
+    GLuint m_Buffer = 0;
+    GLuint m_VAO = 0;
+
+    constexpr std::array<glm::vec3, 36> VERTICES = {
+        glm::vec3(-1, 1, 1),
+        glm::vec3(1, 1, 1),
+        glm::vec3(1, -1, 1),
+        glm::vec3(-1, 1, 1),
+        glm::vec3(1, -1, 1),
+        glm::vec3(-1, -1, 1),
+        glm::vec3(-1, 1, -1),
+        glm::vec3(-1, -1, -1),
+        glm::vec3(1, -1, -1),
+        glm::vec3(-1, 1, -1),
+        glm::vec3(1, -1, -1),
+        glm::vec3(1, 1, -1),
+        glm::vec3(-1, 1, 1),
+        glm::vec3(-1, -1, 1),
+        glm::vec3(-1, -1, -1),
+        glm::vec3(-1, 1, 1),
+        glm::vec3(-1, -1, -1),
+        glm::vec3(-1, 1, -1),
+        glm::vec3(-1, -1, 1),
+        glm::vec3(1, -1, 1),
+        glm::vec3(1, -1, -1),
+        glm::vec3(-1, -1, 1),
+        glm::vec3(1, -1, -1),
+        glm::vec3(-1, -1, -1),
+        glm::vec3(1, -1, 1),
+        glm::vec3(1, 1, 1),
+        glm::vec3(1, 1, -1),
+        glm::vec3(1, -1, 1),
+        glm::vec3(1, 1, -1),
+        glm::vec3(1, -1, -1),
+        glm::vec3(1, 1, 1),
+        glm::vec3(-1, 1, 1),
+        glm::vec3(-1, 1, -1),
+        glm::vec3(1, 1, 1),
+        glm::vec3(-1, 1, -1),
+        glm::vec3(1, 1, -1),
+    };
+
+    void bindDataToGPU() noexcept {
+        glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+    void buildVAO() noexcept {
+        Engine::Renderer::deleteVAO(m_VAO);
+        if (Engine::priv::OpenGLState::constants.supportsVAO()) {
+            Engine::Renderer::genAndBindVAO(m_VAO);
+            bindDataToGPU();
+            Engine::Renderer::bindVAO(0);
+        }
+    }
+    void initMesh() noexcept {
+        if (m_Buffer != 0U) {
+            return;
+        }
+        glGenBuffers(1, &m_Buffer);
+        glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
+        glBufferData(GL_ARRAY_BUFFER, VERTICES.size() * sizeof(glm::vec3), &VERTICES[0], GL_STATIC_DRAW);
+        buildVAO();
+    }
+}
 
 /*
 when saving a skybox in gimp, the layer ordering should be:
@@ -60,37 +86,8 @@ when saving a skybox in gimp, the layer ordering should be:
 
 */
 
-namespace Engine::priv {
-    class SkyboxImplInterface final {
-        friend class Skybox;
-        static void bindDataToGPU() noexcept {
-            glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        }
-        static void buildVAO() noexcept {
-            Engine::Renderer::deleteVAO(m_VAO);
-            if (Engine::priv::OpenGLState::constants.supportsVAO()) {
-                Engine::Renderer::genAndBindVAO(m_VAO);
-                Engine::priv::SkyboxImplInterface::bindDataToGPU();
-                Engine::Renderer::bindVAO(0);
-            }
-        }
-        static void initMesh() noexcept {
-            if (m_Buffer != 0U) {
-                return;
-            }
-            glGenBuffers(1, &m_Buffer);
-            glBindBuffer(GL_ARRAY_BUFFER, m_Buffer);
-            glBufferData(GL_ARRAY_BUFFER, VERTICES.size() * sizeof(glm::vec3), &VERTICES[0], GL_STATIC_DRAW);
-            Engine::priv::SkyboxImplInterface::buildVAO();
-        }
-    };
-};
-
 Skybox::Skybox(const std::array<std::string_view, 6>& files) {
-    Engine::priv::SkyboxImplInterface::initMesh();
-
+    initMesh();
     //instead of using files[0] generate a proper name using the directory?
 
     m_TextureCubemap = Engine::Resources::addResource<TextureCubemap>(files, std::string(files[0]) + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
@@ -99,7 +96,7 @@ Skybox::Skybox(const std::array<std::string_view, 6>& files) {
     registerEvent(EventType::WindowFullscreenChanged);
 }
 Skybox::Skybox(std::string_view filename) {
-    Engine::priv::SkyboxImplInterface::initMesh();
+    initMesh();
 
     m_TextureCubemap = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<TextureCubemap>(filename).m_Handle;
     if (!m_TextureCubemap) {
@@ -113,18 +110,18 @@ Skybox::~Skybox() {
 }
 
 void Skybox::bindMesh() {
-    Engine::priv::SkyboxImplInterface::initMesh();
-    if(m_VAO){
+    initMesh();
+    if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
         glDrawArrays( GL_TRIANGLES, 0, (GLsizei)VERTICES.size() );
-    }else{
-        Engine::priv::SkyboxImplInterface::bindDataToGPU();
+    } else {
+        bindDataToGPU();
         glDrawArrays( GL_TRIANGLES, 0, (GLsizei)VERTICES.size() );
         glDisableVertexAttribArray(0);
     }
 }
 void Skybox::onEvent(const Event& e) {
     if (e.type == EventType::WindowFullscreenChanged) {
-        Engine::priv::SkyboxImplInterface::buildVAO();
+        buildVAO();
     }
 }

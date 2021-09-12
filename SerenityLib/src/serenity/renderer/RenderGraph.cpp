@@ -7,23 +7,41 @@
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/renderer/culling/Culling.h>
 
+namespace {
+    template<class CONTAINER, class INDEX>
+    void internal_remove_swap_and_pop(CONTAINER& container, INDEX&& index) {
+        const auto i = static_cast<size_t>(std::forward<INDEX>(index));
+        //container.erase(container.begin() + i);
+        container[i] = container.back();
+        container.pop_back();
+
+        //Engine::insertion_sort(container);
+    }
+    template<class CONTAINER, class ITEM>
+    auto internal_insert_into_container(CONTAINER& container, ITEM&& item) {
+        auto ret = &container.emplace_back(std::forward<ITEM>(item));
+        return ret;
+    }
+}
+
+
 void Engine::priv::RenderGraph::internal_scan_nodes(const ModelInstance& inInstance, Engine::priv::MaterialNode*& materialNode, Engine::priv::MeshNode*& meshNode, ModelInstance*& modelInstance) {
-    for (auto& itr : m_MaterialNodes) {
-        if (itr.material == inInstance.getMaterial()) {
-            materialNode = &itr;
-            for (auto& itr1 : materialNode->meshNodes) {
-                if (itr1.mesh == inInstance.getMesh()) {
-                    meshNode = &itr1;
-                    for (auto& itr2 : meshNode->instanceNodes) {
-                        if (itr2 == &inInstance) {
-                            modelInstance = itr2;
-                            break;
+    for (auto& itrMaterial : m_MaterialNodes) {
+        if (itrMaterial.material == inInstance.getMaterial()) {
+            materialNode = &itrMaterial;
+            for (auto& itrMesh : materialNode->meshNodes) {
+                if (itrMesh.mesh == inInstance.getMesh()) {
+                    meshNode = &itrMesh;
+                    for (auto& itrInstance : meshNode->instanceNodes) {
+                        if (itrInstance == &inInstance) {
+                            modelInstance = itrInstance;
+                            return;
                         }
                     }
-                    break;
+                    return;
                 }
             }
-            break;
+            return;
         }
     }
 }
@@ -33,16 +51,15 @@ void Engine::priv::RenderGraph::internal_addModelInstanceToPipeline(ModelInstanc
     ModelInstance*              modelInstance = nullptr;
 
     internal_scan_nodes(inModelInstance, materialNode, meshNode, modelInstance);
-
     if (!materialNode) {
-        materialNode = &m_MaterialNodes.emplace_back(inModelInstance.getMaterial());
+        materialNode = internal_insert_into_container(m_MaterialNodes, inModelInstance.getMaterial());
     }
     if (!meshNode) {
-        meshNode = &materialNode->meshNodes.emplace_back(inModelInstance.getMesh());
+        meshNode = internal_insert_into_container(materialNode->meshNodes, inModelInstance.getMesh());
     }
     if (!modelInstance) {
-        meshNode->instanceNodes.emplace_back(&inModelInstance);
-        m_InstancesTotal.emplace_back(&inModelInstance);
+        internal_insert_into_container(meshNode->instanceNodes, &inModelInstance);
+        internal_insert_into_container(m_InstancesTotal, &inModelInstance);
     }
 }
 void Engine::priv::RenderGraph::internal_removeModelInstanceFromPipeline(ModelInstance& inModelInstance) {
@@ -57,120 +74,111 @@ void Engine::priv::RenderGraph::internal_removeModelInstanceFromPipeline(ModelIn
     remove_material_node(materialNode);
 }
 bool Engine::priv::RenderGraph::remove_material_node(const MaterialNode* materialNode) {
-    if (!materialNode) {
-        return false;
-    }
-    for (size_t i = 0; i < m_MaterialNodes.size(); ++i) {
-        if (&m_MaterialNodes[i] == materialNode) {
-            m_MaterialNodes.erase(m_MaterialNodes.begin() + i);
-            return true;
+    if (materialNode) {
+        for (size_t i = 0; i < m_MaterialNodes.size(); ++i) {
+            if (&m_MaterialNodes[i] == materialNode) {
+                internal_remove_swap_and_pop(m_MaterialNodes, i);
+                return true;
+            }
         }
     }
     return false;
 }
 bool Engine::priv::RenderGraph::remove_mesh_node(MaterialNode* materialNode, const MeshNode* meshNode) {
-    if (!materialNode || !meshNode) {
-        return false;
-    }
-    for (size_t i = 0; i < materialNode->meshNodes.size(); ++i) {
-        if (&materialNode->meshNodes[i] == meshNode) {
-            materialNode->meshNodes.erase(materialNode->meshNodes.begin() + i);
-            return true;
+    if (materialNode && meshNode) {
+        for (size_t i = 0; i < materialNode->meshNodes.size(); ++i) {
+            if (&materialNode->meshNodes[i] == meshNode) {
+                internal_remove_swap_and_pop(materialNode->meshNodes, i);
+                return true;
+            }
         }
     }
     return false;
 }
 bool Engine::priv::RenderGraph::remove_instance_node(MeshNode* meshNode, const ModelInstance* instanceNode) {
-    if (!meshNode || !instanceNode) {
-        return false;
-    }
-    for (size_t i = 0; i < meshNode->instanceNodes.size(); ++i) {
-        if (meshNode->instanceNodes[i] == instanceNode) {
-            meshNode->instanceNodes.erase(meshNode->instanceNodes.begin() + i);
+    if (meshNode && instanceNode) {
+        for (size_t i = 0; i < meshNode->instanceNodes.size(); ++i) {
+            if (meshNode->instanceNodes[i] == instanceNode) {
+                internal_remove_swap_and_pop(meshNode->instanceNodes, i);
+            }
         }
-    }
-    for (size_t i = 0; i < m_InstancesTotal.size(); ++i) {
-        if (m_InstancesTotal[i] == instanceNode) {
-            m_InstancesTotal.erase(m_InstancesTotal.begin() + i);
-            return true;
+        for (size_t i = 0; i < m_InstancesTotal.size(); ++i) {
+            if (m_InstancesTotal[i] == instanceNode) {
+                internal_remove_swap_and_pop(m_InstancesTotal, i);
+                return true;
+            }
         }
     }
     return false;
 }
 // TODO: correct this
 void Engine::priv::RenderGraph::internal_sort_impl(Camera* camera, SortingMode sortingMode, std::vector<ModelInstance*>& instances) {
-    if (!camera) {
-        return;
-    }
+    if (camera) {
 #ifndef _DEBUG
-    glm_vec3 camPos = camera->getPosition();
-    auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
-        auto [lhsTransform, lhsModel] = lhs->getParent().getComponents<ComponentTransform, ComponentModel>();
-        auto [rhsTransform, rhsModel] = rhs->getParent().getComponents<ComponentTransform, ComponentModel>();
-        auto lhsPos                   = lhsTransform->getPosition();
-        auto rhsPos                   = rhsTransform->getPosition();
-        auto leftDir                  = glm::normalize(lhsPos - camPos);
-        auto rightDir                 = glm::normalize(rhsPos - camPos);
-        auto leftPos                  = lhsPos - (leftDir * (decimal)lhsModel->getRadius());
-        auto rightPos                 = rhsPos - (rightDir * (decimal)rhsModel->getRadius());
-        if (sortingMode == SortingMode::FrontToBack)
-            return glm::distance2(leftPos, camPos) < glm::distance2(rightPos, camPos);
-        else if (sortingMode == SortingMode::BackToFront)
-            return glm::distance2(leftPos, camPos) > glm::distance2(rightPos, camPos);
-        return false;
-    };
-    Engine::sort(std::execution::par_unseq, instances, lambda_sorter);
+        glm_vec3 camPos = camera->getPosition();
+        auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
+            auto [lhsTransform, lhsModel] = lhs->getParent().getComponents<ComponentTransform, ComponentModel>();
+            auto [rhsTransform, rhsModel] = rhs->getParent().getComponents<ComponentTransform, ComponentModel>();
+            auto lhsPos                   = lhsTransform->getPosition();
+            auto rhsPos                   = rhsTransform->getPosition();
+            auto leftDir                  = glm::normalize(lhsPos - camPos);
+            auto rightDir                 = glm::normalize(rhsPos - camPos);
+            auto leftPos                  = lhsPos - (leftDir * (decimal)lhsModel->getRadius());
+            auto rightPos                 = rhsPos - (rightDir * (decimal)rhsModel->getRadius());
+            if (sortingMode == SortingMode::FrontToBack)
+                return glm::distance2(leftPos, camPos) < glm::distance2(rightPos, camPos);
+            else if (sortingMode == SortingMode::BackToFront)
+                return glm::distance2(leftPos, camPos) > glm::distance2(rightPos, camPos);
+            return false;
+        };
+        Engine::sort(std::execution::par_unseq, instances, lambda_sorter);
 #endif
+    }
 }
 void Engine::priv::RenderGraph::internal_sort_cheap_impl(Camera* camera, SortingMode sortingMode, std::vector<ModelInstance*>& instances) {
-    if (!camera) {
-        return;
-    }
+    if (camera) {
 #ifndef _DEBUG
-    glm::vec3 camPos = glm::vec3{ camera->getPosition() };
-    auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
-        auto lhsTransform = lhs->getParent().getComponent<ComponentTransform>();
-        auto rhsTransform = rhs->getParent().getComponent<ComponentTransform>();
-        auto lhsPos       = glm::vec3(lhsTransform->getPosition()) + lhs->getPosition();
-        auto rhsPos       = glm::vec3(rhsTransform->getPosition()) + rhs->getPosition();
-        if (sortingMode == SortingMode::FrontToBack)
-            return glm::distance2(lhsPos, camPos) < glm::distance2(rhsPos, camPos);
-        else if (sortingMode == SortingMode::BackToFront)
-            return glm::distance2(lhsPos, camPos) > glm::distance2(rhsPos, camPos);
-        return false;
-    };
-    Engine::sort(std::execution::par_unseq, instances, lambda_sorter);
+        glm::vec3 camPos = glm::vec3{ camera->getPosition() };
+        auto lambda_sorter = [sortingMode, &camPos](ModelInstance* lhs, ModelInstance* rhs) {
+            auto lhsTransform = lhs->getParent().getComponent<ComponentTransform>();
+            auto rhsTransform = rhs->getParent().getComponent<ComponentTransform>();
+            auto lhsPos       = glm::vec3(lhsTransform->getPosition()) + lhs->getPosition();
+            auto rhsPos       = glm::vec3(rhsTransform->getPosition()) + rhs->getPosition();
+            if (sortingMode == SortingMode::FrontToBack)
+                return glm::distance2(lhsPos, camPos) < glm::distance2(rhsPos, camPos);
+            else if (sortingMode == SortingMode::BackToFront)
+                return glm::distance2(lhsPos, camPos) > glm::distance2(rhsPos, camPos);
+            return false;
+        };
+        Engine::sort(std::execution::par_unseq, instances, lambda_sorter);
 #endif
+    }
 }
 void Engine::priv::RenderGraph::sort_cheap(Camera* camera, SortingMode sortingMode) {
-    if (!camera) {
-        return;
-    }
+    if (camera) {
 #ifndef _DEBUG
-    glm::vec3 camPos = glm::vec3(camera->getPosition());
-    for (auto& materialNode : m_MaterialNodes) {
-        for (auto& meshNode : materialNode.meshNodes) {
-            internal_sort_cheap_impl(camera, sortingMode, meshNode.instanceNodes);
+        for (auto& materialNode : m_MaterialNodes) {
+            for (auto& meshNode : materialNode.meshNodes) {
+                internal_sort_cheap_impl(camera, sortingMode, meshNode.instanceNodes);
+            }
         }
-    }
 #endif
+    }
 }
 void Engine::priv::RenderGraph::sort_cheap_bruteforce(Camera* camera, SortingMode sortingMode) {
     internal_sort_cheap_impl(camera ,sortingMode, m_InstancesTotal);
 }
 // TODO: make sure the math here is correct
 void Engine::priv::RenderGraph::sort(Camera* camera, SortingMode sortingMode) {
-    if (!camera) {
-        return;
-    }
+    if (camera) {
 #ifndef _DEBUG
-    glm_vec3 camPos = camera->getPosition();
-    for (auto& materialNode : m_MaterialNodes) {
-        for (auto& meshNode : materialNode.meshNodes) {
-            internal_sort_impl(camera, sortingMode, meshNode.instanceNodes);
+        for (auto& materialNode : m_MaterialNodes) {
+            for (auto& meshNode : materialNode.meshNodes) {
+                internal_sort_impl(camera, sortingMode, meshNode.instanceNodes);
+            }
         }
-    }
 #endif
+    }
 }
 void Engine::priv::RenderGraph::sort_bruteforce(Camera* camera, SortingMode sortingMode) {
     internal_sort_impl(camera, sortingMode, m_InstancesTotal);
@@ -179,10 +187,10 @@ void Engine::priv::RenderGraph::clean(Entity inEntity) {
     if (inEntity.null()) {
         return;
     }
-    auto kept_nodes_total = Engine::create_and_reserve<std::vector<ModelInstance*>>((uint32_t)m_InstancesTotal.size());
+    auto kept_nodes_total = Engine::create_and_reserve<std::vector<ModelInstance*>>(m_InstancesTotal.size());
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
-            auto kept_nodes = Engine::create_and_reserve<std::vector<ModelInstance*>>((uint32_t)meshNode.instanceNodes.size());
+            auto kept_nodes = Engine::create_and_reserve<std::vector<ModelInstance*>>(meshNode.instanceNodes.size());
             for (auto& modelInstance : meshNode.instanceNodes) {
                 auto entity = modelInstance->getParent();
                 if (entity != inEntity) {

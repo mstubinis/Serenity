@@ -41,6 +41,18 @@ class Handle final {
         inline explicit constexpr operator uint32_t() const noexcept { return m_Type << 27 | m_Version << 12 | m_Index; }
         inline explicit constexpr operator bool() const noexcept { return !null(); }
 
+        inline constexpr bool operator<(const Handle& other) const noexcept {
+            return m_Index < other.m_Index;
+        }
+        inline constexpr bool operator>(const Handle& other) const noexcept {
+            return m_Index > other.m_Index;
+        }
+        inline constexpr bool operator<=(const Handle& other) const noexcept {
+            return m_Index <= other.m_Index;
+        }
+        inline constexpr bool operator>=(const Handle& other) const noexcept {
+            return m_Index >= other.m_Index;
+        }
         inline constexpr bool operator==(const Handle& other) const noexcept { 
             return (m_Index == other.m_Index && m_Version == other.m_Version && m_Type == other.m_Type);
         }

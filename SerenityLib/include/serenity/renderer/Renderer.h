@@ -40,8 +40,6 @@ extern "C" {
 namespace Engine::priv {
     class  RenderModule final {
         public:
-            static Engine::view_ptr<Engine::priv::RenderModule> RENDER_MODULE;
-        public:
             std::unique_ptr<IRenderingPipeline>  m_Pipeline;
             AntiAliasingAlgorithm                m_AA_algorithm      = AntiAliasingAlgorithm::FXAA;
             LightingAlgorithm                    m_LightingAlgorithm = LightingAlgorithm::PBR;
@@ -62,12 +60,12 @@ namespace Engine::priv {
 
             static void render(RenderModule&, Viewport&, bool mainRenderFunc = true);
 
-            bool setShadowCaster(SunLight&, bool isShadowCaster);
-            bool setShadowCaster(PointLight&, bool isShadowCaster);
+            bool setShadowCaster(SunLight&,         bool isShadowCaster);
+            bool setShadowCaster(PointLight&,       bool isShadowCaster);
             bool setShadowCaster(DirectionalLight&, bool isShadowCaster);
-            bool setShadowCaster(SpotLight&, bool isShadowCaster);
-            bool setShadowCaster(RodLight&, bool isShadowCaster);
-            bool setShadowCaster(ProjectionLight&, bool isShadowCaster);
+            bool setShadowCaster(SpotLight&,        bool isShadowCaster);
+            bool setShadowCaster(RodLight&,         bool isShadowCaster);
+            bool setShadowCaster(ProjectionLight&,  bool isShadowCaster);
 
             void _onFullscreen(uint32_t width, uint32_t height);
             void _onOpenGLContextCreation(uint32_t width, uint32_t height);
@@ -75,16 +73,14 @@ namespace Engine::priv {
             void _sort2DAPICommands();
 
             bool bind(ModelInstance*) const;
-            bool unbind(ModelInstance*) const;
-
             bool bind(ShaderProgram*) const;
-            bool unbind(ShaderProgram*) const;
-
             bool bind(Mesh*) const;
-            bool unbind(Mesh*) const;
-
             bool bind(Material*) const;
+
             bool unbind(Material*) const;
+            bool unbind(Mesh*) const;
+            bool unbind(ShaderProgram*) const;
+            bool unbind(ModelInstance*) const;
 
             inline float _getGIPackedData() noexcept { return m_GI_Pack; }
             void _genPBREnvMapData(TextureCubemap&, Handle convolutionTexture, Handle preEnvTexture, uint32_t, uint32_t);
@@ -94,18 +90,18 @@ namespace Engine::priv {
 namespace Engine::Renderer {
     namespace Settings {
 
-        void setGamma(const float g);
+        void setGamma(const float gamma);
         const float getGamma();
         void clear(bool color = true, bool depth = true, bool stencil = true);
         void applyGlobalAnisotropicFiltering(float filtering);
         bool setAntiAliasingAlgorithm(AntiAliasingAlgorithm);
-        void enableDrawPhysicsInfo(bool b = true);
+        void enableDrawPhysicsInfo(bool enabled = true);
         void disableDrawPhysicsInfo();
-        void enableSkybox(bool = true);
+        void enableSkybox(bool enabled = true);
         void disableSkybox();
 
         namespace Lighting {
-            void enable(bool b = true);
+            void enable(bool enabled = true);
             void disable();
             float getGIContributionGlobal();
             void setGIContributionGlobal(float giGlobal);
@@ -134,7 +130,14 @@ namespace Engine::Renderer {
     bool setViewport(float x, float y, float width, float height);
 
     template<class X, class Y, class W, class H>
-    inline bool setViewport(X x, Y y, W w, H h) noexcept { return setViewport(static_cast<float>(x), static_cast<float>(y), static_cast<float>(w), static_cast<float>(h)); }
+    inline bool setViewport(X&& x, Y&& y, W&& width, H&& height) noexcept { 
+        return setViewport(
+            static_cast<float>(std::forward<X>(x)), 
+            static_cast<float>(std::forward<Y>(y)),
+            static_cast<float>(std::forward<W>(width)),
+            static_cast<float>(std::forward<H>(height))
+        ); 
+    }
 
 
     /*

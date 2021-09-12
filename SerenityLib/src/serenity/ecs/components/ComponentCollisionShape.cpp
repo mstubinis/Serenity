@@ -180,7 +180,7 @@ void ComponentCollisionShape::setCollision(CollisionType collisionType, Componen
     if (componentModel.getNumModels() >= 2) {
         internal_free_memory();
         m_CollisionShape.reset(new btCompoundShape{});
-        std::vector<ModelInstance*> instances = Engine::create_and_reserve<std::vector<ModelInstance*>>((uint32_t)componentModel.getNumModels());
+        std::vector<ModelInstance*> instances = Engine::create_and_reserve<std::vector<ModelInstance*>>(componentModel.getNumModels());
         bool allLoaded = true;
         for (int i = 0; i < componentModel.getNumModels(); ++i) {
             auto& instance = componentModel.getModel(i);
@@ -199,7 +199,7 @@ void ComponentCollisionShape::setCollision(CollisionType collisionType, Componen
     }
 }
 void ComponentCollisionShape::setCollision(CollisionType collisionType, const std::vector<Entity>& entities, float mass) {
-    std::vector<ModelInstance*> instances = Engine::create_and_reserve<std::vector<ModelInstance*>>((uint32_t)entities.size());
+    std::vector<ModelInstance*> instances = Engine::create_and_reserve<std::vector<ModelInstance*>>(entities.size());
     bool allLoaded = true;
     for (const auto entity : entities) {
         auto componentModel = entity.getComponent<ComponentModel>();

@@ -76,7 +76,7 @@ void MeshRequest::request(bool inAsync) {
                         auto& mesh = *part.handle.get<Mesh>();
                         PublicMesh::LoadGPU(mesh);
                     }
-                    auto handles = Engine::create_and_reserve<std::vector<Handle>>((uint32_t)meshRequest.m_Parts.size());
+                    auto handles = Engine::create_and_reserve<std::vector<Handle>>(meshRequest.m_Parts.size());
                     for (auto& part : meshRequest.m_Parts) {
                         handles.emplace_back(part.handle);
                     }

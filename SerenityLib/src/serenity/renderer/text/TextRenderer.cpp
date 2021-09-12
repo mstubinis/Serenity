@@ -117,7 +117,7 @@ void Engine::priv::TextRenderer::internal_process_line(std::string_view text, in
 }
 void Engine::priv::TextRenderer::internal_render_text_left(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     uint32_t w = 0;
-    internal_process_line(text, 0, text.size(), x, y, z, font, newLineGlyphHeight, w, 0);
+    internal_process_line(text, 0, int(text.size()), x, y, z, font, newLineGlyphHeight, w, 0);
 }
 void Engine::priv::TextRenderer::internal_render_text_center(std::string_view text, const Font& font, float newLineGlyphHeight, float& x, float& y, float z) {
     internal_process_newline_chars(text, font, x);

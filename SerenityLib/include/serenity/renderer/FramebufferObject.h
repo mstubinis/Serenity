@@ -6,10 +6,9 @@ class Texture;
 namespace Engine::priv {
     class FramebufferObject;
     class FramebufferObjectAttatchment;
+    struct FramebufferObjectPublicInterface;
     class FramebufferTexture;
     class RenderbufferObject;
-    struct FramebufferObjectDefaultBindFunctor;
-    struct FramebufferObjectDefaultUnbindFunctor;
 };
 
 #include <serenity/renderer/GLImageConstants.h>
@@ -74,10 +73,9 @@ namespace Engine::priv {
     class FramebufferObject final {
         friend class  Engine::priv::FramebufferTexture;
         friend class  Engine::priv::RenderbufferObject;
-        friend struct Engine::priv::FramebufferObjectDefaultBindFunctor;
-        friend struct Engine::priv::FramebufferObjectDefaultUnbindFunctor;
-        using BindFP         = std::function<void(const FramebufferObject*)>;
-        using UnbindFP       = std::function<void(const FramebufferObject*)>;
+        friend struct Engine::priv::FramebufferObjectPublicInterface;
+        using BindFP         = void(*)(const FramebufferObject*);
+        using UnbindFP       = void(*)(const FramebufferObject*);
         using AttatchmentMap = std::unordered_map<uint32_t, std::unique_ptr<FramebufferObjectAttatchment>>;
         private:
             BindFP                    m_CustomBindFunctor   = [](const FramebufferObject*) {};
@@ -85,10 +83,10 @@ namespace Engine::priv {
 
             std::vector<GLuint>       m_FBOs;
             mutable AttatchmentMap    m_Attatchments;
-            mutable size_t            m_CurrentFBOIndex = 0U;
-            uint32_t                  m_FramebufferWidth = 0U;
+            mutable size_t            m_CurrentFBOIndex   = 0U;
+            uint32_t                  m_FramebufferWidth  = 0U;
             uint32_t                  m_FramebufferHeight = 0U;
-            float                     m_Divisor = 1.0f;
+            float                     m_Divisor           = 1.0f;
         public:
             FramebufferObject() = default;
             FramebufferObject(uint32_t width, uint32_t height, float divisor = 1.0f, uint32_t swapBufferCount = 1);

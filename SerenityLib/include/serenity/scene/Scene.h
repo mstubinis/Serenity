@@ -178,10 +178,10 @@ namespace Engine::priv {
         friend struct SceneImpl;
         friend class  Engine::priv::RenderGraph;
 
-        static std::vector<Particle>&            GetParticles(const Scene& scene);
-        static std::vector<Entity>&              GetEntities(Scene& scene);
-        static std::vector<Viewport>&            GetViewports(const Scene& scene);
-        static std::vector<Camera*>&             GetCameras(const Scene& scene);
+        static std::vector<Particle>&            GetParticles(const Scene&);
+        static std::vector<Entity>&              GetEntities(Scene&);
+        static std::vector<Viewport>&            GetViewports(const Scene&);
+        static std::vector<Camera*>&             GetCameras(const Scene&);
 
         template<class LIGHT>
         [[nodiscard]] static inline Engine::priv::LightContainer<LIGHT>& GetLights(const Scene& scene) noexcept {
@@ -214,8 +214,8 @@ namespace Engine::priv {
 
 
 
-        static void                       AddModelInstanceToPipeline(Scene&, ModelInstance&, RenderStage);
-        static void                       RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, RenderStage);
+        static void                       AddModelInstanceToPipeline(Scene&, ModelInstance&, RenderStage::Stage);
+        static void                       RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, RenderStage::Stage);
         [[nodiscard]] static Engine::priv::ECS& GetECS(Scene&);
         static void                       CleanECS(Scene&, Entity);
         static void                       SkipRenderThisFrame(Scene&);

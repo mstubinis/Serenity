@@ -69,22 +69,31 @@ void RenderbufferObject::unbind(){
 #pragma endregion
 
 namespace Engine::priv {
-    struct FramebufferObjectDefaultBindFunctor final { void operator()(const FramebufferObject* fbo) const {
+    struct FramebufferObjectPublicInterface final {
+        static void swap_buffers(const FramebufferObject* fbo) {
+            fbo->m_CurrentFBOIndex = (fbo->m_CurrentFBOIndex + 1) % fbo->m_FBOs.size(); //swap buffers
+        }
+    };
+};
+namespace {
+    constexpr auto FBO_DEFAULT_BIND_FUNC = [](const FramebufferObject* fbo) {
         Engine::Renderer::setViewport(0.0f, 0.0f, fbo->width(), fbo->height());
-        fbo->m_CurrentFBOIndex = (fbo->m_CurrentFBOIndex + 1) % fbo->m_FBOs.size(); //swap buffers
+        Engine::priv::FramebufferObjectPublicInterface::swap_buffers(fbo);
         Engine::Renderer::bindFBO(*fbo);
         for (const auto& [idx, attatchment] : fbo->attatchments()) {
-            attatchment->bind(); 
+            attatchment->bind();
         }
-    }};
-    struct FramebufferObjectDefaultUnbindFunctor final { void operator()(const FramebufferObject* fbo) const {
+    };
+    constexpr auto FBO_DEFAULT_UNBIND_FUNC = [](const FramebufferObject* fbo) {
         for (const auto& [idx, attatchment] : fbo->attatchments()) {
-            attatchment->unbind(); 
+            attatchment->unbind();
         }
         Engine::Renderer::unbindFBO();
-        const auto winSize = Resources::getWindowSize();
-        Engine::Renderer::setViewport(0.0f, 0.0f, winSize.x, winSize.y);
-    }};
+        if (Engine::Resources::getNumWindows() > 0) { //called in destructor, so this might be cleaned up after all the windows are cleaned up
+            const auto winSize = Engine::Resources::getWindowSize();
+            Engine::Renderer::setViewport(0.0f, 0.0f, winSize.x, winSize.y);
+        }
+    };
 };
 
 #pragma region FramebufferObject
@@ -103,14 +112,14 @@ FramebufferObject::~FramebufferObject() {
 void FramebufferObject::init(uint32_t width, uint32_t height, float divisor, uint32_t swapBufferCount) {
     m_CurrentFBOIndex   = 0;
     m_Divisor           = divisor;
-    m_FramebufferWidth  = (uint32_t)((float)width * m_Divisor);
-    m_FramebufferHeight = (uint32_t)((float)height * m_Divisor);
+    m_FramebufferWidth  = uint32_t(float(width) * m_Divisor);
+    m_FramebufferHeight = uint32_t(float(height) * m_Divisor);
     m_FBOs.resize(swapBufferCount, 0);
-    for (auto& fbo : m_FBOs) {
+    for (GLuint& fbo : m_FBOs) {
         glGenFramebuffers(1, &fbo);
     }
-    setCustomBindFunctor(FramebufferObjectDefaultBindFunctor());
-    setCustomUnbindFunctor(FramebufferObjectDefaultUnbindFunctor());
+    setCustomBindFunctor(FBO_DEFAULT_BIND_FUNC);
+    setCustomUnbindFunctor(FBO_DEFAULT_UNBIND_FUNC);
 }
 void FramebufferObject::init(uint32_t width, uint32_t height, ImageInternalFormat depthInternalFormat, float divisor, uint32_t swapBufferCount) {
     if (depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8) {
@@ -125,16 +134,17 @@ void FramebufferObject::cleanup() {
     for (size_t i = 0; i < m_FBOs.size(); ++i) {
         glDeleteFramebuffers(1, &m_FBOs[i]);
     }
+    unbind();
     m_Attatchments.clear();
 }
-void FramebufferObject::resize(const uint32_t w, const uint32_t h) {
-    m_FramebufferWidth  = (uint32_t)((float)w * m_Divisor);
-    m_FramebufferHeight = (uint32_t)((float)h * m_Divisor);
+void FramebufferObject::resize(const uint32_t width, const uint32_t height) {
+    m_FramebufferWidth  = uint32_t(float(width) * m_Divisor);
+    m_FramebufferHeight = uint32_t(float(height) * m_Divisor);
     Engine::Renderer::setViewport(0.0f, 0.0f, m_FramebufferWidth, m_FramebufferHeight);
-    for (const auto fbo : m_FBOs) {
+    for (const GLuint fbo : m_FBOs) {
         Engine::Renderer::bindFBO(fbo);
         for (auto& attatchment : m_Attatchments) {
-            attatchment.second->resize(*this, w, h);
+            attatchment.second->resize(*this, width, height);
         }
     }
 }
@@ -164,7 +174,7 @@ constexpr const char* debugFramebufferStatusAsStr(const GLenum fbStatus) {
 }
 
 bool FramebufferObject::checkStatus() {
-    for (const auto fbo : m_FBOs) {
+    for (const GLuint fbo : m_FBOs) {
         Engine::Renderer::bindFBO(fbo);
         const GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {

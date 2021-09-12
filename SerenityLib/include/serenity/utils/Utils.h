@@ -38,7 +38,7 @@ namespace Engine {
     inline void sort(ExecPolicy&& policy, Container& container) noexcept {
         std::sort(policy, std::begin(container), std::end(container), std::less<>{}); 
     }
-    //TODO: create insertion sort
+
     template<class Container>
     void insertion_sort(Container& container) {
         for (int i = 1; i < container.size(); i++) {
@@ -58,14 +58,14 @@ namespace Engine {
     template<class KEY, class VALUE> using string_map           = std::map<KEY, VALUE, std::less<>>;
     template<class KEY>              using string_set           = std::set<KEY, std::less<>>;
 
-    template<class CONTAINER, class VALUE> CONTAINER create_and_resize(uint32_t size, VALUE value = VALUE{}) {
+    template<class CONTAINER, class VALUE, class SIZE> CONTAINER create_and_resize(SIZE&& size, VALUE value = VALUE{}) {
         CONTAINER result;
-        result.resize(size, value);
+        result.resize(static_cast<size_t>(std::forward<SIZE>(size)), value);
         return result;
     }
-    template<class CONTAINER> CONTAINER create_and_reserve(uint32_t size) {
+    template<class CONTAINER, class SIZE> CONTAINER create_and_reserve(SIZE&& size) {
         CONTAINER result;
-        result.reserve(size);
+        result.reserve(static_cast<size_t>(std::forward<SIZE>(size)));
         return result;
     }
     template<class DERIVED, class BASE> inline DERIVED* type_cast(BASE* inPtr) noexcept {

@@ -158,7 +158,7 @@ void ModelInstance::internal_update_model_matrix(bool recalcRadius) {
     }
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
 }
-void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) {
+void ModelInstance::setStage(RenderStage::Stage stage, ComponentModel& componentModel) {
     m_Stage = stage;
     componentModel.setStage(stage, m_Index);
 }

@@ -31,19 +31,21 @@ bool Entity::isDestroyed() const noexcept {
     return false;
 }
 void Entity::addChild(Entity child) const noexcept {
-    auto body = getComponent<ComponentTransform>();
-    if (body)
-        body->addChild(child);
+    auto transform = getComponent<ComponentTransform>();
+    if (transform) {
+        transform->addChild(child);
+    }
 }
 void Entity::removeChild(Entity child) const noexcept {
-    auto body = getComponent<ComponentTransform>();
-    if (body)
-        body->removeChild(child);
+    auto transform = getComponent<ComponentTransform>();
+    if (transform) {
+        transform->removeChild(child);
+    }
 }
 std::vector<Entity> Entity::getChildren() const noexcept {
-    auto body = getComponent<ComponentTransform>();
+    auto transform = getComponent<ComponentTransform>();
     std::vector<Entity> output;
-    if (body) {
+    if (transform) {
         auto& ecs = *Engine::priv::PublicEntity::GetECS(*this);
         auto& pcs = ecs.getSystem<SystemTransformParentChild>();
         for (uint32_t i = 0; i < (uint32_t)pcs.m_Parents.size(); ++i) {
@@ -56,16 +58,12 @@ std::vector<Entity> Entity::getChildren() const noexcept {
     return output;
 }
 bool Entity::hasParent() const noexcept {
-    auto body = getComponent<ComponentTransform>();
-    if (body)
-        return body->hasParent();
-    return false;
+    auto transform = getComponent<ComponentTransform>();
+    return (transform) ? transform->hasParent() : false;
 }
 [[nodiscard]] Entity Entity::getParent() const noexcept {
-    auto body = getComponent<ComponentTransform>();
-    if (body)
-        return body->getParent();
-    return Entity{};
+    auto transform = getComponent<ComponentTransform>();
+    return (transform) ? transform->getParent() : Entity{};
 }
 
 Engine::view_ptr<Scene> Entity::scene() const noexcept {
@@ -82,7 +80,7 @@ bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef
         }
     }else if (componentClassName == "ComponentModel") {
         if (!a3.isNil() && !a4.isNil()) {
-            return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage>());
+            return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage::Stage>());
         }else if(a4.isNil()){
             return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>());
         }else{

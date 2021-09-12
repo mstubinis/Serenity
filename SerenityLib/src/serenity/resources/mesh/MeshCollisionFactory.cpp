@@ -58,7 +58,7 @@ void Engine::priv::MeshCollisionFactory::internal_init_convex_data(std::vector<g
     m_ConvesHullShape.recalcLocalAabb();
 }
 void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData& data, std::vector<glm::vec3>& positions) {
-    auto triangles = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)data.m_Indices.size());
+    auto triangles = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Indices.size());
     for (auto& indice : data.m_Indices) {
         triangles.emplace_back(positions[indice]);
     }

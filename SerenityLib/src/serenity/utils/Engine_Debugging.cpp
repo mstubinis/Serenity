@@ -62,7 +62,6 @@ std::string priv::DebugManager::fps() const noexcept {
     const auto fps = Engine::priv::Core::m_Engine->m_Misc.m_FPS.fps();
     return std::to_string(fps);
 }
-#include <serenity/renderer/text/TextStringBuilderColor.h>
 std::string& priv::DebugManager::reportTime(uint32_t decimals_) {
     m_Decimals     = decimals_;
     m_Strm.str({});

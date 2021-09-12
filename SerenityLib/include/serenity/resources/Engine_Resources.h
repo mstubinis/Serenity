@@ -98,6 +98,7 @@ namespace Engine::Resources {
 
     [[nodiscard]] Window& getWindow(uint32_t index);
     [[nodiscard]] glm::uvec2 getWindowSize(uint32_t index);
+    [[nodiscard]] size_t getNumWindows();
 
     [[nodiscard]] Engine::view_ptr<Scene> getScene(std::string_view sceneName);
     bool deleteScene(std::string_view sceneName);

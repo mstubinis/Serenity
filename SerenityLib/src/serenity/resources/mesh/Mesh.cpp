@@ -205,14 +205,14 @@ void Engine::priv::PublicMesh::FinalizeVertexData(MeshCPUData& cpuData, MeshImpo
         #pragma endregion
     } else {
         #pragma region Some Threshold
-        auto indices        = Engine::create_and_reserve<std::vector<uint32_t>>((uint32_t)data.m_Points.size());
-        auto temp_pos       = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)data.m_Points.size());
-        auto temp_uvs       = Engine::create_and_reserve<std::vector<glm::vec2>>((uint32_t)data.m_UVs.size());
-        auto temp_normals   = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)data.m_Normals.size());
-        auto temp_binormals = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)data.m_Binormals.size());
-        auto temp_tangents  = Engine::create_and_reserve<std::vector<glm::vec3>>((uint32_t)data.m_Tangents.size());
-        auto boneIDs        = Engine::create_and_reserve<std::vector<glm::vec4>>((uint32_t)data.m_Bones.size());
-        auto boneWeights    = Engine::create_and_reserve<std::vector<glm::vec4>>((uint32_t)data.m_Bones.size());
+        auto indices        = Engine::create_and_reserve<std::vector<uint32_t>>(data.m_Points.size());
+        auto temp_pos       = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Points.size());
+        auto temp_uvs       = Engine::create_and_reserve<std::vector<glm::vec2>>(data.m_UVs.size());
+        auto temp_normals   = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Normals.size());
+        auto temp_binormals = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Binormals.size());
+        auto temp_tangents  = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Tangents.size());
+        auto boneIDs        = Engine::create_and_reserve<std::vector<glm::vec4>>(data.m_Bones.size());
+        auto boneWeights    = Engine::create_and_reserve<std::vector<glm::vec4>>(data.m_Bones.size());
         for (size_t i = 0; i < data.m_Points.size(); ++i) {
             uint32_t index;
             bool found = priv::MeshLoader::GetSimilarVertexIndex(data.m_Points[i], data.m_UVs[i], data.m_Normals[i], temp_pos, temp_uvs, temp_normals, index, cpuData.m_Threshold);
@@ -485,7 +485,7 @@ Mesh::Mesh(std::string_view name, float width, float height, float threshold, co
     m_CPUData.m_VertexData->bind();
     m_CPUData.m_VertexData->setData(0, positions.data(), positions.size(), MeshModifyFlags::None);
     m_CPUData.m_VertexData->setData(1, uvs.data(), uvs.size(), MeshModifyFlags::None);
-    if (m_CPUData.m_VertexData->m_Format.m_Attributes[2].type == GL_UNSIGNED_BYTE) {
+    if (m_CPUData.m_VertexData->m_Format.m_Attributes.size() > 2 && m_CPUData.m_VertexData->m_Format.m_Attributes[2].type == GL_UNSIGNED_BYTE) {
         m_CPUData.m_VertexData->setData(2, colors.data(), colors.size(), MeshModifyFlags::None);
     }
     m_CPUData.m_VertexData->setIndices(indices.data(), indices.size(), MeshModifyFlags::RecalculateTriangles);
@@ -638,7 +638,7 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
         //std::execution::par_unseq seems to really help here for performance
         Engine::sort(std::execution::par_unseq, triangles, lambda_sorter);
 
-        auto newIndices = Engine::create_and_reserve<std::vector<uint32_t>>( static_cast<uint32_t>(m_CPUData.m_VertexData->m_Indices.size()) );
+        auto newIndices = Engine::create_and_reserve<std::vector<uint32_t>>( m_CPUData.m_VertexData->m_Indices.size() );
         for (size_t i = 0; i < triangles.size(); ++i) {
             auto& triangle = triangles[i];
             newIndices.emplace_back(triangle.index1);
