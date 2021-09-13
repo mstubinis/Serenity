@@ -96,7 +96,6 @@ namespace Engine::priv {
             void internal_pass_blur(Viewport&, GLuint texture, std::string_view type);
             void internal_pass_normaless_diffuse();
 
-            void internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, TextureCubemap&, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeTextureSize, uint32_t preEnvFilterSize);
             void internal_generate_brdf_lut(Handle shaderProgram, uint32_t brdfSize, int numSamples);
 
             void internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>&, Handle texture, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment, const glm::vec4& scissor);

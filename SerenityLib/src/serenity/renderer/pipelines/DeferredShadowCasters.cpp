@@ -51,11 +51,13 @@ bool Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthTexture[0], 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
-    GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): FBO Error is: " << framebufferStatus);
-        return false;
-    }
+    #if defined(_DEBUG)
+        GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
+            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): FBO Error is: " << framebufferStatus);
+            return false;
+        }
+    #endif
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return true;
 }

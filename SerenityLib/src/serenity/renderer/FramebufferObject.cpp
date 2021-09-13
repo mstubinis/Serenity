@@ -176,11 +176,13 @@ constexpr const char* debugFramebufferStatusAsStr(const GLenum fbStatus) {
 bool FramebufferObject::checkStatus() {
     for (const GLuint fbo : m_FBOs) {
         Engine::Renderer::bindFBO(fbo);
-        const GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
-            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() error - fbo: " << fbo << ": " << debugFramebufferStatusAsStr(framebufferStatus))
-            return false;
-        }
+        #if defined(_DEBUG)
+            const GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
+                ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() error - fbo: " << fbo << ": " << debugFramebufferStatusAsStr(framebufferStatus))
+                return false;
+            }
+        #endif
     }
     return true;
 }

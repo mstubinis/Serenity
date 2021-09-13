@@ -974,6 +974,9 @@
     <ClCompile Include="src\serenity\renderer\text\TextStringBuilderColor.cpp">
       <Filter>Source Files\Engine\Core\Renderer\text</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\utils\Random.cpp">
+      <Filter>Source Files\Engine\Core\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -1812,6 +1815,9 @@
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\text\TextRendererIncludes.h">
       <Filter>Header Files\Engine\Core\Renderer\text</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\utils\Random.h">
+      <Filter>Header Files\Engine\Core\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

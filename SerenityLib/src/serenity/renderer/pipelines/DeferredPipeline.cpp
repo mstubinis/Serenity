@@ -42,98 +42,103 @@ using namespace Engine;
 using namespace Engine::priv;
 using namespace Engine::Renderer;
 
-constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](const Material& m) {
-    const auto& components = m.getComponents();
-    size_t numComponents   = components.size();
-    size_t textureUnit     = 0;
-
-    for (size_t i = 0; i < numComponents; ++i) {
-        const auto& component = components[i];
-        component.bind(i, textureUnit);
-    }
-    Engine::Renderer::sendUniform1Safe("numComponents", int(numComponents));
-    Engine::Renderer::sendUniform1Safe("Shadeless", int(m.getShadeless()));
-    Engine::Renderer::sendUniform4Safe("Material_F0AndID", m.getF0().r(), m.getF0().g(), m.getF0().b(), float(m.getID()));
-    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne", m.getGlowFloat(), m.getAOFloat(), m.getMetalnessFloat(), m.getSmoothnessFloat());
-    Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", m.getAlphaFloat(), m.getDiffuseModelFloat(), m.getSpecularModelFloat(), 0.0f);
-};
-
-
+namespace {
+    constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](const Material& m) {
+        const auto& components = m.getComponents();
+        size_t numComponents   = components.size();
+        size_t textureUnit     = 0;
+        for (size_t i = 0; i < numComponents; ++i) {
+            components[i].bind(i, textureUnit);
+        }
+        Engine::Renderer::sendUniform1Safe("numComponents", int(numComponents));
+        Engine::Renderer::sendUniform1Safe("Shadeless", int(m.getShadeless()));
+        Engine::Renderer::sendUniform4Safe("Material_F0AndID", m.getF0().r(), m.getF0().g(), m.getF0().b(), float(m.getID()));
+        Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesOne", m.getGlowFloat(), m.getAOFloat(), m.getMetalnessFloat(), m.getSmoothnessFloat());
+        Engine::Renderer::sendUniform4Safe("MaterialBasePropertiesTwo", m.getAlphaFloat(), m.getDiffuseModelFloat(), m.getSpecularModelFloat(), 0.0f);
+    };
+    constexpr const std::array<const glm::mat4, 6> CAPTURE_VIEWS = {
+        glm::mat4{  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+        glm::mat4{  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+        glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+        glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+        glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+        glm::mat4{ -1.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
+    };
 #ifndef ENGINE_PRODUCTION
-constexpr const char* getDebugMsgSourceStr(GLenum src) {
-    switch (src) {
-        case GL_DEBUG_SOURCE_API: {
-            return "API";
-        } case GL_DEBUG_SOURCE_WINDOW_SYSTEM: {
-            return "WINDOW_SYSTEM";
-        } case GL_DEBUG_SOURCE_SHADER_COMPILER: {
-            return "SHADER_COMPILER";
-        } case GL_DEBUG_SOURCE_THIRD_PARTY: {
-            return "THIRD_PARTY";
-        } case GL_DEBUG_SOURCE_APPLICATION: {
-            return "APPLICATION";
-        } case GL_DEBUG_SOURCE_OTHER: {
-            return "OTHER";
+    constexpr const char* getDebugMsgSourceStr(GLenum src) {
+        switch (src) {
+            case GL_DEBUG_SOURCE_API: {
+                return "API";
+            } case GL_DEBUG_SOURCE_WINDOW_SYSTEM: {
+                return "WINDOW_SYSTEM";
+            } case GL_DEBUG_SOURCE_SHADER_COMPILER: {
+                return "SHADER_COMPILER";
+            } case GL_DEBUG_SOURCE_THIRD_PARTY: {
+                return "THIRD_PARTY";
+            } case GL_DEBUG_SOURCE_APPLICATION: {
+                return "APPLICATION";
+            } case GL_DEBUG_SOURCE_OTHER: {
+                return "OTHER";
+            }
         }
+        return "";
     }
-    return "";
-}
-constexpr const char* getDebugMsgTypeStr(GLenum type) {
-    switch (type) {
-        case GL_DEBUG_TYPE_ERROR: {
-            return "ERROR";
-        } case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: {
-            return "DEPRECATED_BEHAVIOR";
-        } case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: {
-            return "UNDEFINED_BEHAVIOR";
-        } case GL_DEBUG_TYPE_PORTABILITY: {
-            return "PORTABILITY";
-        } case GL_DEBUG_TYPE_PERFORMANCE: {
-            return "PERFORMANCE";
-        } case GL_DEBUG_TYPE_MARKER: {
-            return "MARKER";
-        } case GL_DEBUG_TYPE_PUSH_GROUP: {
-            return "PUSH_GROUP";
-        } case GL_DEBUG_TYPE_POP_GROUP: {
-            return "POP_GROUP";
-        } case GL_DEBUG_TYPE_OTHER: {
-            return "OTHER";
+    constexpr const char* getDebugMsgTypeStr(GLenum type) {
+        switch (type) {
+            case GL_DEBUG_TYPE_ERROR: {
+                return "ERROR";
+            } case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: {
+                return "DEPRECATED_BEHAVIOR";
+            } case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR: {
+                return "UNDEFINED_BEHAVIOR";
+            } case GL_DEBUG_TYPE_PORTABILITY: {
+                return "PORTABILITY";
+            } case GL_DEBUG_TYPE_PERFORMANCE: {
+                return "PERFORMANCE";
+            } case GL_DEBUG_TYPE_MARKER: {
+                return "MARKER";
+            } case GL_DEBUG_TYPE_PUSH_GROUP: {
+                return "PUSH_GROUP";
+            } case GL_DEBUG_TYPE_POP_GROUP: {
+                return "POP_GROUP";
+            } case GL_DEBUG_TYPE_OTHER: {
+                return "OTHER";
+            }
         }
+        return "";
     }
-    return "";
-}
-constexpr const char* getDebugMsgSeverityStr(GLenum sev) {
-    switch (sev) {
-        case GL_DEBUG_SEVERITY_HIGH: {
-            return "HIGH";
-        } case GL_DEBUG_SEVERITY_MEDIUM: {
-            return "MED";
-        } case GL_DEBUG_SEVERITY_LOW: {
-            return "LOW";
-        } case GL_DEBUG_SEVERITY_NOTIFICATION: {
-            return "NOTIFICATION";
+    constexpr const char* getDebugMsgSeverityStr(GLenum sev) {
+        switch (sev) {
+            case GL_DEBUG_SEVERITY_HIGH: {
+                return "HIGH";
+            } case GL_DEBUG_SEVERITY_MEDIUM: {
+                return "MED";
+            } case GL_DEBUG_SEVERITY_LOW: {
+                return "LOW";
+            } case GL_DEBUG_SEVERITY_NOTIFICATION: {
+                return "NOTIFICATION";
+            }
         }
+        return "";
     }
-    return "";
-}
-void opengl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-    #ifdef _DEBUG
-    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
-        return;
+    void opengl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+#ifdef _DEBUG
+        if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+            return;
+        }
+#endif
+        std::cout << "opengl error - source: " << getDebugMsgSourceStr(source) << ", type: " << getDebugMsgTypeStr(type) << ", id: " << id << ", severity: " << getDebugMsgSeverityStr(severity) << ", message: " << message << '\n';
     }
-    #endif
-    std::cout << "opengl error - source: " << getDebugMsgSourceStr(source) << ", type: " << getDebugMsgTypeStr(type) << ", id: " << id << ", severity: " << getDebugMsgSeverityStr(severity) << ", message: " << message << '\n';
-}
 #endif 
-
-constexpr const std::array<const glm::mat4, 6> CAPTURE_VIEWS = {
-    glm::mat4{  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
-    glm::mat4{  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
-    glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
-    glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
-    glm::mat4{  1.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
-    glm::mat4{ -1.0f,  0.0f,  0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  1.0f },
-};
+    template<class PROJECTION_MATRIX>
+    std::vector<glm::mat4> internal_gen_capture_views(PROJECTION_MATRIX&& projection) {
+        auto captureViews = Engine::create_and_reserve<std::vector<glm::mat4>>(CAPTURE_VIEWS.size());
+        for (const auto& view : CAPTURE_VIEWS) {
+            captureViews.emplace_back(std::forward<PROJECTION_MATRIX>(projection) * view);
+        }
+        return captureViews;
+    }
+}
 
 struct ShaderEnum final { enum Shader : uint32_t {
     DecalVertex,
@@ -388,59 +393,7 @@ void DeferredPipeline::init() {
 
     Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().get<Mesh>()->getVertexData().unbind();
 }
-void DeferredPipeline::internal_generate_pbr_data_for_texture(Handle covoludeShaderProgram, Handle prefilterShaderProgram, TextureCubemap& cubemap, Handle convolutionTextureHandle, Handle preEnvTextureHandle, uint32_t convoludeTextureSize, uint32_t preEnvFilterSize) {
-    uint32_t size = convoludeTextureSize;
-    auto& convolutionTexture = *convolutionTextureHandle.get<TextureCubemap>();
-    Engine::Renderer::bindTextureForModification(TextureType::CubeMap, convolutionTexture.address());
-    //Engine::Renderer::unbindFBO();
-    priv::FramebufferObject fbo{ size, size }; //try without a depth format
-    fbo.bind();
 
-    //make these global / constexpr in the renderer class?
-    const glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f);
-    std::vector<glm::mat4> captureViews;
-    captureViews.reserve(CAPTURE_VIEWS.size());
-    for (uint32_t i = 0; i < CAPTURE_VIEWS.size(); ++i) {
-        captureViews.emplace_back(captureProjection * CAPTURE_VIEWS[i]);
-    }
-
-    m_Renderer.bind(covoludeShaderProgram.get<ShaderProgram>());
-    Engine::Renderer::sendTexture("cubemap", cubemap.address(), 0, GL_TEXTURE_CUBE_MAP);
-    Engine::Renderer::setViewport(0.0f, 0.0f, size, size);
-    for (uint32_t i = 0; i < captureViews.size(); ++i) {
-        Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, convolutionTexture.address(), 0);
-        fbo.checkStatus();
-        Engine::Renderer::Settings::clear(true, true, false);
-        Skybox::bindMesh();
-    }
-    //now gen EnvPrefilterMap for specular IBL
-    size = preEnvFilterSize;
-    auto& preEnvTexture = *preEnvTextureHandle.get<TextureCubemap>();
-    Engine::Renderer::bindTextureForModification(TextureType::CubeMap, preEnvTexture.address());
-
-    m_Renderer.bind(prefilterShaderProgram.get<ShaderProgram>());
-    Engine::Renderer::sendTexture("cubemap", cubemap.address(), 0, GL_TEXTURE_CUBE_MAP);
-    Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((cubemap.width() * cubemap.width()) * 6 ));
-    Engine::Renderer::sendUniform1("NUM_SAMPLES", 32);
-    const uint32_t maxMipLevels = 5;
-    for (uint32_t m = 0; m < maxMipLevels; ++m) {
-        const uint32_t mipSize(size * (uint32_t)glm::pow(0.5, m)); // reisze framebuffer according to mip-level size.
-        fbo.resize(mipSize, mipSize);
-        const float roughness = float(m) / float(maxMipLevels - 1);
-        const float a = roughness * roughness;
-        Engine::Renderer::sendUniform1("roughness", roughness);
-        Engine::Renderer::sendUniform1("a2", a * a);
-        for (uint32_t i = 0; i < captureViews.size(); ++i) {
-            Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, preEnvTexture.address(), m);
-            fbo.checkStatus();
-            Engine::Renderer::Settings::clear(true, true, false);
-            Skybox::bindMesh();
-        }
-    }
-    fbo.unbind();
-}
 void DeferredPipeline::internal_generate_brdf_lut(Handle program, uint32_t brdfSize, int numSamples) {
     FramebufferObject fbo{ brdfSize, brdfSize }; //try without a depth format
     fbo.bind();
@@ -720,16 +673,50 @@ bool DeferredPipeline::unbind(Mesh* mesh) {
     m_RendererState.current_bound_mesh = nullptr;
     return true;
 }
-void DeferredPipeline::generatePBRData(TextureCubemap& cubemap, Handle convolutionTexture, Handle preEnvTexture, uint32_t convoludeSize, uint32_t prefilterSize) {
-    internal_generate_pbr_data_for_texture(
-        m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude], 
-        m_InternalShaderPrograms[ShaderProgramEnum::CubemapPrefilterEnv], 
-        cubemap,
-        convolutionTexture,
-        preEnvTexture,
-        convoludeSize, 
-        prefilterSize
-    );
+void DeferredPipeline::generatePBRData(TextureCubemap& cubemap, Handle convolutionTextureHandle , Handle preEnvTextureHandle, uint32_t convoludeSize, uint32_t prefilterSize) { 
+    uint32_t size = convoludeSize;
+    auto& convolutionTexture = *convolutionTextureHandle.get<TextureCubemap>();
+    Engine::Renderer::bindTextureForModification(TextureType::CubeMap, convolutionTexture.address());
+    //Engine::Renderer::unbindFBO();
+    Engine::priv::FramebufferObject fbo{ size, size };
+    fbo.bind();
+
+    std::vector<glm::mat4> captureViews = internal_gen_capture_views(glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f));
+
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude].get<ShaderProgram>());
+    Engine::Renderer::sendTexture("cubemap", cubemap.address(), 0, GL_TEXTURE_CUBE_MAP);
+    Engine::Renderer::setViewport(0.0f, 0.0f, size, size);
+    for (uint32_t i = 0; i < captureViews.size(); ++i) {
+        Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, convolutionTexture.address(), 0);
+        fbo.checkStatus();
+        Engine::Renderer::Settings::clear(true, true, false);
+        Skybox::bindMesh();
+    }
+    //now gen EnvPrefilterMap for specular IBL
+    size = prefilterSize;
+    auto& preEnvTexture = *preEnvTextureHandle.get<TextureCubemap>();
+    Engine::Renderer::bindTextureForModification(TextureType::CubeMap, preEnvTexture.address());
+
+    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::CubemapPrefilterEnv].get<ShaderProgram>());
+    Engine::Renderer::sendTexture("cubemap", cubemap.address(), 0, GL_TEXTURE_CUBE_MAP);
+    Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((cubemap.width() * cubemap.width()) * 6));
+    Engine::Renderer::sendUniform1("NUM_SAMPLES", 32);
+    const uint32_t maxMipLevels = 5;
+    for (uint32_t mipmapLevel = 0; mipmapLevel < maxMipLevels; ++mipmapLevel) {
+        const uint32_t mipSize = size * static_cast<uint32_t>(glm::pow(0.5, mipmapLevel)); // reisze framebuffer according to mip-level size.
+        const float roughness  = float(mipmapLevel) / float(maxMipLevels - 1);
+        const float a          = roughness * roughness;
+        fbo.resize(mipSize, mipSize);
+        Engine::Renderer::sendUniform2("Data", roughness, a * a);
+        for (uint32_t i = 0; i < captureViews.size(); ++i) {
+            Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, preEnvTexture.address(), mipmapLevel);
+            fbo.checkStatus();
+            Engine::Renderer::Settings::clear(true, true, false);
+            Skybox::bindMesh();
+        }
+    }
 }
 void DeferredPipeline::onFullscreen() {
     //TODO: move these lines to a more generic area, all rendering pipelines will pretty much do this
@@ -738,7 +725,7 @@ void DeferredPipeline::onFullscreen() {
     Engine::Renderer::GLEnable(GL_CULL_FACE);
     Engine::Renderer::GLEnable(GL_DEPTH_CLAMP);
 
-    auto winSize = Engine::Resources::getWindowSize();
+    const auto winSize = Engine::Resources::getWindowSize();
     m_GBuffer.init(winSize.x, winSize.y);
 }
 void DeferredPipeline::onResize(uint32_t newWidth, uint32_t newHeight) {

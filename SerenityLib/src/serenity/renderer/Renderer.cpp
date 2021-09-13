@@ -236,7 +236,7 @@ bool RenderModule::bind(Mesh* mesh) const {
     if (res) {
         if (mesh->isLoaded()) {
             mesh->m_CustomBindFunctor(mesh, this);
-        }else{
+        } else {
             Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CPUData.m_VertexData->bind();
         }
     }
@@ -246,7 +246,7 @@ bool RenderModule::unbind(Mesh* mesh) const {
     bool res = m_Pipeline->unbind(mesh);
     if (mesh->isLoaded()) {
         mesh->m_CustomUnbindFunctor(mesh, this);
-    }else{
+    } else {
         Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CPUData.m_VertexData->unbind();
     }
     return true;
@@ -335,23 +335,23 @@ bool Engine::Renderer::Settings::setAntiAliasingAlgorithm(AntiAliasingAlgorithm 
     switch (algorithm) {
         case AntiAliasingAlgorithm::None: {
             break;
-        }case AntiAliasingAlgorithm::FXAA: {
+        } case AntiAliasingAlgorithm::FXAA: {
             break;
-        }case AntiAliasingAlgorithm::SMAA_LOW: {
+        } case AntiAliasingAlgorithm::SMAA_LOW: {
             Engine::Renderer::smaa::setQuality(SMAAQualityLevel::Low);
             break;
-        }case AntiAliasingAlgorithm::SMAA_MED: {
+        } case AntiAliasingAlgorithm::SMAA_MED: {
             Engine::Renderer::smaa::setQuality(SMAAQualityLevel::Medium);
             break;
-        }case AntiAliasingAlgorithm::SMAA_HIGH: {
+        } case AntiAliasingAlgorithm::SMAA_HIGH: {
             Engine::Renderer::smaa::setQuality(SMAAQualityLevel::High);
             break;
-        }case AntiAliasingAlgorithm::SMAA_ULTRA: {
+        } case AntiAliasingAlgorithm::SMAA_ULTRA: {
             Engine::Renderer::smaa::setQuality(SMAAQualityLevel::Ultra);
             break;
         }
     }
-    if(RENDER_MODULE->m_AA_algorithm != algorithm){
+    if (RENDER_MODULE->m_AA_algorithm != algorithm) {
         RENDER_MODULE->m_AA_algorithm = algorithm;
         return true;
     }

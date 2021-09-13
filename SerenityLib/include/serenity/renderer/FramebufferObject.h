@@ -151,7 +151,10 @@ namespace Engine::priv {
             inline constexpr uint32_t height() const noexcept { return m_FramebufferHeight; }
             inline constexpr AttatchmentMap& attatchments() const noexcept { return m_Attatchments; }
             inline GLuint address() const noexcept { return m_FBOs[m_CurrentFBOIndex]; }
+
+            //in debug mode, this binds the fbo and checks its status. in release mode, this only binds the fbo
             bool checkStatus();
+
             inline constexpr float divisor() const noexcept { return m_Divisor; }
     };
 };

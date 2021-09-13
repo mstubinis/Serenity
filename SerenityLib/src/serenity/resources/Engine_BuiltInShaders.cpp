@@ -554,15 +554,21 @@ void main(){
 //
 // this shader is heavily modified based on optimizations in the link above. the optimizations are not complete yet, and 
 // what seems to look correct may not be. this shader might have to be modified against the original later on.
+//Data.x = roughness, Data.y = a2
 Engine::priv::EShaders::cubemap_prefilter_envmap_frag = R"(
 varying vec3 UV;
+
 uniform SAMPLER_TYPE_Cube cubemap;
-uniform float roughness;
-uniform float a2;
+uniform vec2 Data;
+
 uniform float PiFourDividedByResSquaredTimesSix;
 uniform int NUM_SAMPLES;
+
 const float PI = 3.14159265;
 const float PI2 = 6.283185;
+const float roughness = Data.x;
+const float a2 = Data.y;
+
 float DistributionGGX(vec3 Half){
     float NdotH2 = Half.z * Half.z;
     float denom = (NdotH2 * (a2 - 1.0) + 1.0);

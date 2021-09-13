@@ -316,6 +316,8 @@ void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentSce
     m_Strm << std::fixed << std::setprecision(4);
 
     auto byte_format = [](DWORDLONG input, std::stringstream& strm) {
+        strm.str({});
+        strm.clear();
         if (input >= 1099511627776) {
             strm << (double(input) / 1099511627776.0) << " TB";
         } else if (input >= 1073741824) {

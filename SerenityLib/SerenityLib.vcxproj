@@ -421,7 +421,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -767,6 +767,7 @@
     <ClCompile Include="src\serenity\threading\WorkerThreadContainer.cpp" />
     <ClCompile Include="src\serenity\types\Timer.cpp" />
     <ClCompile Include="src\serenity\utils\Engine_Debugging.cpp" />
+    <ClCompile Include="src\serenity\utils\Random.cpp" />
     <ClCompile Include="src\serenity\utils\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -1048,6 +1049,7 @@
     <ClInclude Include="include\serenity\utils\BlockProfiler.h" />
     <ClInclude Include="include\serenity\utils\Engine_Debugging.h" />
     <ClInclude Include="include\serenity\utils\Logger.h" />
+    <ClInclude Include="include\serenity\utils\Random.h" />
     <ClInclude Include="include\serenity\utils\Utils.h" />
   </ItemGroup>
   <ItemGroup>
