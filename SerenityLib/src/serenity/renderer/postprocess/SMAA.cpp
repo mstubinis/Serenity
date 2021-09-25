@@ -9,6 +9,7 @@
 #include <serenity/resources/shader/Shader.h>
 #include <serenity/threading/ThreadingModule.h>
 #include <serenity/resources/Engine_Resources.h>
+#include <serenity/renderer/opengl/BindTextureRAII.h>
 
 Engine::priv::SMAA Engine::priv::SMAA::STATIC_SMAA;
 
@@ -603,13 +604,10 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
 
     Engine::Renderer::sendUniform1Safe("SMAA_PREDICATION", (int)PREDICATION);
 
-    Engine::Renderer::sendTexture("textureMap", gbuffer.getTexture(sceneTexture), 0);
-    Engine::Renderer::sendTextureSafe("texturePredication", gbuffer.getTexture(GBufferType::Diffuse), 1);
+    Engine::priv::OpenGLBindTextureRAII textureMap{ "textureMap", gbuffer.getTexture(sceneTexture), 0, false };
+    Engine::priv::OpenGLBindTextureRAII texturePredication{ "texturePredication", gbuffer.getTexture(GBufferType::Diffuse), 1, true };
 
     Engine::Renderer::renderFullscreenQuad();
-
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
 
     Engine::Renderer::stencilMask(0b11111111);
     //only if the stored stencil value is 0b00000001 will the fragments be evaluated
@@ -624,9 +622,9 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
 
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
 
-    Engine::Renderer::sendTexture("edge_tex", gbuffer.getTexture(outTexture), 0);
-    Engine::Renderer::sendTexture("area_tex", AreaTexture, 1, GL_TEXTURE_2D);
-    Engine::Renderer::sendTexture("search_tex", SearchTexture, 2, GL_TEXTURE_2D);
+    Engine::priv::OpenGLBindTextureRAII edge_tex{ "edge_tex", gbuffer.getTexture(outTexture), 0, false };
+    Engine::priv::OpenGLBindTextureRAII area_tex{ "area_tex", AreaTexture, GL_TEXTURE_2D, 1, false };
+    Engine::priv::OpenGLBindTextureRAII search_tex{ "search_tex", SearchTexture, GL_TEXTURE_2D, 2, false };
 
     Engine::Renderer::sendUniform1Safe("SMAA_MAX_SEARCH_STEPS", MAX_SEARCH_STEPS);
 
@@ -635,23 +633,17 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
 
     Engine::Renderer::renderFullscreenQuad();
 
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
-
     Engine::Renderer::GLDisable(GL_STENCIL_TEST);
 }
 void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer) {
     renderer.bind(m_Shader_Programs[PassStage::Neighbor].get<ShaderProgram>());
     const auto& viewportDimensions = viewport.getViewportDimensions();
     Engine::Renderer::sendUniform4("SMAA_PIXEL_SIZE", PIXEL_SIZE);
-    Engine::Renderer::sendTextureSafe("textureMap", gbuffer.getTexture(sceneTexture), 0); //need original final image from first smaa pass
-    Engine::Renderer::sendTextureSafe("blend_tex", gbuffer.getTexture(TEXTURE_INTERMEDIARY), 1);
+
+    Engine::priv::OpenGLBindTextureRAII textureMap{ "textureMap", gbuffer.getTexture(sceneTexture), 0, true };
+    Engine::priv::OpenGLBindTextureRAII blend_tex{ "blend_tex", gbuffer.getTexture(TEXTURE_INTERMEDIARY), 1, true };
 
     Engine::Renderer::renderFullscreenQuad();
-
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
 }
 void Engine::priv::SMAA::passFinal(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const Engine::priv::RenderModule& renderer) {
     /*

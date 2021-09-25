@@ -75,16 +75,16 @@ namespace Engine::Resources {
     bool setCurrentScene(std::string_view sceneName);
 
     template<class T, class ... ARGS>
-    T* addScene(ARGS&&... args) {
+    T& addScene(ARGS&&... args) {
         auto& mgr = *Engine::priv::ResourceManager::RESOURCE_MANAGER;
         for (uint32_t i = 0; i < mgr.m_Scenes.size(); ++i) {
             if (mgr.m_Scenes[i] == nullptr) {
                 mgr.m_Scenes[i].reset( NEW T{ i + 1, std::forward<ARGS>(args)... } );
-                return static_cast<T*>(mgr.m_Scenes[i].get());
+                return *static_cast<T*>(mgr.m_Scenes[i].get());
             }
         }
         mgr.m_Scenes.emplace_back(std::unique_ptr<T>( NEW T{ static_cast<uint32_t>(mgr.m_Scenes.size() + 1), std::forward<ARGS>(args)... } ));
-        return static_cast<T*>(mgr.m_Scenes.back().get());
+        return *static_cast<T*>(mgr.m_Scenes.back().get());
     }
 
     [[nodiscard]] std::mutex& getMutex() noexcept;
@@ -164,33 +164,31 @@ namespace Engine::Resources {
     [[nodiscard]] Handle loadMaterial(
         std::string_view name,
         std::string_view diffuse,
-        std::string_view normal     = "",
-        std::string_view glow       = "",
-        std::string_view specular   = "",
-        std::string_view ao         = "",
-        std::string_view metalness  = "",
-        std::string_view smoothness = ""
+        std::string_view normal     = {},
+        std::string_view glow       = {},
+        std::string_view specular   = {},
+        std::string_view ao         = {},
+        std::string_view metalness  = {},
+        std::string_view smoothness = {}
     );
     [[nodiscard]] Handle loadMaterialAsync(
         std::string_view name,
         std::string_view diffuse,
-        std::string_view normal     = "",
-        std::string_view glow       = "",
-        std::string_view specular   = "",
-        std::string_view ao         = "",
-        std::string_view metalness  = "",
-        std::string_view smoothness = "",
+        std::string_view normal     = {},
+        std::string_view glow       = {},
+        std::string_view specular   = {},
+        std::string_view ao         = {},
+        std::string_view metalness  = {},
+        std::string_view smoothness = {},
         Engine::ResourceCallback callback = [](Handle) {}
     );
-    [[nodiscard]] Handle loadMaterial(
-        std::string_view name,
-        Handle diffuse,
-        Handle normal     = Handle{},
-        Handle glow       = Handle{},
-        Handle specular   = Handle{},
-        Handle ao         = Handle{},
-        Handle metalness  = Handle{},
-        Handle smoothness = Handle{}
+    [[nodiscard]] Handle loadMaterial(std::string_view name, Handle diffuse,
+        Handle normal     = {},
+        Handle glow       = {},
+        Handle specular   = {},
+        Handle ao         = {},
+        Handle metalness  = {},
+        Handle smoothness = {}
     );
 
     [[nodiscard]] Handle addShader(std::string_view shaderFileOrData, ShaderType shaderType, bool fromFile = true);

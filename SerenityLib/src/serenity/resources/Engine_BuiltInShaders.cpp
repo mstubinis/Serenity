@@ -787,7 +787,7 @@ Engine::priv::EShaders::forward_frag =
     "uniform SAMPLER_TYPE_2D brdfLUT;\n"
     "uniform SAMPLER_TYPE_2D gTextureMap;\n"
 
-    "uniform mat4 LightMatrix[NUM_CASCADES];\n"
+    "uniform mat4 uLightMatrix[NUM_CASCADES];\n"
 
     "\n"
     "const float MAX_REFLECTION_LOD = 5.0;\n"
@@ -1236,7 +1236,7 @@ uniform SAMPLER_TYPE_2D gDepthMap;
 uniform SAMPLER_TYPE_2D gSSAOMap;
 uniform SAMPLER_TYPE_2D gTextureMap;
 
-uniform mat4 LightMatrix[NUM_CASCADES];
+uniform mat4 uLightMatrix[NUM_CASCADES];
 
 uniform vec4 materials[MATERIAL_COUNT_LIMIT];
 
@@ -1321,7 +1321,7 @@ void main(){
     float inAO            = fract(MatIDAndAO) + 0.0001;
     vec3 inMatF0          = Unpack3FloatsInto1FloatUnsigned(materials[index].r);
     vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(RendererInfo1.x);
-    vec4 GILight = CalcGILight(inSSAO, inNormals, inAlbedo, inWorldPosition, inAO, inMetalSmooth.x, inMetalSmooth.y, inGlow, inMatF0, materials[index].g, inGIContribution);
+    vec4 GILight          = CalcGILight(inSSAO, inNormals, inAlbedo, inWorldPosition, inAO, inMetalSmooth.x, inMetalSmooth.y, inGlow, inMatF0, materials[index].g, inGIContribution);
     gl_FragColor          += GILight;
     gl_FragColor.rgb = max(gl_FragColor.rgb, inGlow * inAlbedo);
 }
@@ -1348,7 +1348,7 @@ uniform SAMPLER_TYPE_2D gDepthMap;
 uniform SAMPLER_TYPE_2D gSSAOMap;
 uniform SAMPLER_TYPE_2D gTextureMap;
 
-uniform mat4 LightMatrix[NUM_CASCADES];
+uniform mat4 uLightMatrix[NUM_CASCADES];
 
 uniform vec4 materials[MATERIAL_COUNT_LIMIT];
 
@@ -1407,25 +1407,30 @@ void main(){
 )";
 #pragma endregion
 
+//TODO: move this code to the Shadows.cpp file?
 #pragma region ShadowMapDepth
 
 Engine::priv::EShaders::shadow_depth_vert = R"(
 layout(location = 0) in vec3 position;
 
-uniform mat4 LightMatrix;
+uniform mat4 uLightMatrix;
 uniform mat4 Model;
 
 void main() {
-    gl_Position = LightMatrix * Model * vec4(position, 1.0);
+    gl_Position = uLightMatrix * Model * vec4(position, 1.0);
 }  
 )";
-Engine::priv::EShaders::shadow_depth_frag = R"(
-#define BIAS 0.002
 
+/*
+//gl_FragDepth += gl_FrontFacing ? BIAS : 0.0;
+const float BIAS = 0.002;
 void main() {
-    gl_FragDepth = gl_FragCoord.z;
-    gl_FragDepth += gl_FrontFacing ? BIAS : 0.0;
+    gl_FragDepth  = gl_FragCoord.z;
+    gl_FragDepth += float(gl_FrontFacing) * BIAS;
 }
+*/
+Engine::priv::EShaders::shadow_depth_frag = R"(
+void main(){}
 )";
 #pragma endregion
 }

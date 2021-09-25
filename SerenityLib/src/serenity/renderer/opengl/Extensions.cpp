@@ -7,10 +7,11 @@
 #include <string>
 #include <vector>
 
-static std::vector<bool> OPENGL_EXTENSIONS;
+namespace {
+    std::vector<bool> OPENGL_EXTENSIONS = std::vector<bool>(Engine::priv::OpenGLExtensions::_TOTAL, false);
+};
 
 void Engine::priv::OpenGLExtensions::INIT() noexcept {
-    OPENGL_EXTENSIONS.resize(OpenGLExtensions::_TOTAL, false);
     OPENGL_EXTENSIONS[OpenGLExtensions::EXT_texture_filter_anisotropic]  = checkOpenGLExtension("GL_EXT_texture_filter_anisotropic");
     OPENGL_EXTENSIONS[OpenGLExtensions::ARB_texture_filter_anisotropic]  = checkOpenGLExtension("GL_ARB_texture_filter_anisotropic");
     OPENGL_EXTENSIONS[OpenGLExtensions::EXT_draw_instanced]              = checkOpenGLExtension("GL_EXT_draw_instanced");
@@ -29,6 +30,7 @@ void Engine::priv::OpenGLExtensions::INIT() noexcept {
     OPENGL_EXTENSIONS[OpenGLExtensions::NV_bindless_texture]             = checkOpenGLExtension("GL_NV_bindless_texture");
     OPENGL_EXTENSIONS[OpenGLExtensions::ARB_gpu_shader_int64]            = checkOpenGLExtension("GL_ARB_bindless_texture");
     OPENGL_EXTENSIONS[OpenGLExtensions::NV_gpu_shader5]                  = checkOpenGLExtension("GL_NV_bindless_texture");
+    OPENGL_EXTENSIONS[OpenGLExtensions::ARB_clip_control]                = checkOpenGLExtension("GL_ARB_clip_control");
 
     #if !defined(ENGINE_PRODUCTION) && defined(ENGINE_PRINT_OPENGL_EXTENSIONS)
         printAllAvailableExtensions();
@@ -52,7 +54,7 @@ void Engine::priv::OpenGLExtensions::printAllAvailableExtensions() noexcept {
     ENGINE_PRODUCTION_LOG(output)
 }
 
-bool Engine::priv::OpenGLExtensions::supported(OpenGLExtensions::Extension extension) noexcept {
+bool Engine::priv::OpenGLExtensions::supported(OpenGLExtensions extension) noexcept {
     return OPENGL_EXTENSIONS[extension];
 }
 bool Engine::priv::OpenGLExtensions::isBindlessTexturesSupported() noexcept {

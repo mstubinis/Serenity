@@ -3,11 +3,11 @@
 #define ENGINE_EVENTS_MOUSE_BUTTONS_H
 
 #include <string>
-#include <cstdint>
+#include <serenity/system/Macros.h>
 
 class MouseButton final {
     public:
-        enum Button : uint32_t {
+        enum Type : uint32_t {
             Unknown = 0,
             Left = 1,
             Right,
@@ -17,24 +17,25 @@ class MouseButton final {
 
             _TOTAL,
         };
-        [[nodiscard]] static const char* toCharArray(MouseButton::Button);
-        [[nodiscard]] static std::string toString(MouseButton::Button);
-        [[nodiscard]] static const char* toCharArray(uint32_t mouse_button);
-        [[nodiscard]] static std::string toString(uint32_t mouse_button);
+        [[nodiscard]] static const char* toCharArray(MouseButton);
+        [[nodiscard]] static std::string toString(MouseButton);
+
+        BUILD_ENUM_CLASS_MEMBERS(MouseButton, Type)
 };
+
 class MouseWheel final {
     public:
-        enum Wheel : uint32_t {
+        enum Type : uint32_t {
             Unknown = 0,
             VerticalWheel = 1,
             HorizontalWheel,
 
             _TOTAL,
         };
-        [[nodiscard]] static const char* toCharArray(MouseWheel::Wheel);
-        [[nodiscard]] static std::string toString(MouseWheel::Wheel);
-        [[nodiscard]] static const char* toCharArray(uint32_t mouse_wheel);
-        [[nodiscard]] static std::string toString(uint32_t mouse_wheel);
+        [[nodiscard]] static const char* toCharArray(MouseWheel);
+        [[nodiscard]] static std::string toString(MouseWheel);
+
+        BUILD_ENUM_CLASS_MEMBERS(MouseWheel, Type)
 };
 
 #endif

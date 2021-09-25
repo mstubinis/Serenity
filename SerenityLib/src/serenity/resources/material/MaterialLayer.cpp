@@ -6,6 +6,25 @@
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/system/Engine.h>
 
+namespace {
+    template<class TEXTURE> float internal_get_texture_compression_value(Handle textureHandle) noexcept {
+        if (!textureHandle.null()) {
+            auto mutex = textureHandle.getMutex();
+            bool isCompressed = false;
+            if (mutex) {
+                std::lock_guard lock{ *mutex };
+                isCompressed = textureHandle.get<TEXTURE>()->compressed();
+            }
+            return isCompressed ? 0.5f : 1.0f;
+        }
+        return 0.0f;
+    }
+    void internal_set_texture_and_property(Handle textureHandleValue, Handle& textureHandle, float& propertyVar, float value) noexcept {
+        textureHandle = textureHandleValue;
+        propertyVar = value;
+    }
+}
+
 MaterialLayer::MaterialLayer(MaterialLayer&& other) noexcept 
     : m_UVModFuncs               { std::move(other.m_UVModFuncs) }
     , m_MaterialLayerBaseData    { std::move(other.m_MaterialLayerBaseData) }
@@ -30,8 +49,8 @@ MaterialLayer& MaterialLayer::operator=(MaterialLayer&& other) noexcept {
 
 void MaterialLayer::addUVModificationSimpleTranslation(float translationX, float translationY) {
     m_UVModFuncs.emplace_back(translationX, translationY, [](const float x, const float y, const float dt, MaterialLayer& layer) {
-        auto currentUVs           = glm::vec2(layer.getUVModifications().x, layer.getUVModifications().y);
-        auto translatedUVS        = currentUVs + glm::vec2(x * dt, y * dt);
+        auto currentUVs           = glm::vec2{ layer.getUVModifications().x, layer.getUVModifications().y };
+        auto translatedUVS        = currentUVs + glm::vec2{ x * dt, y * dt };
         layer.m_UVModifications.x = translatedUVS.x;
         layer.m_UVModifications.y = translatedUVS.y;
         if (layer.m_UVModifications.x >= 100.0f) {
@@ -50,13 +69,7 @@ void MaterialLayer::addUVModificationSimpleMultiplication(float mulX, float mulY
 }
 
 void MaterialLayer::setTexture(std::string_view textureFile) noexcept {
-    auto texture = Engine::Resources::getResource<Texture>(textureFile);
-    if (!texture.m_Resource) {
-        if (!textureFile.empty()) {
-            texture.m_Handle   = Engine::Resources::loadTextureAsync(textureFile, ImageInternalFormat::SRGB8_ALPHA8, false);
-            texture.m_Resource = texture.m_Handle.get<Texture>();
-        }
-    }
+    auto texture = Engine::priv::MaterialLoader::LoadTextureDiffuse(textureFile);
     setTexture(texture.m_Handle);
 }
 void MaterialLayer::setMask(std::string_view maskFile) noexcept {
@@ -66,10 +79,6 @@ void MaterialLayer::setMask(std::string_view maskFile) noexcept {
 void MaterialLayer::setCubemap(std::string_view cubemapFile) noexcept {
     auto texture = Engine::priv::MaterialLoader::LoadTextureCubemap(cubemapFile);
     setCubemap(texture.m_Handle);
-}
-void MaterialLayer::internal_set_texture_and_property(Handle textureHandleValue, Handle& textureHandle, float& propertyVar, float value) noexcept {
-    textureHandle = textureHandleValue;
-    propertyVar   = value;
 }
 void MaterialLayer::setTexture(Handle textureHandle) noexcept {
     internal_set_texture_and_property(textureHandle, m_TextureHandle, m_MaterialLayerTextureData.textureEnabled, internal_get_texture_compression_value<Texture>(textureHandle));
@@ -86,46 +95,23 @@ void MaterialLayer::update(const float dt) {
         functionItr.func(functionItr.x, functionItr.y, dt, *this);
     }
 }
-void MaterialLayer::sendDataToGPU(const std::string& uniform_component_str, size_t component_idx, size_t layer_idx, size_t& textureUnit) const {
+void MaterialLayer::sendDataToGPU(const std::string& uniform_component_str, size_t layer_idx, int& textureUnit) const {
     const std::string wholeString = uniform_component_str + "layers[" + std::to_string(layer_idx) + "].";
-    if (!m_TextureHandle.null()){
-        auto& texture = *m_TextureHandle.get<Texture>();
-        if (!texture.isLoaded() || texture.address() != 0U) {
-            Engine::Renderer::sendTextureSafe((wholeString + "texture").c_str(), texture, (int)textureUnit);
-            ++textureUnit;
+    auto send_texture = [](const std::string& wholeString, const char* addition, Handle textureHandle, int& textureUnit) {
+        if (!textureHandle.null()) {
+            auto& texture = *textureHandle.get<Texture>();
+            if (texture.isLoaded() || texture.address() != 0) {
+                Engine::Renderer::sendTextureSafe((wholeString + addition).c_str(), texture, textureUnit++);
+            }
         }
-    }
-    if (!m_MaskHandle.null()){
-        auto& mask = *m_MaskHandle.get<Texture>();
-        if (!mask.isLoaded() || mask.address() != 0U) {
-            Engine::Renderer::sendTextureSafe((wholeString + "mask").c_str(), mask, (int)textureUnit);
-            ++textureUnit;
-        }
-    }
-    if (!m_CubemapHandle.null() ){
-        auto& cubemap = *m_CubemapHandle.get<TextureCubemap>();
-        if (!cubemap.isLoaded() || cubemap.address() != 0U) {
-            Engine::Renderer::sendTextureSafe((wholeString + "cubemap").c_str(), cubemap, (int)textureUnit);
-            ++textureUnit;
-        }
-    }
-    Engine::Renderer::sendUniform4Safe((wholeString + "data0").c_str(),
-        m_MaterialLayerBaseData.enabled,
-        m_MaterialLayerBaseData.unused_1,
-        m_MaterialLayerBaseData.unused_2,
-        m_MaterialLayerBaseData.unused_3
-    );
-    Engine::Renderer::sendUniform4Safe((wholeString + "data1").c_str(), 
-        m_MaterialLayerTextureData.blendMode, 
-        m_MaterialLayerTextureData.textureEnabled, 
-        m_MaterialLayerTextureData.maskEnabled, 
-        m_MaterialLayerTextureData.cubemapEnabled
-    );
-    Engine::Renderer::sendUniform4Safe((wholeString + "data2").c_str(), 
-        m_MaterialLayerMiscData.rMultiplier,
-        m_MaterialLayerMiscData.gMultiplier,
-        m_MaterialLayerMiscData.bMultiplier,
-        m_MaterialLayerMiscData.aMultiplier
-    );
+    };
+
+    send_texture(wholeString, "texture", m_TextureHandle, textureUnit);
+    send_texture(wholeString, "mask",    m_MaskHandle,    textureUnit);
+    send_texture(wholeString, "cubemap", m_CubemapHandle, textureUnit);
+
+    Engine::Renderer::sendUniform4Safe((wholeString + "data0").c_str(), m_MaterialLayerBaseData);
+    Engine::Renderer::sendUniform4Safe((wholeString + "data1").c_str(), m_MaterialLayerTextureData);
+    Engine::Renderer::sendUniform4Safe((wholeString + "data2").c_str(), m_MaterialLayerMiscData);
     Engine::Renderer::sendUniform4Safe((wholeString + "uvModifications").c_str(), m_UVModifications);
 }

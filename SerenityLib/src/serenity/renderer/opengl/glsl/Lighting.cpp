@@ -87,22 +87,9 @@ vec3 CalcLightInternal(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, v
 
     vec2 uvs = gl_FragCoord.xy / ScreenInfo.xy;
     vec4 ShadowPxlWorldPos = vec4(PxlWorldPos + CamRealPosition, 1.0);
-    float shadow = 1.0;
-    for (int i = 0; i < NUM_CASCADES; i++) {
-        if (-PxlViewPos.z <= -CascadeEndClipSpace[i]) {
-            vec4 FragPosLightSpace = LightMatrix[i] * ShadowPxlWorldPos;
-            shadow = ShadowCalculation(i, FragPosLightSpace, PxlNormal, LightDir);
-            if (i < NUM_CASCADES - 1) {
-			    float fade = clamp((1.0 - PxlViewPos.z / CascadeEndClipSpace[i]) / 0.05, 0.0, 1.0);
-			    if (fade < 1.0) {
-                    vec4 NextFragPosLightSpace = LightMatrix[i + 1] * ShadowPxlWorldPos;
-				    float nextShadow = ShadowCalculation(i + 1, NextFragPosLightSpace, PxlNormal, LightDir);
-				    shadow = mix(nextShadow, shadow, fade);
-			    }
-            }
-            break;
-        }
-    }
+
+    float shadow = ShadowCalculationLightingShader(PxlViewPos, LightDir, PxlNormal, ShadowPxlWorldPos);
+
     float ao                = AO * SSAO;
     float metalness         = MetalSmooth.x;
     float smoothness        = MetalSmooth.y;
@@ -467,24 +454,9 @@ vec3 CalcLightInternalBasic(in Light currentLight, vec3 LightDir, vec3 PxlWorldP
     vec3 LightDiffuseColor  = currentLight.DataD.xyz;
     vec3 LightSpecularColor = currentLight.DataD.xyz * Specular;
 
-    vec2 uvs = gl_FragCoord.xy / ScreenInfo.xy;
-    vec4 ShadowPxlWorldPos = vec4(PxlWorldPos + CamRealPosition, 1.0);
-    float shadow = 1.0;
-    for (int i = 0; i < NUM_CASCADES; i++) {
-        if (-PxlViewPos.z <= -CascadeEndClipSpace[i]) {
-            vec4 FragPosLightSpace  = LightMatrix[i] * ShadowPxlWorldPos;
-            shadow = ShadowCalculation(i, FragPosLightSpace, PxlNormal, LightDir);
-            if (i < NUM_CASCADES - 1) {
-			    float fade = clamp((1.0 - PxlViewPos.z / CascadeEndClipSpace[i]) / 0.05, 0.0, 1.0);
-			    if (fade < 1.0) {
-                    vec4 NextFragPosLightSpace = LightMatrix[i + 1] * ShadowPxlWorldPos;
-				    float nextShadow = ShadowCalculation(i + 1, NextFragPosLightSpace, PxlNormal, LightDir);
-				    shadow = mix(nextShadow, shadow, fade);
-			    }
-            }
-            break;
-        }
-    }
+    vec2 uvs                = gl_FragCoord.xy / ScreenInfo.xy;
+    vec4 ShadowPxlWorldPos  = vec4(PxlWorldPos + CamRealPosition, 1.0);
+    float shadow            = ShadowCalculationLightingShader(PxlViewPos, LightDir, PxlNormal, ShadowPxlWorldPos);
     vec3 ShadowColor        = max(vec3(shadow), RendererInfo2.rgb); 
 
     vec3 ViewDir            = normalize(CameraPosition - PxlWorldPos);

@@ -37,8 +37,8 @@ class TextureCubemap final : public Resource<TextureCubemap>, public Engine::pri
     friend struct TextureRequest;
     private:
         Engine::priv::TextureCubemapCPUData         m_CPUData;
-        Handle                                      m_ConvolutionTextureHandle = Handle{};
-        Handle                                      m_PreEnvTextureHandle      = Handle{};
+        Handle                                      m_ConvolutionTextureHandle = {};
+        Handle                                      m_PreEnvTextureHandle      = {};
     public:
         //Empty Texture
         TextureCubemap(std::string_view textureName = "", bool mipMap = false);
@@ -58,6 +58,7 @@ class TextureCubemap final : public Resource<TextureCubemap>, public Engine::pri
 
         [[nodiscard]] inline bool hasGlobalIlluminationData() const noexcept { return (bool)(!m_ConvolutionTextureHandle.null() && !m_PreEnvTextureHandle.null()); }
 
+        [[nodiscard]] inline TextureType getTextureType() const noexcept { return TextureType::CubeMap; }
         [[nodiscard]] inline Handle getConvolutionTexture() const noexcept { return m_ConvolutionTextureHandle; }
         [[nodiscard]] inline Handle getPreEnvTexture() const noexcept { return m_PreEnvTextureHandle; }
 

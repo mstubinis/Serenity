@@ -120,8 +120,8 @@ void EngineCore::init(const EngineOptions& options) {
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
     if (m_ResourceManager.m_Scenes.size() == 0) {
-        Scene* defaultScene = Engine::Resources::addScene<Scene>("Default");
-        Engine::Resources::setCurrentScene(defaultScene);
+        Scene& defaultScene = Engine::Resources::addScene<Scene>("Default");
+        Engine::Resources::setCurrentScene(&defaultScene);
     }
     Scene& scene = *m_ResourceManager.m_CurrentScene;
     if (!scene.getActiveCamera()) {
@@ -134,9 +134,9 @@ void EngineCore::init(const EngineOptions& options) {
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
-void EngineCore::internal_pre_input_update() {
-    m_EventModule.m_KeyboardModule.update();
-    m_EventModule.m_MouseModule.update();
+void EngineCore::internal_post_input_update() {
+    m_EventModule.m_KeyboardModule.postUpdate();
+    m_EventModule.m_MouseModule.postUpdate();
 }
 void EngineCore::internal_update_logic(Scene& scene, const float dt) {
     m_DebugManager.stop_clock();
@@ -168,26 +168,21 @@ void EngineCore::internal_post_update(Scene& scene, Window& window, const float 
 void EngineCore::internal_render(Scene& scene, Window& window, const float dt, const double alpha) {
     m_DebugManager.stop_clock();
     Game::render();
-    if (Engine::priv::PublicScene::IsSkipRenderThisFrame(scene)) {
-        return;
-    }
-    scene.render();
-    m_Editor.renderLightIcons(scene);
-    m_RenderModule._sort2DAPICommands();
-    auto& scene_viewports = Engine::priv::PublicScene::GetViewports(scene);
-    for (auto& viewport : scene_viewports) {
-        if (viewport.isActive()) {
-            viewport.render(m_RenderModule, viewport, true);
+    if (!scene.m_SkipRenderThisFrame) {
+        scene.render();
+        m_Editor.renderLightIcons(scene);
+        m_RenderModule._sort2DAPICommands();
+        auto& scene_viewports = Engine::priv::PublicScene::GetViewports(scene);
+        for (auto& viewport : scene_viewports) {
+            if (viewport.isActive()) {
+                viewport.render(m_RenderModule, viewport, true);
+            }
         }
+        m_Editor.render(window);
+        window.display();
     }
-
-    m_Editor.render(window);
-
-    window.display();
-
     m_RenderModule._clear2DAPICommands();
     m_DebugManager.calculate_render();
-
     m_Misc.m_FPS.incrementFPSCount();
 }
 void EngineCore::internal_cleanup() {
@@ -219,7 +214,6 @@ void EngineCore::run() {
     auto   currentTime       = m_Misc.m_Timer.now();
 
     auto   updateWindows     = [this](const float timeElasped, Scene& scene) {
-        internal_pre_input_update();
         for (const auto& window : m_ResourceManager.m_Windows) {
             internal_post_update(scene, *window, timeElasped);
             m_EngineEventHandler.poll_events(*window);
@@ -230,6 +224,7 @@ void EngineCore::run() {
     auto   updateSimulation  = [this](const float timeElasped, Scene& scene) {
         internal_pre_update(scene, timeElasped);
         internal_update_logic(scene, timeElasped);
+        internal_post_input_update();
     };
     auto   renderSimulation  = [this, accumulator](Scene& scene) {
         const double alpha = accumulator / ENGINE_FIXED_TIMESTEP_VALUE_D;

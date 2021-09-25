@@ -11,7 +11,7 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
-constexpr std::array<glm::vec4, (size_t)MaterialComponentType::_TOTAL> MISC_DATA_INFO { {
+constexpr std::array<glm::vec4, MaterialComponentType::_TOTAL> MISC_DATA_INFO { {
     { 1.0f, 1.0f, 1.0f, 1.0f }, // Diffuse
     { 1.0f, 1.0f, 1.0f, 1.0f }, // Normal
     { 0.0f, 1.0f, 1.0f, 0.0f }, // Glow
@@ -78,11 +78,11 @@ MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHand
     ++m_NumLayers;
     return &layer;
 }
-void MaterialComponent::bind(size_t component_index, size_t& inTextureUnit) const {
+void MaterialComponent::bind(size_t component_index, int& inTextureUnit) const {
     const std::string wholeString = "components[" + std::to_string(component_index) + "].";
     Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), (int)m_NumLayers, (int)static_cast<bool>(m_ComponentType != MaterialComponentType::Empty));
     for (uint32_t layerNumber = 0; layerNumber < MAX_MATERIAL_LAYERS_PER_COMPONENT; ++layerNumber) {
-        m_Layers[layerNumber].sendDataToGPU(wholeString, component_index, layerNumber, inTextureUnit);
+        m_Layers[layerNumber].sendDataToGPU(wholeString, layerNumber, inTextureUnit);
     }
 }
 void MaterialComponent::update(const float dt) {

@@ -27,6 +27,7 @@ namespace Engine::priv {
 };
 
 #include <serenity/resources/font/FontIncludes.h>
+#include <serenity/lights/LightIncludes.h>
 #include <serenity/renderer/RendererIncludes.h>
 #include <serenity/resources/Handle.h>
 #include <serenity/resources/texture/TextureIncludes.h>
@@ -134,7 +135,7 @@ namespace Engine::priv {
 
             virtual bool buildShadowCaster(SunLight&) = 0;
             virtual bool buildShadowCaster(PointLight&) = 0;
-            virtual bool buildShadowCaster(DirectionalLight&) = 0;
+            virtual bool buildShadowCaster(DirectionalLight&, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType, float nearFactor, float farFactor) = 0;
             virtual bool buildShadowCaster(SpotLight&) = 0;
             virtual bool buildShadowCaster(RodLight&) = 0;
             virtual bool buildShadowCaster(ProjectionLight&) = 0;

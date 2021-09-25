@@ -17,17 +17,17 @@ namespace Engine::priv {
             std::array<GLuint, (size_t)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS>  m_DepthTexture        = { 0 };
             std::vector<glm::mat4>                                                   m_BufferLightMatrices = std::vector<glm::mat4>(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS);
             std::vector<float>                                                       m_BufferVClips        = std::vector<float>(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS);
-            glm::vec2                                                                m_TexelSize           = glm::vec2{ 1.0f / DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE, 1.0f / DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE };
             GLuint                                                                   m_FBO                 = 0;
 
 
             GLDeferredDirectionalLightShadowInfo() = delete;
-            GLDeferredDirectionalLightShadowInfo(const Camera&, const DirectionalLight&, uint32_t shadowMapWidth, uint32_t shadowMapHeight, float orthographicRadius, float orthoNear, float orthoFar);
+            GLDeferredDirectionalLightShadowInfo(const Camera&, const DirectionalLight&, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType, float nearFactor, float farFactor);
             ~GLDeferredDirectionalLightShadowInfo();
 
             void bindUniformsReading(int textureStartSlot, const Camera&) noexcept;
             void bindUniformsWriting(int cascadeMapIndex);
             void calculateOrthographicProjections(const Camera&, const DirectionalLight&);
+            void setShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType, float nearFactor, float farFactor);
     };
     class GLDeferredSunLightShadowInfo final : public SunLightShadowData {
 

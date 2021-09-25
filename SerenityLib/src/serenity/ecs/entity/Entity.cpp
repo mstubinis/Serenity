@@ -80,7 +80,7 @@ bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef
         }
     }else if (componentClassName == "ComponentModel") {
         if (!a3.isNil() && !a4.isNil()) {
-            return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage::Stage>());
+            return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage>());
         }else if(a4.isNil()){
             return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>());
         }else{

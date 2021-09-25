@@ -18,6 +18,7 @@
 #include <serenity/renderer/FramebufferObject.h>
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Camera.h>
+#include <serenity/renderer/opengl/BindTextureRAII.h>
 
 #include <serenity/ecs/components/ComponentTransform.h>
 
@@ -46,7 +47,7 @@ namespace {
     constexpr auto DEFAULT_MATERIAL_BIND_FUNCTOR = [](const Material& m) {
         const auto& components = m.getComponents();
         size_t numComponents   = components.size();
-        size_t textureUnit     = 0;
+        int    textureUnit     = 0;
         for (size_t i = 0; i < numComponents; ++i) {
             components[i].bind(i, textureUnit);
         }
@@ -223,6 +224,8 @@ void DeferredPipeline::internal_gl_scissor(const glm::vec4& scissor, float depth
 }
 void DeferredPipeline::init() {
     const auto window_size = Engine::Resources::getWindowSize();
+    const auto majorVersion = Engine::priv::OpenGLState::constants.MAJOR_VERSION;
+    const auto minorVersion = Engine::priv::OpenGLState::constants.MINOR_VERSION;
     m_2DProjectionMatrix   = glm::ortho(0.0f, float(window_size.x), 0.0f, float(window_size.y), 0.005f, 99999999.0f);
 
     const float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -234,12 +237,15 @@ void DeferredPipeline::init() {
 
     m_OpenGLExtensionsManager.INIT();
 
+    m_OpenGLStateMachine.GL_glEnable(GL_POLYGON_OFFSET_FILL);
     m_OpenGLStateMachine.GL_glEnable(GL_DEPTH_TEST);
     m_OpenGLStateMachine.GL_glDisable(GL_STENCIL_TEST);
     m_OpenGLStateMachine.GL_glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //for non Power of Two textures
     if (Engine::priv::OpenGLState::constants.supportsCubemapSeamless()) {
         m_OpenGLStateMachine.GL_glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); //can run real slowly on some gpu's / drivers. its core 32 but just to be safe, set it to 40
     }
+
+
     m_OpenGLStateMachine.GL_glEnable(GL_DEPTH_CLAMP);
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 1.0f);
@@ -374,9 +380,9 @@ void DeferredPipeline::init() {
 
 #if defined(ENGINE_PARTICLES_HALF_SIZE)
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_HALF_FLOAT,        GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)0  );
+    glVertexAttribPointer(2, 4, GL_HALF_FLOAT,      GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)0  );
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_HALF_FLOAT,        GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)sizeofOne);
+    glVertexAttribPointer(3, 2, GL_HALF_FLOAT,      GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)sizeofOne);
     glEnableVertexAttribArray(4);
     glVertexAttribIPointer(4, 2, GL_UNSIGNED_SHORT, sizeof(Engine::priv::ParticleDOD), (void*)(sizeofOne + sizeofTwo));
 #else
@@ -675,46 +681,52 @@ bool DeferredPipeline::unbind(Mesh* mesh) {
 }
 void DeferredPipeline::generatePBRData(TextureCubemap& cubemap, Handle convolutionTextureHandle , Handle preEnvTextureHandle, uint32_t convoludeSize, uint32_t prefilterSize) { 
     uint32_t size = convoludeSize;
-    auto& convolutionTexture = *convolutionTextureHandle.get<TextureCubemap>();
-    Engine::Renderer::bindTextureForModification(TextureType::CubeMap, convolutionTexture.address());
     //Engine::Renderer::unbindFBO();
     Engine::priv::FramebufferObject fbo{ size, size };
     fbo.bind();
 
-    std::vector<glm::mat4> captureViews = internal_gen_capture_views(glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f));
+    const std::vector<glm::mat4> captureViews = internal_gen_capture_views(glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f));
+    {
+        auto& convolutionTexture = *convolutionTextureHandle.get<TextureCubemap>();
+        Engine::Renderer::bindTextureForModification(TextureType::CubeMap, convolutionTexture.address());
+        m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude].get<ShaderProgram>());
 
-    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::CubemapConvolude].get<ShaderProgram>());
-    Engine::Renderer::sendTexture("cubemap", cubemap.address(), 0, GL_TEXTURE_CUBE_MAP);
-    Engine::Renderer::setViewport(0.0f, 0.0f, size, size);
-    for (uint32_t i = 0; i < captureViews.size(); ++i) {
-        Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, convolutionTexture.address(), 0);
-        fbo.checkStatus();
-        Engine::Renderer::Settings::clear(true, true, false);
-        Skybox::bindMesh();
-    }
-    //now gen EnvPrefilterMap for specular IBL
-    size = prefilterSize;
-    auto& preEnvTexture = *preEnvTextureHandle.get<TextureCubemap>();
-    Engine::Renderer::bindTextureForModification(TextureType::CubeMap, preEnvTexture.address());
+        Engine::priv::OpenGLBindTextureRAII cube{ "cubemap", cubemap, 0, false };
 
-    m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::CubemapPrefilterEnv].get<ShaderProgram>());
-    Engine::Renderer::sendTexture("cubemap", cubemap.address(), 0, GL_TEXTURE_CUBE_MAP);
-    Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((cubemap.width() * cubemap.width()) * 6));
-    Engine::Renderer::sendUniform1("NUM_SAMPLES", 32);
-    const uint32_t maxMipLevels = 5;
-    for (uint32_t mipmapLevel = 0; mipmapLevel < maxMipLevels; ++mipmapLevel) {
-        const uint32_t mipSize = size * static_cast<uint32_t>(glm::pow(0.5, mipmapLevel)); // reisze framebuffer according to mip-level size.
-        const float roughness  = float(mipmapLevel) / float(maxMipLevels - 1);
-        const float a          = roughness * roughness;
-        fbo.resize(mipSize, mipSize);
-        Engine::Renderer::sendUniform2("Data", roughness, a * a);
+        Engine::Renderer::setViewport(0.0f, 0.0f, size, size);
         for (uint32_t i = 0; i < captureViews.size(); ++i) {
             Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, preEnvTexture.address(), mipmapLevel);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, convolutionTexture.address(), 0);
             fbo.checkStatus();
             Engine::Renderer::Settings::clear(true, true, false);
             Skybox::bindMesh();
+        }
+    }
+    //now gen EnvPrefilterMap for specular IBL
+    {
+        size = prefilterSize;
+        auto& preEnvTexture = *preEnvTextureHandle.get<TextureCubemap>();
+        Engine::Renderer::bindTextureForModification(TextureType::CubeMap, preEnvTexture.address());
+        m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::CubemapPrefilterEnv].get<ShaderProgram>());
+
+        Engine::priv::OpenGLBindTextureRAII cube{ "cubemap", cubemap, 0, false };
+
+        Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((cubemap.width() * cubemap.width()) * 6));
+        Engine::Renderer::sendUniform1("NUM_SAMPLES", 32);
+        const uint32_t maxMipLevels = 5;
+        for (uint32_t mipmapLevel = 0; mipmapLevel < maxMipLevels; ++mipmapLevel) {
+            const uint32_t mipSize = size * uint32_t(glm::pow(0.5, mipmapLevel)); // reisze framebuffer according to mip-level size.
+            const float roughness = float(mipmapLevel) / float(maxMipLevels - 1);
+            const float a = roughness * roughness;
+            fbo.resize(mipSize, mipSize);
+            Engine::Renderer::sendUniform2("Data", roughness, a * a);
+            for (uint32_t i = 0; i < captureViews.size(); ++i) {
+                Engine::Renderer::sendUniformMatrix4("VP", captureViews[i]);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, preEnvTexture.address(), mipmapLevel);
+                fbo.checkStatus();
+                Engine::Renderer::Settings::clear(true, true, false);
+                Skybox::bindMesh();
+            }
         }
     }
 }
@@ -756,17 +768,15 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, Handle shaderProgram, Scene&
     glm::mat4 view_no_position = camera.getView();
     Math::removeMatrixPosition(view_no_position);
     m_Renderer.bind(shaderProgram.get<ShaderProgram>());
-    if (skybox) {
-        Engine::Renderer::sendUniform1("IsFake", 0);
-        Engine::Renderer::sendTextureSafe("Texture", *skybox->cubemap().get<TextureCubemap>(), 0);
-    } else {
-        Engine::Renderer::sendUniform1("IsFake", 1);
+
+    Engine::priv::OpenGLBindTextureRAII Texture{ "Texture", skybox ? skybox->cubemap().get<TextureCubemap>()->address() : 0, GL_TEXTURE_CUBE_MAP, 0, true };
+    Engine::Renderer::sendUniform1("IsFake", skybox ? 0 : 1);
+    if (!skybox) {
         const auto& bgColor = scene.getBackgroundColor();
         Engine::Renderer::sendUniform4Safe("Color", bgColor.r, bgColor.g, bgColor.b, bgColor.a);
     }
     Engine::Renderer::sendUniformMatrix4("VP", camera.getProjection() * view_no_position);
     Skybox::bindMesh();
-    Engine::Renderer::sendTextureSafe("Texture", 0, 0, GL_TEXTURE_CUBE_MAP); //this is needed to render stuff in geometry transparent using the normal deferred shader. i do not know why just yet...
 }
 void DeferredPipeline::toggleShadowCaster(SunLight& sunLight, bool isCaster) {
 
@@ -794,14 +804,17 @@ bool DeferredPipeline::buildShadowCaster(SunLight& sunLight) {
 bool DeferredPipeline::buildShadowCaster(PointLight& pointLight) {
     return false;
 }
-bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight) {
+bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
     if (!m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
         auto& data = m_ShadowCasters.m_ShadowCastersDirectional.emplace_back(
             &directionalLight, 
-            NEW GLDeferredDirectionalLightShadowInfo(*Engine::Resources::getCurrentScene()->getActiveCamera(), directionalLight, 2048, 2048, 80.0f, 0.1f, 99999999999.0f)
+            NEW GLDeferredDirectionalLightShadowInfo{ *Engine::Resources::getCurrentScene()->getActiveCamera(), directionalLight, shadowMapWidth, shadowMapSize, frustumType, nearFactor, farFactor }
         );
         m_ShadowCasters.m_ShadowCastersDirectionalHashed.emplace(&directionalLight, std::get<1>(data));
         return true;
+    } else {
+        auto& data = m_ShadowCasters.m_ShadowCastersDirectionalHashed.at(&directionalLight);
+        data->setShadowInfo(shadowMapWidth, shadowMapSize, frustumType, nearFactor, farFactor);
     }
     return false;
 }
@@ -816,7 +829,7 @@ bool DeferredPipeline::buildShadowCaster(ProjectionLight& projectionLight) {
 }
 void DeferredPipeline::setShadowDirectionalLightDirection(DirectionalLight& directionalLight, const glm::vec3& direction) {
     if (!m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
-        m_ShadowCasters.m_ShadowCastersDirectionalHashed[&directionalLight]->setLookAt(direction);
+        m_ShadowCasters.m_ShadowCastersDirectionalHashed[&directionalLight]->setLookAt(direction, glm::vec3{ 0.0f }, glm::vec3{ 0.0f, 1.0f, 0.0f });
     }
 }
 void DeferredPipeline::sendGPUDataAllLights(const Scene& scene, const Camera& camera) {
@@ -844,15 +857,17 @@ void DeferredPipeline::sendGPUDataAllLights(const Scene& scene, const Camera& ca
     lambda(Engine::priv::PublicScene::GetLights<ProjectionLight>(scene));
 }
 void DeferredPipeline::sendGPUDataGI(Skybox* skybox) {
-    const auto maxTextures = getMaxNumTextureUnits() - 1U;
-    if (skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData()) {
-        Engine::Renderer::sendTextureSafe("irradianceMap", *skybox->cubemap().get<TextureCubemap>()->getConvolutionTexture().get<TextureCubemap>(), maxTextures - 2);
-        Engine::Renderer::sendTextureSafe("prefilterMap", *skybox->cubemap().get<TextureCubemap>()->getPreEnvTexture().get<TextureCubemap>(), maxTextures - 1);
-    } else {
-        Engine::Renderer::sendTextureSafe("irradianceMap", *Texture::Black.get<Texture>(), maxTextures - 2);
-        Engine::Renderer::sendTextureSafe("prefilterMap", *Texture::Black.get<Texture>(), maxTextures - 1);
-    }
-    Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures);
+    const auto maxTextures      = getMaxNumTextureUnits() - 1U;
+    bool hasGI                  = skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData();
+    auto& blackTexture          = *Texture::Black.get<Texture>();
+    TextureCubemap* convolution = hasGI ? skybox->cubemap().get<TextureCubemap>()->getConvolutionTexture().get<TextureCubemap>() : nullptr;
+    TextureCubemap* preEnv      = hasGI ? skybox->cubemap().get<TextureCubemap>()->getPreEnvTexture().get<TextureCubemap>() : nullptr;
+
+    Engine::Renderer::sendTextureSafe( "irradianceMap", hasGI ? convolution->address() : blackTexture.address(), maxTextures - 2,
+        hasGI ? convolution->getTextureType().toGLType() : blackTexture.getTextureType().toGLType() );
+    Engine::Renderer::sendTextureSafe( "prefilterMap", hasGI ? preEnv->address() : blackTexture.address(), maxTextures - 1,
+        hasGI ? preEnv->getTextureType().toGLType() : blackTexture.getTextureType().toGLType() );
+    Engine::Renderer::sendTextureSafe( "brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures );
 }
 void DeferredPipeline::sendGPUDataLight(const Camera& camera, const SunLight& sunLight, const std::string& start) {
     auto transform   = sunLight.getComponent<ComponentTransform>();
@@ -862,7 +877,7 @@ void DeferredPipeline::sendGPUDataLight(const Camera& camera, const SunLight& su
     sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(sunLight.getType()));
     sendUniform1Safe("Type", 0.0f);
-    sendUniform1Safe("ShadowEnabled", 0);
+    sendUniform1Safe("uShadowEnabled", 0);
 }
 int DeferredPipeline::sendGPUDataLight(const Camera& camera, const PointLight& pointLight, const std::string& start) {
     auto transform  = pointLight.getComponent<ComponentTransform>();
@@ -881,7 +896,7 @@ int DeferredPipeline::sendGPUDataLight(const Camera& camera, const PointLight& p
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)pointLight.getType());
     sendUniform4Safe((start + "DataE").c_str(), 0.0f, 0.0f, (float)pointLight.getAttenuationModel(), 0.0f);
     sendUniform1Safe("Type", 1.0f);
-    sendUniform1Safe("ShadowEnabled", 0);
+    sendUniform1Safe("uShadowEnabled", 0);
     if (distSq <= (cull * cull)) { //inside the light volume
         return 1;
     }
@@ -895,12 +910,12 @@ void DeferredPipeline::sendGPUDataLight(const Camera& camera, const DirectionalL
     sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, 0.0f, 0.0f);
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)directionalLight.getType());
     sendUniform1Safe("Type", 0.0f);
-    sendUniform1Safe("ShadowEnabled", 0);
+    sendUniform1Safe("uShadowEnabled", 0);
     if (m_Renderer.m_Lighting) {
         if (m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
             auto& data = *m_ShadowCasters.m_ShadowCastersDirectionalHashed.at(&directionalLight);
             if (data.m_Enabled) {
-                data.bindUniformsReading(5, camera);
+                data.bindUniformsReading(5, camera); //TODO: this texture slot might not work for forward lighting
             }
         }
     }
@@ -928,7 +943,7 @@ int DeferredPipeline::sendGPUDataLight(const Camera& camera, const SpotLight& sp
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(spotLight.getType()));
     sendUniform4Safe((start + "DataE").c_str(), cosRad(spotLight.getCutoff()), cosRad(spotLight.getCutoffOuter()), float(spotLight.getAttenuationModel()), 0.0f);
     sendUniform1Safe("Type", 2.0f);
-    sendUniform1Safe("ShadowEnabled", 0);
+    sendUniform1Safe("uShadowEnabled", 0);
     if (distSq <= (cull * cull)) { //inside the light volume
         return 1;
     }
@@ -953,7 +968,7 @@ int DeferredPipeline::sendGPUDataLight(const Camera& camera, const RodLight& rod
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(rodLight.getType()));
     sendUniform4Safe((start + "DataE").c_str(), rodLight.getRodLength(), 0.0f, float(rodLight.getAttenuationModel()), 0.0f);
     sendUniform1Safe("Type", 1.0f);
-    sendUniform1Safe("ShadowEnabled", 0);
+    sendUniform1Safe("uShadowEnabled", 0);
     if (distSq <= (cullingDistance * cullingDistance)) {
         return 1;
     }
@@ -994,9 +1009,9 @@ void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) 
     sendUniformMatrix4("Model", renderingMatrix);
     sendUniformMatrix4("VP", m_CameraUBODataPtr->CameraViewProj);
 
-    if(result == 1){
+    if (result == 1) {
         cullFace(GL_FRONT);
-    }else if (result == 2) {
+    } else if (result == 2) {
         cullFace(GL_BACK);
     }
     auto& pointLightMesh = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPointLightBounds().get<Mesh>();
@@ -1023,7 +1038,7 @@ void DeferredPipeline::renderSpotLight(Camera& camera, SpotLight& spotLight) {
 
     if (result == 1) {
         cullFace(GL_FRONT);
-    }else if (result == 2) {
+    } else if (result == 2) {
         cullFace(GL_BACK);
     }
     auto& spotLightMesh = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getSpotLightBounds().get<Mesh>();
@@ -1110,16 +1125,16 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, H
     const size_t particle_count = system.ParticlesDOD.size();
     if (particle_count > 0) {
         m_Renderer.bind(program.get<ShaderProgram>());
-        for (auto& [id, mat] : system.BimapMaterialToIndexReverse) {
+        for (const auto& [id, mat] : system.BimapMaterialToIndexReverse) {
             system.MaterialIDToIndex.try_emplace(id, (uint32_t)system.MaterialIDToIndex.size());
         }
-        for (auto& pod : system.ParticlesDOD) {
-            pod.MatID = system.MaterialIDToIndex.at(pod.MatID);
+        for (auto& particlePOD : system.ParticlesDOD) {
+            particlePOD.MatID = system.MaterialIDToIndex.at(particlePOD.MatID);
         }
-        for (auto& [id, index] : system.MaterialIDToIndex) {
-            Material* mat         = system.BimapMaterialToIndexReverse.at(id);
-            Texture& texture      = *mat->getComponent((uint32_t)MaterialComponentType::Diffuse).getTexture(0).get<Texture>();
-            std::string location  = "DiffuseTexture" + std::to_string(index) + "";
+        for (const auto& [id, index] : system.MaterialIDToIndex) {
+            Material* mat              = system.BimapMaterialToIndexReverse.at(id);
+            Texture& texture           = *mat->getComponent(MaterialComponentType::Diffuse).getTexture(0).get<Texture>();
+            const std::string location = "DiffuseTexture" + std::to_string(index);
             Engine::Renderer::sendTextureSafe(location.c_str(), texture, index);
         }
         const auto maxTextures = getMaxNumTextureUnits() - 1U;
@@ -1158,9 +1173,10 @@ void DeferredPipeline::render2DText(const std::string& text, Handle fontHandle, 
     modelMatrix           = glm::scale(modelMatrix, glm::vec3{ scale.x, scale.y, 1 });
 
     Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
-    Engine::Renderer::sendTexture("DiffuseTexture", *textureHandle.get<Texture>(), 0);
     Engine::Renderer::sendUniform4("Object_Color", glm::vec4{1.0f, 1.0f, 1.0f, 1.0f});
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
+
+    Engine::priv::OpenGLBindTextureRAII DiffuseTexture{ "DiffuseTexture", *textureHandle.get<Texture>(), 0, false };
 
     Mesh& fontPlane = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getFontMesh().get<Mesh>();
     m_TextRenderer.renderText(fontPlane, m_Renderer, text, font, color, textAlignment, x, y, z);
@@ -1178,14 +1194,17 @@ void DeferredPipeline::render2DTexture(Handle textureHandle, const glm::vec2& po
 
     Texture* texture   = textureHandle.get<Texture>();
 
+    Engine::priv::OpenGLBindTextureRAII DiffuseTexture{ 
+        "DiffuseTexture",
+        texture ? texture->address() : 0, 
+        texture ? texture->getTextureType().toGLType() : GL_TEXTURE_2D, 
+        0,
+        false 
+    };
+    Engine::Renderer::sendUniform1("DiffuseTextureEnabled", texture ? 1 : 0);
     if (texture) {
         totalSizeX *= texture->width();
         totalSizeY *= texture->height();
-        Engine::Renderer::sendTexture("DiffuseTexture", *texture, 0);
-        Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
-    } else {
-        Engine::Renderer::sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
-        Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 0);
     }
     Engine::Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
 
@@ -1212,8 +1231,6 @@ void DeferredPipeline::render2DTexture(uint32_t textureAddress, int textureWidth
 
     totalSizeX *= textureWidth;
     totalSizeY *= textureHeight;
-    Engine::Renderer::sendTexture("DiffuseTexture", textureAddress, 0, GL_TEXTURE_2D);
-    Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
 
     Engine::Renderer::alignmentOffset(align, translationX, translationY, totalSizeX, totalSizeY);
 
@@ -1222,6 +1239,8 @@ void DeferredPipeline::render2DTexture(uint32_t textureAddress, int textureWidth
     modelMatrix           = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3{ 0, 0, 1 });
     modelMatrix           = glm::scale(modelMatrix, glm::vec3{ totalSizeX, totalSizeY, 1.0f });
 
+    Engine::priv::OpenGLBindTextureRAII DiffuseTexture{ "DiffuseTexture", textureAddress, GL_TEXTURE_2D, 0, false };
+    Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 1);
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
 
@@ -1243,7 +1262,7 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
     modelMatrix           = glm::rotate(modelMatrix, Math::toRadians(angle), glm::vec3{ 0, 0, 1 });
     modelMatrix           = glm::scale(modelMatrix, glm::vec3{ width, height, 1 });
 
-    Engine::Renderer::sendTexture("DiffuseTexture", 0, 0, GL_TEXTURE_2D);
+    Engine::priv::OpenGLBindTextureRAII DiffuseTexture{ "DiffuseTexture", 0, GL_TEXTURE_2D, 0, false };
     Engine::Renderer::sendUniform1("DiffuseTextureEnabled", 0);
     Engine::Renderer::sendUniform4("Object_Color", color);
     Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
@@ -1285,15 +1304,16 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::ShadowDepth].get<ShaderProgram>());
     Engine::Renderer::colorMask(false, false, false, false);
 
-    //glDisable(GL_CULL_FACE);
+    glDisable(GL_CULL_FACE);
+    //glPolygonOffset(1.0, 1.0);
     for (auto& dir : m_ShadowCasters.m_ShadowCastersDirectional) {
         auto& data = *std::get<1>(dir);
         if (data.m_Enabled) {
             data.calculateOrthographicProjections(camera, *std::get<0>(dir));
             Engine::Renderer::setViewport(0.0f, 0.0f, data.m_ShadowWidth, data.m_ShadowHeight);
-            for (int i = 0; i < (int)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS; ++i) {
+            for (int i = 0; i < int(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS); ++i) {
                 data.bindUniformsWriting(i);
-                glm::mat4 viewProj = data.m_LightOrthoProjection[i] * data.m_LightViewMatrix;
+                const glm::mat4 viewProj = data.m_LightOrthoProjection[i] * data.m_LightViewMatrix;
 
                 PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
                 PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
@@ -1304,7 +1324,8 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
             }
         }
     }
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
+    //glPolygonOffset(0, 0);
     const auto& dimensions = glm::vec4{ viewport.getViewportDimensions() };
     Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
     Engine::Renderer::colorMask(true, true, true, true);
@@ -1432,78 +1453,61 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
     auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
     Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
 
-    Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
-    Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
-    Engine::Renderer::sendTexture("gMiscMap", m_GBuffer.getTexture(GBufferType::Misc), 2);
-    Engine::Renderer::sendTexture("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 3);
-    Engine::Renderer::sendTexture("gSSAOMap", m_GBuffer.getTexture(GBufferType::Bloom), 4);
+    {
+        Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
+        Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
+        Engine::priv::OpenGLBindTextureRAII gMiscMap{ "gMiscMap", m_GBuffer.getTexture(GBufferType::Misc), 2, false };
+        Engine::priv::OpenGLBindTextureRAII gDepthMap{ "gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 3, false };
+        Engine::priv::OpenGLBindTextureRAII gSSAOMap{ "gSSAOMap", m_GBuffer.getTexture(GBufferType::Bloom), 4, false };
 
-    Engine::Renderer::setDepthFunc(GL_GEQUAL);
-    Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-    
-    for (const auto& light : PublicScene::GetLights<PointLight>(scene)) {
-        renderPointLight(camera, *light);
-    }
-    for (const auto& light : PublicScene::GetLights<SpotLight>(scene)) {
-        renderSpotLight(camera, *light);
-    }
-    for (const auto& light : PublicScene::GetLights<RodLight>(scene)) {
-        renderRodLight(camera, *light);
-    }
-    for (const auto& light : PublicScene::GetLights<ProjectionLight>(scene)) {
-        renderProjectionLight(camera, *light);
-    }
-    Engine::Renderer::setDepthFunc(GL_LEQUAL);
-    Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-    for (const auto& light : PublicScene::GetLights<SunLight>(scene)) {
-        renderSunLight(camera, *light, viewport);
-    }
-    for (const auto& light : PublicScene::GetLights<DirectionalLight>(scene)) {
-        renderDirectionalLight(camera, *light, viewport);
-    }
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(3, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(4, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(5, GL_TEXTURE_2D);
+        Engine::Renderer::setDepthFunc(GL_GEQUAL);
+        Engine::Renderer::GLEnable(GL_DEPTH_TEST);
 
+        for (const auto& light : PublicScene::GetLights<PointLight>(scene)) {
+            renderPointLight(camera, *light);
+        }
+        for (const auto& light : PublicScene::GetLights<SpotLight>(scene)) {
+            renderSpotLight(camera, *light);
+        }
+        for (const auto& light : PublicScene::GetLights<RodLight>(scene)) {
+            renderRodLight(camera, *light);
+        }
+        for (const auto& light : PublicScene::GetLights<ProjectionLight>(scene)) {
+            renderProjectionLight(camera, *light);
+        }
+        Engine::Renderer::setDepthFunc(GL_LEQUAL);
+        Engine::Renderer::GLDisable(GL_DEPTH_TEST);
+        for (const auto& light : PublicScene::GetLights<SunLight>(scene)) {
+            renderSunLight(camera, *light, viewport);
+        }
+        for (const auto& light : PublicScene::GetLights<DirectionalLight>(scene)) {
+            renderDirectionalLight(camera, *light, viewport);
+        }
+        Engine::Renderer::clearTexture(5, GL_TEXTURE_2D);
+    }
     if (mainRenderFunction) {
         //do GI here. (only doing GI during the main render pass, not during light probes
         glBlendEquationSeparate(GL_MAX, GL_FUNC_ADD);
         m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGI].get<ShaderProgram>());
         Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
-        Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
-        Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
-        Engine::Renderer::sendTexture("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 2);
-        Engine::Renderer::sendTexture("gSSAOMap", m_GBuffer.getTexture(GBufferType::Bloom), 3);
-        Engine::Renderer::sendTexture("gMiscMap", m_GBuffer.getTexture(GBufferType::Misc), 4);
+
+        Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
+        Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
+        Engine::priv::OpenGLBindTextureRAII gDepthMap{ "gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 2, false };
+        Engine::priv::OpenGLBindTextureRAII gSSAOMap{ "gSSAOMap", m_GBuffer.getTexture(GBufferType::Bloom), 3, false };
+        Engine::priv::OpenGLBindTextureRAII gMiscMap{ "gMiscMap", m_GBuffer.getTexture(GBufferType::Misc), 4, false };
+
         Skybox* skybox = scene.skybox();
-        if (skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData()) {
-            Engine::Renderer::sendTextureSafe("irradianceMap", *skybox->cubemap().get<TextureCubemap>()->getConvolutionTexture().get<TextureCubemap>(), 5);
-            Engine::Renderer::sendTextureSafe("prefilterMap", *skybox->cubemap().get<TextureCubemap>()->getPreEnvTexture().get<TextureCubemap>(), 6);
-        } else {
-            Engine::Renderer::sendTextureSafe("irradianceMap", *Texture::Black.get<Texture>(), 5);
-            Engine::Renderer::sendTextureSafe("prefilterMap", *Texture::Black.get<Texture>(), 6);
-        }
-        Engine::Renderer::sendTextureSafe("brdfLUT", *Texture::BRDF.get<Texture>(), 7);
+        sendGPUDataGI(skybox);
 
         Engine::Renderer::renderFullscreenQuad();
 
-        Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-        Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
-        Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
-        Engine::Renderer::clearTexture(3, GL_TEXTURE_2D);
-        Engine::Renderer::clearTexture(4, GL_TEXTURE_2D);
+        const auto maxTextures = getMaxNumTextureUnits() - 1U;
+        bool hasGI = skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData();
+        Engine::Renderer::clearTexture(maxTextures - 2, hasGI ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D);
+        Engine::Renderer::clearTexture(maxTextures - 1, hasGI ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D);
+        Engine::Renderer::clearTexture(maxTextures, GL_TEXTURE_2D);
 
-        if (skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData()) {
-            Engine::Renderer::clearTexture(5, GL_TEXTURE_CUBE_MAP);
-            Engine::Renderer::clearTexture(6, GL_TEXTURE_CUBE_MAP);
-        } else {
-            Engine::Renderer::clearTexture(5, GL_TEXTURE_2D);
-            Engine::Renderer::clearTexture(6, GL_TEXTURE_2D);
-        }
-        Engine::Renderer::clearTexture(7, GL_TEXTURE_2D);
         glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
     }
 }
@@ -1511,54 +1515,47 @@ void DeferredPipeline::internal_pass_lighting_basic(Viewport& viewport, Camera& 
     const Scene& scene = viewport.getScene();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingBasic].get<ShaderProgram>());
     auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    {
+        Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
 
-    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
+        Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
+        Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
+        Engine::priv::OpenGLBindTextureRAII gMiscMap{ "gMiscMap", m_GBuffer.getTexture(GBufferType::Misc), 2, false };
+        Engine::priv::OpenGLBindTextureRAII gDepthMap{ "gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 3, false };
+        Engine::priv::OpenGLBindTextureRAII gSSAOMap{ "gSSAOMap", m_GBuffer.getTexture(GBufferType::Bloom), 4, false };
 
-    Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
-    Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
-    Engine::Renderer::sendTexture("gMiscMap", m_GBuffer.getTexture(GBufferType::Misc), 2);
-    Engine::Renderer::sendTexture("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 3);
-    Engine::Renderer::sendTexture("gSSAOMap", m_GBuffer.getTexture(GBufferType::Bloom), 4);
+        Engine::Renderer::setDepthFunc(GL_GEQUAL);
+        Engine::Renderer::GLEnable(GL_DEPTH_TEST);
 
-    Engine::Renderer::setDepthFunc(GL_GEQUAL);
-    Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-
-    for (const auto& light : PublicScene::GetLights<PointLight>(scene)) {
-        renderPointLight(camera, *light);
+        for (const auto& light : PublicScene::GetLights<PointLight>(scene)) {
+            renderPointLight(camera, *light);
+        }
+        for (const auto& light : PublicScene::GetLights<SpotLight>(scene)) {
+            renderSpotLight(camera, *light);
+        }
+        for (const auto& light : PublicScene::GetLights<RodLight>(scene)) {
+            renderRodLight(camera, *light);
+        }
+        for (const auto& light : PublicScene::GetLights<ProjectionLight>(scene)) {
+            renderProjectionLight(camera, *light);
+        }
+        Engine::Renderer::setDepthFunc(GL_LEQUAL);
+        Engine::Renderer::GLDisable(GL_DEPTH_TEST);
+        for (const auto& light : PublicScene::GetLights<SunLight>(scene)) {
+            renderSunLight(camera, *light, viewport);
+        }
+        for (const auto& light : PublicScene::GetLights<DirectionalLight>(scene)) {
+            renderDirectionalLight(camera, *light, viewport);
+        }
     }
-    for (const auto& light : PublicScene::GetLights<SpotLight>(scene)) {
-        renderSpotLight(camera, *light);
-    }
-    for (const auto& light : PublicScene::GetLights<RodLight>(scene)) {
-        renderRodLight(camera, *light);
-    }
-    for (const auto& light : PublicScene::GetLights<ProjectionLight>(scene)) {
-        renderProjectionLight(camera, *light);
-    }
-    Engine::Renderer::setDepthFunc(GL_LEQUAL);
-    Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-    for (const auto& light : PublicScene::GetLights<SunLight>(scene)) {
-        renderSunLight(camera, *light, viewport);
-    }
-    for (const auto& light : PublicScene::GetLights<DirectionalLight>(scene)) {
-        renderDirectionalLight(camera, *light, viewport);
-    }
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(3, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(4, GL_TEXTURE_2D);
-
     if (mainRenderFunction) {
         //do GI here. (only doing GI during the main render pass, not during light probes)
         m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGIBasic].get<ShaderProgram>());
-        Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0);
-        Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1);
+
+        Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
+        Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
 
         Engine::Renderer::renderFullscreenQuad();
-
-        Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-        Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
     }
 }
 void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera) {
@@ -1660,28 +1657,23 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
 }
 void DeferredPipeline::internal_pass_final(GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal].get<ShaderProgram>());
+
     Engine::Renderer::sendUniform1Safe("HasBloom", (int)Bloom::STATIC_BLOOM.m_Bloom_Active);
     Engine::Renderer::sendUniform1Safe("HasFog", (int)Fog::STATIC_FOG.fog_active);
 
+    Engine::priv::OpenGLBindTextureRAII SceneTexture{ "SceneTexture", m_GBuffer.getTexture(sceneTexture), 0, true };
+    Engine::priv::OpenGLBindTextureRAII gBloomMap{ "gBloomMap", m_GBuffer.getTexture(GBufferType::Bloom), 1, true };
+    Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 2, true };
+    Engine::priv::OpenGLBindTextureRAII gDepthMap{ "gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 3, true };
     if (Engine::Renderer::fog::enabled()) {
         Engine::Renderer::sendUniform1Safe("FogDistNull", Fog::STATIC_FOG.distNull);
         Engine::Renderer::sendUniform1Safe("FogDistBlend", Fog::STATIC_FOG.distBlend);
         Engine::Renderer::sendUniform4Safe("FogColor", Fog::STATIC_FOG.color);
-        Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 2);
     }
-    Engine::Renderer::sendTextureSafe("SceneTexture", m_GBuffer.getTexture(sceneTexture), 0);
-    Engine::Renderer::sendTextureSafe("gBloomMap", m_GBuffer.getTexture(GBufferType::Bloom), 1);
-    Engine::Renderer::sendTextureSafe("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 2);
     Engine::Renderer::renderFullscreenQuad();
-
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
 }
 void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency].get<ShaderProgram>());
-    Engine::Renderer::sendTextureSafe("SceneTexture", m_GBuffer.getTexture(sceneTexture), 0);
-    Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 1);
 
     //Engine::Renderer::GLEnable(GL_BLEND);
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
@@ -1693,6 +1685,9 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
     Engine::Renderer::sendUniform1Safe("DepthMaskValue", viewport.getDepthMaskValue());
     Engine::Renderer::sendUniform1Safe("DepthMaskActive", (int)viewport.isDepthMaskActive());
 
+    Engine::priv::OpenGLBindTextureRAII SceneTexture{ "SceneTexture", m_GBuffer.getTexture(sceneTexture), 0, true };
+    Engine::priv::OpenGLBindTextureRAII gDepthMap{ "gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 1, true };
+
     Engine::Renderer::renderFullscreenQuad();
 
     //Engine::Renderer::GLDisable(GL_BLEND);
@@ -1701,11 +1696,11 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
 void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredBlur].get<ShaderProgram>());
 
-    glm::vec2 hv(0.0f);
+    glm::vec2 hv{ 0.0f };
     if (type == "H") { 
-        hv = glm::vec2(1.0f, 0.0f); 
-    }else{ 
-        hv = glm::vec2(0.0f, 1.0f); 
+        hv = glm::vec2{ 1.0f, 0.0f };
+    } else { 
+        hv = glm::vec2{ 0.0f, 1.0f };
     }
 
     auto& bloom = Bloom::STATIC_BLOOM;
@@ -1716,7 +1711,8 @@ void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, st
         SSAO::STATIC_SSAO.m_ssao_blur_strength
     );
     Engine::Renderer::sendUniform4("DataA", bloom.m_Blur_Radius, 0.0f, hv.x, hv.y);
-    Engine::Renderer::sendTexture("image", m_GBuffer.getTexture(texture), 0);
+
+    Engine::priv::OpenGLBindTextureRAII image{ "image", m_GBuffer.getTexture(texture), 0, false };
 
     Engine::Renderer::renderFullscreenQuad();
 }
@@ -1726,13 +1722,11 @@ void DeferredPipeline::internal_pass_normaless_diffuse() {
     m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGBA");
 
     Engine::Renderer::sendUniform1Safe("HasLighting", (int)m_Renderer.m_Lighting);
-    Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0);
-    Engine::Renderer::sendTexture("gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 1);
+
+    Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0, false };
+    Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 1, false };
 
     Engine::Renderer::renderFullscreenQuad();
-
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
 }
 void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) {
     Engine::Renderer::GLEnablei(GL_BLEND, 0);

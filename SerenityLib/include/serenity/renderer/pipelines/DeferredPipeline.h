@@ -196,7 +196,7 @@ namespace Engine::priv {
 
             bool buildShadowCaster(SunLight&) override;
             bool buildShadowCaster(PointLight&) override;
-            bool buildShadowCaster(DirectionalLight&) override;
+            bool buildShadowCaster(DirectionalLight&, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType, float nearFactor, float farFactor) override;
             bool buildShadowCaster(SpotLight&) override;
             bool buildShadowCaster(RodLight&) override;
             bool buildShadowCaster(ProjectionLight&) override;

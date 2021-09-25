@@ -13,9 +13,9 @@ constexpr std::array<const char*, JoystickAxis::_TOTAL> JOYSTICK_CONTROL_NAMES{ 
 } };
 
 
-std::string JoystickAxis::toString(JoystickAxis::Axis joystick_axis) {
+std::string JoystickAxis::toString(JoystickAxis joystick_axis) {
     return (joystick_axis == JoystickAxis::Unknown) ? "Unknown Joystick Axis" : JOYSTICK_CONTROL_NAMES[joystick_axis];
 }
-const char* JoystickAxis::toCharArray(JoystickAxis::Axis joystick_axis) {
+const char* JoystickAxis::toCharArray(JoystickAxis joystick_axis) {
     return (joystick_axis == JoystickAxis::Unknown) ? "Unknown Joystick Axis" : JOYSTICK_CONTROL_NAMES[joystick_axis];
 }

@@ -5,7 +5,7 @@
 
 TEST_CASE("GL Image Types tests") {
 
-    ImagePixelFormat pixelFormat = ImagePixelFormat::RGBA;
+    ImagePixelFormat pixelFormat       = ImagePixelFormat::RGBA;
     ImageInternalFormat internalFormat = ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT;
 
     REQUIRE(internalFormat == ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT);
@@ -15,9 +15,9 @@ TEST_CASE("GL Image Types tests") {
     REQUIRE(!internalFormat.isCompressedType());
 
     pixelFormat = internalFormat;
-    REQUIRE(pixelFormat == ImagePixelFormat::Type::RGBA);
+    REQUIRE(pixelFormat == ImagePixelFormat::RGBA);
 
     internalFormat = ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT;
     pixelFormat = internalFormat;
-    REQUIRE(pixelFormat == ImagePixelFormat::Type::RGB);
+    REQUIRE(pixelFormat == ImagePixelFormat::RGB);
 }

@@ -40,21 +40,14 @@ namespace Engine{
     [[nodiscard]] uint32_t getNumPressedKeys();
     [[nodiscard]] uint32_t getNumPressedMouseButtons();
 
-    [[nodiscard]] bool isKeyDown(KeyboardKey::Key);
-    [[nodiscard]] bool isKeyDownOnce(KeyboardKey::Key);
-    [[nodiscard]] bool isKeyDownOnce(KeyboardKey::Key, KeyboardKey::Key);
-    [[nodiscard]] bool isKeyDownOnce(KeyboardKey::Key, KeyboardKey::Key, KeyboardKey::Key);
-    [[nodiscard]] bool isKeyUp(KeyboardKey::Key);
-    [[nodiscard]] bool isKeyDown(uint32_t key);
-    [[nodiscard]] bool isKeyDownOnce(uint32_t key);
-    [[nodiscard]] bool isKeyDownOnce(uint32_t first, uint32_t second);
-    [[nodiscard]] bool isKeyDownOnce(uint32_t first, uint32_t second, uint32_t third);
-    [[nodiscard]] bool isKeyUp(uint32_t key);
+    [[nodiscard]] bool isKeyDown(KeyboardKey);
+    [[nodiscard]] bool isKeyDownOnce(KeyboardKey);
+    [[nodiscard]] bool isKeyDownOnce(KeyboardKey, KeyboardKey);
+    [[nodiscard]] bool isKeyDownOnce(KeyboardKey, KeyboardKey, KeyboardKey);
+    [[nodiscard]] bool isKeyUp(KeyboardKey);
 
-    [[nodiscard]] bool isMouseButtonDown(MouseButton::Button);
-    [[nodiscard]] bool isMouseButtonDownOnce(MouseButton::Button);
-    [[nodiscard]] bool isMouseButtonDown(uint32_t button);
-    [[nodiscard]] bool isMouseButtonDownOnce(uint32_t button);
+    [[nodiscard]] bool isMouseButtonDown(MouseButton);
+    [[nodiscard]] bool isMouseButtonDownOnce(MouseButton);
 
     [[nodiscard]] const glm::vec2& getMouseDifference();
     [[nodiscard]] const glm::vec2& getMousePositionPrevious();

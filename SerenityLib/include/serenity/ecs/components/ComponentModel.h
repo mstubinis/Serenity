@@ -44,7 +44,7 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
 
         ComponentModel() = delete;
     public:
-        ComponentModel(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{}, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ComponentModel(Entity, Handle mesh, Handle material, Handle shaderProgram = {}, RenderStage = RenderStage::GeometryOpaque);
        
         ComponentModel(const ComponentModel&)                = delete;
         ComponentModel& operator=(const ComponentModel&)     = delete;
@@ -57,8 +57,8 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
 
         void setViewportFlag(uint32_t flag) noexcept;
         void addViewportFlag(uint32_t flag) noexcept;
-        inline void setViewportFlag(ViewportFlag::Flag flag) noexcept { setViewportFlag((uint32_t)flag); }
-        inline void addViewportFlag(ViewportFlag::Flag flag) noexcept { addViewportFlag((uint32_t)flag); }
+        inline void setViewportFlag(ViewportFlag flag) noexcept { setViewportFlag((uint32_t)flag); }
+        inline void addViewportFlag(ViewportFlag flag) noexcept { addViewportFlag((uint32_t)flag); }
 
         [[nodiscard]] inline size_t getNumModels() const noexcept { return m_ModelInstances.size(); }
         [[nodiscard]] inline constexpr float getRadius() const noexcept { return m_Radius; }
@@ -67,14 +67,14 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
         inline void hide() noexcept { show(false); }
 
         [[nodiscard]] inline ModelInstance& getModel(size_t index = 0) noexcept { return *m_ModelInstances[index].get(); }
-        ModelInstanceHandle addModel(Handle mesh, Handle material, Handle shaderProgram = Handle{}, RenderStage::Stage = RenderStage::GeometryOpaque);
+        ModelInstanceHandle addModel(Handle mesh, Handle material, Handle shaderProgram = {}, RenderStage = RenderStage::GeometryOpaque);
         inline void removeModel(size_t index) noexcept { m_ModelInstances.erase(m_ModelInstances.begin() + index); }
 
-        void setStage(RenderStage::Stage stage, size_t index = 0);
-        void setModel(Handle mesh, Handle material, size_t index, Handle = Handle{}, RenderStage::Stage = RenderStage::GeometryOpaque);
-        void setModelMesh(Handle mesh, size_t index, RenderStage::Stage = RenderStage::GeometryOpaque);
-        void setModelMaterial(Handle material, size_t index, RenderStage::Stage = RenderStage::GeometryOpaque);
-        void setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage::Stage = RenderStage::GeometryOpaque);
+        void setStage(RenderStage stage, size_t index = 0);
+        void setModel(Handle mesh, Handle material, size_t index, Handle = {}, RenderStage = RenderStage::GeometryOpaque);
+        void setModelMesh(Handle mesh, size_t index, RenderStage = RenderStage::GeometryOpaque);
+        void setModelMaterial(Handle material, size_t index, RenderStage = RenderStage::GeometryOpaque);
+        void setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage = RenderStage::GeometryOpaque);
 
         [[nodiscard]] bool rayIntersectSphere(const ComponentCamera& camera) const noexcept;
 

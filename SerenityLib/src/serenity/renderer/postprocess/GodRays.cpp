@@ -9,6 +9,7 @@
 #include <serenity/resources/shader/Shader.h>
 #include <serenity/resources/Engine_BuiltInShaders.h>
 #include <serenity/threading/ThreadingModule.h>
+#include <serenity/renderer/opengl/BindTextureRAII.h>
 
 Engine::priv::GodRays Engine::priv::GodRays::STATIC_GOD_RAYS;
 
@@ -66,11 +67,10 @@ void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, con
     Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / dimensions.z, lightScrnPos.y / dimensions.w);
     Engine::Renderer::sendUniform1("samples", samples);
     Engine::Renderer::sendUniform1("alpha", alpha);
-    Engine::Renderer::sendTexture("firstPass", gbuffer.getTexture(GBufferType::Misc), 0);
+
+    Engine::priv::OpenGLBindTextureRAII firstPass{ "firstPass", gbuffer.getTexture(GBufferType::Misc), 0, false };
 
     Engine::Renderer::renderFullscreenQuad();
-
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
 }
 
 void Engine::Renderer::godRays::setSun(Entity sunEntity) noexcept {

@@ -286,6 +286,7 @@ void Engine::priv::RenderGraph::render_bruteforce(Engine::priv::RenderModule& re
     }
 }
 void Engine::priv::RenderGraph::render_shadow_map(Engine::priv::RenderModule& renderer, Camera* camera) {
+    //int count = 0;
     for (auto& materialNode : m_MaterialNodes) {
         if (materialNode.meshNodes.size() > 0) {
             for (auto& meshNode : materialNode.meshNodes) {
@@ -294,6 +295,7 @@ void Engine::priv::RenderGraph::render_shadow_map(Engine::priv::RenderModule& re
                     renderer.bind(mesh);
                     for (auto& modelInstance : meshNode.instanceNodes) {
                         if (modelInstance->hasPassedRenderCheck() && modelInstance->isShadowCaster()) {
+                            //++count;
                             renderer.bind(modelInstance);
                             renderer.m_Pipeline->renderMesh(*mesh, (uint32_t)modelInstance->getDrawingMode());
                             renderer.unbind(modelInstance);
@@ -304,6 +306,7 @@ void Engine::priv::RenderGraph::render_shadow_map(Engine::priv::RenderModule& re
             }
         }
     }
+    //std::cout << "count: " << count << '\n';
 }
 void Engine::priv::RenderGraph::render_bruteforce_shadow_map(Engine::priv::RenderModule& renderer, Camera* camera) {
     for (auto& modelInstance : m_InstancesTotal) {

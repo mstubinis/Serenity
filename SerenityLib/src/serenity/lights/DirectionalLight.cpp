@@ -15,11 +15,11 @@ DirectionalLight::DirectionalLight(Scene* scene, const glm::vec3& direction)
     : DirectionalLight{ scene, direction.x, direction.y, direction.z }
 {}
 
-bool DirectionalLight::setShadowCaster(bool castsShadow) noexcept {
+bool DirectionalLight::setShadowCaster(bool castsShadow, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType frustumType, float nearFactor, float farFactor) noexcept {
+    auto& renderer = Engine::priv::Core::m_Engine->m_RenderModule;
+    renderer.setShadowCaster(*this, castsShadow, shadowMapWidth, shadowMapSize, frustumType, nearFactor, farFactor);
     if ((m_IsShadowCaster && castsShadow == false) || (!m_IsShadowCaster && castsShadow == true)) {
         m_IsShadowCaster = castsShadow;
-        auto& renderer = Engine::priv::Core::m_Engine->m_RenderModule;
-        renderer.setShadowCaster(*this, castsShadow);
         return Engine::priv::PublicScene::SetLightShadowCaster<DirectionalLight>(*scene(), *this, castsShadow);
     }
     return false;

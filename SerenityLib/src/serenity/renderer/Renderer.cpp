@@ -176,10 +176,10 @@ bool RenderModule::setShadowCaster(PointLight& pointLight, bool isShadowCaster) 
     m_Pipeline->toggleShadowCaster(pointLight, isShadowCaster);
     return res;
 }
-bool RenderModule::setShadowCaster(DirectionalLight& directionalLight, bool isShadowCaster) {
+bool RenderModule::setShadowCaster(DirectionalLight& directionalLight, bool isShadowCaster, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
     bool res = false;
     if (isShadowCaster) {
-        res = m_Pipeline->buildShadowCaster(directionalLight);
+        res = m_Pipeline->buildShadowCaster(directionalLight, shadowMapWidth, shadowMapSize, frustumType, nearFactor, farFactor);
     }
     m_Pipeline->toggleShadowCaster(directionalLight, isShadowCaster);
     return res;

@@ -3,11 +3,11 @@
 #define ENGINE_EVENTS_KEYBOARD_KEYS_H
 
 #include <string>
-#include <cstdint>
+#include <serenity/system/Macros.h>
 
 class KeyboardKey final {
     public:
-        enum Key : uint32_t {
+        enum Type : uint32_t {
             Unknown = 0,
             A = 1,
             B,
@@ -113,12 +113,11 @@ class KeyboardKey final {
 
             _TOTAL,
         };
-        [[nodiscard]] static const char* toCharArray(KeyboardKey::Key);
-        [[nodiscard]] static std::string toString(KeyboardKey::Key);
-        [[nodiscard]] static bool isModifierKey(KeyboardKey::Key);
-        [[nodiscard]] static const char* toCharArray(uint32_t keyboard_key);
-        [[nodiscard]] static std::string toString(uint32_t keyboard_key);
-        [[nodiscard]] static bool isModifierKey(uint32_t keyboard_key);
+        [[nodiscard]] static const char* toCharArray(KeyboardKey);
+        [[nodiscard]] static std::string toString(KeyboardKey);
+        [[nodiscard]] static bool isModifierKey(KeyboardKey);
+
+        BUILD_ENUM_CLASS_MEMBERS(KeyboardKey, Type)
 };
 
 #endif

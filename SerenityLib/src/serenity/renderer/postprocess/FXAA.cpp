@@ -8,6 +8,7 @@
 #include <serenity/scene/Viewport.h>
 #include <serenity/resources/Engine_BuiltInShaders.h>
 #include <serenity/resources/Engine_Resources.h>
+#include <serenity/renderer/opengl/BindTextureRAII.h>
 
 Engine::priv::FXAA Engine::priv::FXAA::STATIC_FXAA;
 
@@ -87,13 +88,9 @@ void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, uint32
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MUL", reduce_mul);
     Engine::Renderer::sendUniform1("FXAA_SPAN_MAX", span_max);
 
-    Engine::Renderer::sendTexture("inTexture", gbuffer.getTexture(sceneTexture), 0);
-    Engine::Renderer::sendTextureSafe("edgeTexture", gbuffer.getTexture(GBufferType::Misc), 1);
-    Engine::Renderer::sendTexture("depthTexture", gbuffer.getTexture(GBufferType::Depth), 2);
+    Engine::priv::OpenGLBindTextureRAII inTexture{ "inTexture", gbuffer.getTexture(sceneTexture), 0, false };
+    Engine::priv::OpenGLBindTextureRAII edgeTexture{ "edgeTexture", gbuffer.getTexture(GBufferType::Misc), 1, true };
+    Engine::priv::OpenGLBindTextureRAII depthTexture{ "depthTexture", gbuffer.getTexture(GBufferType::Depth), 2, false };
 
     Engine::Renderer::renderFullscreenQuad();
-
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(2, GL_TEXTURE_2D);
 }

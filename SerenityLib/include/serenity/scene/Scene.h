@@ -214,8 +214,8 @@ namespace Engine::priv {
 
 
 
-        static void                       AddModelInstanceToPipeline(Scene&, ModelInstance&, RenderStage::Stage);
-        static void                       RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, RenderStage::Stage);
+        static void                       AddModelInstanceToPipeline(Scene&, ModelInstance&, RenderStage);
+        static void                       RemoveModelInstanceFromPipeline(Scene&, ModelInstance&, RenderStage);
         [[nodiscard]] static Engine::priv::ECS& GetECS(Scene&);
         static void                       CleanECS(Scene&, Entity);
         static void                       SkipRenderThisFrame(Scene&);

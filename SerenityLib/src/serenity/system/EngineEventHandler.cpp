@@ -76,7 +76,7 @@ void Engine::priv::EngineEventHandler::internal_on_event_key_pressed(Window& win
     m_EventModule.onEventKeyPressed(key);
     Game::onKeyPressed(window, key);
 
-    EventKeyboard e{ KeyboardKey::Key(key) };
+    EventKeyboard e(key);
     if (Engine::isKeyDown(KeyboardKey::LeftControl) || Engine::isKeyDown(KeyboardKey::RightControl)) e.control = true;
     if (Engine::isKeyDown(KeyboardKey::LeftAlt)     || Engine::isKeyDown(KeyboardKey::RightAlt))     e.alt     = true;
     if (Engine::isKeyDown(KeyboardKey::LeftShift)   || Engine::isKeyDown(KeyboardKey::RightShift))   e.shift   = true;
@@ -89,7 +89,7 @@ void Engine::priv::EngineEventHandler::internal_on_event_key_released(Window& wi
     m_EventModule.onEventKeyReleased(key);
     Game::onKeyReleased(window, key);
 
-    EventKeyboard e{ KeyboardKey::Key(key) };
+    EventKeyboard e(key);
     if (Engine::isKeyDown(KeyboardKey::LeftControl) || Engine::isKeyDown(KeyboardKey::RightControl)) e.control = true;
     if (Engine::isKeyDown(KeyboardKey::LeftAlt)     || Engine::isKeyDown(KeyboardKey::RightAlt))     e.alt     = true;
     if (Engine::isKeyDown(KeyboardKey::LeftShift)   || Engine::isKeyDown(KeyboardKey::RightShift))   e.shift   = true;
@@ -106,13 +106,13 @@ void Engine::priv::EngineEventHandler::internal_on_event_mouse_button_pressed(Wi
     ++mouseButton;
     m_EventModule.onEventMouseButtonPressed(mouseButton);
     Game::onMouseButtonPressed(window, mouseButton);
-    internal_dispatch_event(Event{ EventType::MouseButtonPressed, EventMouseButton{ MouseButton::Button(mouseButton), window } });
+    internal_dispatch_event(Event{ EventType::MouseButtonPressed, EventMouseButton( mouseButton, window ) });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_mouse_button_released(Window& window, uint32_t mouseButton) {
     ++mouseButton;
     m_EventModule.onEventMouseButtonReleased(mouseButton);
     Game::onMouseButtonReleased(window, mouseButton);
-    internal_dispatch_event(Event{ EventType::MouseButtonReleased, EventMouseButton{ MouseButton::Button(mouseButton), window } });
+    internal_dispatch_event(Event{ EventType::MouseButtonReleased, EventMouseButton( mouseButton, window ) });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_mouse_moved(Window& window, int mouseX, int mouseY) {
     const float mX = float(mouseX);
@@ -141,7 +141,7 @@ void Engine::priv::EngineEventHandler::internal_on_event_joystick_button_release
 }
 void Engine::priv::EngineEventHandler::internal_on_event_joystick_moved(Window& window, uint32_t id, float position, uint32_t axis) {
     Game::onJoystickMoved();
-    internal_dispatch_event(Event{ EventType::JoystickMoved, EventJoystickMoved{ id, (JoystickAxis::Axis)axis, position } });
+    internal_dispatch_event(Event{ EventType::JoystickMoved, EventJoystickMoved( id, axis, position ) });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_joystick_connected(Window& window, uint32_t id) {
     Game::onJoystickConnected();

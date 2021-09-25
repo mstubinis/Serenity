@@ -9,6 +9,7 @@
 #include <serenity/threading/ThreadingModule.h>
 #include <serenity/scene/Viewport.h>
 #include <serenity/resources/Engine_Resources.h>
+#include <serenity/renderer/opengl/BindTextureRAII.h>
 
 Engine::priv::Bloom Engine::priv::Bloom::STATIC_BLOOM;
 
@@ -46,9 +47,8 @@ void Engine::priv::Bloom::pass(const Engine::priv::GBuffer& gbuffer, const Viewp
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4("Data", m_Scale, m_Threshold, m_Exposure, m_Bloom_Strength);
-    Engine::Renderer::sendTexture("SceneTexture", gbuffer.getTexture(sceneTexture), 0);
+
+    Engine::priv::OpenGLBindTextureRAII SceneTexture{ "SceneTexture", gbuffer.getTexture(sceneTexture), 0, false };
 
     Engine::Renderer::renderFullscreenQuad();
-
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
 }

@@ -11,10 +11,6 @@ namespace Engine::priv {
 #include <serenity/lights/LightIncludes.h>
 #include <serenity/ecs/entity/EntityBody.h>
 
-class SunLightShadowData {
-
-};
-
 class SunLight : public EntityBody, public LightBaseData<SunLight> {
     friend class ::Engine::priv::RenderModule;
     public:
@@ -25,4 +21,9 @@ class SunLight : public EntityBody, public LightBaseData<SunLight> {
         bool setShadowCaster(bool castsShadow) noexcept;
 
 };
+
+class SunLightShadowData {
+
+};
+
 #endif

@@ -19,9 +19,6 @@ class TextureCubemap;
 
 namespace Engine::priv {
     class MaterialLoader final {
-        private: 
-            static LoadedResource<Texture> internal_load_texture(std::string_view file, bool mipmapped, ImageInternalFormat, TextureType);
-            static LoadedResource<TextureCubemap> internal_load_texture_cubemap(std::string_view file, bool mipmapped, ImageInternalFormat);
         public:
             static LoadedResource<Texture> LoadTextureDiffuse(std::string_view file);
             static LoadedResource<Texture> LoadTextureNormal(std::string_view file);

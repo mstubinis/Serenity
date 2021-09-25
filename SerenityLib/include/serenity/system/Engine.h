@@ -33,7 +33,7 @@ namespace Engine::priv {
             void internal_init_os_specific(const EngineOptions&);
             void internal_cleanup_os_specific();
 
-            void internal_pre_input_update();
+            void internal_post_input_update();
             void internal_pre_update(Scene&, const float dt);
             void internal_post_update(Scene&, Window&, const float dt);
 

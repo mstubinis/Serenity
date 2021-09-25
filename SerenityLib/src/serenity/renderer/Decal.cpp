@@ -23,7 +23,7 @@ namespace Engine::priv {
     };
 };
 
-Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::vec3& hitNormal, float size, Scene& scene, float lifetimeMax, RenderStage::Stage stage)
+Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::vec3& hitNormal, float size, Scene& scene, float lifetimeMax, RenderStage stage)
     : EntityBody{ scene }
     , m_InitialPosition{ localPosition }
     , m_LifetimeMax{ lifetimeMax}

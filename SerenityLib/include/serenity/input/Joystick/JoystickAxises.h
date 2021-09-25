@@ -3,11 +3,11 @@
 #define ENGINE_EVENTS_JOYSTICK_AXISES_H
 
 #include <string>
-#include <cstdint>
+#include <serenity/system/Macros.h>
 
 class JoystickAxis final {
     public:
-        enum Axis : uint32_t {
+        enum Type : uint32_t {
             X = 0,
             Y,
             Z,
@@ -20,8 +20,10 @@ class JoystickAxis final {
             _TOTAL,
             Unknown = 4294967295, //-1
         };
-        [[nodiscard]] static const char* toCharArray(JoystickAxis::Axis);
-        [[nodiscard]] static std::string toString(JoystickAxis::Axis);
+        [[nodiscard]] static const char* toCharArray(JoystickAxis);
+        [[nodiscard]] static std::string toString(JoystickAxis);
+
+        BUILD_ENUM_CLASS_MEMBERS(JoystickAxis, Type)
 };
 
 #endif

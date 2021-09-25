@@ -14,21 +14,27 @@ namespace Engine::priv {
 #include <serenity/system/TypeDefs.h>
 #include <serenity/dependencies/glm.h>
 #include <serenity/types/Flag.h>
+#include <serenity/system/Macros.h>
 
-struct ViewportRenderingFlag final { enum Flag: uint16_t {
-    GodRays      = 1 << 0,
-    SSAO         = 1 << 1,
-    API2D        = 1 << 2,
-    HDR          = 1 << 3,
-    PhysicsDebug = 1 << 4,
-    AntiAliasing = 1 << 5,
-    Fog          = 1 << 6,
-    DepthOfField = 1 << 7,
-    Skybox       = 1 << 8,
-    Bloom        = 1 << 9,
-    Particles    = 1 << 10,
-    _ALL         = 65535,
-};};
+class ViewportRenderingFlag final { 
+    public:
+        using TypeVal = uint16_t;
+        enum Type : TypeVal {
+            GodRays      = 1 << 0,
+            SSAO         = 1 << 1,
+            API2D        = 1 << 2,
+            HDR          = 1 << 3,
+            PhysicsDebug = 1 << 4,
+            AntiAliasing = 1 << 5,
+            Fog          = 1 << 6,
+            DepthOfField = 1 << 7,
+            Skybox       = 1 << 8,
+            Bloom        = 1 << 9,
+            Particles    = 1 << 10,
+            _ALL         = std::numeric_limits<TypeVal>().max(),
+        };
+        BUILD_ENUM_CLASS_MEMBERS(ViewportRenderingFlag, Type)
+};
 
 class Viewport final {
     friend class Scene;
@@ -76,9 +82,9 @@ class Viewport final {
         inline void setResizeFuncUserPointer(void* userPointer) noexcept { m_ResizeFuncPointerUserData = userPointer; }
 
         [[nodiscard]] inline Engine::Flag<uint16_t> getRenderFlags() const noexcept { return m_RenderFlags; }
-        inline void setRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags = flag; }
-        inline void addRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags.add(flag); }
-        inline void removeRenderFlag(ViewportRenderingFlag::Flag flag) noexcept { m_RenderFlags.remove(flag); }
+        inline void setRenderFlag(ViewportRenderingFlag flag) noexcept { m_RenderFlags = uint16_t(flag); }
+        inline void addRenderFlag(ViewportRenderingFlag flag) noexcept { m_RenderFlags.add(flag); }
+        inline void removeRenderFlag(ViewportRenderingFlag flag) noexcept { m_RenderFlags.remove(flag); }
 
         [[nodiscard]] inline constexpr float getDepthMaskValue() const noexcept { return m_DepthMaskValue; }
         inline void setDepthMaskValue(float depth) noexcept { m_DepthMaskValue = depth; }

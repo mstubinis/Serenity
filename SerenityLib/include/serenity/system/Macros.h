@@ -2,6 +2,8 @@
 #ifndef ENGINE_SYSTEM_MACROS_H
 #define ENGINE_SYSTEM_MACROS_H
 
+#include <cstdint>
+
 #ifndef ENGINE_PRODUCTION
 #include <iostream>
 #endif
@@ -244,6 +246,25 @@
     inline typename TYPE::const_iterator end() const noexcept { return VAR.end(); } \
     inline typename const TYPE::const_iterator cbegin() const noexcept { return VAR.cbegin(); } \
     inline typename const TYPE::const_iterator cend() const noexcept { return VAR.cend(); }
+
+#define BUILD_ENUM_CLASS_MEMBERS(TYPE, INNER_TYPE) \
+    private: TYPE::INNER_TYPE m_Type; \
+    public: constexpr TYPE(uint32_t data) { m_Type = static_cast<TYPE::INNER_TYPE>(data); } \
+    explicit constexpr TYPE(int32_t data) { m_Type = static_cast<TYPE::INNER_TYPE>(data); } \
+    explicit constexpr TYPE(int8_t data) { m_Type = static_cast<TYPE::INNER_TYPE>(data); } \
+    explicit constexpr TYPE(uint8_t data) { m_Type = static_cast<TYPE::INNER_TYPE>(data); } \
+    explicit constexpr TYPE(int16_t data) { m_Type = static_cast<TYPE::INNER_TYPE>(data); } \
+    explicit constexpr TYPE(uint16_t data) { m_Type = static_cast<TYPE::INNER_TYPE>(data); } \
+    explicit constexpr TYPE(int64_t data) { m_Type = static_cast<TYPE::INNER_TYPE>(data); } \
+    explicit constexpr TYPE(uint64_t data) { m_Type = static_cast<TYPE::INNER_TYPE>(data); } \
+    constexpr operator uint32_t() const noexcept { return static_cast<uint32_t>(m_Type); } \
+    explicit constexpr operator int32_t() const noexcept { return static_cast<int32_t>(m_Type); } \
+    explicit constexpr operator uint8_t() const noexcept { return static_cast<uint8_t>(m_Type); } \
+    explicit constexpr operator int8_t() const noexcept { return static_cast<int8_t>(m_Type); } \
+    explicit constexpr operator uint16_t() const noexcept { return static_cast<uint16_t>(m_Type); } \
+    explicit constexpr operator int16_t() const noexcept { return static_cast<int16_t>(m_Type); } \
+    explicit constexpr operator int64_t() const noexcept { return static_cast<int64_t>(m_Type); } \
+    explicit constexpr operator uint64_t() const noexcept { return static_cast<uint64_t>(m_Type); }
 
 #pragma endregion
 

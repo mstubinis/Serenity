@@ -71,15 +71,22 @@ namespace Engine::priv {
                 void calculate();
 
                 inline bool supportsVAO() const noexcept { return (MAJOR_VERSION >= 3 && MINOR_VERSION >= 0); }
+
                 inline bool supportsAniosotropicFiltering() const noexcept { return (MAJOR_VERSION >= 4 && MINOR_VERSION >= 6); }
+
+                //can run real slowly on some gpu's / drivers. its core 32 but just to be safe, set it to 40
                 inline bool supportsCubemapSeamless() const noexcept { return (MAJOR_VERSION >= 4 && MINOR_VERSION >= 0); }
+
+                inline bool supportsClipControl() const noexcept { return (MAJOR_VERSION > 4 || (MAJOR_VERSION == 4 && MINOR_VERSION >= 5)); }
+
                 inline bool supportsInstancing() const noexcept { return (MAJOR_VERSION >= 3 && MINOR_VERSION >= 1); }
+
                 inline bool supportsUBO() const noexcept { return GLSL_VERSION >= 140; }
             };
 
             #pragma region TextureUnits
             struct TextureUnitState final {
-                std::array<GLuint, (size_t)TextureType::_TOTAL - 1> openglIDs; //-1 for the "Unknown" enum 
+                std::array<GLuint, TextureType::_TOTAL> openglIDs;
 
                 TextureUnitState() {
                     openglIDs.fill(std::numeric_limits<GLuint>().max());

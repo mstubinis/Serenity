@@ -34,15 +34,15 @@ namespace {
         BufferNewLineIndices.clear();
         for (uint32_t j = 0; j < text.size(); ++j) {
             if (text[j] == '\n') {
-                BufferNewLineIndices.emplace_back(j, static_cast<uint16_t>(x));
+                BufferNewLineIndices.emplace_back(j, uint16_t(x));
                 x = 0.0f;
             } else if (text[j] != '\0') {
                 const CharGlyph& chr = font.getGlyphData(text[j]);
-                x += static_cast<float>(chr.xadvance);
+                x += float(chr.xadvance);
             }
         }
         //add the last block
-        BufferNewLineIndices.emplace_back(text.size(), static_cast<uint16_t>(x));
+        BufferNewLineIndices.emplace_back(uint32_t(text.size()), uint16_t(x));
         x = 0.0f;
     }
     void internal_add_quad(Engine::priv::TextRenderer::IndiceBuffer& indices, uint32_t accumulator) {

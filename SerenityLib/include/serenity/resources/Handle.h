@@ -39,7 +39,7 @@ class Handle final {
         [[nodiscard]] inline constexpr uint32_t version() const noexcept { return m_Version; }
         [[nodiscard]] inline constexpr uint32_t type() const noexcept { return m_Type; }
         inline explicit constexpr operator uint32_t() const noexcept { return m_Type << 27 | m_Version << 12 | m_Index; }
-        inline explicit constexpr operator bool() const noexcept { return !null(); }
+        inline constexpr operator bool() const noexcept { return !null(); }
 
         inline constexpr bool operator<(const Handle& other) const noexcept {
             return m_Index < other.m_Index;
@@ -80,7 +80,7 @@ class Handle final {
 namespace std {
     template <>
     struct hash<Handle> {
-        std::size_t operator()(const Handle& handle) const {
+        std::size_t operator()(const Handle& handle) const noexcept {
             using std::hash;
             return ((hash<uint32_t>()(handle.index())
                 ^ (hash<uint32_t>()(handle.version()) << 1)) >> 1)
@@ -93,6 +93,9 @@ template<class TResource>
 struct LoadedResource final {
     Engine::view_ptr<TResource> m_Resource = nullptr;
     Handle                      m_Handle   = Handle{};
+
+    operator Handle() const noexcept { return m_Handle; }
+    explicit operator TResource&() const noexcept { return *m_Resource; }
 };
 
 #endif

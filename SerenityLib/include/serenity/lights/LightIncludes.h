@@ -49,6 +49,10 @@ enum class LightAttenuation : uint8_t {
     Constant_Linear_Exponent,
     Distance_Radius_Squared,
 };
+enum class LightShadowFrustumType : uint8_t {
+    CameraBased = 0,
+    Fixed = 1,
+};
 
 template<class T>
 class LightBaseData {

@@ -15,12 +15,12 @@ namespace Engine::priv {
         public:
             void onWindowLostFocus() noexcept;
             void onWindowGainedFocus() noexcept;
-            void onButtonPressed(uint32_t button) noexcept;
-            void onButtonReleased(uint32_t button) noexcept;
-            void update() noexcept;
+            void onButtonPressed(MouseButton button) noexcept;
+            void onButtonReleased(MouseButton button) noexcept;
+            void postUpdate() noexcept;
             [[nodiscard]] inline constexpr int32_t getNumPressedButtons() const noexcept { return m_NumPressedMouseButtons; }
-            [[nodiscard]] inline constexpr bool isButtonDown(uint32_t button) noexcept { return m_CurrMouseStatus[button]; }
-            [[nodiscard]] bool isButtonDownOnce(uint32_t button) noexcept;
+            [[nodiscard]] inline constexpr bool isButtonDown(MouseButton button) noexcept { return m_CurrMouseStatus[button]; }
+            [[nodiscard]] bool isButtonDownOnce(MouseButton button) noexcept;
     };
 }
 

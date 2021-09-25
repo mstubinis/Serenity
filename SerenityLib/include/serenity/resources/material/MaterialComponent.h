@@ -23,7 +23,7 @@ class MaterialComponent final {
         inline constexpr bool operator==(const bool other) const noexcept { return (other && m_ComponentType != MaterialComponentType::Empty && m_NumLayers > 0); }
         inline constexpr bool operator!=(const bool other) const noexcept { return !operator==(other); }
 
-        void bind(size_t component_index, size_t& inTextureUnit) const;
+        void bind(size_t component_index, int& inTextureUnit) const;
         //void unbind() {}
 
         MaterialLayer* addLayer(const std::string& textureFile, const std::string& maskFile = "", const std::string& cubemapFile = "");

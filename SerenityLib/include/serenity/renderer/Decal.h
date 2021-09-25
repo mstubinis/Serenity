@@ -29,7 +29,7 @@ class Decal final: public EntityBody {
             float size,
             Scene& scene,
             float lifetimeMax,
-            RenderStage::Stage = RenderStage::Decals
+            RenderStage = RenderStage::Decals
         );
         ~Decal();
 

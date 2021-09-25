@@ -109,7 +109,7 @@ void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& modelC
 
 #pragma region Component
 
-ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, RenderStage::Stage stage)
+ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, RenderStage stage)
     : m_Owner{ entity }
 {
     addModel(mesh, material, shaderProgram, stage);
@@ -167,7 +167,7 @@ void ComponentModel::show(bool shown) noexcept {
         modelInstance->show(shown);
     }
 }
-ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, Handle shaderProgram, RenderStage::Stage renderStage) {
+ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, Handle shaderProgram, RenderStage renderStage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
     auto& modelInstance        = *m_ModelInstances.emplace_back(std::make_unique<ModelInstance>(m_Owner, mesh, material, shaderProgram));
@@ -179,7 +179,7 @@ ModelInstanceHandle ComponentModel::addModel(Handle mesh, Handle material, Handl
     ComponentModel_Functions::CalculateRadius(*this);
     return { modelInstance.m_Index, *this };
 }
-void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle shaderProgram, RenderStage::Stage renderStage) {
+void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle shaderProgram, RenderStage renderStage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
     auto& model_instance                 = *m_ModelInstances[index];
@@ -194,7 +194,7 @@ void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
     ComponentModel_Functions::CalculateRadius(*this);
 }
-void ComponentModel::setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage::Stage renderStage) {
+void ComponentModel::setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage renderStage) {
     auto& model_instance                 = *m_ModelInstances[index];
     auto& scene                          = *m_Owner.scene();
     PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
@@ -205,7 +205,7 @@ void ComponentModel::setModelShaderProgram(Handle shaderProgram, size_t index, R
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
     ComponentModel_Functions::CalculateRadius(*this);
 }
-void ComponentModel::setStage(RenderStage::Stage renderStage, size_t index) {
+void ComponentModel::setStage(RenderStage renderStage, size_t index) {
     auto& model_instance   = *m_ModelInstances[index];
     auto& scene            = *m_Owner.scene();
     PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());
@@ -214,7 +214,7 @@ void ComponentModel::setStage(RenderStage::Stage renderStage, size_t index) {
 
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
 }
-void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage::Stage renderStage) {
+void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage renderStage) {
     ComponentModel_Functions::RegisterDeferredMeshLoaded(*this, mesh);
 
     auto& model_instance        = *m_ModelInstances[index];
@@ -228,7 +228,7 @@ void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage::Stage 
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
     ComponentModel_Functions::CalculateRadius(*this);
 }
-void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage::Stage renderStage) {
+void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage renderStage) {
     auto& model_instance            = *m_ModelInstances[index];
     auto& scene                     = *m_Owner.scene();
     PublicScene::RemoveModelInstanceFromPipeline(scene, model_instance, model_instance.getStage());

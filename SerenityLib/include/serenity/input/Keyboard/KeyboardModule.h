@@ -15,14 +15,14 @@ namespace Engine::priv {
         public:
             void onWindowLostFocus() noexcept;
             void onWindowGainedFocus() noexcept;
-            void onKeyPressed(uint32_t key) noexcept;
-            void onKeyReleased(uint32_t key) noexcept;
-            void update() noexcept;
+            void onKeyPressed(KeyboardKey key) noexcept;
+            void onKeyReleased(KeyboardKey key) noexcept;
+            void postUpdate() noexcept;
             [[nodiscard]] inline constexpr int32_t getNumPressedKeys() const noexcept { return m_NumPressedKeys; }
-            [[nodiscard]] inline constexpr bool isKeyDown(uint32_t key) const noexcept { return m_CurrKeyboardKeyStatus[key]; }
-            [[nodiscard]] bool isKeyDownOnce(uint32_t key) noexcept;
-            [[nodiscard]] bool isKeyDownOnce(uint32_t key1, uint32_t key2) noexcept;
-            [[nodiscard]] bool isKeyDownOnce(uint32_t key1, uint32_t key2, uint32_t key3) noexcept;
+            [[nodiscard]] inline constexpr bool isKeyDown(KeyboardKey key) const noexcept { return m_CurrKeyboardKeyStatus[key]; }
+            [[nodiscard]] bool isKeyDownOnce(KeyboardKey key) noexcept;
+            [[nodiscard]] bool isKeyDownOnce(KeyboardKey key1, KeyboardKey key2) noexcept;
+            [[nodiscard]] bool isKeyDownOnce(KeyboardKey key1, KeyboardKey key2, KeyboardKey key3) noexcept;
     };
 }
 

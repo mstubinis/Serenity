@@ -8,6 +8,7 @@
 #include <serenity/threading/ThreadingModule.h>
 #include <serenity/scene/Viewport.h>
 #include <serenity/resources/Engine_Resources.h>
+#include <serenity/renderer/opengl/BindTextureRAII.h>
 
 Engine::priv::DepthOfField Engine::priv::DepthOfField::STATIC_DOF;
 
@@ -84,11 +85,8 @@ void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport
 
     Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, 0.0f);
 
-    Engine::Renderer::sendTextureSafe("inTexture", gbuffer.getTexture(sceneTexture), 0);
-    Engine::Renderer::sendTextureSafe("textureDepth", gbuffer.getTexture(GBufferType::Depth), 1);
+    Engine::priv::OpenGLBindTextureRAII inTexture{ "inTexture", gbuffer.getTexture(sceneTexture), 0, true };
+    Engine::priv::OpenGLBindTextureRAII textureDepth{ "textureDepth", gbuffer.getTexture(GBufferType::Depth), 1, true };
 
     Engine::Renderer::renderFullscreenQuad();
-
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
 }

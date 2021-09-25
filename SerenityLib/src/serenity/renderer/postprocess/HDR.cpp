@@ -9,6 +9,7 @@
 #include <serenity/threading/ThreadingModule.h>
 #include <serenity/scene/Viewport.h>
 #include <serenity/resources/Engine_Resources.h>
+#include <serenity/renderer/opengl/BindTextureRAII.h>
 
 Engine::priv::HDR Engine::priv::HDR::STATIC_HDR;
 
@@ -87,11 +88,9 @@ void Engine::priv::HDR::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_
     Engine::Renderer::sendUniform4Safe("HDRInfo", m_Exposure, 0.0f, godRaysFactor, float(m_Algorithm));
     Engine::Renderer::sendUniform1Safe("HasGodRays", int(godRays));
 
-    Engine::Renderer::sendTextureSafe("gLightingMap", gbuffer.getTexture(GBufferType::Lighting), 0);
-    Engine::Renderer::sendTextureSafe("gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 1);
+    Engine::priv::OpenGLBindTextureRAII gLightingMap{ "gLightingMap", gbuffer.getTexture(GBufferType::Lighting), 0, false };
+    Engine::priv::OpenGLBindTextureRAII gGodsRaysMap{ "gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 1, false };
 
     Engine::Renderer::renderFullscreenQuad();
 
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
-    Engine::Renderer::clearTexture(1, GL_TEXTURE_2D);
 }

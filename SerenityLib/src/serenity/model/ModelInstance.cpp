@@ -19,7 +19,7 @@
 using namespace Engine;
 
 uint32_t ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
-decimal ModelInstance::m_GlobalDistanceFactor = (decimal)1100.0;
+decimal ModelInstance::m_GlobalDistanceFactor = decimal(1100.0);
 
 constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
     const auto stage                   = i->getStage();
@@ -34,9 +34,8 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->getGodRaysColor().toPackedInt());
 
     if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
-        Skybox* skybox          = scene.skybox();
         renderer->m_Pipeline->sendGPUDataAllLights(scene, *camera);
-        renderer->m_Pipeline->sendGPUDataGI(skybox);
+        renderer->m_Pipeline->sendGPUDataGI(scene.skybox());
     }
     if (animationContainer.size() > 0) {
         Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
@@ -158,7 +157,7 @@ void ModelInstance::internal_update_model_matrix(bool recalcRadius) {
     }
     Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
 }
-void ModelInstance::setStage(RenderStage::Stage stage, ComponentModel& componentModel) {
+void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) {
     m_Stage = stage;
     componentModel.setStage(stage, m_Index);
 }

@@ -32,7 +32,7 @@
 
 struct SceneImpl final {
     template<class FUNC> static void iterateMaterials(Scene& scene, FUNC&& func) {
-        for (size_t i = 0; i < (size_t)RenderStage::_TOTAL; ++i) {
+        for (size_t i = 0; i < RenderStage::_TOTAL; ++i) {
             for (auto& graph : scene.m_RenderGraphs[i]) {
                 graph.iterateMaterials(std::forward<FUNC&&>(func));
             }
@@ -203,7 +203,7 @@ void Engine::priv::PublicScene::RenderForwardTransparentTrianglesSortedShadowMap
 }
 
 
-void Engine::priv::PublicScene::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage::Stage stage) {
+void Engine::priv::PublicScene::AddModelInstanceToPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage) {
     auto& renderGraphs = scene.m_RenderGraphs[stage];
     Engine::priv::RenderGraph* renderGraph = nullptr;
     for (auto& graph : renderGraphs) {
@@ -217,7 +217,7 @@ void Engine::priv::PublicScene::AddModelInstanceToPipeline(Scene& scene, ModelIn
     }
     renderGraph->internal_addModelInstanceToPipeline(modelInstance);
 }
-void Engine::priv::PublicScene::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage::Stage stage){
+void Engine::priv::PublicScene::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage){
     auto& renderGraphs = scene.m_RenderGraphs[stage];
     Engine::priv::RenderGraph* renderGraph = nullptr;
     for (auto& graph : renderGraphs) {

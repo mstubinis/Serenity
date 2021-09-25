@@ -27,6 +27,7 @@ namespace Engine::priv {
 #include <serenity/resources/font/FontIncludes.h>
 #include <serenity/renderer/pipelines/IRenderingPipeline.h>
 #include <serenity/resources/texture/TextureIncludes.h>
+#include <serenity/lights/LightIncludes.h>
 #include <serenity/types/Types.h>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -62,7 +63,7 @@ namespace Engine::priv {
 
             bool setShadowCaster(SunLight&,         bool isShadowCaster);
             bool setShadowCaster(PointLight&,       bool isShadowCaster);
-            bool setShadowCaster(DirectionalLight&, bool isShadowCaster);
+            bool setShadowCaster(DirectionalLight&, bool isShadowCaster, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType, float nearFactor, float farFactor);
             bool setShadowCaster(SpotLight&,        bool isShadowCaster);
             bool setShadowCaster(RodLight&,         bool isShadowCaster);
             bool setShadowCaster(ProjectionLight&,  bool isShadowCaster);

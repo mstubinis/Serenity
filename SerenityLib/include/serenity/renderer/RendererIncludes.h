@@ -6,6 +6,7 @@
 #include <SFML/OpenGL.hpp>
 #include <serenity/system/TypeDefs.h>
 #include <serenity/dependencies/glm.h>
+#include <serenity/system/Macros.h>
 
 constexpr const glm::vec4 NO_SCISSOR = glm::vec4{ -1.0f };
 
@@ -55,48 +56,52 @@ enum class Alignment : uint32_t {
     BottomCenter,
     BottomRight,
 };
-class RenderStage { public: enum Stage : uint32_t {
-    GeometryOpaque = 0,
-    GeometryOpaque_2,
-    GeometryOpaque_3,
-    GeometryOpaque_4,
+class RenderStage { 
+    public: 
+        enum Type : uint32_t {
+            GeometryOpaque = 0,
+            GeometryOpaque_2,
+            GeometryOpaque_3,
+            GeometryOpaque_4,
 
-    GeometryTransparent,
-    GeometryTransparent_2,
-    GeometryTransparent_3,
-    GeometryTransparent_4,
+            GeometryTransparent,
+            GeometryTransparent_2,
+            GeometryTransparent_3,
+            GeometryTransparent_4,
 
-    GeometryTransparentTrianglesSorted,
-    GeometryTransparentTrianglesSorted_2,
-    GeometryTransparentTrianglesSorted_3,
-    GeometryTransparentTrianglesSorted_4,
+            GeometryTransparentTrianglesSorted,
+            GeometryTransparentTrianglesSorted_2,
+            GeometryTransparentTrianglesSorted_3,
+            GeometryTransparentTrianglesSorted_4,
 
-    ForwardOpaque,
-    ForwardOpaque_2,
-    ForwardOpaque_3,
-    ForwardOpaque_4,
+            ForwardOpaque,
+            ForwardOpaque_2,
+            ForwardOpaque_3,
+            ForwardOpaque_4,
 
-    ForwardTransparent,
-    ForwardTransparent_2,
-    ForwardTransparent_3,
-    ForwardTransparent_4,
+            ForwardTransparent,
+            ForwardTransparent_2,
+            ForwardTransparent_3,
+            ForwardTransparent_4,
 
-    ForwardTransparentTrianglesSorted,
-    ForwardTransparentTrianglesSorted_2,
-    ForwardTransparentTrianglesSorted_3,
-    ForwardTransparentTrianglesSorted_4,
+            ForwardTransparentTrianglesSorted,
+            ForwardTransparentTrianglesSorted_2,
+            ForwardTransparentTrianglesSorted_3,
+            ForwardTransparentTrianglesSorted_4,
 
-    ForwardParticles,
-    ForwardParticles_2,
-    ForwardParticles_3,
-    ForwardParticles_4,
+            ForwardParticles,
+            ForwardParticles_2,
+            ForwardParticles_3,
+            ForwardParticles_4,
 
-    Decals,
-    Decals_2,
-    Decals_3,
-    Decals_4,
+            Decals,
+            Decals_2,
+            Decals_3,
+            Decals_4,
 
-    _TOTAL
-};};
+            _TOTAL,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(RenderStage, Type)
+};
 
 #endif

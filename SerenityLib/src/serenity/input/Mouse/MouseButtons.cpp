@@ -17,30 +17,16 @@ constexpr std::array<const char*, MouseWheel::_TOTAL> MOUSE_WHEEL_NAMES { {
 } };
 
 
-std::string MouseButton::toString(MouseButton::Button mouse_button) {
+std::string MouseButton::toString(MouseButton mouse_button) {
     return MOUSE_BUTTON_NAMES[mouse_button];
 }
-std::string MouseWheel::toString(MouseWheel::Wheel mouse_wheel) {
+std::string MouseWheel::toString(MouseWheel mouse_wheel) {
     return MOUSE_WHEEL_NAMES[mouse_wheel];
 }
 
-const char* MouseButton::toCharArray(MouseButton::Button mouse_button) {
+const char* MouseButton::toCharArray(MouseButton mouse_button) {
     return MOUSE_BUTTON_NAMES[mouse_button];
 }
-const char* MouseWheel::toCharArray(MouseWheel::Wheel mouse_wheel) {
+const char* MouseWheel::toCharArray(MouseWheel mouse_wheel) {
     return MOUSE_WHEEL_NAMES[mouse_wheel];
-}
-
-
-const char* MouseButton::toCharArray(uint32_t mouse_button) {
-    return MouseButton::toCharArray((MouseButton::Button)mouse_button);
-}
-std::string MouseButton::toString(uint32_t mouse_button) {
-    return MouseButton::toString((MouseButton::Button)mouse_button);
-}
-const char* MouseWheel::toCharArray(uint32_t mouse_wheel) {
-    return MouseWheel::toCharArray((MouseWheel::Wheel)mouse_wheel);
-}
-std::string MouseWheel::toString(uint32_t mouse_wheel) {
-    return MouseWheel::toString((MouseWheel::Wheel)mouse_wheel);
 }

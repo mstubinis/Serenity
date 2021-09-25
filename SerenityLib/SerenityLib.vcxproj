@@ -651,6 +651,7 @@
     <ClCompile Include="src\serenity\renderer\FullscreenItems.cpp" />
     <ClCompile Include="src\serenity\renderer\GBuffer.cpp" />
     <ClCompile Include="src\serenity\renderer\GLImageConstants.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\BindTextureRAII.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\Extensions.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Common.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Compression.cpp" />
@@ -929,6 +930,7 @@
     <ClInclude Include="include\serenity\renderer\FullscreenItems.h" />
     <ClInclude Include="include\serenity\renderer\GBuffer.h" />
     <ClInclude Include="include\serenity\renderer\GLImageConstants.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\BindTextureRAII.h" />
     <ClInclude Include="include\serenity\renderer\opengl\Extensions.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Common.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Compression.h" />

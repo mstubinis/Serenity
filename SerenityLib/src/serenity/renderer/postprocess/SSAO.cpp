@@ -13,6 +13,7 @@
 #include <serenity/resources/Engine_BuiltInShaders.h>
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/resources/texture/Texture.h>
+#include <serenity/renderer/opengl/BindTextureRAII.h>
 
 using namespace Engine::priv;
 
@@ -142,9 +143,9 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
     Engine::Renderer::sendUniform4("SSAOInfo", m_ssao_radius, m_ssao_intensity, m_ssao_bias, m_ssao_scale);
     Engine::Renderer::sendUniform4("SSAOInfoA", 0, 0, (int)m_ssao_samples, (int)SSAO_NORMALMAP_SIZE); //change to 4f eventually?
 
-    Engine::Renderer::sendTexture("gNormalMap", gbuffer.getTexture(GBufferType::Normal), 0);
-    Engine::Renderer::sendTexture("gRandomMap", m_ssao_noise_texture, 1, GL_TEXTURE_2D);
-    Engine::Renderer::sendTexture("gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2);
+    Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", gbuffer.getTexture(GBufferType::Normal), 0, false };
+    Engine::priv::OpenGLBindTextureRAII gRandomMap{ "gRandomMap", m_ssao_noise_texture, GL_TEXTURE_2D, 1, false };
+    Engine::priv::OpenGLBindTextureRAII gDepthMap{ "gDepthMap", gbuffer.getTexture(GBufferType::Depth), 2, false };
 
     Engine::Renderer::renderFullscreenQuad();
 }
@@ -157,11 +158,10 @@ void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, st
         hv = glm::vec2{ 0.0f, 1.0f };
     }
     Engine::Renderer::sendUniform4("Data", m_ssao_blur_radius, m_ssao_blur_strength, hv.x, hv.y);
-    Engine::Renderer::sendTexture("image", gbuffer.getTexture(texture), 0);
+
+    Engine::priv::OpenGLBindTextureRAII image{ "image", gbuffer.getTexture(texture), 0, false };
 
     Engine::Renderer::renderFullscreenQuad();
-
-    Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
 }
 
 void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {

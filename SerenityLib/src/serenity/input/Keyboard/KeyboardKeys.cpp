@@ -106,13 +106,13 @@ constexpr std::array<const char*, KeyboardKey::_TOTAL> KEYBOARD_KEY_NAMES { {
     "Pause",
 } };
 
-const char* KeyboardKey::toCharArray(KeyboardKey::Key keyboard_key) {
+const char* KeyboardKey::toCharArray(KeyboardKey keyboard_key) {
     return KEYBOARD_KEY_NAMES[keyboard_key];
 }
-std::string KeyboardKey::toString(KeyboardKey::Key keyboard_key) {
+std::string KeyboardKey::toString(KeyboardKey keyboard_key) {
     return KEYBOARD_KEY_NAMES[keyboard_key];
 }
-bool KeyboardKey::isModifierKey(KeyboardKey::Key key) {
+bool KeyboardKey::isModifierKey(KeyboardKey key) {
     return (
         key == KeyboardKey::LeftShift || 
         key == KeyboardKey::RightShift || 
@@ -121,13 +121,4 @@ bool KeyboardKey::isModifierKey(KeyboardKey::Key key) {
         key == KeyboardKey::LeftAlt || 
         key == KeyboardKey::RightAlt
     );
-}
-const char* KeyboardKey::toCharArray(uint32_t key) {
-    return KeyboardKey::toCharArray((KeyboardKey::Key)key);
-}
-std::string KeyboardKey::toString(uint32_t key) {
-    return KeyboardKey::toString((KeyboardKey::Key)key);
-}
-bool KeyboardKey::isModifierKey(uint32_t key) {
-    return KeyboardKey::isModifierKey((KeyboardKey::Key)key);
 }

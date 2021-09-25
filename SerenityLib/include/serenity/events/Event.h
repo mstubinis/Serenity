@@ -83,10 +83,10 @@ namespace Engine::priv {
         }
     };
     struct EventKeyboard final{ 
-        KeyboardKey::Key  key;
+        KeyboardKey       key;
         bool              alt, control, shift, system;
         EventKeyboard() = default;
-        EventKeyboard(KeyboardKey::Key key_, bool alt_ = false, bool control_ = false, bool shift_ = false, bool system_ = false)
+        EventKeyboard(KeyboardKey key_, bool alt_ = false, bool control_ = false, bool shift_ = false, bool system_ = false)
             : key    { key_ }
             , alt    { alt_ }
             , control{ control_ }
@@ -115,16 +115,16 @@ namespace Engine::priv {
         }
     };
     struct EventMouseButton final{ 
-        MouseButton::Button button; 
+        MouseButton button; 
         float x = 0.0f;
         float y = 0.0f;
         EventMouseButton() = default;
-        EventMouseButton(MouseButton::Button button_, float x_, float y_) 
+        EventMouseButton(MouseButton button_, float x_, float y_) 
             : button{ button_ }
             , x{ x_ }
             , y{ y_ }
         {}
-        EventMouseButton(MouseButton::Button button_, Window& window)
+        EventMouseButton(MouseButton button_, Window& window)
             : button{ button_ }
         {
             const auto& m = Engine::getMousePosition(window);
@@ -159,10 +159,10 @@ namespace Engine::priv {
     };
     struct EventJoystickMoved final{ 
         uint32_t            joystickID = 0;
-        JoystickAxis::Axis  axis       = JoystickAxis::Axis::Unknown;
+        JoystickAxis        axis       = JoystickAxis::Unknown;
         float               position   = 0.0f;
         EventJoystickMoved() = default;
-        EventJoystickMoved(uint32_t joystickID_, JoystickAxis::Axis axis_, float position_)
+        EventJoystickMoved(uint32_t joystickID_, JoystickAxis axis_, float position_)
             : joystickID{ joystickID_ }
             , axis{ axis_ }
             , position{ position_ }
