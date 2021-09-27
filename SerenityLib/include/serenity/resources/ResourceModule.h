@@ -16,9 +16,18 @@ namespace Engine::priv {
     class ResourceModule final {
         friend class Engine::priv::ResourceManager;
         private:
-            static std::atomic<uint32_t>                   m_RegisteredResources;
-            std::vector<std::unique_ptr<IResourceVector>>  m_Resources;
-            mutable std::mutex                             m_Mutex;
+            std::vector<IResourceVector*>  m_ResourceVectors;
+            static std::atomic<uint32_t>   m_RegisteredResources;
+            mutable std::mutex             m_Mutex;
+        private:
+            template<class RESOURCE>
+            [[nodiscard]] inline uint32_t getResourceTypeID() const noexcept {
+                return RESOURCE::TYPE_ID - 1;
+            }
+            template<class RESOURCE>
+            [[nodiscard]] inline ResourceVector<RESOURCE>* getResourceVector() noexcept {
+                return static_cast<ResourceVector<RESOURCE>*>(m_ResourceVectors[getResourceTypeID<RESOURCE>()]);
+            }
         public:
             ResourceModule() = default;
             ResourceModule(const ResourceModule&)            = delete;
@@ -26,62 +35,58 @@ namespace Engine::priv {
             ResourceModule(ResourceModule&&) noexcept        = delete;
             ResourceModule& operator=(ResourceModule&&)      = delete;
 
+            ~ResourceModule() {
+                SAFE_DELETE_VECTOR(m_ResourceVectors);
+            }
+
             // Locks the resource module from modifying the underlying resource containers. 
             // It will also reduce the memory footprint of them by calling shrink_to_fit().
-            void lock() noexcept { for (auto& itr : m_Resources) { itr->lock(); } }
+            //void lock() noexcept { for (auto& itr : m_ResourceVectors) { itr->lock(); } }
             // Unlocks the resource module so the underlying resource containers can be modified again.
-            void unlock() noexcept { for (auto& itr : m_Resources) { itr->unlock(); } }
+            //void unlock() noexcept { for (auto& itr : m_ResourceVectors) { itr->unlock(); } }
 
-            [[nodiscard]] inline std::mutex& getMutex(const Handle inHandle) noexcept { return m_Resources[inHandle.type() - 1]->getMutex(); }
+            [[nodiscard]] inline std::mutex& getMutex(const Handle inHandle) noexcept { return m_ResourceVectors[inHandle.type() - 1]->getMutex(); }
 
-            template<class TResource>
+            template<class RESOURCE>
             uint32_t registerResourceTypeID() noexcept {
-                if (TResource::TYPE_ID == 0) {
-                    TResource::TYPE_ID = ++m_RegisteredResources;
-                    m_Resources.emplace_back(std::make_unique<Engine::priv::ResourceVector<TResource>>());
+                if (RESOURCE::TYPE_ID == 0) {
+                    RESOURCE::TYPE_ID = ++m_RegisteredResources;
+                    m_ResourceVectors.push_back(NEW Engine::priv::ResourceVector<RESOURCE>{});
                 }
-                return TResource::TYPE_ID - 1;
+                return RESOURCE::TYPE_ID - 1;
             }
-            template<class TResource> [[nodiscard]] inline uint32_t getResourceTypeID() const noexcept {
-                return TResource::TYPE_ID - 1;
-            }
-            template<typename TResource>
-            [[nodiscard]] LoadedResource<TResource> get(const std::string_view sv) noexcept {
+            template<class RESOURCE>
+            [[nodiscard]] LoadedResource<RESOURCE> get(const std::string_view sv) noexcept {
                 if (sv.empty()) {
                     return {};
                 }
-                const uint32_t typeIndex           = getResourceTypeID<TResource>();
-                LoadedResource<TResource> ret_data = static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->get(sv);
+                LoadedResource<RESOURCE> ret_data = getResourceVector<RESOURCE>()->get(sv);
                 return ret_data;
             }
-            template<typename TResource>
-            [[nodiscard]] Engine::view_ptr<TResource> get(const Handle inHandle) noexcept {
-                const uint32_t typeIndex = getResourceTypeID<TResource>();
-                return static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->get(inHandle);
+            template<class RESOURCE>
+            [[nodiscard]] Engine::view_ptr<RESOURCE> get(const Handle inHandle) noexcept {
+                return getResourceVector<RESOURCE>()->get(inHandle);
             }
-            [[nodiscard]] inline void get(void*& out, const Handle inHandle) const noexcept {
-                if (inHandle.null()) {
-                    out = nullptr;
-                    return;
-                }
-                m_Resources[inHandle.type() - 1]->get(out, inHandle);
+
+            [[nodiscard]] inline void* getVoid(const Handle inHandle) noexcept {
+                return !inHandle.null() ? m_ResourceVectors[inHandle.type() - 1]->getVoid(inHandle) : nullptr;
             }
-            template<typename TResource, typename ... ARGS>
+
+            template<class RESOURCE, class ... ARGS>
             [[nodiscard]] Handle emplace(ARGS&&... args) {
-                const uint32_t typeIndex = registerResourceTypeID<TResource>();
-                const uint32_t index     = static_cast<const uint32_t>(static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->emplace_back(std::forward<ARGS>(args)...));
+                const uint32_t typeIndex = registerResourceTypeID<RESOURCE>();
+                const uint32_t index     = uint32_t(getResourceVector<RESOURCE>()->emplace_back(std::forward<ARGS>(args)...));
                 return Handle( index, 0, typeIndex + 1 );
             }
-            template<typename TResource>
-            [[nodiscard]] Handle push(TResource&& inResource) {
-                const uint32_t typeIndex = registerResourceTypeID<TResource>();
-                const uint32_t index     = (const uint32_t)static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->push_back(std::move(inResource));
+            template<class RESOURCE>
+            [[nodiscard]] Handle push(RESOURCE&& inResource) {
+                const uint32_t typeIndex = registerResourceTypeID<RESOURCE>();
+                const uint32_t index     = uint32_t(getResourceVector<RESOURCE>()->push_back(std::move(inResource)));
                 return Handle( index, 0, typeIndex + 1 );
             }
-            template<typename TResource>
-            [[nodiscard]] std::list<Engine::view_ptr<TResource>> getAllResourcesOfType() {
-                const uint32_t typeIndex = getResourceTypeID<TResource>();
-                return static_cast<ResourceVector<TResource>*>(m_Resources[typeIndex].get())->getAsList();
+            template<class RESOURCE>
+            [[nodiscard]] inline std::list<Engine::view_ptr<RESOURCE>> getAllResourcesOfType() noexcept {
+                return getResourceVector<RESOURCE>()->getAsList();
             }
     };
 };

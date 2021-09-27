@@ -14,35 +14,36 @@ std::vector<glm::vec4> Material::m_MaterialProperities;
 Handle Material::Checkers       = {};
 Handle Material::WhiteShadeless = {};
 
-constexpr std::array<MaterialDefaultPhysicsProperty, MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES { {
-    { 5_uc, 5_uc, 5_uc, 128_uc, 1_uc },                // 0 - water
-    { 8_uc, 8_uc, 8_uc, 246_uc, 1_uc },                // 1 - plastic or glass low
-    { 13_uc, 13_uc, 13_uc, 234_uc, 1_uc },             // 2 - plastic high
-    { 20_uc, 20_uc, 20_uc, 250_uc, 1_uc },             // 3 - glass or ruby high
-    { 44_uc, 44_uc, 44_uc, 250_uc, 1_uc },             // 4 - diamond
-    { 143_uc, 145_uc, 148_uc, 128_uc, 255_uc },        // 5 - iron
-    { 243_uc, 162_uc, 137_uc, 229_uc, 255_uc },        // 6 - copper
-    { 237_uc, 177_uc, 1_uc, 229_uc, 255_uc },          // 7 - gold
-    { 233_uc, 235_uc, 235_uc, 191_uc, 255_uc },        // 8 - aluminium
-    { 242_uc, 237_uc, 224_uc, 240_uc, 255_uc },        // 9 - silver
-    { 1_uc, 1_uc, 2_uc, 115_uc, 1_uc },                // 10 - black leather
-    { 81_uc, 56_uc, 13_uc, 81_uc, 1_uc },              // 11 - yellow paint MERL
-    { 140_uc, 141_uc, 141_uc, 204_uc, 255_uc },        // 12 - chromium
-    { 66_uc, 13_uc, 2_uc, 234_uc, 1_uc },              // 13 - red plastic MERL
-    { 13_uc, 20_uc, 43_uc, 89_uc, 1_uc },              // 14 - blue rubber MERL
-    { 169_uc, 210_uc, 217_uc, 229_uc, 255_uc },        // 15 - zinc
-    { 255_uc, 51_uc, 1_uc, 229_uc, 128_uc },           // 16 - car paint orange
-    { 7_uc, 7_uc, 7_uc, 25_uc, 1_uc },                 // 17 - skin
-    { 11_uc, 11_uc, 11_uc, 204_uc, 1_uc },             // 18 - quartz
-    { 28_uc, 28_uc, 28_uc, 229_uc, 1_uc },             // 19 - crystal
-    { 5_uc, 5_uc, 5_uc, 204_uc, 1_uc },                // 20 - alcohol
-    { 6_uc, 6_uc, 6_uc, 153_uc, 1_uc },                // 21 - milk
-    { 10_uc, 10_uc, 10_uc, 247_uc, 1_uc },             // 22 - glass
-    { 138_uc, 126_uc, 114_uc, 232_uc, 255_uc },        // 23 - titanium
-    { 171_uc, 162_uc, 150_uc, 232_uc, 255_uc },        // 24 - platinum
-    { 168_uc, 155_uc, 134_uc, 242_uc, 255_uc },        // 25 - nickel
-} };
-
+namespace {
+    constexpr std::array<MaterialDefaultPhysicsProperty, MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES{ {
+        { 5_uc, 5_uc, 5_uc, 128_uc, 1_uc },                // 0 - water
+        { 8_uc, 8_uc, 8_uc, 246_uc, 1_uc },                // 1 - plastic or glass low
+        { 13_uc, 13_uc, 13_uc, 234_uc, 1_uc },             // 2 - plastic high
+        { 20_uc, 20_uc, 20_uc, 250_uc, 1_uc },             // 3 - glass or ruby high
+        { 44_uc, 44_uc, 44_uc, 250_uc, 1_uc },             // 4 - diamond
+        { 143_uc, 145_uc, 148_uc, 128_uc, 255_uc },        // 5 - iron
+        { 243_uc, 162_uc, 137_uc, 229_uc, 255_uc },        // 6 - copper
+        { 237_uc, 177_uc, 1_uc, 229_uc, 255_uc },          // 7 - gold
+        { 233_uc, 235_uc, 235_uc, 191_uc, 255_uc },        // 8 - aluminium
+        { 242_uc, 237_uc, 224_uc, 240_uc, 255_uc },        // 9 - silver
+        { 1_uc, 1_uc, 2_uc, 115_uc, 1_uc },                // 10 - black leather
+        { 81_uc, 56_uc, 13_uc, 81_uc, 1_uc },              // 11 - yellow paint MERL
+        { 140_uc, 141_uc, 141_uc, 204_uc, 255_uc },        // 12 - chromium
+        { 66_uc, 13_uc, 2_uc, 234_uc, 1_uc },              // 13 - red plastic MERL
+        { 13_uc, 20_uc, 43_uc, 89_uc, 1_uc },              // 14 - blue rubber MERL
+        { 169_uc, 210_uc, 217_uc, 229_uc, 255_uc },        // 15 - zinc
+        { 255_uc, 51_uc, 1_uc, 229_uc, 128_uc },           // 16 - car paint orange
+        { 7_uc, 7_uc, 7_uc, 25_uc, 1_uc },                 // 17 - skin
+        { 11_uc, 11_uc, 11_uc, 204_uc, 1_uc },             // 18 - quartz
+        { 28_uc, 28_uc, 28_uc, 229_uc, 1_uc },             // 19 - crystal
+        { 5_uc, 5_uc, 5_uc, 204_uc, 1_uc },                // 20 - alcohol
+        { 6_uc, 6_uc, 6_uc, 153_uc, 1_uc },                // 21 - milk
+        { 10_uc, 10_uc, 10_uc, 247_uc, 1_uc },             // 22 - glass
+        { 138_uc, 126_uc, 114_uc, 232_uc, 255_uc },        // 23 - titanium
+        { 171_uc, 162_uc, 150_uc, 232_uc, 255_uc },        // 24 - platinum
+        { 168_uc, 155_uc, 134_uc, 242_uc, 255_uc },        // 25 - nickel
+    } };
+}
 #pragma region Material
 
 Material::Material()

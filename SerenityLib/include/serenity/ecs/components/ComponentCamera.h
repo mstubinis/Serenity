@@ -19,7 +19,7 @@ namespace Engine::priv::Culling {
 
 namespace Engine::priv {
     struct ComponentCamera_Functions final {
-        static void      RebuildProjectionMatrix(ComponentCamera&) noexcept;
+        static void RebuildProjectionMatrix(ComponentCamera&) noexcept;
     };
 };
 class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
@@ -39,8 +39,6 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         glm::mat4                m_ProjectionMatrix  = glm::mat4{ 1.0f };
 
         std::array<glm::vec4, 6> m_FrustumPlanes;
-        glm::vec3                m_Eye               = glm::vec3{ 0.0f };
-        glm::vec3                m_Up                = glm::vec3{ 0.0f, 1.0f, 0.0f };
 
         float                    m_NearPlane         = 0.01f;
         float                    m_FarPlane          = 2000.0f;
@@ -94,7 +92,6 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
 
         [[nodiscard]] inline std::array<glm::vec4, 6>& getFrustrumPlanes() noexcept { return m_FrustumPlanes; }
         [[nodiscard]] inline glm::vec3 getRight() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][0], m_ViewMatrix[1][0], m_ViewMatrix[2][0])); }
-        [[nodiscard]] inline constexpr glm::vec3 getUp() const noexcept { return m_Up; /*normalize later?*/ }
 };
 
 #endif

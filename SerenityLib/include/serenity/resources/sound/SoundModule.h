@@ -28,9 +28,9 @@ namespace Engine::priv {
             std::stack<uint32_t>                       m_FreelistMusics;
             std::vector<std::unique_ptr<SoundQueue>>   m_SoundQueues;
 
-            void updateSoundQueues(Scene& scene, const float dt);
-            void updateSoundEffects(Scene& scene, const float dt);
-            void updateSoundMusic(Scene& scene, const float dt);
+            void updateSoundQueues(Scene&, const float dt);
+            void updateSoundEffects(Scene&, const float dt);
+            void updateSoundMusic(Scene&, const float dt);
         public:
             std::array<SoundEffect, MAX_SOUND_EFFECTS>  m_SoundEffects;
             std::array<SoundMusic, MAX_SOUND_MUSIC>     m_SoundMusics;
@@ -38,17 +38,17 @@ namespace Engine::priv {
             SoundModule();
             ~SoundModule();
 
-            void updateCameraPosition(Scene& scene);
-            void update(Scene& scene, const float dt);
+            void updateCameraPosition(Scene&);
+            void update(Scene&, const float dt);
 
             SoundEffect* getNextFreeEffect();
             SoundMusic*  getNextFreeMusic();
 
-            void setSoundInformation(Handle soundHandle, SoundEffect& soundEffect);
-            void setSoundInformation(Handle soundHandle, SoundMusic& soundMusic);
+            void setSoundInformation(Handle soundHandle, SoundEffect&);
+            void setSoundInformation(Handle soundHandle, SoundMusic&);
     };
 };
-namespace Engine::Sound{
+namespace Engine::Sound {
     SoundQueue*  createQueue(float delay);
     SoundEffect* playEffect(Handle soundHandle, uint32_t numLoops = 1);
     SoundMusic*  playMusic(Handle soundHandle, uint32_t numLoops = 1);

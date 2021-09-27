@@ -23,7 +23,7 @@ void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::Image
     if (imageData.m_InternalFormat.isCompressedType() && mipmap.compressedSize != 0) {
         glCompressedTexImage2D(textureType.toGLType(), mipmap.level, imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, mipmap.compressedSize, &mipmap.pixels[0]);
     }else{
-        glTexImage2D(textureType.toGLType(), mipmap.level, (GLint)imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, imageData.m_PixelFormat, imageData.m_PixelType, &mipmap.pixels[0]);
+        glTexImage2D(textureType.toGLType(), mipmap.level, imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, imageData.m_PixelFormat, imageData.m_PixelType, &mipmap.pixels[0]);
     }
 }
 bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded_struct) {
@@ -206,7 +206,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
 }
 void TextureLoader::LoadTexture2DIntoOpenGL(Texture& texture) {
     Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
-    for (auto& mipmap : texture.m_CPUData.m_ImagesDatas[0].m_Mipmaps) {
+    for (const auto& mipmap : texture.m_CPUData.m_ImagesDatas[0].m_Mipmaps) {
         TextureLoader::ImportIntoOpengl(texture, mipmap, texture.m_CPUData.m_TextureType);
         //TextureLoader::WithdrawPixelsFromOpenGLMemory(texture, 0, mipmap.level);
     }
@@ -216,7 +216,7 @@ void TextureLoader::LoadTexture2DIntoOpenGL(Texture& texture) {
 void TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& texture) {
     Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
     const auto& image = texture.m_CPUData.m_ImagesDatas[0];
-    glTexImage2D(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLint)image.m_InternalFormat, image.m_Mipmaps[0].width, image.m_Mipmaps[0].height, 0, image.m_PixelFormat, image.m_PixelType, nullptr);
+    glTexImage2D(texture.m_CPUData.m_TextureType.toGLType(), 0, image.m_InternalFormat, image.m_Mipmaps[0].width, image.m_Mipmaps[0].height, 0, image.m_PixelFormat, image.m_PixelType, nullptr);
     texture.setFilter(TextureFilter::Linear);
     texture.setWrapping(TextureWrap::ClampToEdge);
 }
@@ -332,11 +332,11 @@ void TextureLoader::Resize(Texture& texture, Engine::priv::FramebufferObject& fb
     }
     const float divisor           = fbo.divisor();
     Engine::Renderer::bindTextureForModification(texture.m_CPUData.m_TextureType, texture.m_TextureAddress);
-    const int w                   = (int)((float)width * divisor);
-    const int h                   = (int)((float)height * divisor);
+    const int w                   = int(float(width) * divisor);
+    const int h                   = int(float(height) * divisor);
     auto& imageData               = texture.m_CPUData.m_ImagesDatas[0];
     imageData.m_Mipmaps[0].width  = w;
     imageData.m_Mipmaps[0].height = h;
 
-    glTexImage2D(texture.m_CPUData.m_TextureType.toGLType(), 0, (GLint)imageData.m_InternalFormat, w, h, 0, imageData.m_PixelFormat, imageData.m_PixelType, NULL);
+    glTexImage2D(texture.m_CPUData.m_TextureType.toGLType(), 0, imageData.m_InternalFormat, w, h, 0, imageData.m_PixelFormat, imageData.m_PixelType, NULL);
 }

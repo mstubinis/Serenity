@@ -20,7 +20,7 @@ ComponentCamera::ComponentCamera(Entity entity, float angleDegrees, float aspect
     , m_Type       { CameraType::Perspective }
 {
     setProjectionMatrix(glm::perspective(m_Angle, m_AspectRatio, m_NearPlane, m_FarPlane));
-    setViewMatrix(glm::lookAt(m_Eye, m_Eye + glm::vec3(0.0f, 0.0f, -1.0f), m_Up));
+    setViewMatrix(glm::lookAt(glm::vec3{ 0.0f }, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3{ 0.0f, 1.0f, 0.0f }));
 }
 ComponentCamera::ComponentCamera(Entity entity, float left, float right, float bottom, float top, float nearPlane, float farPlane) 
     : m_Left     { left }
@@ -32,12 +32,10 @@ ComponentCamera::ComponentCamera(Entity entity, float left, float right, float b
     , m_Type     { CameraType::Orthographic }
 {
     setProjectionMatrix(glm::ortho(m_Left, m_Right, m_Bottom, m_Top, m_NearPlane, m_FarPlane));
-    setViewMatrix(glm::lookAt(m_Eye, m_Eye + glm::vec3(0.0f, 0.0f, -1.0f), m_Up));
+    setViewMatrix(glm::lookAt(glm::vec3{ 0.0f }, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3{ 0.0f, 1.0f, 0.0f }));
 }
 ComponentCamera::ComponentCamera(const ComponentCamera& other) 
-    : m_Eye             { (other.m_Eye) }
-    , m_Up              { (other.m_Up) }
-    , m_Angle           { (other.m_Angle) }
+    : m_Angle           { (other.m_Angle) }
     , m_AspectRatio     { (other.m_AspectRatio) }
     , m_NearPlane       { (other.m_NearPlane) }
     , m_FarPlane        { (other.m_FarPlane) }
@@ -50,8 +48,6 @@ ComponentCamera::ComponentCamera(const ComponentCamera& other)
 {}
 ComponentCamera& ComponentCamera::operator=(const ComponentCamera& other) {
     if (&other != this) {
-        m_Eye              = (other.m_Eye);
-        m_Up               = (other.m_Up);
         m_Angle            = (other.m_Angle);
         m_AspectRatio      = (other.m_AspectRatio);
         m_NearPlane        = (other.m_NearPlane);
@@ -66,9 +62,7 @@ ComponentCamera& ComponentCamera::operator=(const ComponentCamera& other) {
     return *this;
 }
 ComponentCamera::ComponentCamera(ComponentCamera&& other) noexcept 
-    : m_Eye             { std::move(other.m_Eye) }
-    , m_Up              { std::move(other.m_Up) }
-    , m_Angle           { std::move(other.m_Angle) }
+    : m_Angle           { std::move(other.m_Angle) }
     , m_AspectRatio     { std::move(other.m_AspectRatio) }
     , m_NearPlane       { std::move(other.m_NearPlane) }
     , m_FarPlane        { std::move(other.m_FarPlane) }
@@ -80,8 +74,6 @@ ComponentCamera::ComponentCamera(ComponentCamera&& other) noexcept
     , m_Type            { std::move(other.m_Type) }
 {}
 ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
-    m_Eye              = std::move(other.m_Eye);
-    m_Up               = std::move(other.m_Up);
     m_Angle            = std::move(other.m_Angle);
     m_AspectRatio      = std::move(other.m_AspectRatio);
     m_NearPlane        = std::move(other.m_NearPlane);
@@ -108,9 +100,7 @@ void ComponentCamera::setViewMatrix(glm::mat4&& viewMatrix) noexcept {
     m_ViewMatrix = std::move(viewMatrix);
 }
 void ComponentCamera::lookAt(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up) noexcept {
-    m_Eye     = eye;
-    m_Up      = up;
-    setViewMatrix(glm::lookAt(m_Eye, center, m_Up));
+    m_ViewMatrix = glm::lookAt(eye, center, up);
 }
 void ComponentCamera::setAngle(float angleInRadians) noexcept {
 	m_Angle = angleInRadians;

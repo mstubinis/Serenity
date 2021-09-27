@@ -3,54 +3,99 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/Engine_Resources.h>
+#include <glm/gtx/euler_angles.hpp>
 
-CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_FUNCTION = [](const CameraLogicComponent* component, const float dt) {
-    auto& camera          = *static_cast<Camera*>(component->getUserPointer());
-    auto cameraComponent  = camera.getComponent<ComponentCamera>();
-    auto transform        = camera.getComponent<ComponentTransform>();
-};
-CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_NO_GIMBLE_LOCK_FUNCTION = [](const CameraLogicComponent* component, const float dt) {
-    auto& camera          = *static_cast<Camera*>(component->getUserPointer());
-    auto cameraComponent  = camera.getComponent<ComponentCamera>();
-    auto transform        = camera.getComponent<ComponentTransform>();
-    const auto& mouse     = Engine::getMouseDifference();
+namespace {
+    CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_FUNCTION = [](const CameraLogicComponent* component, const float dt) {
+        auto& camera           = *static_cast<Camera*>(component->getUserPointer());
+        auto cameraComponent   = camera.getComponent<ComponentCamera>();
+        auto transform         = camera.getComponent<ComponentTransform>();
+        const auto& mouse      = Engine::getMouseDifference();
 
-    const auto rotSpeedX   = (mouse.x * dt) * 0.4f;
-    const auto rotSpeedY   = -(mouse.y * dt) * 0.4f;
-    auto transSpeed        = static_cast<decimal>(5.0f * dt);
-    const auto transSpeed2 = static_cast<decimal>(5.0f * dt);
+        const auto rotSpeedX   = (mouse.x * dt) * 0.4f;
+        const auto rotSpeedY   = -(mouse.y * dt) * 0.4f;
+        auto transSpeed        = static_cast<decimal>(5.0f * dt);
+        const auto transSpeed2 = static_cast<decimal>(5.0f * dt);
 
-    if (Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift)) {
-        transSpeed *= static_cast<decimal>(6.0);
-    }
-
-    if (Engine::isMouseButtonDown(MouseButton::Left)) {
-        if (std::abs(mouse.x) > 0.05f) {
-            transform->rotate(0.0f, rotSpeedX, 0.0f);
+        if (Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift)) {
+            transSpeed *= static_cast<decimal>(6.0);
         }
-        if (std::abs(mouse.y) > 0.05f) {
-            transform->rotate(rotSpeedY, 0.0f, 0.0f);
+
+        if (Engine::isKeyDown(KeyboardKey::W)) {
+            transform->translate(0, 0, -transSpeed);
+        } else if (Engine::isKeyDown(KeyboardKey::S)) {
+            transform->translate(0, 0, transSpeed);
         }
-    }
-    if (Engine::isKeyDown(KeyboardKey::W)) {
-        transform->translate(0, 0, -transSpeed);
-    }else if (Engine::isKeyDown(KeyboardKey::S)) {
-        transform->translate(0, 0, transSpeed);
-    }
-    if (Engine::isKeyDown(KeyboardKey::A)) {
-        transform->translate(-transSpeed, 0, 0);
-    }else if (Engine::isKeyDown(KeyboardKey::D)) {
-        transform->translate(transSpeed, 0, 0);
-    }
+        if (Engine::isKeyDown(KeyboardKey::A)) {
+            transform->translate(-transSpeed, 0, 0);
+        } else if (Engine::isKeyDown(KeyboardKey::D)) {
+            transform->translate(transSpeed, 0, 0);
+        }
 
-    if (Engine::isKeyDown(KeyboardKey::Q)) {
-        transform->rotate(0.0f, 0.0f, static_cast<float>(transSpeed2) * 0.5f);
-    }else if (Engine::isKeyDown(KeyboardKey::E)) {
-        transform->rotate(0.0f, 0.0f, static_cast<float>(-transSpeed2) * 0.5f);
-    }
-    cameraComponent->lookAt(transform->getWorldPosition(), transform->getWorldPosition() + transform->getForward(), transform->getUp());
-};
 
+        if (Engine::isMouseButtonDown(MouseButton::Left)) {
+            if (std::abs(mouse.x) > 0.05f) {
+                camera.m_UserFloats.x += glm::degrees(rotSpeedX);
+            }
+            if (std::abs(mouse.y) > 0.05f) {
+                camera.m_UserFloats.y += glm::degrees(rotSpeedY);
+            }
+        }
+        if (camera.m_UserFloats.y > 89.0f) {
+            camera.m_UserFloats.y = 89.0f;
+        } else if (camera.m_UserFloats.y < -89.0f) {
+            camera.m_UserFloats.y = -89.0f;
+        }
+        const glm::mat4 rotMatrix   = glm::eulerAngleXYZ(glm::radians(camera.m_UserFloats.y), glm::radians(camera.m_UserFloats.x), glm::radians(0.0f));
+        const glm::vec3 fwd         = -glm::vec3(rotMatrix[0][2], rotMatrix[1][2], rotMatrix[2][2]);
+        const glm::mat4 viewMatrix  = glm::lookAt(transform->getWorldPosition(), transform->getWorldPosition() + fwd, glm_vec3{ 0.0f, 1.0f, 0.0f });
+        const glm::quat orientation = glm::conjugate(glm::toQuat(viewMatrix));
+
+        transform->setRotation(orientation);
+        cameraComponent->setViewMatrix(viewMatrix);
+    };
+    CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_NO_GIMBLE_LOCK_FUNCTION = [](const CameraLogicComponent* component, const float dt) {
+        auto& camera           = *static_cast<Camera*>(component->getUserPointer());
+        auto cameraComponent   = camera.getComponent<ComponentCamera>();
+        auto transform         = camera.getComponent<ComponentTransform>();
+        const auto& mouse      = Engine::getMouseDifference();
+
+        const auto rotSpeedX   = (mouse.x * dt) * 0.4f;
+        const auto rotSpeedY   = -(mouse.y * dt) * 0.4f;
+        auto transSpeed        = static_cast<decimal>(5.0f * dt);
+        const auto transSpeed2 = static_cast<decimal>(5.0f * dt);
+
+        if (Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift)) {
+            transSpeed *= static_cast<decimal>(6.0);
+        }
+
+        if (Engine::isKeyDown(KeyboardKey::W)) {
+            transform->translate(0, 0, -transSpeed);
+        } else if (Engine::isKeyDown(KeyboardKey::S)) {
+            transform->translate(0, 0, transSpeed);
+        }
+        if (Engine::isKeyDown(KeyboardKey::A)) {
+            transform->translate(-transSpeed, 0, 0);
+        } else if (Engine::isKeyDown(KeyboardKey::D)) {
+            transform->translate(transSpeed, 0, 0);
+        }
+
+        if (Engine::isMouseButtonDown(MouseButton::Left)) {
+            if (std::abs(mouse.x) > 0.05f) {
+                transform->rotateYaw(rotSpeedX);
+            }
+            if (std::abs(mouse.y) > 0.05f) {
+                transform->rotatePitch(rotSpeedY);
+            }
+        }
+        if (Engine::isKeyDown(KeyboardKey::Q)) {
+            transform->rotateRoll(static_cast<float>(transSpeed2) * 0.5f);
+        } else if (Engine::isKeyDown(KeyboardKey::E)) {
+            transform->rotateRoll(static_cast<float>(-transSpeed2) * 0.5f);
+        }
+        cameraComponent->lookAt(transform->getWorldPosition(), transform->getWorldPosition() + transform->getForward(), transform->getUp());
+    };
+}
 
 Camera::Camera(Scene* scene, float angle, float aspectRatio, float Near, float Far)
     : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
@@ -83,10 +128,22 @@ Camera::Camera(Scene* scene, float left, float right, float bottom, float top, f
     auto logic      = getComponent<CameraLogicComponent>();
     auto transform  = getComponent<ComponentTransform>();
 
-    camera->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + glm::vec3(0.0f, 0.0f, -1.0f), camera->getUp());
+    camera->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3{ 0.0f, 1.0f, 0.0f });
     logic->setUserPointer(this);
 }
 Camera::~Camera() { 
+}
+void Camera::setUpdateFunction(CameraLogicType logicType) noexcept {
+    switch (logicType) {
+        case CameraLogicType::FPS_Mouselook: {
+            setUpdateFunction(CAMERA_DEFAULT_MOUSELOOK_FUNCTION);
+            break;
+        }
+        case CameraLogicType::SpaceSimulator: {
+            setUpdateFunction(CAMERA_DEFAULT_MOUSELOOK_NO_GIMBLE_LOCK_FUNCTION);
+            break;
+        }
+    }
 }
 void Camera::setProjectionMatrix(const glm::mat4& projectonMatrix) noexcept {
     getComponent<ComponentCamera>()->setProjectionMatrix(projectonMatrix);
@@ -151,9 +208,6 @@ glm::vec3 Camera::getViewVector() const noexcept {
 glm::vec3 Camera::getRight() const noexcept {
     return getComponent<ComponentCamera>()->getRight(); 
 }
-glm::vec3 Camera::getUp() const noexcept {
-    return getComponent<ComponentCamera>()->getUp(); 
-}
 decimal Camera::getDistance(Entity otherEntity) const noexcept {
     auto otherEntityBody = otherEntity.getComponent<ComponentTransform>();
     return glm::distance(otherEntityBody->getPosition(), getPosition());
@@ -178,12 +232,12 @@ decimal Camera::getDistanceSquared(const glm_vec3& otherPosition, const glm_vec3
 bool Camera::rayIntersectSphere(Entity entity) const noexcept {
     auto entityTransform = entity.getComponent<ComponentTransform>();
     auto entityModel     = entity.getComponent<ComponentModel>();
-    float entityRadius   = 0.0f;
-    if (entityModel) {
-        entityRadius     = entityModel->getRadius();
-    }
+    float entityRadius   = entityModel ? entityModel->getRadius() : 0.0f;
     if (!entityTransform) {
         return false;
     }
     return Engine::Math::rayIntersectSphere(entityTransform->getPosition(), entityRadius, getPosition(), getViewVector());
+}
+bool Camera::rayIntersectSphere(const glm::vec3& position, float radius) const noexcept {
+    return Engine::Math::rayIntersectSphere(position, radius, getPosition(), getViewVector());
 }

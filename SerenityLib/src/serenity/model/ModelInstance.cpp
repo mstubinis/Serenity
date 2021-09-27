@@ -181,12 +181,12 @@ void ModelInstance::setScale(float x, float y, float z){
     m_Scale = glm::vec3(x, y, z);
     internal_update_model_matrix(recalcRadius);
 }
-void ModelInstance::translate(float x, float y, float z){
+void ModelInstance::translate(float x, float y, float z) {
     m_Position += glm::vec3(x, y, z);
     internal_update_model_matrix(false);
 }
-void ModelInstance::rotate(float x, float y, float z){
-    Math::rotate(m_Orientation, x, y, z);
+void ModelInstance::rotate(float x, float y, float z, bool local){
+    Math::rotate(m_Orientation, x, y, z, local);
     internal_update_model_matrix(false);
 }
 

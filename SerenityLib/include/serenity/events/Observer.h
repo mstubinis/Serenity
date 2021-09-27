@@ -14,12 +14,10 @@ Inherit from this class to expose your class to events and event dispatching, sp
 */
 class Observer {
     public:
-        Observer() = default;
-        virtual ~Observer() = default;
-
         void registerEvent(EventType) noexcept;
         void unregisterEvent(EventType) noexcept;
         void unregisterEventImmediate(EventType) noexcept;
+
         [[nodiscard]] bool isRegistered(EventType) const noexcept;
         
         virtual void onEvent(const Event&) {}

@@ -8,28 +8,22 @@
 #include <serenity/system/Macros.h>
 #include <mutex>
 
-class SoundQueue;
 namespace Engine::priv {
     class ResourceModule;
 };
 
 class Handle final {
-    friend class ::SoundQueue;
     friend class Engine::priv::ResourceModule;
     private:
         void* internal_get_base() const noexcept;
         void* internal_get_base_thread_safe() noexcept;
 
-        uint32_t m_Index   : 23;
-        uint32_t m_Version : 3;
-        uint32_t m_Type    : 6;
+        uint32_t m_Index   : 23 = 0;
+        uint32_t m_Version : 3  = 0;
+        uint32_t m_Type    : 6  = 0;
     public:
-        constexpr Handle()
-            : m_Index{ 0 }
-            , m_Version{ 0 }
-            , m_Type{ 0 }
-        {}
-        constexpr Handle(const uint32_t index, const uint32_t version, const uint32_t type)
+        constexpr Handle() noexcept = default;
+        constexpr Handle(const uint32_t index, const uint32_t version, const uint32_t type) noexcept
             : m_Index{ index }
             , m_Version{ version }
             , m_Type { type }
@@ -40,36 +34,27 @@ class Handle final {
         [[nodiscard]] inline constexpr uint32_t type() const noexcept { return m_Type; }
         inline explicit constexpr operator uint32_t() const noexcept { return m_Type << 27 | m_Version << 12 | m_Index; }
         inline constexpr operator bool() const noexcept { return !null(); }
-
-        inline constexpr bool operator<(const Handle& other) const noexcept {
-            return m_Index < other.m_Index;
-        }
-        inline constexpr bool operator>(const Handle& other) const noexcept {
-            return m_Index > other.m_Index;
-        }
-        inline constexpr bool operator<=(const Handle& other) const noexcept {
-            return m_Index <= other.m_Index;
-        }
-        inline constexpr bool operator>=(const Handle& other) const noexcept {
-            return m_Index >= other.m_Index;
-        }
-        inline constexpr bool operator==(const Handle& other) const noexcept { 
-            return (m_Index == other.m_Index && m_Version == other.m_Version && m_Type == other.m_Type);
-        }
-
+        
+        inline constexpr bool operator<(const Handle& other) const noexcept { return m_Index < other.m_Index; }
+        inline constexpr bool operator>(const Handle& other) const noexcept { return m_Index > other.m_Index; }
+        inline constexpr bool operator<=(const Handle& other) const noexcept { return m_Index <= other.m_Index; }
+        inline constexpr bool operator>=(const Handle& other) const noexcept { return m_Index >= other.m_Index; }
+        inline constexpr bool operator==(const Handle& other) const noexcept {  return (m_Index == other.m_Index && m_Version == other.m_Version && m_Type == other.m_Type); }
+        
         [[nodiscard]] inline constexpr bool null() const noexcept { return (m_Index == 0 && m_Version == 0 && m_Type == 0); }
 
-        template<typename TResource> [[nodiscard]] inline operator TResource*() const noexcept { return get<TResource>(); }
+        template<class RESOURCE> 
+        [[nodiscard]] inline operator RESOURCE*() const noexcept { return get<RESOURCE>(); }
 
-        template<typename TResource> 
-        [[nodiscard]] inline TResource* get() const noexcept {
-            TResource* ret = static_cast<TResource*>(internal_get_base());
+        template<class RESOURCE>
+        [[nodiscard]] inline RESOURCE* get() const noexcept {
+            RESOURCE* ret = static_cast<RESOURCE*>(internal_get_base());
             ASSERT((ret != nullptr && !null()) || (ret == nullptr && null()), __FUNCTION__ << "(): a non-null handle returned a null resource!");
             return ret;
         }
-        template<typename TResource>
-        [[nodiscard]] inline TResource* getThreadSafe() noexcept {
-            TResource* ret = static_cast<TResource*>(internal_get_base_thread_safe());
+        template<class RESOURCE>
+        [[nodiscard]] inline RESOURCE* getThreadSafe() noexcept {
+            RESOURCE* ret = static_cast<RESOURCE*>(internal_get_base_thread_safe());
             ASSERT((ret != nullptr && !null()) || (ret == nullptr && null()), __FUNCTION__ << "(): a non-null handle returned a null resource!");
             return ret;
         }
@@ -82,20 +67,19 @@ namespace std {
     struct hash<Handle> {
         std::size_t operator()(const Handle& handle) const noexcept {
             using std::hash;
-            return ((hash<uint32_t>()(handle.index())
-                ^ (hash<uint32_t>()(handle.version()) << 1)) >> 1)
-                ^ (hash<uint32_t>()(handle.type()) << 1);
+            return ((hash<uint32_t>()(handle.index()) ^ (hash<uint32_t>()(handle.version()) << 1)) >> 1) ^ (hash<uint32_t>()(handle.type()) << 1);
         }
     };
 };
 
-template<class TResource>
+template<class RESOURCE>
 struct LoadedResource final {
-    Engine::view_ptr<TResource> m_Resource = nullptr;
-    Handle                      m_Handle   = Handle{};
+    Engine::view_ptr<RESOURCE> m_Resource = nullptr;
+    Handle                     m_Handle   = {};
 
-    operator Handle() const noexcept { return m_Handle; }
-    explicit operator TResource&() const noexcept { return *m_Resource; }
+    inline operator Handle() const noexcept { return m_Handle; }
+    inline operator RESOURCE&() const noexcept { return *m_Resource; }
+    inline operator RESOURCE*() const noexcept { return m_Resource; }
 };
 
 #endif

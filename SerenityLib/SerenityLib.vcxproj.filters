@@ -991,9 +991,6 @@
     <ClInclude Include="include\serenity\resources\Handle.h">
       <Filter>Header Files\Engine\Core\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\resources\IResourceVector.h">
-      <Filter>Header Files\Engine\Core\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="include\serenity\resources\Resource.h">
       <Filter>Header Files\Engine\Core\Resources</Filter>
     </ClInclude>

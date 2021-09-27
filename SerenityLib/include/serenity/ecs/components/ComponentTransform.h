@@ -77,8 +77,13 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
         inline void translate(decimal translation, bool local = true) noexcept { translate(translation, translation, translation, local); }
         void translate(decimal x, decimal y, decimal z, bool local = true);
 
-        inline void rotate(const glm::vec3& rotation, bool local = true) noexcept { rotate(rotation.x, rotation.y, rotation.z, local); }
+        inline void rotate(const glm::vec3& rotation_radians, bool local = true) noexcept { rotate(rotation_radians.x, rotation_radians.y, rotation_radians.z, local); }
         void rotate(float pitch_radians, float yaw_radians, float roll_radians, bool local = true);
+
+
+        void rotatePitch(float pitch_radians, bool local = true);
+        void rotateYaw(float yaw_radians, bool local = true);
+        void rotateRoll(float roll_radians, bool local = true);
 
         void scale(float x, float y, float z);
         inline void scale(const glm::vec3& scaleAmount) noexcept { scale(scaleAmount.x, scaleAmount.y, scaleAmount.z); }

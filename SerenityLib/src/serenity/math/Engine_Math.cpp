@@ -139,20 +139,51 @@ void Math::setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position
 }
 void Math::setRotation(glm::quat& orientation, float pitch, float yaw, float roll) noexcept {
     if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation =               (glm::angleAxis(pitch, glm::vec3{ -1.0f, 0.0f, 0.0f }));   //pitch
+        orientation =  glm::angleAxis(pitch, glm::vec3{ -1.0f, 0.0f, 0.0f });
     if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3{ 0.0f, -1.0f, 0.0f }));   //yaw
+        orientation *= glm::angleAxis(yaw,   glm::vec3{ 0.0f, -1.0f, 0.0f });
     if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll,  glm::vec3{ 0.0f, 0.0f, 1.0f }));   //roll
+        orientation *= glm::angleAxis(roll,  glm::vec3{ 0.0f, 0.0f, 1.0f });
 }
-void Math::rotate(glm::quat& orientation, float pitch, float yaw, float roll) noexcept {
-    if (abs(pitch) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(pitch, glm::vec3{ -1.0f, 0.0f, 0.0f }));   //pitch
-    if (abs(yaw) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(yaw,   glm::vec3{ 0.0f, -1.0f, 0.0f }));   //yaw
-    if (abs(roll) > ROTATION_THRESHOLD)
-        orientation = orientation * (glm::angleAxis(roll,  glm::vec3{ 0.0f, 0.0f, 1.0f }));   //roll
+void Math::rotate(glm::quat& orientation, float pitch, float yaw, float roll, bool local) noexcept {
+    if (local) {
+        if (abs(pitch) > ROTATION_THRESHOLD)
+            orientation *= glm::angleAxis(pitch, glm::vec3{ -1.0f, 0.0f, 0.0f });
+        if (abs(yaw) > ROTATION_THRESHOLD)
+            orientation *= glm::angleAxis(yaw, glm::vec3{ 0.0f, -1.0f, 0.0f });
+        if (abs(roll) > ROTATION_THRESHOLD)
+            orientation *= glm::angleAxis(roll, glm::vec3{ 0.0f, 0.0f, 1.0f });
+    } else {
+        if (abs(yaw) > ROTATION_THRESHOLD)
+            orientation = glm::angleAxis(yaw, glm::vec3{ 0.0f, -1.0f, 0.0f }) * orientation;
+        if (abs(pitch) > ROTATION_THRESHOLD)
+            orientation = glm::angleAxis(pitch, glm::vec3{ -1.0f, 0.0f, 0.0f }) * orientation;
+        if (abs(roll) > ROTATION_THRESHOLD)
+            orientation = glm::angleAxis(roll, glm::vec3{ 0.0f, 0.0f, 1.0f }) * orientation;
+    }
 }
+void Math::rotatePitch(glm::quat& orientation, float pitch, bool local) noexcept {
+    if (local) {
+        if (abs(pitch) > ROTATION_THRESHOLD) orientation *= glm::angleAxis(pitch, glm::vec3{ -1.0f, 0.0f, 0.0f });
+    } else {
+        if (abs(pitch) > ROTATION_THRESHOLD) orientation = glm::angleAxis(pitch, glm::vec3{ -1.0f, 0.0f, 0.0f }) * orientation;
+    }
+}
+void Math::rotateYaw(glm::quat& orientation, float yaw, bool local) noexcept {
+    if (local) {
+        if (abs(yaw) > ROTATION_THRESHOLD) orientation *= glm::angleAxis(yaw, glm::vec3{ 0.0f, -1.0f, 0.0f });
+    } else {
+        if (abs(yaw) > ROTATION_THRESHOLD) orientation = glm::angleAxis(yaw, glm::vec3{ 0.0f, -1.0f, 0.0f }) * orientation;
+    }
+}
+void Math::rotateRoll(glm::quat& orientation, float roll, bool local) noexcept {
+    if (local) {
+        if (abs(roll) > ROTATION_THRESHOLD) orientation *= glm::angleAxis(roll, glm::vec3{ 0.0f, 0.0f, 1.0f });
+    } else {
+        if (abs(roll) > ROTATION_THRESHOLD) orientation = glm::angleAxis(roll, glm::vec3{ 0.0f, 0.0f, 1.0f }) * orientation;
+    }
+}
+
 glm::vec2 Math::rotate2DPoint(const glm::vec2& point, float angle, const glm::vec2& origin) {
     float s = glm::sin(angle);
     float c = glm::cos(angle);

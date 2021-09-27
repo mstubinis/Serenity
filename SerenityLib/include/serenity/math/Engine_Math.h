@@ -65,7 +65,10 @@ namespace Engine::Math {
     [[nodiscard]] glm::vec3 direction(const glm::vec3& eye, const glm::vec3& target);
 
     void translate(const btRigidBody&, btVector3&, bool local) noexcept;
-    void rotate(glm::quat& orientation, float pitch, float yaw, float roll) noexcept;
+    void rotate(glm::quat& orientation, float pitch, float yaw, float roll, bool local) noexcept;
+    void rotatePitch(glm::quat& orientation, float pitch, bool local) noexcept;
+    void rotateYaw(glm::quat& orientation, float yaw, bool local) noexcept;
+    void rotateRoll(glm::quat& orientation, float roll, bool local) noexcept;
     void setRotation(glm::quat& orientation, float pitch, float yaw, float roll) noexcept;
     void setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position, const glm::quat& rotation, const glm::vec3& scale) noexcept;
     void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) noexcept;

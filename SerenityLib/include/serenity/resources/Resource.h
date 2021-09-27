@@ -12,9 +12,9 @@ class ResourceBaseClass {
         ResourceType   m_ResourceType = ResourceType::Unknown;
         bool           m_IsLoaded     = false;
     public:
-        ResourceBaseClass() = default;
-        ResourceBaseClass(ResourceType type);
-        ResourceBaseClass(ResourceType type, std::string_view name);
+        ResourceBaseClass() noexcept = default;
+        ResourceBaseClass(ResourceType) noexcept;
+        ResourceBaseClass(ResourceType, std::string_view name) noexcept;
 
         ResourceBaseClass(const ResourceBaseClass&)                 = delete;
         ResourceBaseClass& operator=(const ResourceBaseClass&)      = delete;
@@ -37,11 +37,11 @@ class Resource : public ResourceBaseClass {
         //static inline std::atomic<uint32_t> TYPE_ID = 0;
         static inline uint32_t TYPE_ID = 0;
     public:
-        Resource() = default;
-        Resource(ResourceType type) 
+        Resource() noexcept = default;
+        Resource(ResourceType type) noexcept
             : ResourceBaseClass { type }
         {}
-        Resource(ResourceType type, std::string_view name) 
+        Resource(ResourceType type, std::string_view name) noexcept
             : ResourceBaseClass { type, name }
         {}
 

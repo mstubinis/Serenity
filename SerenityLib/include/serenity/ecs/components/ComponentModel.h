@@ -7,8 +7,10 @@ class  ShaderProgram;
 class  Mesh;
 class  Material;
 class  ComponentModel;
+class  ComponentTransform;
 class  ComponentCamera;
 class  ModelInstanceHandle;
+class  Camera;
 namespace Engine::priv {
     class  EditorWindowScene;
 }
@@ -76,7 +78,8 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
         void setModelMaterial(Handle material, size_t index, RenderStage = RenderStage::GeometryOpaque);
         void setModelShaderProgram(Handle shaderProgram, size_t index, RenderStage = RenderStage::GeometryOpaque);
 
-        [[nodiscard]] bool rayIntersectSphere(const ComponentCamera& camera) const noexcept;
+        [[nodiscard]] bool rayIntersectSphere(const ComponentTransform& cameraTransform) const noexcept;
+        [[nodiscard]] bool rayIntersectSphere(const Camera&) const noexcept;
 
         void setUserPointer(void* UserPointer) noexcept;
 

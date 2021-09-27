@@ -4,42 +4,60 @@
 
 #include <cstdint>
 
+#pragma region OPERATING SYSTEMS
+#if defined(_WIN32)
+    #define ENGINE_WINDOWS
+#elif defined(__APPLE__) || defined(__MACH__)
+    #define ENGINE_APPLE
+    #define ENGINE_MACINTOSH
+    #define ENGINE_OSX
+#elif defined(__linux__) || defined(__linux )
+    #define ENGINE_LINUX
+#elif defined(__FreeBSD__)
+    #define ENGINE_FREE_BSD
+#elif defined(__ANDROID__)
+    #define ENGINE_ANDROID
+#else
+
+#endif
+#pragma endregion
+
 #ifndef ENGINE_PRODUCTION
-#include <iostream>
+    #include <iostream>
 #endif
 
 #ifndef ENGINE_FIXED_TIMESTEP_VALUE
-#define ENGINE_FIXED_TIMESTEP_VALUE 0.01666666666666666666f
+    #define ENGINE_FIXED_TIMESTEP_VALUE 0.01666666666666666666f
 #endif
 
 #ifndef ENGINE_FIXED_TIMESTEP_VALUE_D
-#define ENGINE_FIXED_TIMESTEP_VALUE_D 0.01666666666666666666
+    #define ENGINE_FIXED_TIMESTEP_VALUE_D 0.01666666666666666666
 #endif
 
 #ifdef ENGINE_USE_INLINE
-#define INLINE inline
+    #define INLINE inline
 #else
-#define INLINE
+    #define INLINE
 #endif
 
 #ifdef ENGINE_USE_NOEXCEPT
-#define NOEXCEPT noexcept
+    #define NOEXCEPT noexcept
 #else
-#define NOEXCEPT
+    #define NOEXCEPT
 #endif
 
 #ifdef ENGINE_USE_CONSTEXPR
-#define constexpr constexpr
+    #define CONSTEXPR constexpr
 #else
-#define CONSTEXPR
+    #define CONSTEXPR
 #endif
 
 #ifdef ENGINE_USE_LIKELY
-#define LIKELY [[likely]]
-#define UNLIKELY [[unlikely]]
+    #define LIKELY [[likely]]
+    #define UNLIKELY [[unlikely]]
 #else
-#define LIKELY
-#define UNLIKELY
+    #define LIKELY
+    #define UNLIKELY
 #endif
 
 #if defined(ENGINE_PRODUCTION)
@@ -53,29 +71,29 @@
 //#define ENGINE_FORCE_PHYSICS_DEBUG_DRAW //this will force the renderer to output physics debugging info regardless if the build is debug or release
 
 #if defined(__AVX2__) || defined( __AVX__ ) || (defined(_M_AMD64) || defined(_M_X64)) || _M_IX86_FP || defined(__SSE__) || defined(__SSE2__) || defined(__SSE3__) || defined(__SSE4_1__)
-#define ENGINE_SIMD_SUPPORTED
+    #define ENGINE_SIMD_SUPPORTED
 #endif
 
 
 
 #if defined(__clang__)
-#define DEBUG_BREAK() __builtin_debugtrap()
+    #define DEBUG_BREAK() __builtin_debugtrap()
 #elif defined(__GNUC__) || defined(__GNUG__)
-#define DEBUG_BREAK() __builtin_trap()
+    #define DEBUG_BREAK() __builtin_trap()
 #elif defined(_MSC_VER) || defined(_MSC_FULL_VER)
-#define DEBUG_BREAK() __debugbreak()
+    #define DEBUG_BREAK() __debugbreak()
 #else
-#include <signal.h>
-#if defined(SIGTRAP)
-#define DEBUG_BREAK() raise(SIGTRAP)
-#else
-#define DEBUG_BREAK() raise(SIGABRT)
-#endif
+    #include <signal.h>
+    #if defined(SIGTRAP)
+        #define DEBUG_BREAK() raise(SIGTRAP)
+    #else
+        #define DEBUG_BREAK() raise(SIGABRT)
+    #endif
 #endif
 
 
 #if defined(ENGINE_PRODUCTION)
-#define ASSERT(condition, message) ((void)0)
+    #define ASSERT(condition, message) ((void)0)
 #else
 #define ASSERT(condition, message) \
     do { \
@@ -91,17 +109,17 @@
 
 #if _WIN32 || _WIN64
 #if _WIN64
-#define ENVIRONMENT64
+    #define ENVIRONMENT64
 #else
-#define ENVIRONMENT32
+    #define ENVIRONMENT32
 #endif
 #endif
 
 #if __GNUC__
 #if __x86_64__ || __ppc64__
-#define ENVIRONMENT64
+    #define ENVIRONMENT64
 #else
-#define ENVIRONMENT32
+    #define ENVIRONMENT32
 #endif
 #endif
 
@@ -116,11 +134,11 @@
 #if (defined(_DEBUG) && !defined(ENVIRONMENT32)) || defined(_CRTDBG_MAP_ALLOC)
 
 #ifndef BT_DEBUG_MEMORY_ALLOCATIONS
-#define BT_DEBUG_MEMORY_ALLOCATIONS
+    #define BT_DEBUG_MEMORY_ALLOCATIONS
 #endif
 
 #ifndef _CRTDBG_MAP_ALLOC
-#define _CRTDBG_MAP_ALLOC
+    #define _CRTDBG_MAP_ALLOC
 #endif
 
 // Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the allocations to be of _CLIENT_BLOCK type

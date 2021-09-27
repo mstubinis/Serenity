@@ -23,6 +23,10 @@ namespace Engine::priv {
             [[nodiscard]] bool isKeyDownOnce(KeyboardKey key) noexcept;
             [[nodiscard]] bool isKeyDownOnce(KeyboardKey key1, KeyboardKey key2) noexcept;
             [[nodiscard]] bool isKeyDownOnce(KeyboardKey key1, KeyboardKey key2, KeyboardKey key3) noexcept;
+
+            bool isCapsLockOn() const;
+            bool isScrollLockOn() const;
+            bool isNumLockOn() const;
     };
 }
 

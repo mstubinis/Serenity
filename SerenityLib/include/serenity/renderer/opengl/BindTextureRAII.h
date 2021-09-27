@@ -34,5 +34,4 @@ namespace Engine::priv {
             ~OpenGLBindTextureRAII();
     };
 }
-
 #endif

@@ -80,8 +80,19 @@ void ComponentTransform::translate(decimal x, decimal y, decimal z, bool local) 
     ComponentTransform::setPosition(m_Position + offset);
 }
 void ComponentTransform::rotate(float pitch, float yaw, float roll, bool local) {
-    //TODO: implement local parameter
-    Engine::Math::rotate(m_Rotation, pitch, yaw, roll);
+    Engine::Math::rotate(m_Rotation, pitch, yaw, roll, local);
+    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+}
+void ComponentTransform::rotatePitch(float pitch, bool local) {
+    Engine::Math::rotatePitch(m_Rotation, pitch, local);
+    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+}
+void ComponentTransform::rotateYaw(float yaw, bool local) {
+    Engine::Math::rotateYaw(m_Rotation, yaw, local);
+    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+}
+void ComponentTransform::rotateRoll(float roll, bool local) {
+    Engine::Math::rotateRoll(m_Rotation, roll, local);
     Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
 }
 void ComponentTransform::scale(float x, float y, float z) {
@@ -166,7 +177,7 @@ ScreenBoxCoordinates ComponentTransform::getScreenBoxCoordinates(float minOffset
     const auto center2D     = glm::vec2{ center2DRes.x, center2DRes.y };
     if (model) {
         radius = model->getRadius();
-    }else{
+    } else {
         ret.topLeft         = center2D;
         ret.topRight        = center2D;
         ret.bottomLeft      = center2D;
@@ -175,8 +186,8 @@ ScreenBoxCoordinates ComponentTransform::getScreenBoxCoordinates(float minOffset
         return ret;
     }
     auto& cam               = *Engine::Resources::getCurrentScene()->getActiveCamera();
-    const auto camvectest   = cam.getUp();   
-    const auto  testRes     = Engine::Math::getScreenCoordinates(worldPos + (camvectest * radius), camera, false);
+    const auto camvectest   = cam.getComponent<ComponentTransform>()->getUp();
+    const auto testRes      = Engine::Math::getScreenCoordinates(worldPos + (camvectest * radius), camera, false);
     const auto test         = glm::vec2{ testRes.x, testRes.y };
     const auto radius2D     = glm::max(minOffset, glm::distance(test, center2D));
     const auto yPlus        = center2D.y + radius2D;

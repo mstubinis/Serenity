@@ -54,6 +54,15 @@ bool Engine::isKeyDownOnce(KeyboardKey first, KeyboardKey second, KeyboardKey th
 bool Engine::isKeyUp(KeyboardKey key) {
     return !Engine::isKeyDown(key);
 }
+bool Engine::isCapsLockOn() {
+    return EVENT_MODULE->m_KeyboardModule.isCapsLockOn();
+}
+bool Engine::isNumLockOn() {
+    return EVENT_MODULE->m_KeyboardModule.isNumLockOn();
+}
+bool Engine::isScrollLockOn() {
+    return EVENT_MODULE->m_KeyboardModule.isScrollLockOn();
+}
 
 #pragma endregion
 

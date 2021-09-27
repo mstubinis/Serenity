@@ -175,7 +175,7 @@ class ModelInstance final : public Observer {
 
         void translate(float x, float y, float z);
 
-        void rotate(float pitch, float yaw, float roll);
+        void rotate(float pitch, float yaw, float roll, bool local = true);
 
         inline void setScale(float scale) noexcept { setScale(scale, scale, scale); }
         inline void scale(float x, float y, float z) noexcept { setScale(x + m_Scale.x, y + m_Scale.y, z + m_Scale.z); }

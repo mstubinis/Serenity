@@ -4,7 +4,7 @@
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <ft2build.h>
 #include <freetype/freetype.h> //can be replaced with #include FT_FREETYPE_H
@@ -12,6 +12,12 @@
 #include <SFML/Graphics/Image.hpp>
 
 #include <sstream>
+
+namespace {
+    auto& getFromRowCol(auto& container, size_t row, size_t col, size_t colSize) {
+        return container[(row * colSize) + col];
+    }
+}
 
 Font::Font(const std::string& filename, int height, int width, float line_height) 
     : Resource{ ResourceType::Font, filename }
@@ -34,11 +40,8 @@ Font& Font::operator=(Font&& other) noexcept {
     m_CharGlyphs  = std::move(other.m_CharGlyphs);
     return *this;
 }
-Font::~Font(){ 
-}
-
 void Font::init(const std::string& filename, int height, int width) {
-    std::string extension = boost::filesystem::extension(filename);
+    const std::string extension = std::filesystem::path(filename).extension().string();
     /*
     TODO:
         CID-keyed Type 1 fonts
@@ -47,44 +50,25 @@ void Font::init(const std::string& filename, int height, int width) {
     */
     if (extension == ".fnt") { //Windows FNT fonts
         init_simple(filename, height, width);
-    }else if (extension == ".ttf" || extension == ".ttc") { //TrueType fonts (TTF) and TrueType collections (TTC)
+    } else if (extension == ".ttf" || extension == ".ttc") { //TrueType fonts (TTF) and TrueType collections (TTC)
         init_freetype(filename, height, width);
-    }else if (extension == ".cff") { //CFF fonts
+    } else if (extension == ".cff") { //CFF fonts
         init_freetype(filename, height, width);
-    }else if (extension == ".pcf") { //X11 PCF fonts
+    } else if (extension == ".pcf") { //X11 PCF fonts
         init_freetype(filename, height, width);
-    }else if (extension == ".woff") { //WOFF fonts
+    } else if (extension == ".woff") { //WOFF fonts
         init_freetype(filename, height, width);
-    }else if (extension == ".otf" || extension == ".otc") { //OpenType fonts (OTF, both TrueType and CFF variants) and OpenType collections (OTC)
+    } else if (extension == ".otf" || extension == ".otc") { //OpenType fonts (OTF, both TrueType and CFF variants) and OpenType collections (OTC)
         init_freetype(filename, height, width);
-    }else if (extension == ".pfa" || extension == ".pfb") { //Type 1 fonts (PFA and PFB)
+    } else if (extension == ".pfa" || extension == ".pfb") { //Type 1 fonts (PFA and PFB)
         init_freetype(filename, height, width);
-    }else if (extension == ".bdf") { //BDF fonts (including anti-aliased ones)
+    } else if (extension == ".bdf") { //BDF fonts (including anti-aliased ones)
         init_freetype(filename, height, width);
-    }else if (extension == ".pfr") { //PFR fonts
+    } else if (extension == ".pfr") { //PFR fonts
         init_freetype(filename, height, width);
     }
 }
 
-std::vector<std::vector<uint8_t>> Font::generate_bitmap(const FT_GlyphSlotRec_& glyph) {
-    std::vector<std::vector<uint8_t>> pixels;
-    pixels.resize(glyph.bitmap.rows);
-    for (unsigned int i = 0; i < pixels.size(); ++i) {
-        pixels[i].resize(glyph.bitmap.width, 0_uc);
-    }
-    auto image_pixel_size = (glyph.bitmap.rows * glyph.bitmap.width) * 1; //last number = color components (so far, just grayscale)
-    unsigned int row = 0;
-    unsigned int col = 0;
-    for (unsigned int buffer_loc = 0; buffer_loc < image_pixel_size; ++buffer_loc) {
-        pixels[row][col] = glyph.bitmap.buffer[buffer_loc];
-        ++col;
-        if (col >= glyph.bitmap.width) {
-            ++row;
-            col = 0;
-        }
-    }
-    return pixels;
-}
 void Font::init_simple(const std::string& filename, int height, int width) {
     std::string rawname    = filename;
     const size_t lastindex = filename.find_last_of(".");
@@ -98,8 +82,8 @@ void Font::init_simple(const std::string& filename, int height, int width) {
 
     float min_y_offset  = std::numeric_limits<float>().max();
     float max_y_offset  = std::numeric_limits<float>().min();
-    float textureHeight = (float)texture.height();
-    float textureWidth  = (float)texture.width();
+    float textureHeight = float(texture.height());
+    float textureWidth  = float(texture.width());
 
     boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
     for (std::string line; std::getline(str, line, '\n');) {
@@ -114,19 +98,22 @@ void Font::init_simple(const std::string& filename, int height, int width) {
 
                 if (key == "id") {
                     charGlyph.char_id = std::stoi(value);
-                }else if (key == "x") {
+                    if (m_CharGlyphs.size() < charGlyph.char_id) {
+                        m_CharGlyphs.resize(charGlyph.char_id + 1);
+                    }
+                } else if (key == "x") {
                     charGlyph.x = std::stoi(value);
-                }else if (key == "y") {
+                } else if (key == "y") {
                     charGlyph.y = std::stoi(value);
-                }else if (key == "width") {
+                } else if (key == "width") {
                     charGlyph.width = std::stoi(value);
-                }else if (key == "height") {
+                } else if (key == "height") {
                     charGlyph.height = std::stoi(value);
-                }else if (key == "xoffset") {
+                } else if (key == "xoffset") {
                     charGlyph.xoffset = std::stoi(value);
-                }else if (key == "yoffset") {
+                } else if (key == "yoffset") {
                     charGlyph.yoffset = std::stoi(value);
-                }else if (key == "xadvance") {
+                } else if (key == "xadvance") {
                     charGlyph.xadvance = std::stoi(value);
                 }
             }
@@ -151,19 +138,15 @@ void Font::init_simple(const std::string& filename, int height, int width) {
             charGlyph.uvs.emplace_back(uvW1, uvH1);
             charGlyph.uvs.emplace_back(uvW2, uvH2);
 
-            m_CharGlyphs.emplace(
-                std::piecewise_construct,
-                std::forward_as_tuple(charGlyph.char_id), 
-                std::forward_as_tuple(std::move(charGlyph))
-            );
+            m_CharGlyphs[charGlyph.char_id] = std::move(charGlyph);
         }
     }
     m_MaxHeight = max_y_offset - min_y_offset;
 }
 
 void Font::init_freetype(const std::string& filename, int height, int width) {
-    unsigned requested_char_count = 128;
-
+    uint32_t requested_char_count = 128;
+    
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
         ENGINE_PRODUCTION_LOG("ERROR::FREETYPE: Could not init FreeType Library")
@@ -176,12 +159,13 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
     }
     FT_Set_Pixel_Sizes(face, (width < 0) ? 0 : width, height); //Setting the width to 0 lets the face dynamically calculate the width based on the given height.
 
-    unsigned int max_width   = 0;
-    unsigned int max_height  = 0;
+    uint32_t max_width       = 0;
+    uint32_t max_height      = 0;
     float min_y_offset       = std::numeric_limits<float>().max();
     float max_y_offset       = std::numeric_limits<float>().min();
     const auto face_height   = (face->height >> 6);
 
+    m_CharGlyphs.resize(requested_char_count);
     for (GLubyte char_id = 0; char_id < requested_char_count; ++char_id) {
         if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
             ENGINE_PRODUCTION_LOG("ERROR::FREETYTPE: Failed to load Glyph: " << char_id)
@@ -205,11 +189,11 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
         if (charGlyph.yoffset < min_y_offset) {
             min_y_offset = float(charGlyph.yoffset);
         }
-        m_CharGlyphs.emplace(char_id, std::move(charGlyph));
+        m_CharGlyphs[char_id] = std::move(charGlyph);
     }
-    unsigned int final_count  = (unsigned int)glm::ceil(glm::sqrt((float)requested_char_count));
-    unsigned int final_width  = final_count * max_width;
-    unsigned int final_height = final_count * max_height;
+    uint32_t final_count  = (uint32_t)glm::ceil(glm::sqrt((float)requested_char_count));
+    uint32_t final_width  = final_count * max_width;
+    uint32_t final_height = final_count * max_height;
 
     sf::Image atlas_image;
     atlas_image.create(final_width, final_height, sf::Color::Transparent);
@@ -218,17 +202,16 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
     bool done           = false;
     float textureHeight = (float)final_height;
     float textureWidth  = (float)final_width;
-    for (unsigned int i = 0; i < final_count; ++i) {
-        for (unsigned int j = 0; j < final_count; ++j) {
+    for (uint32_t i = 0; i < final_count; ++i) {
+        for (uint32_t j = 0; j < final_count; ++j) {
             if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
                 continue;
             }
-            if (!m_CharGlyphs.contains(char_id)) {
+            if (char_id >= m_CharGlyphs.size()) {
                 done = true;
                 break;
             }
-            std::vector<std::vector<unsigned char>> pixels = generate_bitmap(*face->glyph);
-            auto& charGlyph   = m_CharGlyphs.at(char_id);
+            auto& charGlyph   = m_CharGlyphs[char_id];
 
             const auto startX = i * max_width;
             const auto startY = j * max_height;
@@ -236,15 +219,15 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
             charGlyph.x = startX;
             charGlyph.y = startY;
 
-            unsigned int cx               = 0;
-            unsigned int glyph_y_size     = unsigned int(pixels.size());
-            for (unsigned int y = startY; y < startY + glyph_y_size; ++y) {
-                unsigned int cy           = 0;
-                unsigned int glyph_x_size = unsigned int(pixels[cx].size());
-                unsigned int glyph_xEnd   = (startX + glyph_x_size);
-                unsigned int glyph_yEnd   = (startY + glyph_y_size);
-                for (unsigned int x = startX; x < glyph_xEnd; ++x) {
-                    auto gray = pixels[cx][cy];
+            uint32_t cx               = 0;
+            uint32_t glyph_x_size     = face->glyph->bitmap.width;
+            uint32_t glyph_y_size     = face->glyph->bitmap.rows;
+            for (uint32_t y = startY; y < startY + glyph_y_size; ++y) {
+                uint32_t cy           = 0;
+                uint32_t glyph_xEnd   = (startX + glyph_x_size);
+                uint32_t glyph_yEnd   = (startY + glyph_y_size);
+                for (uint32_t x = startX; x < glyph_xEnd; ++x) {
+                    auto gray = getFromRowCol(face->glyph->bitmap.buffer, cx, cy, glyph_x_size);
                     atlas_image.setPixel(x, y, sf::Color(gray, gray, gray, gray));
                     ++cy;
                 }
@@ -282,7 +265,7 @@ float Font::getTextHeight(std::string_view text) const {
     if (text.empty()) {
         return 0.0f;
     }
-    unsigned int line_count = 0;
+    uint32_t line_count = 0;
     for (const char character : text) {
         if (character == '\n') {
             ++line_count;
@@ -300,7 +283,7 @@ float Font::getTextHeightDynamic(std::string_view text) const {
     for (const char character : text) {
         if (character == '\n') {
             res += ((max_y - min_y) ) + m_LineHeight;
-        }else {
+        } else {
             const auto& glyph = getGlyphData(character);
             min_y = std::min(min_y, glyph.yoffset);
             max_y = std::max(max_y, (glyph.yoffset) + int(glyph.height));
@@ -318,7 +301,7 @@ float Font::getTextWidth(std::string_view text) const {
             if (character != '\n') {
                 const CharGlyph& glyph = getGlyphData(character);
                 row_width += float(glyph.xadvance);
-            }else{
+            } else {
                 //backtrack spaces
                 int j = (int)i - 1;
                 while (j >= 0) {
@@ -339,5 +322,8 @@ float Font::getTextWidth(std::string_view text) const {
     return maxWidth;
 }
 const CharGlyph& Font::getGlyphData(uint8_t character) const {
-    return (m_CharGlyphs.contains(character)) ? m_CharGlyphs.at(character) : m_CharGlyphs.at('?');
+    const size_t idx = static_cast<size_t>(character);
+    ASSERT(idx >= 0 && idx < m_CharGlyphs.size(), __FUNCTION__ << "(): character glyph was not found!");
+    //return (idx < m_CharGlyphs.size()) ? m_CharGlyphs[idx] : m_CharGlyphs['?']; //TODO: maybe we need a check like this line?
+    return m_CharGlyphs[idx];
 }

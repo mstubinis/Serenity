@@ -238,9 +238,12 @@ void ComponentModel::setModelMaterial(Handle material, size_t index, RenderStage
 
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
 }
-bool ComponentModel::rayIntersectSphere(const ComponentCamera& camera) const noexcept {
-    auto transform = m_Owner.getComponent<ComponentTransform>();
-    return Math::rayIntersectSphere(transform->getPosition(), m_Radius, camera.m_Eye, camera.getViewVector());
+bool ComponentModel::rayIntersectSphere(const ComponentTransform& cameraTransform) const noexcept {
+    auto modelTransform = m_Owner.getComponent<ComponentTransform>();
+    return Math::rayIntersectSphere(modelTransform->getPosition(), m_Radius, cameraTransform.getWorldPosition(), cameraTransform.getForward());
+}
+bool ComponentModel::rayIntersectSphere(const Camera& camera) const noexcept {
+    return rayIntersectSphere(*camera.getComponent<ComponentTransform>());
 }
 void ComponentModel::setUserPointer(void* UserPointer) noexcept {
     for (auto& instance : m_ModelInstances) {

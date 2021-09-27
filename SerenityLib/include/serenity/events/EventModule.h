@@ -46,6 +46,10 @@ namespace Engine{
     [[nodiscard]] bool isKeyDownOnce(KeyboardKey, KeyboardKey, KeyboardKey);
     [[nodiscard]] bool isKeyUp(KeyboardKey);
 
+    [[nodiscard]] bool isCapsLockOn();
+    [[nodiscard]] bool isNumLockOn();
+    [[nodiscard]] bool isScrollLockOn();
+
     [[nodiscard]] bool isMouseButtonDown(MouseButton);
     [[nodiscard]] bool isMouseButtonDownOnce(MouseButton);
 

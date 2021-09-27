@@ -13,13 +13,13 @@ namespace Engine::priv {
 class SoundQueue {
     friend class Engine::priv::SoundModule;
     private:
-        Engine::priv::SoundModule&     m_SoundModule;
-        std::queue<Handle>             m_Queue;
-        SoundBaseClass*                m_Current          = nullptr;
-        float                          m_DelayInSeconds   = 0.0f;
-        float                          m_DelayTimer       = 0.0f;
-        bool                           m_IsDelayProcess   = false;
-        bool                           m_Active           = false;
+        std::queue<std::pair<Handle, int8_t>>   m_Queue;
+        Engine::priv::SoundModule&              m_SoundModule;
+        SoundBaseClass*                         m_Current          = nullptr;
+        float                                   m_DelayInSeconds   = 0.0f;
+        float                                   m_DelayTimer       = 0.0f;
+        bool                                    m_IsDelayProcess   = false;
+        bool                                    m_Active           = false;
 
         SoundQueue() = delete;
     public:
@@ -31,8 +31,8 @@ class SoundQueue {
         inline constexpr bool active() const noexcept { return m_Active; }
         inline constexpr void activate(bool active = true) noexcept { m_Active = active; }
         inline constexpr void deactivate() noexcept { m_Active = false; }
-        void enqueueEffect(Handle soundEffectHandle, unsigned int loops = 1);
-        void enqueueMusic(Handle soundMusicHandle, unsigned int loops = 1);
+        void enqueueEffect(Handle soundEffectHandle, uint32_t loops = 1);
+        void enqueueMusic(Handle soundMusicHandle, uint32_t loops = 1);
         void dequeue();
         void clear();
 

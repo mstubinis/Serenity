@@ -13,29 +13,26 @@ SoundQueue::SoundQueue(Engine::priv::SoundModule& module, float delay)
 SoundQueue::~SoundQueue() {
     clear();
 }
-void SoundQueue::enqueueEffect(Handle handle, unsigned int loops) {
+void SoundQueue::enqueueEffect(Handle handle, uint32_t loops) {
     if (!m_Current) {
         m_Current = m_SoundModule.getNextFreeEffect();
         if (m_Current) {
-            handle.m_Type = 1;
             m_SoundModule.setSoundInformation(handle, *(SoundEffect*)m_Current);
         }
     }
-    m_Queue.push(handle);
+    m_Queue.emplace(handle, 1);
 }
-void SoundQueue::enqueueMusic(Handle handle, unsigned int loops) {
+void SoundQueue::enqueueMusic(Handle handle, uint32_t loops) {
     if (!m_Current) {
         m_Current = m_SoundModule.getNextFreeMusic();
         if (m_Current) {
-            handle.m_Type = 2;
             m_SoundModule.setSoundInformation(handle, *(SoundMusic*)m_Current);
         }
     }
-    m_Queue.push(handle);
+    m_Queue.emplace(handle, 2);
 }
 void SoundQueue::dequeue() {
     if (m_Queue.size() > 0) {
-        auto item = m_Queue.front();
         m_Queue.pop();
         m_IsDelayProcess = true;
     }
@@ -48,16 +45,16 @@ void SoundQueue::update(const float dt) {
                 m_IsDelayProcess = false;
                 m_DelayTimer = 0.0f;
             }
-        }else{
+        } else {
             if (m_Queue.size() > 0) {
                 if (!m_Current) {
-                    Handle handle = m_Queue.front();
-                    if (handle.type() == 1) {
+                    auto& [handle, type] = m_Queue.front();
+                    if (type == 1) {
                         m_Current = m_SoundModule.getNextFreeEffect();
                         if (m_Current) {
                             m_SoundModule.setSoundInformation(handle, *(SoundEffect*)m_Current);
                         }
-                    }else if (handle.type() == 2) {
+                    } else if (type == 2) {
                         m_Current = m_SoundModule.getNextFreeMusic();
                         if (m_Current) {
                             m_SoundModule.setSoundInformation(handle, *(SoundMusic*)m_Current);
@@ -69,19 +66,19 @@ void SoundQueue::update(const float dt) {
                     case SoundStatus::Fresh: {
                         m_Current->play();
                         break;
-                    }case SoundStatus::Stopped: {
-                        unsigned int loopsLeft = m_Current->getLoopsLeft();
+                    } case SoundStatus::Stopped: {
+                        uint32_t loopsLeft = m_Current->getLoopsLeft();
                         if (loopsLeft <= 1) {
                             m_Queue.pop();
                             m_IsDelayProcess = true;
                             m_Current        = nullptr;
                         }
                         break;
-                    }case SoundStatus::Playing: {
-                    }case SoundStatus::PlayingLooped: {
+                    } case SoundStatus::Playing: {
+                    } case SoundStatus::PlayingLooped: {
                         m_Current->update(dt);
                         break;
-                    }default: {
+                    } default: {
                         break;
                     }
                 }
