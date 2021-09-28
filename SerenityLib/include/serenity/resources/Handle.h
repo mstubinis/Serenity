@@ -80,6 +80,11 @@ struct LoadedResource final {
     inline operator Handle() const noexcept { return m_Handle; }
     inline operator RESOURCE&() const noexcept { return *m_Resource; }
     inline operator RESOURCE*() const noexcept { return m_Resource; }
+
+    void operator=(const Handle otherHandle) {
+        m_Handle   = otherHandle;
+        m_Resource = m_Handle.get<RESOURCE>();
+    }
 };
 
 #endif

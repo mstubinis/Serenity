@@ -4,17 +4,23 @@
 
 class  Handle;
 class  SoundQueue;
+namespace Engine::priv {
+    class SoundModule;
+}
 
-#include <serenity/resources/sound/SoundBaseClass.h>
+#include <serenity/resources/sound/SoundIncludes.h>
 #include <SFML/Audio.hpp>
 
-class SoundMusic : public SoundBaseClass {
+class SoundMusic {
     friend class Engine::priv::SoundModule;
     friend class SoundQueue;
     private:
         sf::Music   m_Sound;
-        float       m_Duration = 0.0f;
-        bool        m_Active   = false;
+        SoundStatus m_Status      = SoundStatus::Fresh;
+        uint32_t    m_Loops       = 0U;
+        uint32_t    m_CurrentLoop = 0U;
+        float       m_Duration    = 0.0f;
+        bool        m_Active      = false;
     public:
         SoundMusic();
         SoundMusic(const SoundMusic& other)                = delete;
@@ -23,29 +29,31 @@ class SoundMusic : public SoundBaseClass {
         SoundMusic& operator=(SoundMusic&& other) noexcept = default;
         virtual ~SoundMusic()                              = default;
 
+        [[nodiscard]] inline constexpr SoundStatus status() const noexcept { return m_Status; }
+        [[nodiscard]] inline constexpr uint32_t getLoopsLeft() const noexcept { return m_Loops - m_CurrentLoop; }
         [[nodiscard]] inline constexpr bool isActive() const noexcept { return m_Active; }
-        bool play(unsigned int numLoops = 1) override;
-        bool pause() override;
+        bool play(unsigned int numLoops = 1);
+        bool pause();
         bool stop(bool stopAllLoops = false);
-        bool restart() override;
+        bool restart();
         [[nodiscard]] inline constexpr float getDuration() const noexcept { return m_Duration; }
-        [[nodiscard]] unsigned int getChannelCount() const override;
-        [[nodiscard]] float getMinDistance() const override;
-        void setMinDistance(float minDistance) override;
-        [[nodiscard]] bool isRelativeToListener() const override;
-        void setRelativeToListener(bool relative = true) override;
-        [[nodiscard]] float getAttenuation() const override;
-        void setAttenuation(float attenuation) override;
-        [[nodiscard]] glm::vec3 getPosition() const override;
-        void setPosition(float x, float y, float z) override;
-        void setPosition(const glm::vec3& position) override;
-        void translate(float x, float y, float z) override;
-        void translate(const glm::vec3& position) override;
-        [[nodiscard]] float getVolume() const override;
-        void setVolume(float volume) override;
-        [[nodiscard]] float getPitch() const override;
-        void setPitch(float pitch) override;
+        [[nodiscard]] unsigned int getChannelCount() const;
+        [[nodiscard]] float getMinDistance() const;
+        void setMinDistance(float minDistance);
+        [[nodiscard]] bool isRelativeToListener() const;
+        void setRelativeToListener(bool relative = true);
+        [[nodiscard]] float getAttenuation() const;
+        void setAttenuation(float attenuation);
+        [[nodiscard]] glm::vec3 getPosition() const;
+        void setPosition(float x, float y, float z);
+        void setPosition(const glm::vec3& position);
+        void translate(float x, float y, float z);
+        void translate(const glm::vec3& position);
+        [[nodiscard]] float getVolume() const;
+        void setVolume(float volume);
+        [[nodiscard]] float getPitch() const;
+        void setPitch(float pitch);
 
-        void update(const float dt) override;
+        void update(const float dt);
 };
 #endif

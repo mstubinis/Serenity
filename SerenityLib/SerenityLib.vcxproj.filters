@@ -1552,9 +1552,6 @@
     <ClInclude Include="include\serenity\resources\shader\ShaderProgram.h">
       <Filter>Header Files\Engine\Core\Resources\Shader</Filter>
     </ClInclude>
-    <ClInclude Include="include\serenity\resources\sound\SoundBaseClass.h">
-      <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
-    </ClInclude>
     <ClInclude Include="include\serenity\resources\sound\SoundData.h">
       <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
     </ClInclude>
@@ -1821,6 +1818,9 @@
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\opengl\BindTextureRAII.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\sound\SoundIncludes.h">
+      <Filter>Header Files\Engine\Core\Resources\Sound</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

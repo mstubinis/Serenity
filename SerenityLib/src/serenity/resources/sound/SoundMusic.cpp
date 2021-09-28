@@ -11,7 +11,7 @@ using namespace Engine;
 using namespace Engine::priv;
 
 SoundMusic::SoundMusic() 
-    : SoundBaseClass{ 1 }
+    : m_Loops{ 1 }
 {}
 void SoundMusic::update(const float dt) {
     auto sfStatus = m_Sound.getStatus();
@@ -144,7 +144,7 @@ float SoundMusic::getAttenuation() const {
 }
 glm::vec3 SoundMusic::getPosition() const {
     const sf::Vector3f pos = m_Sound.getPosition();
-    return glm::vec3(pos.x, pos.y, pos.z);
+    return glm::vec3{ pos.x, pos.y, pos.z };
 }
 uint SoundMusic::getChannelCount() const {
     return m_Sound.getChannelCount();

@@ -421,7 +421,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -1001,9 +1001,9 @@
     <ClInclude Include="include\serenity\resources\shader\ShaderHelper.h" />
     <ClInclude Include="include\serenity\resources\shader\ShaderIncludes.h" />
     <ClInclude Include="include\serenity\resources\shader\ShaderProgram.h" />
-    <ClInclude Include="include\serenity\resources\sound\SoundBaseClass.h" />
     <ClInclude Include="include\serenity\resources\sound\SoundData.h" />
     <ClInclude Include="include\serenity\resources\sound\SoundEffect.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundIncludes.h" />
     <ClInclude Include="include\serenity\resources\sound\SoundModule.h" />
     <ClInclude Include="include\serenity\resources\sound\SoundMusic.h" />
     <ClInclude Include="include\serenity\resources\sound\SoundQueue.h" />

@@ -11,6 +11,10 @@
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 
+namespace {
+    std::string WholeStringBuffer;
+}
+
 constexpr std::array<glm::vec4, MaterialComponentType::_TOTAL> MISC_DATA_INFO { {
     { 1.0f, 1.0f, 1.0f, 1.0f }, // Diffuse
     { 1.0f, 1.0f, 1.0f, 1.0f }, // Normal
@@ -51,16 +55,13 @@ MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const
     auto cubemap = Engine::Resources::getResource<TextureCubemap>(cubemapFile);
 
     if (!texture.m_Resource && !textureFile.empty()) {
-        texture.m_Handle   = Engine::Resources::addResource<Texture>(textureFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
-        texture.m_Resource = texture.m_Handle.get<Texture>();
+        texture  = Engine::Resources::addResource<Texture>(textureFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
     }
     if (!mask.m_Resource && !maskFile.empty()) {
-        mask.m_Handle   = Engine::Resources::addResource<Texture>(maskFile, false, ImageInternalFormat::R8, TextureType::Texture2D);
-        mask.m_Resource = mask.m_Handle.get<Texture>();
+        mask     = Engine::Resources::addResource<Texture>(maskFile, false, ImageInternalFormat::R8, TextureType::Texture2D);
     }
     if (!cubemap.m_Resource && !cubemapFile.empty()) {
-        cubemap.m_Handle   = Engine::Resources::addResource<TextureCubemap>(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8);
-        cubemap.m_Resource = cubemap.m_Handle.get<TextureCubemap>();
+        cubemap  = Engine::Resources::addResource<TextureCubemap>(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8);
     }
     return addLayer(texture.m_Handle, mask.m_Handle, cubemap.m_Handle);
 }
@@ -74,15 +75,16 @@ MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHand
     layer.setTexture(textureHandle);
     layer.setMask(maskHandle);
     layer.setCubemap(cubemapHandle);
-    layer.setMiscData(MISC_DATA_INFO[(size_t)m_ComponentType]);
+    layer.setMiscData(MISC_DATA_INFO[m_ComponentType]);
     ++m_NumLayers;
     return &layer;
 }
 void MaterialComponent::bind(size_t component_index, int& inTextureUnit) const {
-    const std::string wholeString = "components[" + std::to_string(component_index) + "].";
-    Engine::Renderer::sendUniform2Safe((wholeString + "componentData").c_str(), (int)m_NumLayers, (int)static_cast<bool>(m_ComponentType != MaterialComponentType::Empty));
+    WholeStringBuffer.clear();
+    WholeStringBuffer += "components[" + std::to_string(component_index) + "].";
+    Engine::Renderer::sendUniform2Safe((WholeStringBuffer + "compDat").c_str(), int(m_NumLayers), int(m_ComponentType != MaterialComponentType::Empty));
     for (uint32_t layerNumber = 0; layerNumber < MAX_MATERIAL_LAYERS_PER_COMPONENT; ++layerNumber) {
-        m_Layers[layerNumber].sendDataToGPU(wholeString, layerNumber, inTextureUnit);
+        m_Layers[layerNumber].sendDataToGPU(WholeStringBuffer, layerNumber, inTextureUnit);
     }
 }
 void MaterialComponent::update(const float dt) {

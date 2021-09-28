@@ -15,7 +15,8 @@ class SoundQueue {
     private:
         std::queue<std::pair<Handle, int8_t>>   m_Queue;
         Engine::priv::SoundModule&              m_SoundModule;
-        SoundBaseClass*                         m_Current          = nullptr;
+        void*                                   m_Current          = nullptr;
+        int                                     m_CurrentType      = -1; //0 for effect, 1 for music
         float                                   m_DelayInSeconds   = 0.0f;
         float                                   m_DelayTimer       = 0.0f;
         bool                                    m_IsDelayProcess   = false;
@@ -23,7 +24,7 @@ class SoundQueue {
 
         SoundQueue() = delete;
     public:
-        SoundQueue(Engine::priv::SoundModule& manager, float delay = 0.5f);
+        SoundQueue(Engine::priv::SoundModule&, float delay = 0.5f);
         virtual ~SoundQueue();
 
         [[nodiscard]] inline bool empty() const noexcept { return m_Queue.empty(); }

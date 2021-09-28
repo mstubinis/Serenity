@@ -9,12 +9,9 @@
 namespace {
     template<class TEXTURE> float internal_get_texture_compression_value(Handle textureHandle) noexcept {
         if (!textureHandle.null()) {
-            auto mutex = textureHandle.getMutex();
             bool isCompressed = false;
-            if (mutex) {
-                std::lock_guard lock{ *mutex };
-                isCompressed = textureHandle.get<TEXTURE>()->compressed();
-            }
+            std::lock_guard lock{ *textureHandle.getMutex() };
+            isCompressed = textureHandle.get<TEXTURE>()->compressed();
             return isCompressed ? 0.5f : 1.0f;
         }
         return 0.0f;
@@ -105,13 +102,12 @@ void MaterialLayer::sendDataToGPU(const std::string& uniform_component_str, size
             }
         }
     };
-
     send_texture(wholeString, "texture", m_TextureHandle, textureUnit);
     send_texture(wholeString, "mask",    m_MaskHandle,    textureUnit);
     send_texture(wholeString, "cubemap", m_CubemapHandle, textureUnit);
 
-    Engine::Renderer::sendUniform4Safe((wholeString + "data0").c_str(), m_MaterialLayerBaseData);
-    Engine::Renderer::sendUniform4Safe((wholeString + "data1").c_str(), m_MaterialLayerTextureData);
-    Engine::Renderer::sendUniform4Safe((wholeString + "data2").c_str(), m_MaterialLayerMiscData);
-    Engine::Renderer::sendUniform4Safe((wholeString + "uvModifications").c_str(), m_UVModifications);
+    Engine::Renderer::sendUniform4Safe((wholeString + "d0").c_str(), m_MaterialLayerBaseData);
+    Engine::Renderer::sendUniform4Safe((wholeString + "d1").c_str(), m_MaterialLayerTextureData);
+    Engine::Renderer::sendUniform4Safe((wholeString + "d2").c_str(), m_MaterialLayerMiscData);
+    Engine::Renderer::sendUniform4Safe((wholeString + "uvMods").c_str(), m_UVModifications);
 }

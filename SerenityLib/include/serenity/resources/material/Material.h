@@ -68,16 +68,7 @@ class Material final : public Resource<Material> {
             std::string_view metalness  = {},
             std::string_view smoothness = {}
         );
-        Material(
-            std::string_view name,
-            Handle diffuse,
-            Handle normal     = {},
-            Handle glow       = {},
-            Handle specular   = {},
-            Handle ao         = {},
-            Handle metalness  = {},
-            Handle smoothness = {}
-        );
+        Material(std::string_view name, Handle diffuse, Handle normal = {}, Handle glow = {}, Handle specular = {}, Handle ao = {}, Handle metalness = {}, Handle smoothness = {});
 
         Material(const Material&)                 = delete;
         Material& operator=(const Material&)      = delete;
@@ -85,10 +76,10 @@ class Material final : public Resource<Material> {
         Material& operator=(Material&&) noexcept;
         ~Material();
 
-        inline const std::vector<MaterialComponent>& getComponents() const noexcept { return m_Components; }
+        [[nodiscard]] inline const std::vector<MaterialComponent>& getComponents() const noexcept { return m_Components; }
         [[nodiscard]] inline MaterialComponent& getComponent(uint32_t index) { return m_Components[index]; }
 
-        MaterialComponent& addComponent(MaterialComponentType, std::string_view textureFile = "", std::string_view maskFile = "", std::string_view cubemapFile = "");
+        MaterialComponent& addComponent(MaterialComponentType, std::string_view textureFile = {}, std::string_view maskFile = {}, std::string_view cubemapFile = {});
         MaterialComponent& addComponentDiffuse(std::string_view textureFile);
         MaterialComponent& addComponentNormal(std::string_view textureFile);
         MaterialComponent& addComponentGlow(std::string_view textureFile);

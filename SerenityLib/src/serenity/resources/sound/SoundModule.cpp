@@ -118,7 +118,7 @@ SoundEffect* Engine::Sound::playEffect(Handle handle, uint32_t loops){
         SOUND_MODULE->setSoundInformation(handle, *effect);
         effect->play(loops);
     } else {
-        ENGINE_PRODUCTION_LOG("Sound::playEffect returned a null sound effect for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version())
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << " - returned a null sound effect for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version())
     }
     return effect;
 }
@@ -128,7 +128,7 @@ SoundMusic* Engine::Sound::playMusic(Handle handle, uint32_t loops){
         SOUND_MODULE->setSoundInformation(handle, *music);
         music->play(loops);
     } else {
-        ENGINE_PRODUCTION_LOG("Sound::playMusic returned a null sound music for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version())
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << " - returned a null sound music for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version())
     }
     return music;
 }

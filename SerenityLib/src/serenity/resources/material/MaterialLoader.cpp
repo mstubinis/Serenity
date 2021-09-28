@@ -5,8 +5,6 @@
 #include <serenity/resources/texture/TextureCubemap.h>
 #include <serenity/resources/material/Material.h>
 #include <serenity/resources/Engine_Resources.h>
-//#include <serenity/system/Engine.h>
-//#include <serenity/events/Event.h>
 
 namespace {
     LoadedResource<Texture> internal_load_texture(std::string_view file, bool mipmapped, ImageInternalFormat format, TextureType textureType) {
@@ -14,8 +12,7 @@ namespace {
         if (!file.empty()) {
             texture = Engine::Resources::getResource<Texture>(file);
             if (!texture.m_Resource) {
-                texture.m_Handle = Engine::Resources::addResource<Texture>(file, mipmapped, format, textureType);
-                texture.m_Resource = texture.m_Handle.get<Texture>();
+                texture = Engine::Resources::addResource<Texture>(file, mipmapped, format, textureType);
             }
         }
         return texture;
@@ -25,8 +22,7 @@ namespace {
         if (!file.empty()) {
             cubemap = Engine::Resources::getResource<TextureCubemap>(file);
             if (!cubemap.m_Resource) {
-                cubemap.m_Handle = Engine::Resources::addResource<TextureCubemap>(file, mipmapped, format);
-                cubemap.m_Resource = cubemap.m_Handle.get<TextureCubemap>();
+                cubemap = Engine::Resources::addResource<TextureCubemap>(file, mipmapped, format);
             }
         }
         return cubemap;

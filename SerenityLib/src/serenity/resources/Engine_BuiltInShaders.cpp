@@ -306,16 +306,16 @@ Engine::priv::EShaders::decal_frag =
 "    float smoothness;\n"
 "};\n"
 "struct Layer {\n"
-"    vec4 data0;\n"
-"    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
-"    vec4 data2;\n"
-"    vec4 uvModifications;\n"
+"    vec4 d0;\n"
+"    vec4 d1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
+"    vec4 d2;\n"
+"    vec4 uvMods;\n"
 "    SAMPLER_TYPE_2D texture;\n"
 "    SAMPLER_TYPE_2D mask;\n"
 "    SAMPLER_TYPE_Cube cubemap;\n"
 "};\n"
 "struct Component {\n"
-"    ivec2 componentData;\n" //x = numLayers, y = componentType
+"    ivec2 compDat;\n" //x = numLayers, y = componentType
 "    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];\n"
 "};\n"
 "uniform Component   components[MAX_MATERIAL_COMPONENTS];\n"
@@ -734,16 +734,16 @@ Engine::priv::EShaders::forward_frag =
     "    float smoothness;\n"
     "};\n"
     "struct Layer {\n"
-    "    vec4 data0;\n"
-    "    vec4 data1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
-    "    vec4 data2;\n"
-    "    vec4 uvModifications;\n"
+    "    vec4 d0;\n"
+    "    vec4 d1;\n"//x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
+    "    vec4 d2;\n"
+    "    vec4 uvMods;\n"
     "    SAMPLER_TYPE_2D texture;\n"
     "    SAMPLER_TYPE_2D mask;\n"
     "    SAMPLER_TYPE_Cube cubemap;\n"
     "};\n"
     "struct Component {\n"
-    "    ivec2 componentData;\n" //x = numLayers, y = componentType
+    "    ivec2 compDat;\n" //x = numLayers, y = componentType
     "    Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];\n"
     "};\n"
     "\n"
@@ -917,8 +917,8 @@ priv::EShaders::particle_frag +=
 
 #pragma region DeferredFrag
 
-//ivec2 componentData; //x = numLayers, y = componentType
-//vec4 data1; //x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
+//ivec2 compDat; //x = numLayers, y = componentType
+//vec4 d1; //x = blend mode | y = texture enabled? | z = mask enabled? | w = cubemap enabled?
 //uniform vec4        MaterialBasePropertiesOne; //x = BaseGlow, y = BaseAO, z = BaseMetalness, w = BaseSmoothness
 //uniform vec4        MaterialBasePropertiesTwo; //x = BaseAlpha, y = diffuseModel, z = specularModel, w = UNUSED
 //inData.diffuse = vec4(0.0,0.0,0.0,0.0001); //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
@@ -942,16 +942,16 @@ struct InData {
     float smoothness;
 };
 struct Layer {
-    vec4 data0;
-    vec4 data1;
-    vec4 data2;
-    vec4 uvModifications;
+    vec4 d0;
+    vec4 d1;
+    vec4 d2;
+    vec4 uvMods;
     SAMPLER_TYPE_2D texture;
     SAMPLER_TYPE_2D mask;
     SAMPLER_TYPE_Cube cubemap;
 };
 struct Component {
-    ivec2 componentData;
+    ivec2 compDat;
     Layer layers[MAX_MATERIAL_LAYERS_PER_COMPONENT];
 };
 

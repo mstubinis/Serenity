@@ -4,6 +4,24 @@
 #include <serenity/resources/sound/SoundMusic.h>
 #include <serenity/resources/sound/SoundModule.h>
 
+namespace {
+    void internal_play(int type, void* sound) {
+        type == 0 ? ((SoundEffect*)sound)->play () : ((SoundMusic*)sound)->play();
+    }
+    SoundStatus internal_get_status(int type, void* sound) {
+        return type == 0 ? ((SoundEffect*)sound)->status() : ((SoundMusic*)sound)->status();
+    }
+    uint32_t internal_get_loops(int type, void* sound) {
+        return type == 0 ? ((SoundEffect*)sound)->getLoopsLeft() : ((SoundMusic*)sound)->getLoopsLeft();
+    }
+    void internal_update(int type, void* sound, float dt) {
+        type == 0 ? ((SoundEffect*)sound)->update(dt) : ((SoundMusic*)sound)->update(dt);
+    }
+    void internal_stop(int type, void* sound) {
+        type == 0 ? ((SoundEffect*)sound)->stop() : ((SoundMusic*)sound)->stop();
+    }
+}
+
 SoundQueue::SoundQueue(Engine::priv::SoundModule& module, float delay) 
     : m_SoundModule{ module }
     , m_DelayInSeconds{ delay }
@@ -17,7 +35,10 @@ void SoundQueue::enqueueEffect(Handle handle, uint32_t loops) {
     if (!m_Current) {
         m_Current = m_SoundModule.getNextFreeEffect();
         if (m_Current) {
+            m_CurrentType = 0;
             m_SoundModule.setSoundInformation(handle, *(SoundEffect*)m_Current);
+        } else {
+            m_CurrentType = -1;
         }
     }
     m_Queue.emplace(handle, 1);
@@ -26,7 +47,10 @@ void SoundQueue::enqueueMusic(Handle handle, uint32_t loops) {
     if (!m_Current) {
         m_Current = m_SoundModule.getNextFreeMusic();
         if (m_Current) {
+            m_CurrentType = 1;
             m_SoundModule.setSoundInformation(handle, *(SoundMusic*)m_Current);
+        } else {
+            m_CurrentType = -1;
         }
     }
     m_Queue.emplace(handle, 2);
@@ -52,22 +76,24 @@ void SoundQueue::update(const float dt) {
                     if (type == 1) {
                         m_Current = m_SoundModule.getNextFreeEffect();
                         if (m_Current) {
+                            m_CurrentType = 0;
                             m_SoundModule.setSoundInformation(handle, *(SoundEffect*)m_Current);
                         }
                     } else if (type == 2) {
                         m_Current = m_SoundModule.getNextFreeMusic();
                         if (m_Current) {
+                            m_CurrentType = 1;
                             m_SoundModule.setSoundInformation(handle, *(SoundMusic*)m_Current);
                         }
                     }
                 }
-                SoundStatus status = m_Current->status();
+                SoundStatus status = internal_get_status(m_CurrentType, m_Current);
                 switch (status) {
                     case SoundStatus::Fresh: {
-                        m_Current->play();
+                        internal_play(m_CurrentType, m_Current);
                         break;
                     } case SoundStatus::Stopped: {
-                        uint32_t loopsLeft = m_Current->getLoopsLeft();
+                        uint32_t loopsLeft = internal_get_loops(m_CurrentType, m_Current);
                         if (loopsLeft <= 1) {
                             m_Queue.pop();
                             m_IsDelayProcess = true;
@@ -76,7 +102,7 @@ void SoundQueue::update(const float dt) {
                         break;
                     } case SoundStatus::Playing: {
                     } case SoundStatus::PlayingLooped: {
-                        m_Current->update(dt);
+                        internal_update(m_CurrentType, m_Current, dt);
                         break;
                     } default: {
                         break;
@@ -88,11 +114,12 @@ void SoundQueue::update(const float dt) {
 }
 void SoundQueue::clear() {
     if (m_Current) {
-        m_Current->stop();
+        internal_stop(m_CurrentType, m_Current);
     }
     while (m_Queue.size() > 0) {
         m_Queue.pop();
     }
+    m_CurrentType    = -1;
     m_Current        = nullptr;
     m_DelayTimer     = 0.0f;
     m_IsDelayProcess = false;

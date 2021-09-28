@@ -12,7 +12,7 @@ using namespace Engine;
 using namespace Engine::priv;
 
 SoundEffect::SoundEffect() 
-    : SoundBaseClass{ 1 }
+    : m_Loops { 1 }
 {}
 void SoundEffect::update(const float dt) {
     auto sfStatus = m_Sound.getStatus();

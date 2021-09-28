@@ -9,10 +9,9 @@
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Skybox.h>
 
-std::vector<glm::vec4> Material::m_MaterialProperities;
-
-Handle Material::Checkers       = {};
-Handle Material::WhiteShadeless = {};
+std::vector<glm::vec4>   Material::m_MaterialProperities;
+Handle                   Material::Checkers                = {};
+Handle                   Material::WhiteShadeless          = {};
 
 namespace {
     constexpr std::array<MaterialDefaultPhysicsProperty, MaterialPhysics::_TOTAL> MATERIAL_PROPERTIES{ {
@@ -106,15 +105,14 @@ Material::~Material() {
     Engine::priv::PublicMaterial::Unload(*this);
 }
 MaterialComponent* Material::internal_add_component_generic(MaterialComponentType type, Handle texture, Handle mask, Handle cubemap) {
-    uint32_t idx = uint32_t(type);
-    if (m_Components.size() <= idx) {
-        m_Components.resize(idx + 1);
+    if (m_Components.size() <= type) {
+        m_Components.resize(type + 1);
     }
-    if (m_Components[idx].getType() == type) {
-        return &m_Components[idx];
+    if (m_Components[type].getType() == type) {
+        return &m_Components[type];
     }
-    m_Components[idx] = MaterialComponent{ type, texture, mask, cubemap };
-    return &m_Components[idx];
+    m_Components[type] = MaterialComponent{ type, texture, mask, cubemap };
+    return &m_Components[type];
 }
 void Material::internal_update_global_material_pool(bool addToDatabase) noexcept {
     //this data is kept around to be deferred to the lighting pass
@@ -128,17 +126,17 @@ void Material::internal_update_global_material_pool(bool addToDatabase) noexcept
         m_ID       = MaterialID(Material::m_MaterialProperities.size());
         auto& data = Material::m_MaterialProperities.emplace_back(0.0f, 0.0f, 0.0f, 0.0f);
         update_data(data);
-    }else{
+    } else {
         update_data(Material::m_MaterialProperities[m_ID]);
     }
 }
 MaterialComponent& Material::addComponent(MaterialComponentType type, std::string_view textureFile, std::string_view maskFile, std::string_view cubemapFile) {
     auto texture = Engine::priv::Core::m_Engine->m_ResourceManager.m_ResourceModule.get<Texture>(textureFile);
     if (!texture.m_Resource) {
-        if (!textureFile.empty() && textureFile != "DEFAULT") {
+        if (!textureFile.empty()) {
             ImageInternalFormat fmt = (type == MaterialComponentType::Normal || type == MaterialComponentType::ParallaxOcclusion) ? ImageInternalFormat::RGB8 : ImageInternalFormat::SRGB8_ALPHA8;
             texture.m_Handle = Engine::Resources::addResource<Texture>(textureFile, true, fmt, TextureType::Texture2D);
-        } else if (textureFile == "DEFAULT") {
+        } else {
             texture.m_Handle = Texture::Checkers;
         }
         texture.m_Resource = texture.m_Handle.get<Texture>();
