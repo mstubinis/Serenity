@@ -42,7 +42,6 @@ namespace Engine::priv {
             }
 
             bool deleteLight(LIGHT* light) noexcept {
-                ASSERT(light != nullptr, __FUNCTION__ << "(): light parameter must not be a null pointer!");
                 if (!light) {
                     return false;
                 }

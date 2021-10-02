@@ -8,6 +8,9 @@
 #include <serenity/renderer/culling/Culling.h>
 
 namespace {
+    std::vector<ModelInstance*> KEPT_NODES_TOTAL_BUFFER(10, nullptr);
+    std::vector<ModelInstance*> KEPT_NODES_PER_INSTANCE_BUFFER(4, nullptr);
+
     template<class CONTAINER, class INDEX>
     void internal_remove_swap_and_pop(CONTAINER& container, INDEX&& index) {
         const auto i = static_cast<size_t>(std::forward<INDEX>(index));
@@ -187,23 +190,23 @@ void Engine::priv::RenderGraph::clean(Entity inEntity) {
     if (inEntity.null()) {
         return;
     }
-    auto kept_nodes_total = Engine::create_and_reserve<std::vector<ModelInstance*>>(m_InstancesTotal.size());
+    KEPT_NODES_TOTAL_BUFFER.clear();
     for (auto& materialNode : m_MaterialNodes) {
         for (auto& meshNode : materialNode.meshNodes) {
-            auto kept_nodes = Engine::create_and_reserve<std::vector<ModelInstance*>>(meshNode.instanceNodes.size());
+            KEPT_NODES_PER_INSTANCE_BUFFER.clear();
             for (auto& modelInstance : meshNode.instanceNodes) {
                 auto entity = modelInstance->getParent();
                 if (entity != inEntity) {
-                    kept_nodes.push_back(modelInstance);
-                    kept_nodes_total.push_back(modelInstance);
+                    KEPT_NODES_PER_INSTANCE_BUFFER.push_back(modelInstance);
+                    KEPT_NODES_TOTAL_BUFFER.push_back(modelInstance);
                 }
             }
             meshNode.instanceNodes.clear();
-            std::move(std::begin(kept_nodes), std::end(kept_nodes), std::back_inserter(meshNode.instanceNodes));
+            std::move(std::begin(KEPT_NODES_PER_INSTANCE_BUFFER), std::end(KEPT_NODES_PER_INSTANCE_BUFFER), std::back_inserter(meshNode.instanceNodes));
         }
     }
     m_InstancesTotal.clear();
-    std::move(std::begin(kept_nodes_total), std::end(kept_nodes_total), std::back_inserter(m_InstancesTotal));
+    std::move(std::begin(KEPT_NODES_TOTAL_BUFFER), std::end(KEPT_NODES_TOTAL_BUFFER), std::back_inserter(m_InstancesTotal));
 }
 void Engine::priv::RenderGraph::validate_model_instances_for_rendering(Camera* camera, Viewport* viewport) {
     Engine::priv::Culling::cull(camera, viewport, m_InstancesTotal);

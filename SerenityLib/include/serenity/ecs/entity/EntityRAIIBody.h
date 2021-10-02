@@ -18,7 +18,7 @@ class EntityRAIIBody final {
         EntityRAIIBody(const Entity& other) 
             : m_Entity{ other }
         {}
-        EntityRAIIBody(uint32_t entityID, uint32_t sceneID, uint32_t versionID)
+        EntityRAIIBody(EntityID entityID, EntityID sceneID, EntityID versionID)
             : m_Entity{ entityID, sceneID, versionID }
         {}
         EntityRAIIBody(const EntityRAIIBody& other) = delete;
@@ -34,9 +34,9 @@ class EntityRAIIBody final {
             m_Entity.destroy();
         }
 
-        [[nodiscard]] inline uint32_t id() const noexcept { return m_Entity.id(); }
-        [[nodiscard]] inline uint32_t sceneID() const noexcept { return m_Entity.sceneID(); }
-        [[nodiscard]] inline uint32_t versionID() const noexcept { return m_Entity.versionID(); }
+        [[nodiscard]] inline EntityID id() const noexcept { return m_Entity.id(); }
+        [[nodiscard]] inline EntityID sceneID() const noexcept { return m_Entity.sceneID(); }
+        [[nodiscard]] inline EntityID versionID() const noexcept { return m_Entity.versionID(); }
 
         [[nodiscard]] inline bool null() const noexcept { return m_Entity.null(); }
         [[nodiscard]] inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }

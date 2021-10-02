@@ -15,7 +15,7 @@ class EntityBody : public Entity {
         EntityBody() = default;
         EntityBody(Scene& scene);
         EntityBody(const Entity& other);
-        EntityBody(uint32_t entityID, uint32_t sceneID, uint32_t versionID);
+        EntityBody(EntityID entityID, EntityID sceneID, EntityID versionID);
 
         EntityBody(const EntityBody&)                = default;
         EntityBody& operator=(const EntityBody&)     = default;

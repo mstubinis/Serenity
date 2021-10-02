@@ -15,7 +15,7 @@ class EntityBodyRigid : public Entity {
         EntityBodyRigid() = default;
         EntityBodyRigid(Scene& scene);
         EntityBodyRigid(const Entity& other);
-        EntityBodyRigid(uint32_t entityID, uint32_t sceneID, uint32_t versionID);
+        EntityBodyRigid(EntityID entityID, EntityID sceneID, EntityID versionID);
 
         EntityBodyRigid(const EntityBodyRigid&)                = default;
         EntityBodyRigid& operator=(const EntityBodyRigid&)     = default;

@@ -18,11 +18,11 @@ class EntityRAIIBodyRigid final {
         EntityRAIIBodyRigid(const Entity& other)
             : m_Entity{ other }
         {}
-        EntityRAIIBodyRigid(uint32_t entityID, uint32_t sceneID, uint32_t versionID)
+        EntityRAIIBodyRigid(EntityID entityID, EntityID sceneID, EntityID versionID)
             : m_Entity{ entityID, sceneID, versionID }
         {}
-        EntityRAIIBodyRigid(const EntityRAIIBodyRigid& other) = delete;
-        EntityRAIIBodyRigid& operator=(const EntityRAIIBodyRigid& other) = delete;
+        EntityRAIIBodyRigid(const EntityRAIIBodyRigid&) = delete;
+        EntityRAIIBodyRigid& operator=(const EntityRAIIBodyRigid&) = delete;
         EntityRAIIBodyRigid(EntityRAIIBodyRigid&& other) noexcept
             : m_Entity{ std::exchange(other.m_Entity, EntityBodyRigid{}) }
         {}
@@ -34,9 +34,9 @@ class EntityRAIIBodyRigid final {
             m_Entity.destroy();
         }
 
-        [[nodiscard]] inline uint32_t id() const noexcept { return m_Entity.id(); }
-        [[nodiscard]] inline uint32_t sceneID() const noexcept { return m_Entity.sceneID(); }
-        [[nodiscard]] inline uint32_t versionID() const noexcept { return m_Entity.versionID(); }
+        [[nodiscard]] inline EntityID id() const noexcept { return m_Entity.id(); }
+        [[nodiscard]] inline EntityID sceneID() const noexcept { return m_Entity.sceneID(); }
+        [[nodiscard]] inline EntityID versionID() const noexcept { return m_Entity.versionID(); }
 
         [[nodiscard]] inline bool null() const noexcept { return m_Entity.null(); }
         [[nodiscard]] inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }

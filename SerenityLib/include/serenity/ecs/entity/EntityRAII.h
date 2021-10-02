@@ -16,7 +16,7 @@ class EntityRAII final {
         EntityRAII(Scene& scene)
             : m_Entity{ scene }
         {}
-        constexpr EntityRAII(uint32_t entityID, uint32_t sceneID, uint32_t versionID)
+        constexpr EntityRAII(EntityID entityID, EntityID sceneID, EntityID versionID)
             : m_Entity{ entityID, sceneID, versionID }
         {}
         ~EntityRAII() {
@@ -44,16 +44,16 @@ class EntityRAII final {
 
         inline [[nodiscard]] bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
 
-        inline [[nodiscard]] uint32_t id() const noexcept { return m_Entity.id(); }
-        inline [[nodiscard]] uint32_t sceneID() const noexcept { return m_Entity.sceneID(); }
-        inline [[nodiscard]] uint32_t versionID() const noexcept { return m_Entity.versionID(); }
+        inline [[nodiscard]] EntityID id() const noexcept { return m_Entity.id(); }
+        inline [[nodiscard]] EntityID sceneID() const noexcept { return m_Entity.sceneID(); }
+        inline [[nodiscard]] EntityID versionID() const noexcept { return m_Entity.versionID(); }
 
         inline [[nodiscard]] Engine::view_ptr<Scene> scene() const noexcept { return m_Entity.scene(); }
         inline [[nodiscard]] bool hasParent() const noexcept { return m_Entity.hasParent(); }
 
         inline void addChild(Entity child) const noexcept { m_Entity.addChild(child); }
         inline void removeChild(Entity child) const noexcept { m_Entity.removeChild(child); }
-        inline void removeAllChildren() const noexcept { m_Entity.removeAllChildren(); }
+        //inline void removeAllChildren() const noexcept { m_Entity.removeAllChildren(); }
 
         template<typename T, typename... ARGS> inline bool addComponent(ARGS&&... args) noexcept {
             return m_Entity.addComponent<T>(std::forward<ARGS>(args)...);

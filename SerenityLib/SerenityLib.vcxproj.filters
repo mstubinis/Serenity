@@ -980,6 +980,9 @@
     <ClCompile Include="src\serenity\renderer\opengl\BindTextureRAII.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestEntities.cpp">
+      <Filter>Source Files\Engine\Core\Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">

@@ -4,7 +4,7 @@
 EntityBody::EntityBody(Scene& scene) 
     : Entity{ scene }
 {}
-EntityBody::EntityBody(uint32_t entityID, uint32_t sceneID, uint32_t versionID) 
+EntityBody::EntityBody(EntityID entityID, EntityID sceneID, EntityID versionID)
     : Entity{ entityID, sceneID, versionID }
 {}
 EntityBody::EntityBody(const Entity& other) 

@@ -10,8 +10,7 @@ bool Engine::priv::ECSEntityPool::isEntityVersionDifferent(Entity entity) const 
     return (index >= m_Pool.size()) ? true : (m_Pool[index].versionID() != entity.versionID());
 }
 void Engine::priv::ECSEntityPool::destroyFlaggedEntity(uint32_t entityID) {
-    const auto index          = entityID - 1U;
-
+    const auto index = entityID - 1U;
 #ifndef ENGINE_PRODUCTION
     //check for double destroy
     for (auto idx : m_Freelist) {
@@ -20,7 +19,6 @@ void Engine::priv::ECSEntityPool::destroyFlaggedEntity(uint32_t entityID) {
         }
     }
 #endif
-
     m_Pool[index].m_VersionID++;
     m_Freelist.emplace_back(index);
 }

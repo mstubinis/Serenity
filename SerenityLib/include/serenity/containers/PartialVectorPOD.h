@@ -29,11 +29,6 @@ namespace Engine {
             inline void resize(size_t capacity) {
                 m_Items.resize(capacity);
             }
-
-            //inline void insert(iterator location, move_iterator first, move_iterator last) {
-            //    m_Items.insert(location, first, last);
-            //}
-
             inline constexpr size_t size() const noexcept { return m_Count; }
             inline constexpr size_t capacity() const noexcept { return m_Items.size(); }
             inline constexpr const T* data() const noexcept { return m_Items.data(); }
@@ -45,17 +40,41 @@ namespace Engine {
             inline T& operator[](size_t index) noexcept { return m_Items[index]; }
             inline const T& operator[](size_t index) const noexcept { return m_Items[index]; }
 
-            inline void push(T&& item) noexcept { 
+            inline T& front() noexcept { return m_Items[0]; }
+            inline const T& front() const noexcept { return m_Items[0]; }
+            inline T& back() noexcept { return m_Items[size() - 1]; }
+            inline const T& back() const noexcept { return m_Items[size() - 1]; }
+
+            int push(T&& item) noexcept {
                 if (m_Count >= capacity()) {
-                    return;
+                    return -1;
                 }
-                m_Items[m_Count++] = std::forward<T>(item); 
+                m_Items[m_Count] = std::forward<T>(item); 
+                int res = m_Count++;
+                return res;
             }
             template<class ... ARGS>
-            inline void emplace_push(ARGS&&... args) { m_Items[m_Count++] = T(std::forward<ARGS>(args)...); }
+            int emplace_push(ARGS&&... args) noexcept {
+                m_Items[m_Count] = T(std::forward<ARGS>(args)...);
+                int res = m_Count++;
+                return res;
+            }
 
-            inline void pop() noexcept { m_Items[m_Count - 1] = T(); --m_Count; }
+            inline void pop() noexcept {
+                --m_Count;
+            }
 
+            void swap_and_pop(size_t index) {
+                m_Items[index] = std::move(m_Items.back());
+                pop();
+            }
+            int insert(size_t index, T&& item) {
+                if (index >= m_Count) {
+                    return -1;
+                }
+                m_Items[index] = std::forward<T>(item);
+                return static_cast<int>(index);
+            }
             //notice the end() functions use m_Count instead of end()
             inline typename ContainerType::iterator begin() noexcept { return m_Items.begin(); }
             inline typename ContainerType::const_iterator begin() const noexcept { return m_Items.begin(); }

@@ -5,7 +5,7 @@
 EntityBodyRigid::EntityBodyRigid(Scene& scene)
     : Entity{ scene }
 {}
-EntityBodyRigid::EntityBodyRigid(uint32_t entityID, uint32_t sceneID, uint32_t versionID)
+EntityBodyRigid::EntityBodyRigid(EntityID entityID, EntityID sceneID, EntityID versionID)
     : Entity{ entityID, sceneID, versionID }
 {}
 EntityBodyRigid::EntityBodyRigid(const Entity& other)

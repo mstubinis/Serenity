@@ -8,6 +8,7 @@
 #include <serenity/system/Macros.h>
 #include <serenity/ecs/entity/Entity.h>
 #include <array>
+#include <vector>
 #include <functional>
 
 using PacketSequence  = uint16_t;
@@ -51,20 +52,45 @@ sf::Packet& operator >>(sf::Packet&, glm::dvec2&) noexcept;
 sf::Packet& operator >>(sf::Packet&, glm::dvec3&) noexcept;
 sf::Packet& operator >>(sf::Packet&, glm::dvec4&) noexcept;
 
-template<class T, size_t size>
-inline sf::Packet& operator <<(sf::Packet& packet, const std::array<T, size>& data) noexcept {
-    for (size_t i = 0; i < size - 1; ++i) {
+template<class T, size_t arraySize>
+inline sf::Packet& operator <<(sf::Packet& packet, const std::array<T, arraySize>& data) noexcept {
+    for (size_t i = 0; i < arraySize; ++i) {
         packet << data[i];
     }
-    return packet << data[size - 1];
+    return packet;
 }
-template<class T, size_t size>
-inline sf::Packet& operator >>(sf::Packet& packet, std::array<T, size>& data) noexcept {
-    for (size_t i = 0; i < size - 1; ++i) {
+template<class T, size_t arraySize>
+inline sf::Packet& operator >>(sf::Packet& packet, std::array<T, arraySize>& data) noexcept {
+    for (size_t i = 0; i < arraySize; ++i) {
         packet >> data[i];
     }
-    return packet >> data[size - 1];
+    return packet;
 }
+
+
+template<class T>
+inline sf::Packet& operator <<(sf::Packet& packet, const std::vector<T>& vector) noexcept {
+    sf::Uint32 vecSize = static_cast<sf::Uint32>(vector.size());
+    packet << vecSize;
+    for (sf::Uint32 i = 0; i < vecSize; ++i) {
+        packet << vector[i];
+    }
+    return packet;
+}
+template<class T>
+inline sf::Packet& operator >>(sf::Packet& packet, std::vector<T>& vector) noexcept {
+    sf::Uint32 vecSize;
+    packet >> vecSize;
+    vector.reserve(vecSize);
+    T item;
+    for (sf::Uint32 i = 0; i < vecSize; ++i) {
+        packet >> item;
+        vector.push_back(item);
+    }
+    return packet;
+}
+
+
 
 namespace Engine::Networking {
     class Packet : public sf::Packet {
