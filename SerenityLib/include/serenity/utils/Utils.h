@@ -41,14 +41,18 @@ namespace Engine {
 
     template<class Container>
     void insertion_sort(Container& container) {
-        for (int i = 1; i < container.size(); i++) {
-            auto key = container[i];
-            int j = i - 1;
+        using signed_size_t = std::make_signed_t<std::size_t>;
+        signed_size_t i = 1;
+        signed_size_t sz = static_cast<signed_size_t>(container.size());
+        while (i < sz) {
+            auto key = container[i]; //copy
+            signed_size_t j = i - 1;
             while (j >= 0 && container[j] > key) {
                 container[j + 1] = container[j];
-                --j;
+                j -= 1;
             }
             container[j + 1] = key;
+            i += 1;
         }
     }
 

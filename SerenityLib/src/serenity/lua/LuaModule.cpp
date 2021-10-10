@@ -9,7 +9,6 @@ LUAModule::LUAModule() {
 }
 LUAModule::~LUAModule() {
 
-
 }
 
 void LUAModule::init() {
@@ -18,8 +17,6 @@ void LUAModule::init() {
 const LUABinder& LUAModule::getBinder() const {
     return m_Binder;
 }
-
-
 const Engine::priv::LUABinder& Engine::priv::getLUABinder() {
     return manager->getBinder();
 }

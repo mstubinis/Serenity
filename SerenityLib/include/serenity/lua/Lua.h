@@ -71,7 +71,7 @@ class LuaCallableFunction final {
                     (*m_LUAFunctor)(owner, (args)...);
             }
         #else
-            void operator()(const OWNER* owner, ARGS... args) const {
+            void operator()(const OWNER* owner, ARGS... args) const noexcept {
                 if (m_CPPFunctor) {
                     (*m_CPPFunctor)(owner, (args)...);
                 }else if(m_LUAFunctor){
@@ -79,6 +79,10 @@ class LuaCallableFunction final {
                         (*m_LUAFunctor)(owner, (args)...);
                     }catch (const luabridge::LuaException& luaException) {
                         ENGINE_PRODUCTION_LOG("LuaCallableFunction::operator() LuaException: " << luaException.what())
+                    }catch (const std::exception& e) {
+                        ENGINE_PRODUCTION_LOG("LuaCallableFunction::operator() C++ Exception: " << e.what())
+                    }catch (...) {
+                        ENGINE_PRODUCTION_LOG("LuaCallableFunction::operator() Unknown C++ Exception")
                     }
                 }
             }

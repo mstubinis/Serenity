@@ -5,6 +5,7 @@
 class ComponentTransform;
 
 #include <serenity/system/TypeDefs.h>
+#include <serenity/system/Macros.h>
 #include <glm/vec4.hpp>
 #include <glm/vec3.hpp>
 
@@ -28,20 +29,25 @@ enum class LightType : uint8_t {
     Rod,
     Projection,
 };
-enum class LightRange : uint8_t {
-    _7 = 0, 
-    _13, 
-    _20, 
-    _32, 
-    _50, 
-    _65, 
-    _100, 
-    _160, 
-    _200, 
-    _325, 
-    _600, 
-    _3250,
-_TOTAL};
+class LightRange {
+    public:
+        enum Type : uint8_t {
+            _7 = 0,
+            _13,
+            _20,
+            _32,
+            _50,
+            _65,
+            _100,
+            _160,
+            _200,
+            _325,
+            _600,
+            _3250,
+            _TOTAL
+        };
+        BUILD_ENUM_CLASS_MEMBERS(LightRange, Type)
+};
 enum class LightAttenuation : uint8_t {
     Constant = 0,
     Distance,
@@ -57,7 +63,7 @@ enum class LightShadowFrustumType : uint8_t {
 template<class T>
 class LightBaseData {
     public:
-        static inline uint32_t TYPE_ID = 0;
+        static inline uint32_t TYPE_ID = std::numeric_limits<uint32_t>().max();
     protected:
         glm::vec4          m_Color             = glm::vec4{ 1.0f };
         float              m_DiffuseIntensity  = LIGHT_DEFAULT_DIFFUSE_INTENSITY;

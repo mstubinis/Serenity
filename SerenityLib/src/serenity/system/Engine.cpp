@@ -121,13 +121,9 @@ void EngineCore::init(const EngineOptions& options) {
     //the scene is the root of all games. create the default scene if 1 does not exist already
     if (m_ResourceManager.m_Scenes.size() == 0) {
         Scene& defaultScene = Engine::Resources::addScene<Scene>("Default");
+        auto default_camera = defaultScene.addCamera<Camera>(60.0f, (float)options.width / (float)options.height, 0.01f, 1000.0f);
         Engine::Resources::setCurrentScene(&defaultScene);
     }
-    Scene& scene = *m_ResourceManager.m_CurrentScene;
-    if (!scene.getActiveCamera()) {
-        auto default_camera = scene.addCamera<Camera>(60.0f, (float)options.width / (float)options.height, 0.01f, 1000.0f);
-    }
-
     Engine::Renderer::ssao::setLevel((SSAOLevel::Level)options.ssao_level);
     Engine::Renderer::godRays::enable(options.god_rays_enabled);
     Engine::Renderer::hdr::setAlgorithm((HDRAlgorithm::Algorithm)options.hdr);
@@ -149,6 +145,9 @@ void EngineCore::internal_update_logic(Scene& scene, const float dt) {
 
     m_DiscordModule.update();
     m_DebugManager.calculate_logic();
+
+    Game::onPostUpdate(dt);
+    scene.postUpdate(dt);
 }
 void EngineCore::internal_update_sounds(Scene& scene, const float dt) {
     m_DebugManager.stop_clock();
@@ -160,8 +159,6 @@ void EngineCore::internal_pre_update(Scene& scene, const float dt) {
     scene.preUpdate(dt);
 }
 void EngineCore::internal_post_update(Scene& scene, Window& window, const float dt) {
-    Game::onPostUpdate(dt);
-    scene.postUpdate(dt);
     m_EventModule.postUpdate();
     window.m_Data.internal_update_on_reset_events(dt);
 }

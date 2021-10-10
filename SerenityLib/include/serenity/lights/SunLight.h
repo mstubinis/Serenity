@@ -9,9 +9,10 @@ namespace Engine::priv {
 };
 
 #include <serenity/lights/LightIncludes.h>
-#include <serenity/ecs/entity/EntityBody.h>
+#include <serenity/dependencies/glm.h>
+#include <serenity/ecs/entity/Entity.h>
 
-class SunLight : public EntityBody, public LightBaseData<SunLight> {
+class SunLight : public Entity, public LightBaseData<SunLight> {
     friend class ::Engine::priv::RenderModule;
     public:
         SunLight() = delete;

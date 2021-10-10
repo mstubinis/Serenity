@@ -8,7 +8,7 @@ class SystemGameUpdate final : public SystemCRTP<SystemGameUpdate> {
     private:
 
     public:
-        SystemGameUpdate(Engine::priv::ECS& ecs);
+        SystemGameUpdate(Engine::priv::ECS&);
 };
 
 #endif

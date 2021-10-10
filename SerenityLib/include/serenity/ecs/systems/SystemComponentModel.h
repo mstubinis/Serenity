@@ -11,7 +11,7 @@ class SystemComponentModel final : public SystemCRTP<SystemComponentModel, Compo
     private:
 
     public:
-        SystemComponentModel(Engine::priv::ECS& ecs);
+        SystemComponentModel(Engine::priv::ECS&);
 };
 
 #endif

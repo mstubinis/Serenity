@@ -79,11 +79,11 @@ namespace Engine::Resources {
         auto& mgr = *Engine::priv::ResourceManager::RESOURCE_MANAGER;
         for (uint32_t i = 0; i < mgr.m_Scenes.size(); ++i) {
             if (mgr.m_Scenes[i] == nullptr) {
-                mgr.m_Scenes[i].reset( NEW T{ i + 1, std::forward<ARGS>(args)... } );
+                mgr.m_Scenes[i].reset( NEW T{ i, std::forward<ARGS>(args)... } );
                 return *static_cast<T*>(mgr.m_Scenes[i].get());
             }
         }
-        mgr.m_Scenes.emplace_back(std::unique_ptr<T>( NEW T{ static_cast<uint32_t>(mgr.m_Scenes.size() + 1), std::forward<ARGS>(args)... } ));
+        mgr.m_Scenes.emplace_back(std::unique_ptr<T>( NEW T{ uint32_t(mgr.m_Scenes.size()), std::forward<ARGS>(args)... } ));
         return *static_cast<T*>(mgr.m_Scenes.back().get());
     }
 

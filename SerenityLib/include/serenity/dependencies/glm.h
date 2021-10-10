@@ -24,7 +24,9 @@
     using glm_mat3 = glm::mat3;
     using glm_mat4 = glm::mat4;
 #else
-    #define BT_USE_DOUBLE_PRECISION
+    #ifndef BT_USE_DOUBLE_PRECISION
+        #define BT_USE_DOUBLE_PRECISION
+    #endif
     using decimal  = double;
     using glm_vec2 = glm::dvec2;
     using glm_vec3 = glm::dvec3;

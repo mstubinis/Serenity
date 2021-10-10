@@ -99,7 +99,7 @@ class ModelInstance final : public Observer {
         inline bool isShadowCaster() const noexcept { return m_IsShadowCaster; }
 
         static inline void setGlobalDistanceFactor(decimal factor) noexcept { m_GlobalDistanceFactor = factor; }
-        static inline constexpr decimal getGlobalDistanceFactor() noexcept { return m_GlobalDistanceFactor; }
+        static inline decimal getGlobalDistanceFactor() noexcept { return m_GlobalDistanceFactor; }
 
         inline void setUserPointer(void* userPtr) noexcept { m_UserPointer = userPtr; }
         inline void* getUserPointer() const noexcept { return m_UserPointer; }

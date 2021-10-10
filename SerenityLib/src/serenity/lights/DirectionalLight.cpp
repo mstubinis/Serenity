@@ -5,7 +5,7 @@
 #include <serenity/system/Engine.h>
 
 DirectionalLight::DirectionalLight(Scene* scene, float directionX, float directionY, float directionZ)
-    : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
+    : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
     , LightBaseData<DirectionalLight>{ LightType::Directional }
 {
     addComponent<ComponentTransform>();

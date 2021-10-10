@@ -9,7 +9,7 @@ class SystemSceneChanging final : public SystemCRTP<SystemSceneChanging> {
     private:
 
     public:
-        SystemSceneChanging(Engine::priv::ECS& ecs);
+        SystemSceneChanging(Engine::priv::ECS&);
 };
 
 #endif

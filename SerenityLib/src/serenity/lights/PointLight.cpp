@@ -6,11 +6,11 @@
 #include <serenity/scene/Scene.h>
 
 PointLight::PointLight(Scene* scene, decimal x, decimal y, decimal z)
-    : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
+    : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
     , LightBaseData<PointLight>{ LightType::Point }
 {
     addComponent<ComponentTransform>();
-    setPosition(x, y, z);
+    getComponent<ComponentTransform>()->setPosition(x, y, z);
     calculateCullingRadius();
 }
 PointLight::PointLight(Scene* scene, const glm_vec3& pos)

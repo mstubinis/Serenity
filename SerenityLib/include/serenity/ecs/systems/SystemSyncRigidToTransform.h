@@ -16,7 +16,7 @@ class SystemSyncRigidToTransform final : public SystemCRTP<SystemSyncRigidToTran
     private:
 
     public:
-        SystemSyncRigidToTransform(Engine::priv::ECS& ecs);
+        SystemSyncRigidToTransform(Engine::priv::ECS&);
 };
 
 #endif

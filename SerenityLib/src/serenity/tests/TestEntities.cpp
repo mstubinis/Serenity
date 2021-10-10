@@ -1,10 +1,6 @@
 
 #include <serenity/ecs/entity/Entity.h>
-#include <serenity/ecs/entity/EntityBody.h>
-#include <serenity/ecs/entity/EntityBodyRigid.h>
 #include <serenity/ecs/entity/EntityRAII.h>
-#include <serenity/ecs/entity/EntityRAIIBody.h>
-#include <serenity/ecs/entity/EntityRAIIBodyRigid.h>
 
 #include <catch.hpp>
 

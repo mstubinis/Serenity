@@ -5,11 +5,11 @@
 #include <serenity/resources/Engine_Resources.h>
 
 SpotLight::SpotLight(Scene* scene, decimal x, decimal y, decimal z, const glm_vec3& direction, float innerCutoffInDegrees, float outerCutoffInDegrees)
-    : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
+    : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
     , LightBaseData<SpotLight>{ LightType::Spot }
 {
     addComponent<ComponentTransform>();
-    setPosition(x, y, z);
+    getComponent<ComponentTransform>()->setPosition(x, y, z);
     setCutoffDegrees(innerCutoffInDegrees);
     setCutoffOuterDegrees(outerCutoffInDegrees);
     setDirection(direction);

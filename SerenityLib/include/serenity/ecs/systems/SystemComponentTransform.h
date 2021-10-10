@@ -12,7 +12,7 @@ class  ComponentTransform;
 class SystemComponentTransform final : public SystemCRTP<SystemComponentTransform, ComponentTransform> {
     friend class  ComponentTransform;
     public:
-        SystemComponentTransform(Engine::priv::ECS& ecs);
+        SystemComponentTransform(Engine::priv::ECS&);
 };
 
 #endif

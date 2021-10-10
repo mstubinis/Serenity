@@ -30,14 +30,16 @@ class SystemBaseClass {
     using FuncSceneEntered               = void(*)(SystemBaseClass&, Scene&);
     using FuncSceneLeft                  = void(*)(SystemBaseClass&, Scene&);
     private:
-        bool hasEntity(Entity entity) const noexcept;
+        bool hasEntity(Entity) const noexcept;
+        [[nodiscard]] size_t getEntityIdxInContainer(uint32_t entityID) const noexcept;
+        [[nodiscard]] size_t getEntityIdxInContainer(Entity) const noexcept;
         bool hasAssociatedComponent(uint32_t typeID) noexcept;
         void associateComponentImpl(uint32_t typeID);
         void sortEntities() noexcept;
     protected:
         Engine::priv::ECS&             m_ECS;
         std::vector<Entity>            m_Entities;
-        ComponentPoolContainer         m_Components;
+        ComponentPoolContainer         m_AssociatedComponents;
 
         FuncUpdate                     m_UpdateFunction                     = [](SystemBaseClass&, const float dt, Scene&) {};
         FuncComponentAddedToEntity     m_ComponentAddedToEntityFunction     = [](SystemBaseClass&, void*, Entity) {};
@@ -50,19 +52,19 @@ class SystemBaseClass {
             : m_ECS { ecs }
         {}
 
-        void onUpdate(const float dt, Scene& scene) noexcept;
-        void onEntityAddedToScene(Scene& scene, Entity entity) noexcept;
-        void onComponentAddedToEntity(void* component, Entity entity) noexcept;
-        void onComponentRemovedFromEntity(Entity entity) noexcept;
-        void onSceneEntered(Scene& scene) noexcept;
-        void onSceneLeft(Scene& scene) noexcept;
+        void onUpdate(const float dt, Scene&) noexcept;
+        void onEntityAddedToScene(Scene&, Entity) noexcept;
+        void onComponentAddedToEntity(void* component, Entity) noexcept;
+        void onComponentRemovedFromEntity(Entity) noexcept;
+        void onSceneEntered(Scene&) noexcept;
+        void onSceneLeft(Scene&) noexcept;
 
         [[nodiscard]] inline Engine::priv::ECS& getECS() noexcept { return m_ECS; }
         [[nodiscard]] Entity getEntity(uint32_t entityID) const noexcept;
 
-        void addEntity(Entity entity) noexcept;
-        void removeEntity(Entity entity) noexcept;
-        void eraseEntity(std::vector<Entity>& vec, Entity entity);
+        void addEntity(Entity) noexcept;
+        void removeEntity(Entity) noexcept;
+        bool eraseEntity(std::vector<Entity>& vec, Entity);
 
         template<class FUNC> void setUpdateFunction(FUNC&& func) noexcept;
         template<class FUNC> void setComponentAddedToEntityFunction(FUNC&& func) noexcept;
@@ -79,7 +81,7 @@ class SystemBaseClass {
 template<class SYSTEM, class ... COMPONENTS>
 class SystemCRTP : public SystemBaseClass {
     public:
-        static inline uint32_t TYPE_ID = 0;
+        static inline uint32_t TYPE_ID = std::numeric_limits<uint32_t>().max();
     private:
         template<class COMPONENT>
         COMPONENT* buildTupleImpl(Entity entity, uint32_t& idx) {

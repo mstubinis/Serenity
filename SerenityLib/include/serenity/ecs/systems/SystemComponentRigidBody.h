@@ -12,7 +12,7 @@ class  ComponentRigidBody;
 class SystemComponentRigidBody final : public SystemCRTP<SystemComponentRigidBody, ComponentRigidBody> {
     friend class  ComponentRigidBody;
     public:
-        SystemComponentRigidBody(Engine::priv::ECS& ecs);
+        SystemComponentRigidBody(Engine::priv::ECS&);
 };
 
 #endif

@@ -100,7 +100,7 @@ void Engine::priv::EditorCore::renderLightIcons(Scene& scene) {
             auto render_light_icons = [&camera](auto& container, Handle texture) {
                 const auto depth = 0.1f;
                 for (const auto& light : container) {
-                    const auto twoDPos = Engine::Math::getScreenCoordinates(glm::vec3{ light->getPosition() }, *camera, false);
+                    const auto twoDPos = Engine::Math::getScreenCoordinates(glm::vec3{ light->getComponent<ComponentTransform>()->getPosition() }, *camera, false);
                     if (twoDPos.z > 0) {
                         Engine::Renderer::renderTexture(texture, glm::vec2{ twoDPos }, light->getColor(), 0.0f, glm::vec2{ 1.0f }, depth);
                     }

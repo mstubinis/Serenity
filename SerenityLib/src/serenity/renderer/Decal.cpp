@@ -24,7 +24,7 @@ namespace Engine::priv {
 };
 
 Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::vec3& hitNormal, float size, Scene& scene, float lifetimeMax, RenderStage stage)
-    : EntityBody{ scene }
+    : Entity{ scene }
     , m_InitialPosition{ localPosition }
     , m_LifetimeMax{ lifetimeMax}
 {
@@ -48,7 +48,7 @@ Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::ve
     model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor);
 }
 Decal::Decal(Decal&& other) noexcept 
-    : EntityBody       { std::move(other) }
+    : Entity           { std::move(other) }
     , m_LifetimeCurrent{ std::move(other.m_LifetimeCurrent) }
     , m_LifetimeMax    { std::move(other.m_LifetimeMax) }
     , m_Active         { std::move(other.m_Active) }
@@ -56,7 +56,7 @@ Decal::Decal(Decal&& other) noexcept
     , m_InitialRotation{ std::move(other.m_InitialRotation) }
 {}
 Decal& Decal::operator=(Decal&& other) noexcept {
-    EntityBody::operator=( std::move(other) );
+    Entity::operator=( std::move(other) );
     m_LifetimeCurrent   = std::move(other.m_LifetimeCurrent);
     m_LifetimeMax       = std::move(other.m_LifetimeMax);
     m_Active            = std::move(other.m_Active);

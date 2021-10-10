@@ -30,7 +30,7 @@ void Particle::init(const glm::vec3& emitterPosition, const glm::quat& emitterRo
     auto emitterScale             = emitterTransform.getScale();
 
     m_Velocity                    = emitter.m_Properties->m_InitialVelocityFunctor(*this) * emitterScale;
-    auto rotated_initial_velocity = Engine::Math::rotate_vec3(emitter.getRotation(), m_Velocity);
+    auto rotated_initial_velocity = Engine::Math::rotate_vec3(emitter.getComponent<ComponentTransform>()->getRotation(), m_Velocity);
     if (!emitter.m_Parent.null()) {
         auto parentBody = emitter.m_Parent.getComponent<ComponentTransform>();
         if (parentBody) {

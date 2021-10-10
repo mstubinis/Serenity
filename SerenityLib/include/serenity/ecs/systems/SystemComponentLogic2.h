@@ -10,7 +10,7 @@ class SystemComponentLogic2 final : public SystemCRTP<SystemComponentLogic2, Com
     private:
 
     public:
-        SystemComponentLogic2(Engine::priv::ECS& ecs);
+        SystemComponentLogic2(Engine::priv::ECS&);
 };
 
 #endif

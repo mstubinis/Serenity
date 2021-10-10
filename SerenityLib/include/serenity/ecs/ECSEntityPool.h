@@ -34,9 +34,9 @@ namespace Engine::priv {
             [[nodiscard]] Entity createEntity(const Scene&) noexcept;
             [[nodiscard]] Entity getEntityFromID(uint32_t entityID) const noexcept;
 
-
             void clear() noexcept {
-                m_Pool.clear(); m_Freelist.clear();
+                m_Pool.clear(); 
+                m_Freelist.clear();
             }
 
             BUILD_BEGIN_END_ITR_CLASS_MEMBERS(std::vector<Entity>, m_Pool)

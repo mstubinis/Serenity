@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ENGINE_CONTAINERS_FREELIST_H
 #define ENGINE_CONTAINERS_FREELIST_H
 

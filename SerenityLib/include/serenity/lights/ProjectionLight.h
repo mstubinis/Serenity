@@ -20,7 +20,7 @@ class ProjectionLightShadowData {
 
 };
 
-class ProjectionLight : public EntityBody, public LightBaseData<ProjectionLight> {
+class ProjectionLight : public Entity, public LightBaseData<ProjectionLight> {
     friend class Engine::priv::RenderModule;
     friend class Engine::priv::IRenderingPipeline;
     protected:

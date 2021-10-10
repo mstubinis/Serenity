@@ -15,9 +15,7 @@ SystemComponentModel::SystemComponentModel(Engine::priv::ECS& ecs)
     });
     setComponentAddedToEntityFunction([](SystemBaseClass& inSystem, void* component, Entity entity) {
         auto* componentModel = static_cast<ComponentModel*>(component);
-        //if (componentModel) {
-            Engine::priv::ComponentModel_Functions::CalculateRadius(*componentModel);
-        //}
+        Engine::priv::ComponentModel_Functions::CalculateRadius(*componentModel);
     });
     setEntityAddedToSceneFunction([](SystemBaseClass& inSystem, Scene& scene, Entity entity) {
         auto& pool           = inSystem.getComponentPool<ComponentModel>(0);

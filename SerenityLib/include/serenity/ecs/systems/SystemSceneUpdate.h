@@ -8,7 +8,7 @@ class SystemSceneUpdate final : public SystemCRTP<SystemSceneUpdate> {
     private:
 
     public:
-        SystemSceneUpdate(Engine::priv::ECS& ecs);
+        SystemSceneUpdate(Engine::priv::ECS&);
 };
 
 #endif

@@ -85,16 +85,16 @@ void MeshRequest::request(bool inAsync) {
                 if (m_Async || !Engine::priv::threading::isMainThread()) {
                     if (Engine::priv::threading::isMainThread()) {
                         threading::addJobWithPostCallback(l_cpu, l_gpu);
-                    }else{
+                    } else {
                         threading::submitTaskForMainThread([=]() mutable {
                             threading::addJobWithPostCallback(l_cpu, l_gpu);
                         });
                     }
-                }else{
+                } else {
                     l_cpu();
                     l_gpu();
                 }
-            }else{
+            } else {
                 ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): mesh request - " << m_FileOrData << " was invalid (populate() failed)!")
             }
         }
@@ -110,9 +110,8 @@ bool MeshRequest::populate() {
         if (!&aiscene || (aiscene.mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !&aiRootNode) {
             return false;
         }
-
         MeshLoader::LoadPopulateGlobalNodes(aiscene, &aiRootNode, *this);
-    }else{
+    } else {
         auto& part   = m_Parts.emplace_back();
         part.name    = m_FileOrData;
         part.handle  = Engine::Resources::addResource<Mesh>();
@@ -127,17 +126,16 @@ void PublicMeshRequest::LoadCPU(MeshRequest& meshRequest) {
         MeshLoader::LoadProcessNodeData(meshRequest, aiscene, aiRootNode);
         auto& part        = meshRequest.m_Parts[0];
         auto mutex        = part.handle.getMutex();
-        if (mutex) {
-            std::unique_lock lock{ *mutex };
-            auto& mesh = *part.handle.get<Mesh>();
-            mesh.setName(part.name);
-            mesh.m_CPUData = std::move(part.cpuData);
-            mesh.m_CPUData.m_NodeData = std::move(meshRequest.m_NodeData);
 
-            //TODO: this just saves any imported model as the engine's optimized format. Remove this upon release.
-            std::string saveFileName = (meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str();
-            SMSH_File::SaveFile(saveFileName.c_str(), mesh.m_CPUData);
-        }
+        std::unique_lock lock{ *mutex };
+        auto& mesh = *part.handle.get<Mesh>();
+        mesh.setName(part.name);
+        mesh.m_CPUData = std::move(part.cpuData);
+        mesh.m_CPUData.m_NodeData = std::move(meshRequest.m_NodeData);
+
+        //TODO: this just saves any imported model as the engine's optimized format. Remove this upon release.
+        std::string saveFileName = (meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str();
+        SMSH_File::SaveFile(saveFileName.c_str(), mesh.m_CPUData);
     }else if (meshRequest.m_FileExtension == ".smsh") {
         for (auto& part : meshRequest.m_Parts) {
             part.cpuData.m_Threshold = meshRequest.m_Threshold;
@@ -145,12 +143,10 @@ void PublicMeshRequest::LoadCPU(MeshRequest& meshRequest) {
             part.cpuData.internal_calculate_radius();
             part.cpuData.m_CollisionFactory = NEW MeshCollisionFactory{ part.cpuData, meshRequest.m_CollisionLoadingFlags };
             auto mutex                      = part.handle.getMutex();
-            if (mutex) {
-                std::unique_lock lock{ *mutex };
-                auto& mesh = *part.handle.get<Mesh>();
-                mesh.setName(part.name);
-                mesh.m_CPUData = std::move(part.cpuData);
-            }
+            std::unique_lock lock{ *mutex };
+            auto& mesh = *part.handle.get<Mesh>();
+            mesh.setName(part.name);
+            mesh.m_CPUData = std::move(part.cpuData);
         }
     }
 }

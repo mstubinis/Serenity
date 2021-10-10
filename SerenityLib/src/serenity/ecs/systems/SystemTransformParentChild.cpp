@@ -8,8 +8,6 @@
 
 #include <serenity/utils/Utils.h>
 
-constexpr const uint32_t NULL_INDEX = std::numeric_limits<uint32_t>().max();
-
 SystemTransformParentChild::SystemTransformParentChild(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
@@ -33,28 +31,25 @@ SystemTransformParentChild::SystemTransformParentChild(Engine::priv::ECS& ecs)
     setComponentRemovedFromEntityFunction([](SystemBaseClass& inSystem, Entity entity) {
         auto& system         = static_cast<SystemTransformParentChild&>(inSystem);
         const auto id        = entity.id();
-        const auto thisIndex = id - 1;
-        if (system.m_Parents[thisIndex] > 0) {
-            system.removeChild(system.m_Parents[thisIndex], id);
+        if (system.m_Parents[id] != NULL_IDX) {
+            system.removeChild(system.m_Parents[id], id);
         }
     });
 }
 Entity SystemTransformParentChild::getParentEntity(Entity entity) const {
-    auto parent = m_Parents[entity.id() - 1];
-    if (parent > 0) {
+    auto parent = m_Parents[entity.id()];
+    if (parent != NULL_IDX) {
         return getEntity(parent);
     }
     return Entity{};
 }
 bool SystemTransformParentChild::computeEntityParentChild(uint32_t entityID) {
-    if (entityID > 0) {
-        const uint32_t entityIndex = entityID - 1;
-        const uint32_t parentID    = m_Parents[entityIndex];
-        if (parentID == 0) {
-            m_WorldTransforms[entityIndex] = m_LocalTransforms[entityIndex];
+    if (entityID != NULL_IDX) {
+        const uint32_t parentID = m_Parents[entityID];
+        if (parentID == NULL_IDX) {
+            m_WorldTransforms[entityID] = m_LocalTransforms[entityID];
         } else {
-            const uint32_t parentIndex = parentID - 1;
-            m_WorldTransforms[entityIndex] = m_WorldTransforms[parentIndex] * m_LocalTransforms[entityIndex];
+            m_WorldTransforms[entityID] = m_WorldTransforms[parentID] * m_LocalTransforms[entityID];
         }
     } else {
         return false;
@@ -81,9 +76,9 @@ void SystemTransformParentChild::computeAllParentChildWorldTransforms() {
 }
 void SystemTransformParentChild::syncRigidToTransform(ComponentRigidBody* rigidBody, ComponentCollisionShape* collisionShape, Entity entity) {
     if (rigidBody) {
-        const auto& thisWorldMatrix        = m_WorldTransforms[entity.id() - 1];
+        const auto& thisWorldMatrix        = m_WorldTransforms[entity.id()];
         if (collisionShape && collisionShape->isChildShape()) {
-            const auto& parentWorldMatrix  = m_WorldTransforms[collisionShape->getParent().id() - 1];
+            const auto& parentWorldMatrix  = m_WorldTransforms[collisionShape->getParent().id()];
             auto localMatrix               = glm::inverse(parentWorldMatrix) * thisWorldMatrix;
             const auto localScale          = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(localMatrix);
             collisionShape->updateChildShapeTransform(localMatrix);
@@ -94,7 +89,7 @@ void SystemTransformParentChild::syncRigidToTransform(ComponentRigidBody* rigidB
 }
 
 void SystemTransformParentChild::resize(size_t size) {
-    m_Parents.resize(size, 0);
+    m_Parents.resize(size, NULL_IDX);
     m_WorldTransforms.resize(size, glm_mat4{ 1.0 });
     m_LocalTransforms.resize(size, glm_mat4{ 1.0 });
 }
@@ -104,24 +99,24 @@ void SystemTransformParentChild::reserve(size_t size) {
     m_LocalTransforms.reserve(size);
 }
 void SystemTransformParentChild::acquireMoreMemory(uint32_t entityID) {
-    if (m_Parents.capacity() < entityID) {
+    if (m_Parents.capacity() <= entityID) {
         reserve(entityID + 50);
     }
-    if (m_Parents.size() < entityID) {
-        resize(entityID);
+    if (m_Parents.size() <= entityID) {
+        resize(entityID + 1);
     }
 }
 void SystemTransformParentChild::internal_reserve_from_insert(uint32_t parentID, uint32_t childID) {
-    if (m_Parents.capacity() < parentID || m_Parents.capacity() < childID) {
+    if (m_Parents.capacity() <= parentID || m_Parents.capacity() <= childID) {
         reserve(std::max(parentID, childID) + 50);
     }
-    if (m_Parents.size() < parentID || m_Parents.size() < childID) {
-        resize(std::max(parentID, childID));
+    if (m_Parents.size() <= parentID || m_Parents.size() <= childID) {
+        resize(std::max(parentID, childID) + 1);
     }
 }
 uint32_t SystemTransformParentChild::getRootParent(uint32_t childID) noexcept {
-    uint32_t parent = m_Parents[childID - 1];
-    while (parent != 0 && getParent(parent) != 0) {
+    uint32_t parent = m_Parents[childID];
+    while (parent != NULL_IDX && getParent(parent) != NULL_IDX) {
         parent = getParent(parent);
     }
     return parent;
@@ -134,13 +129,13 @@ void SystemTransformParentChild::addChild(uint32_t parentID, uint32_t childID) {
     auto parentBlock = getBlockIndices(parentID); //O(order.size())
     auto childBlock  = getBlockIndices(childID);  //O(order.size())
 
-    if (parentBlock.first == NULL_INDEX && childBlock.first == NULL_INDEX) {
+    if (parentBlock.first == NULL_IDX && childBlock.first == NULL_IDX) {
         m_Order.push_back(parentID);
         m_Order.push_back(childID);
-    } else if (parentBlock.first != NULL_INDEX && childBlock.first == NULL_INDEX) {
+    } else if (parentBlock.first != NULL_IDX && childBlock.first == NULL_IDX) {
         //parent found, not child
         m_Order.insert(std::begin(m_Order) + (parentBlock.first + 1), childID);
-    } else if (parentBlock.first == NULL_INDEX && childBlock.first != NULL_INDEX) {
+    } else if (parentBlock.first == NULL_IDX && childBlock.first != NULL_IDX) {
         //child found, not parent
         m_Order.insert(std::begin(m_Order) + childBlock.first, parentID);
     } else {
@@ -168,7 +163,7 @@ void SystemTransformParentChild::removeChild(uint32_t parentID, uint32_t childID
         return;
     }
     auto parentBlock = getBlockIndices(parentID); //O(order.size())
-    if (parentBlock.first == NULL_INDEX) {
+    if (parentBlock.first == NULL_IDX) {
         return;
     }
     auto childBlock         = getBlockIndices(childID);  //O(order.size())
@@ -183,13 +178,13 @@ void SystemTransformParentChild::removeChild(uint32_t parentID, uint32_t childID
         m_Order.erase(std::cbegin(m_Order) + childBlock.first, std::cbegin(m_Order) + childBlock.second + 1);
         m_Order.insert(std::cend(m_Order), std::begin(temp), std::end(temp));
     }
-    if (parentBlock.first == m_Order.size() - 1 || getParent(m_Order[parentBlock.first + 1]) == 0) { //TODO: check for out of bounds possibility
+    if (parentBlock.first == m_Order.size() - 1 || getParent(m_Order[parentBlock.first + 1]) == NULL_IDX) { //TODO: check for out of bounds possibility
         m_Order.erase(std::cbegin(m_Order) + parentBlock.first);
     }
-    getParent(childID) = 0;
+    getParent(childID) = NULL_IDX;
 }
 std::pair<uint32_t, uint32_t> SystemTransformParentChild::getBlockIndices(uint32_t ID) {
-    std::pair<uint32_t, uint32_t> ret{ NULL_INDEX, static_cast<uint32_t>(m_Order.size() - 1) };
+    std::pair<uint32_t, uint32_t> ret{ NULL_IDX, uint32_t(m_Order.size() - 1) };
     //find first index
     for (uint32_t i = 0; i < m_Order.size(); ++i) {
         if (m_Order[i] == ID) {

@@ -12,7 +12,7 @@ LUAState::~LUAState() {
         lua_close(L);
     }
 }
-int LUAState::runFile(const std::string& filename) const {
+int LUAState::runFile(const std::string& filename) const noexcept {
     int ret = -1;
     auto* filenameC = filename.c_str();
     if (luaL_loadfile(L, filenameC) || lua_pcall(L, 0, 0, 0)) {

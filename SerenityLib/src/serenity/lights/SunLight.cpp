@@ -6,11 +6,11 @@
 #include <serenity/system/Engine.h>
 
 SunLight::SunLight(Scene* scene, decimal x, decimal y, decimal z)
-    : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
+    : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
     , LightBaseData<SunLight>{ LightType::Sun }
 {
     addComponent<ComponentTransform>();
-    setPosition(x, y, z);
+    getComponent<ComponentTransform>()->setPosition(x, y, z);
 }
 SunLight::SunLight(Scene* scene, const glm_vec3& pos)
     : SunLight{ scene, pos.x, pos.y, pos.z }

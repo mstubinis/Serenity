@@ -22,6 +22,12 @@
 #endif
 #pragma endregion
 
+#ifdef __clang__
+    #define ITR_TYPENAME class
+#else
+    #define ITR_TYPENAME 
+#endif
+
 #ifndef ENGINE_PRODUCTION
     #include <iostream>
 #endif
@@ -258,12 +264,14 @@
     inline const TYPE::const_iterator cend() const noexcept { return VAR.cend(); }
 
 #define BUILD_TEMPLATE_BEGIN_END_ITR_CLASS_MEMBERS(TYPE, VAR) \
-    inline typename TYPE::iterator begin() noexcept { return VAR.begin(); } \
-    inline typename TYPE::const_iterator begin() const noexcept { return VAR.begin(); } \
-    inline typename TYPE::iterator end() noexcept { return VAR.end(); } \
-    inline typename TYPE::const_iterator end() const noexcept { return VAR.end(); } \
-    inline typename const TYPE::const_iterator cbegin() const noexcept { return VAR.cbegin(); } \
-    inline typename const TYPE::const_iterator cend() const noexcept { return VAR.cend(); }
+    using itr = typename TYPE::iterator; \
+    using itr_const = typename TYPE::const_iterator; \
+    inline itr begin() noexcept { return VAR.begin(); } \
+    inline itr_const begin() const noexcept { return VAR.begin(); } \
+    inline itr end() noexcept { return VAR.end(); } \
+    inline itr_const end() const noexcept { return VAR.end(); } \
+    inline const itr_const cbegin() const noexcept { return VAR.cbegin(); } \
+    inline const itr_const cend() const noexcept { return VAR.cend(); }
 
 #define BUILD_ENUM_CLASS_MEMBERS(TYPE, INNER_TYPE) \
     private: TYPE::INNER_TYPE m_Type; \

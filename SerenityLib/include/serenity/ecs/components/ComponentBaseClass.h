@@ -11,8 +11,8 @@ class ComponentBaseClass {
     private:
 
     public:
-        //static inline std::atomic<uint32_t> TYPE_ID = 0;
-        static inline uint32_t TYPE_ID = 0;
+        //static inline std::atomic<uint32_t> TYPE_ID = std::numeric_limits<uint32_t>().max();
+        static inline uint32_t TYPE_ID = std::numeric_limits<uint32_t>().max();
 };
 
 #endif

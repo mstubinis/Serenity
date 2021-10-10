@@ -12,7 +12,7 @@ constexpr const uint32_t  DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE   = 2048;
 constexpr const uint8_t   DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS = 4;
 constexpr const uint8_t   DIRECTIONAL_LIGHT_NUM_FRUSTUM_CORNERS       = 8;
 
-class DirectionalLight : public EntityBody, public LightBaseData<DirectionalLight> {
+class DirectionalLight : public Entity, public LightBaseData<DirectionalLight> {
     friend class Engine::priv::RenderModule;
     public:
         DirectionalLight() = delete;

@@ -4,7 +4,7 @@
 
 namespace Engine {
     //a simple wrapper around a raw pointer that prevents explicit deletion by the user.
-    template<typename T>
+    template<class T>
     class view_ptr final {
         private:
             T* m_Ptr = nullptr;
@@ -15,6 +15,8 @@ namespace Engine {
             inline T& operator* () noexcept { return *m_Ptr; }
             inline operator bool() const noexcept { return static_cast<bool>(m_Ptr); }
             inline operator T*() const noexcept { return m_Ptr; }
+
+            [[nodiscard]] inline bool equals(const view_ptr& other) const noexcept { return m_Ptr == other.m_Ptr; }
 
             //returns the static_cast of the underlying pointer to the templated type if the typeid's match. Otherwise returns nullptr.
             //this is faster than using dynamic_cast
@@ -33,5 +35,6 @@ namespace Engine {
 
     };
 }
+
 
 #endif

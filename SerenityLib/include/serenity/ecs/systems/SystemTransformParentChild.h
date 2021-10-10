@@ -13,12 +13,14 @@ class  ComponentCollisionShape;
 //computes updated world matrices by walking the parent child heirarchy, also updates bullet physics matrices to the newly updated world matrices
 class SystemTransformParentChild final : public SystemCRTP<SystemTransformParentChild, ComponentTransform> {
     friend class  ComponentTransform;
+    public:
+        static inline constexpr const uint32_t NULL_IDX = std::numeric_limits<uint32_t>().max();
     private:
-        [[nodiscard]] inline uint32_t& getParent(uint32_t childID) noexcept { return m_Parents[childID - 1]; }
+        [[nodiscard]] inline uint32_t& getParent(uint32_t childID) noexcept { return m_Parents[childID]; }
 
         [[nodiscard]] uint32_t getRootParent(uint32_t childID) noexcept;
-        [[nodiscard]] inline glm_mat4& getWorld(uint32_t ID) noexcept { return m_WorldTransforms[ID - 1]; }
-        [[nodiscard]] inline glm_mat4& getLocal(uint32_t ID) noexcept { return m_LocalTransforms[ID - 1]; }
+        [[nodiscard]] inline glm_mat4& getWorld(uint32_t ID) noexcept { return m_WorldTransforms[ID]; }
+        [[nodiscard]] inline glm_mat4& getLocal(uint32_t ID) noexcept { return m_LocalTransforms[ID]; }
 
         void internal_reserve_from_insert(uint32_t parentID, uint32_t childID);  
 

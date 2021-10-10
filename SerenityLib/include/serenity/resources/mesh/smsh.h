@@ -162,7 +162,7 @@ struct SMSH_Attribute final : public SMSH_AttributeNoBuffer {
     const uint8_t*  m_AttributeBuffer = nullptr;
 
     SMSH_Attribute(SMSH_AttributeDataType type, SMSH_AttributeComponentSize componentCount, uint32_t offset, uint32_t normalized, uint32_t stride, uint32_t sizeOfAttr, uint32_t attributeBufferSize)
-        : SMSH_AttributeNoBuffer{ type, (uint32_t)componentCount, offset, normalized, stride, sizeOfAttr, attributeBufferSize }
+        : SMSH_AttributeNoBuffer{ type, (uint32_t)componentCount, offset, (uint8_t)normalized, stride, sizeOfAttr, attributeBufferSize }
     {}
 
 

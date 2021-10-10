@@ -10,18 +10,19 @@ LuaScript::LuaScript(const std::string& fileName, bool run)
         runScript();
     }
 }
-bool LuaScript::runScript() {
-    int res = m_LUAStateRef.runFile(m_FileName);
-    if (!res) {
-        return false; //error
-    }
-    return true;
+LuaScript::~LuaScript() {
+    clean();
 }
-void LuaScript::clean() {
+bool LuaScript::runScript() noexcept {
+    int res;
+    res = m_LUAStateRef.runFile(m_FileName);
+    return res;
+}
+void LuaScript::clean() noexcept {
     int n = lua_gettop(m_LUAStateRef.getState());
     lua_pop(m_LUAStateRef.getState(), n);
 }
-void LuaScript::callFunction(const char* funcName) {
+void LuaScript::callFunction(const char* funcName) noexcept {
     lua_getfield(m_LUAStateRef.getState(), LUA_REGISTRYINDEX, m_FileName.c_str());
     lua_getfield(m_LUAStateRef.getState(), -1, funcName);
     lua_call(m_LUAStateRef.getState(), 0, 0);

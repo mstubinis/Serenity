@@ -18,8 +18,8 @@ namespace Engine::priv {
             void onButtonPressed(MouseButton button) noexcept;
             void onButtonReleased(MouseButton button) noexcept;
             void postUpdate() noexcept;
-            [[nodiscard]] inline constexpr int32_t getNumPressedButtons() const noexcept { return m_NumPressedMouseButtons; }
-            [[nodiscard]] inline constexpr bool isButtonDown(MouseButton button) noexcept { return m_CurrMouseStatus[button]; }
+            [[nodiscard]] inline int32_t getNumPressedButtons() const noexcept { return m_NumPressedMouseButtons; }
+            [[nodiscard]] inline bool isButtonDown(MouseButton button) noexcept { return m_CurrMouseStatus[button]; }
             [[nodiscard]] bool isButtonDownOnce(MouseButton button) noexcept;
     };
 }

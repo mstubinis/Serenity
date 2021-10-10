@@ -68,7 +68,7 @@ class Scene: public Observer {
         glm::vec3                                   m_AmbientColor        = glm::vec3{ 0.05f, 0.05f, 0.05f };
         std::string                                 m_Name;
         Skybox*                                     m_Skybox              = nullptr;
-        uint32_t                                    m_ID                  = 0;
+        uint32_t                                    m_ID                  = std::numeric_limits<uint32_t>().max();
         Entity                                      m_Sun;
         bool                                        m_SkipRenderThisFrame = false;
         bool                                        m_WasJustSwappedTo    = false;

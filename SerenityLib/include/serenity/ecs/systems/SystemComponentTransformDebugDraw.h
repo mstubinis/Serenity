@@ -13,7 +13,7 @@ class SystemComponentTransformDebugDraw final : public SystemCRTP<SystemComponen
     private:
 
     public:
-        SystemComponentTransformDebugDraw(Engine::priv::ECS& ecs);
+        SystemComponentTransformDebugDraw(Engine::priv::ECS&);
 };
 
 #endif

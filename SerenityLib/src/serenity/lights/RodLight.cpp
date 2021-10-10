@@ -5,11 +5,11 @@
 #include <serenity/resources/Engine_Resources.h>
 
 RodLight::RodLight(Scene* scene, decimal x, decimal y, decimal z, float rodLength)
-    : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
+    : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
     , LightBaseData<RodLight>{ LightType::Rod }
 {
     addComponent<ComponentTransform>();
-    setPosition(x, y, z);
+    getComponent<ComponentTransform>()->setPosition(x, y, z);
     setRodLength(rodLength);
 }
 RodLight::RodLight(Scene* scene, const glm_vec3& pos, float rodLength)

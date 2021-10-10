@@ -15,21 +15,20 @@ SystemComponentTransformDebugDraw::SystemComponentTransformDebugDraw(Engine::pri
         auto& system = static_cast<SystemComponentTransformDebugDraw&>(inSystem);
         system.forEach<Scene*>([](Scene* scene, Entity entity, ComponentTransform* transform, ComponentModel* model) {
             //ASSERT(scene && body && model, __FUNCTION__ << "(): parameter(s) was nullptr!");
-            const auto world_pos = glm::vec3{ transform->getPosition() };
-            const auto world_rot = glm::quat{ transform->getRotation() };
-            const auto world_scl = glm::vec3{ transform->getScale() };
+            const glm::vec3 world_pos = transform->getPosition();
+            const glm::quat world_rot = transform->getRotation();
+            const glm::vec3 world_scl = transform->getScale();
             for (size_t i = 0; i < model->getNumModels(); ++i) {
                 auto& modelInstance = (*model)[i];
 
                 auto rotation = world_rot * modelInstance.getRotation();
-                auto fwd      = glm::normalize(Engine::Math::getForward(rotation)) * 0.3f;
-                auto right    = glm::normalize(Engine::Math::getRight(rotation)) * 0.3f;
-                auto up       = glm::normalize(Engine::Math::getUp(rotation)) * 0.3f;
+                auto fwd      = glm::normalize(Engine::Math::getForward(rotation)) * world_scl.x;
+                auto right    = glm::normalize(Engine::Math::getRight(rotation)) * world_scl.y;
+                auto up       = glm::normalize(Engine::Math::getUp(rotation)) * world_scl.z;
 
-                auto& physicsPipeline = Engine::priv::PhysicsModule::PHYSICS_MANAGER->m_Pipeline;
-                physicsPipeline.drawLine(world_pos, (world_pos + fwd),   1.0f, 0.0f, 0.0f);
-                physicsPipeline.drawLine(world_pos, (world_pos + right), 0.0f, 1.0f, 0.0f);
-                physicsPipeline.drawLine(world_pos, (world_pos + up),    0.0f, 0.0f, 1.0f);
+                Engine::Physics::drawDebugLine(world_pos, world_pos + fwd,   1.0f, 0.0f, 0.0f);
+                Engine::Physics::drawDebugLine(world_pos, world_pos + right, 0.0f, 1.0f, 0.0f);
+                Engine::Physics::drawDebugLine(world_pos, world_pos + up,    0.0f, 0.0f, 1.0f);
             }
             const auto screenPos = Engine::Math::getScreenCoordinates(world_pos, *scene->getActiveCamera(), false);
             //if (screenPos.z > 0) {

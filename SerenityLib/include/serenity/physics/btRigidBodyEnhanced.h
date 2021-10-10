@@ -18,10 +18,9 @@ class btRigidBodyEnhanced : public btRigidBody {
     public:
         btRigidBodyEnhanced(btScalar mass, btMotionState*, btCollisionShape*, const btVector3& localInertia = btVector3(0, 0, 0));
         btRigidBodyEnhanced(const btRigidBodyConstructionInfo&);
+        ~btRigidBodyEnhanced();
 
-        inline void setName(std::string_view name) noexcept { m_Name = name; }
-        inline void setName(const char* cName) noexcept { m_Name = cName; }
-        inline void setName(std::string name) noexcept { m_Name = std::move(name); }
+        inline void setName(const std::string& name) noexcept { m_Name = name; }
 
         [[nodiscard]] inline const std::string& getName() const noexcept { return m_Name; }
 };

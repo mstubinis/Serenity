@@ -51,7 +51,7 @@ std::vector<Entity> Entity::getChildren() const noexcept {
         for (size_t i = 0; i < pcs.m_Parents.size(); ++i) {
             const auto parentID = pcs.m_Parents[i];
             if (parentID == m_ID) {
-                output.push_back(ecs.getEntityPool().getEntityFromID(i + 1));
+                output.push_back(ecs.getEntityPool().getEntityFromID(i));
             }
         }
     }

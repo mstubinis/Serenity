@@ -44,8 +44,6 @@ namespace Engine{
     namespace priv{
         class PhysicsModule final {
             public:
-                static Engine::view_ptr<PhysicsModule> PHYSICS_MANAGER;
-            public:
                 Engine::priv::PhysicsPipeline    m_Pipeline;
                 std::mutex                       m_Mutex;
                 uint32_t                         m_NumberOfStepsPerFrame = 1;
@@ -67,6 +65,9 @@ namespace Engine{
 
         RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, MaskType group = -1, MaskType mask = -1);
         RayCastResult rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>&& ignored, MaskType group = -1, MaskType mask = -1);
+
+        void drawDebugLine(const glm_vec3& start, const glm_vec3& end, float r, float g, float b);
+        void drawDebugLine(const glm_vec3& start, const glm_vec3& end, const glm::vec3& color);
 
         void setNumberOfStepsPerFrame(uint32_t numSteps);
         [[nodiscard]] uint32_t getNumberOfStepsPerFrame();

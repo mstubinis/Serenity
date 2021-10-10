@@ -337,11 +337,18 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
     shape->setCollision(m_TerrainData.m_FinalCompoundShape);
     rigid->setMass(0.0f);
     rigid->setDynamic(false);
-    rigid->setGravity(0, 0, 0);
+    rigid->addFlags(ComponentRigidBody::Flags::DISABLE_WORLD_GRAVITY);
+    rigid->setGravity(0.0, 0.0, 0.0);
     Terrain::translate(-maxOriginY * btScalar(0.5), 0, -maxOriginX * btScalar(0.5));
 }
 Terrain::~Terrain() {
 
+}
+void Terrain::setGravity(float x, float y, float z) {
+    getComponent<ComponentRigidBody>()->setGravity(x, y, z);
+}
+void Terrain::setGravity(const glm::vec3& gravity) {
+    setGravity(gravity.x, gravity.y, gravity.z);
 }
 bool Terrain::getUseDiamondSubdivision() const {
     return m_TerrainData.m_UseDiamondSubDivision;

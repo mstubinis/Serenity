@@ -2,21 +2,24 @@
 #include <glm/glm.hpp>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/ecs/components/ComponentTransform.h>
+#include <array>
 
-constexpr std::array<LightDefaultAttenuationData, (size_t)LightRange::_TOTAL> LIGHT_RANGES{ {
-    { 1.0f, 0.7f, 1.8f },
-    { 1.0f, 0.35f, 0.44f },
-    { 1.0f, 0.22f, 0.20f },
-    { 1.0f, 0.14f, 0.07f },
-    { 1.0f, 0.09f, 0.032f },
-    { 1.0f, 0.07f, 0.017f },
-    { 1.0f, 0.045f, 0.0075f },
-    { 1.0f, 0.027f, 0.0028f },
-    { 1.0f, 0.022f, 0.0019f },
-    { 1.0f, 0.014f, 0.0007f },
-    { 1.0f, 0.007f, 0.0002f },
-    { 1.0f, 0.0014f, 0.000007f },
-} };
+namespace {
+    constexpr std::array<LightDefaultAttenuationData, LightRange::_TOTAL> LIGHT_RANGES{ {
+        { 1.0f, 0.7f, 1.8f },
+        { 1.0f, 0.35f, 0.44f },
+        { 1.0f, 0.22f, 0.20f },
+        { 1.0f, 0.14f, 0.07f },
+        { 1.0f, 0.09f, 0.032f },
+        { 1.0f, 0.07f, 0.017f },
+        { 1.0f, 0.045f, 0.0075f },
+        { 1.0f, 0.027f, 0.0028f },
+        { 1.0f, 0.022f, 0.0019f },
+        { 1.0f, 0.014f, 0.0007f },
+        { 1.0f, 0.007f, 0.0002f },
+        { 1.0f, 0.0014f, 0.000007f },
+    } };
+}
 
 void LightAttenuationData::calculateCullingRadius(ComponentTransform* transform, const glm::vec4& color) {
     float lightMax = Engine::Math::Max(color.x, color.y, color.z);

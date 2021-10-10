@@ -11,7 +11,7 @@ class SystemStepPhysics final : public SystemCRTP<SystemStepPhysics, ComponentRi
     private:
 
     public:
-        SystemStepPhysics(Engine::priv::ECS& ecs);
+        SystemStepPhysics(Engine::priv::ECS&);
 };
 
 #endif

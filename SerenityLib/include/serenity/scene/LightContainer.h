@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ENGINE_SCENE_LIGHT_CONTAINER_H
 #define ENGINE_SCENE_LIGHT_CONTAINER_H
 

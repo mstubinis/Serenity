@@ -15,7 +15,7 @@ class LUAState {
 
         [[nodiscard]] inline lua_State* getState() const noexcept { return L; }
 
-        int runFile(const std::string& filename) const;
+        int runFile(const std::string& filename) const noexcept;
 };
 
 #endif

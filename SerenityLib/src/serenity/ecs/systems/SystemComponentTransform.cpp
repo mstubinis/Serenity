@@ -12,8 +12,9 @@ SystemComponentTransform::SystemComponentTransform(Engine::priv::ECS& ecs)
         auto& system   = static_cast<SystemComponentTransform&>(inSystem);
         auto& systemPC = inSystem.getECS().getSystem<SystemTransformParentChild>();
         system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArgs, Entity entity, ComponentTransform* transform) {
-            auto& worldMatrix = pcsArgs->m_WorldTransforms[entity.id() - 1];
-            auto& localMatrix = pcsArgs->m_LocalTransforms[entity.id() - 1];
+            const uint32_t entityIdx = entity.id();
+            auto& worldMatrix = pcsArgs->m_WorldTransforms[entityIdx];
+            auto& localMatrix = pcsArgs->m_LocalTransforms[entityIdx];
             Engine::Math::setFinalModelMatrix(localMatrix, transform->m_Position, transform->m_Rotation, transform->m_Scale);
             worldMatrix = localMatrix;
         }, &systemPC, SystemExecutionPolicy::ParallelWait);

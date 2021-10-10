@@ -95,5 +95,8 @@ class Terrain : public Observer, public Entity {
 
         bool getUseDiamondSubdivision() const;
         void setUseDiamondSubdivision(bool useDiamond);
+
+        void setGravity(float x, float y, float z);
+        void setGravity(const glm::vec3& gravity);
 };
 #endif

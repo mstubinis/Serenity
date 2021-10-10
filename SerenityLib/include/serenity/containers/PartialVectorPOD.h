@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ENGINE_CONTAINERS_PARTIAL_VECTOR_POD_H
 #define ENGINE_CONTAINERS_PARTIAL_VECTOR_POD_H
 
@@ -65,7 +64,7 @@ namespace Engine {
             }
 
             void swap_and_pop(size_t index) {
-                m_Items[index] = std::move(m_Items.back());
+                std::swap(m_Items[index], m_Items.back());
                 pop();
             }
             int insert(size_t index, T&& item) {
@@ -75,13 +74,16 @@ namespace Engine {
                 m_Items[index] = std::forward<T>(item);
                 return static_cast<int>(index);
             }
+
             //notice the end() functions use m_Count instead of end()
-            inline typename ContainerType::iterator begin() noexcept { return m_Items.begin(); }
-            inline typename ContainerType::const_iterator begin() const noexcept { return m_Items.begin(); }
-            inline typename ContainerType::iterator end() noexcept { return m_Items.begin() + m_Count; }
-            inline typename ContainerType::const_iterator end() const noexcept { return m_Items.begin() + m_Count; }
-            inline typename const ContainerType::const_iterator cbegin() const noexcept { return m_Items.cbegin(); }
-            inline typename const ContainerType::const_iterator cend() const noexcept { return m_Items.cbegin() + m_Count; }
+            using itr = typename ContainerType::iterator;
+            using itr_const = typename ContainerType::const_iterator;
+            inline itr begin() noexcept { return m_Items.begin(); }
+            inline itr_const begin() const noexcept { return m_Items.begin(); }
+            inline itr end() noexcept { return m_Items.begin() + m_Count; }
+            inline itr_const end() const noexcept { return m_Items.begin() + m_Count; }
+            inline const itr_const cbegin() const noexcept { return m_Items.cbegin(); }
+            inline const itr_const cend() const noexcept { return m_Items.cbegin() + m_Count; }
     };
 };
 

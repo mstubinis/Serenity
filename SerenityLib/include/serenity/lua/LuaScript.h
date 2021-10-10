@@ -15,11 +15,12 @@ class LuaScript final {
         LuaScript() = delete;
     public:
         LuaScript(const std::string& fileName, bool run = true);
+        ~LuaScript();
 
-        bool runScript();
+        bool runScript() noexcept;
 
-        void callFunction(const char* name);
-        void clean();
+        void callFunction(const char* name) noexcept;
+        void clean() noexcept;
 
 };
 #endif

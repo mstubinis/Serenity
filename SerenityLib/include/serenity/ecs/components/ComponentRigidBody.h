@@ -44,14 +44,14 @@ struct RigidCollisionCallbackEventData final {
     glm::vec3&           normalOnB;
     glm::vec3&           normalFromA;
     glm::vec3&           normalFromB;
-    btCollisionObject*   ownerCollisionObj        = nullptr;
-    btCollisionObject*   otherCollisionObj        = nullptr;
-    btCollisionShape*    ownerCollisionShapeRoot  = nullptr;
-    btCollisionShape*    otherCollisionShapeRoot  = nullptr;
-    btCollisionShape*    ownerCollisionShape      = nullptr;
-    btCollisionShape*    otherCollisionShape      = nullptr;
-    uint32_t             ownerModelInstanceIndex  = 0;
-    uint32_t             otherModelInstanceIndex  = 0;
+    btCollisionObject*   btOwnerCollisionObj        = nullptr;
+    btCollisionObject*   btOtherCollisionObj        = nullptr;
+    btCollisionShape*    btOwnerCollisionShapeRoot  = nullptr;
+    btCollisionShape*    btOtherCollisionShapeRoot  = nullptr;
+    btCollisionShape*    btOwnerCollisionShape      = nullptr;
+    btCollisionShape*    btOtherCollisionShape      = nullptr;
+    uint32_t             ownerModelInstanceIndex    = 0;
+    uint32_t             otherModelInstanceIndex    = 0;
 
     RigidCollisionCallbackEventData() = delete;
     RigidCollisionCallbackEventData(const RigidCollisionCallbackEventData&) = delete;
@@ -74,7 +74,7 @@ struct RigidCollisionCallbackEventData final {
     {}
 };
 
-class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
+class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
     friend class  ComponentModel;
     friend class  SystemComponentRigidBody;
     friend class  ComponentCollisionShape;
@@ -82,6 +82,21 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
     friend class  SystemSyncTransformToRigid;
     friend class  SystemSyncRigidToTransform;
     using CollisionCallbackFPRigid = void(*)(RigidCollisionCallbackEventData&);
+    public:
+        class Flags {
+            public:
+                enum Type : int32_t {
+                    DISABLE_WORLD_GRAVITY = 1,
+                    ///ENABLE_GYROPSCOPIC_FORCE flags is enabled by default in Bullet 2.83 and onwards.
+                    ///and it ENABLE_GYROPSCOPIC_FORCE becomes equivalent to ENABLE_GYROSCOPIC_FORCE_IMPLICIT_BODY
+                    ///See Demos/GyroscopicDemo and computeGyroscopicImpulseImplicit
+                    ENABLE_GYROSCOPIC_FORCE_EXPLICIT = 2,
+                    ENABLE_GYROSCOPIC_FORCE_IMPLICIT_WORLD = 4,
+                    ENABLE_GYROSCOPIC_FORCE_IMPLICIT_BODY = 8,
+                    ENABLE_GYROPSCOPIC_FORCE = BT_ENABLE_GYROSCOPIC_FORCE_IMPLICIT_BODY,
+                };
+                BUILD_ENUM_CLASS_MEMBERS(Flags, Type)
+        };
     private:
         CollisionCallbackFPRigid              m_CollisionFunctor  = [](RigidCollisionCallbackEventData&) {};
         std::unique_ptr<btRigidBodyType>      m_BulletRigidBody;
@@ -107,10 +122,11 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
         btTransform internal_get_bt_transform() const;
         btTransform internal_get_bt_transform_motion_state() const;
 
+        void cleanup();
         bool removePhysicsFromWorldImmediate();
         bool addPhysicsToWorldImmediate();
     public:
-        ComponentRigidBody(Entity);
+        ComponentRigidBody(Entity, const std::string& name = {});
         ComponentRigidBody(const ComponentRigidBody&)            = delete;
         ComponentRigidBody& operator=(const ComponentRigidBody&) = delete;
         ComponentRigidBody(ComponentRigidBody&&) noexcept;
@@ -119,6 +135,11 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
 
         [[nodiscard]] inline Entity getOwner() const noexcept { return m_Owner; }
         [[nodiscard]] inline float getMass() const noexcept { return m_Mass; }
+
+        [[nodiscard]] ComponentRigidBody::Flags getFlags() const noexcept;
+        void setFlags(ComponentRigidBody::Flags);
+        void addFlags(ComponentRigidBody::Flags);
+        void removeFlags(ComponentRigidBody::Flags);
 
         //immediately syncs physics object to graphics object without waiting for it to occur normally for this frame
         void forcePhysicsSync() noexcept;
@@ -214,6 +235,9 @@ class ComponentRigidBody : public ComponentBaseClass<ComponentRigidBody> {
         void applyImpulse(const glm_vec3& impulse, const glm_vec3& origin = glm_vec3(0.0f), bool local = true);
 
         void applyTorque(decimal x, decimal y, decimal z, bool local = true);
+        void applyTorqueX(decimal x, bool local = true);
+        void applyTorqueY(decimal y, bool local = true);
+        void applyTorqueZ(decimal z, bool local = true);
         inline void applyTorque(const glm_vec3& torque, bool local = true) noexcept { applyTorque(torque.x, torque.y, torque.z, local); }
 
         void applyTorqueImpulse(decimal x, decimal y, decimal z, bool local = true);

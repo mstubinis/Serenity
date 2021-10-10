@@ -8,11 +8,11 @@ namespace Engine::priv {
     struct DefaultDecalUnbindFunctor;
 };
 
-#include <serenity/ecs/entity/EntityBody.h>
+#include <serenity/ecs/entity/Entity.h>
 #include <serenity/renderer/RendererIncludes.h>
 #include <serenity/resources/Handle.h>
 
-class Decal final: public EntityBody {
+class Decal final: public Entity {
     friend struct Engine::priv::DefaultDecalBindFunctor;
     friend struct Engine::priv::DefaultDecalUnbindFunctor;
     private:

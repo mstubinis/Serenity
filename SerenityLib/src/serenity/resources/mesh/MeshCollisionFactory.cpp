@@ -41,6 +41,9 @@ Engine::priv::MeshCollisionFactory& Engine::priv::MeshCollisionFactory::operator
     return *this;
 }
 void Engine::priv::MeshCollisionFactory::internal_init_convex_data(std::vector<glm::vec3>& positions) {
+    if (m_ConvesHullShape.getNumPoints() > 0) {
+        return;
+    }
     //build convex hull using all the positions
     m_ConvesHullShape = btConvexHullShape{};
     for (auto& pos : positions) {
@@ -58,6 +61,9 @@ void Engine::priv::MeshCollisionFactory::internal_init_convex_data(std::vector<g
     m_ConvesHullShape.recalcLocalAabb();
 }
 void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData& data, std::vector<glm::vec3>& positions) {
+    if (m_TriangleStaticData.getNumTriangles() > 0) {
+        return;
+    }
     auto triangles = Engine::create_and_reserve<std::vector<glm::vec3>>(data.m_Indices.size());
     for (auto& indice : data.m_Indices) {
         triangles.emplace_back(positions[indice]);
@@ -74,7 +80,7 @@ void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData&
             tri.clear();
         }
     }
-    m_TriangleStaticShape.reset( new btBvhTriangleMeshShape{ &m_TriangleStaticData, true, true } );
+    m_TriangleStaticShape.reset(new btBvhTriangleMeshShape{ &m_TriangleStaticData, true, true });
     m_TriangleStaticShape->setMargin(DEFAULT_MARGIN);
     m_TriangleStaticShape->recalcLocalAabb();
 
@@ -115,10 +121,10 @@ btBoxShape* Engine::priv::MeshCollisionFactory::buildBoxShape(ModelInstance* mod
 }
 btUniformScalingShape* Engine::priv::MeshCollisionFactory::buildConvexHull(ModelInstance* modelInstance, bool isCompoundChild) {
     if (m_ConvesHullShape.getNumPoints() == 0) {
-        ENGINE_PRODUCTION_LOG("Engine::priv::MeshCollisionFactory::buildConvexHull(): m_ConvesHullShape was empty!")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_ConvesHullShape was empty!")
         return nullptr;
     }
-    btUniformScalingShape* uniformScalingShape = new btUniformScalingShape{ &m_ConvesHullShape, (btScalar)1.0 };
+    btUniformScalingShape* uniformScalingShape = new btUniformScalingShape( &m_ConvesHullShape, (btScalar)1.0 );
     uniformScalingShape->setMargin(DEFAULT_MARGIN);
     if (isCompoundChild) {
         uniformScalingShape->getChildShape()->setUserPointer(modelInstance);
@@ -131,7 +137,7 @@ btScaledBvhTriangleMeshShape* Engine::priv::MeshCollisionFactory::buildTriangleS
         ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_TriangleStaticData was empty!")
         return nullptr;
     }
-    btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape{ m_TriangleStaticShape.get(), btVector3{ (btScalar)1.0, (btScalar)1.0, (btScalar)1.0} };
+    btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape( m_TriangleStaticShape.get(), btVector3{ (btScalar)1.0, (btScalar)1.0, (btScalar)1.0} );
     scaledBVH->setMargin(DEFAULT_MARGIN);
     if (isCompoundChild) {
         scaledBVH->getChildShape()->setUserPointer(modelInstance);

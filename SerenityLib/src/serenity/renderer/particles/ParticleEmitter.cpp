@@ -11,10 +11,9 @@
 #include <serenity/resources/material/Material.h>
 
 ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) 
-    : EntityBody{ scene }
+    : Entity{ scene }
 {
     addComponent<ComponentTransform>();
-
     /*
     addComponent<ComponentModel>(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), Material::Checkers);
     auto& modelComponent = *getComponent<ComponentModel>();
@@ -26,7 +25,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& 
 void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     setProperties(properties);
     //removeAllChildren();
-    setPosition(std::numeric_limits<float>().max());
+    getComponent<ComponentTransform>()->setPosition(std::numeric_limits<float>().max());
     if (!parent.null()) {
         parent.addChild(*this);
     }
@@ -34,11 +33,11 @@ void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene,
     m_SpawningTimer = m_Properties->m_SpawnRate - 0.01f;
 
     //setLinearVelocity(0.0, 0.0, 0.0);
-    setScale(1.0, 1.0, 1.0);
+    getComponent<ComponentTransform>()->setScale(1.0, 1.0, 1.0);
 }
 
 ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept 
-    : EntityBody     { std::move(other) }
+    : Entity         { std::move(other) }
     , m_SpawningTimer{ std::move(other.m_SpawningTimer) }
     , m_Active       { std::move(other.m_Active) }
     , m_Timer        { std::move(other.m_Timer) }
@@ -49,7 +48,7 @@ ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept
     , m_Properties   { std::move(other.m_Properties) }
 {}
 ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {  
-    EntityBody::operator=(std::move(other));
+    Entity::operator=(std::move(other));
     m_Properties     = std::move(other.m_Properties);
     m_SpawningTimer  = std::move(other.m_SpawningTimer);
     m_Active         = std::move(other.m_Active);

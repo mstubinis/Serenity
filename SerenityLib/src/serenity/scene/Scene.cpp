@@ -243,6 +243,7 @@ bool Engine::priv::PublicScene::HasItemsToRender(Scene& scene) {
 
 Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options) 
     : m_ParticleSystem{ options.maxAmountOfParticleEmitters, options.maxAmountOfParticles }
+    , m_ID{ id }
 {
     m_ECS.init(options);
 
@@ -250,7 +251,6 @@ Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options)
     internal_register_components();
     internal_register_systems();
 
-    m_ID = id;
     setName(name);
 
     registerEvent(EventType::SceneChanged);

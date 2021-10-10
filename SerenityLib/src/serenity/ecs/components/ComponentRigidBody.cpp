@@ -2,17 +2,26 @@
 #include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/ecs/components/ComponentCollisionShape.h>
 #include <serenity/ecs/components/ComponentModel.h>
+#include <BulletCollision/CollisionShapes/btCollisionShape.h>
 #include <serenity/ecs/systems/SystemAddRigidBodies.h>
 #include <serenity/ecs/systems/SystemRemoveRigidBodies.h>
 #include <serenity/physics/PhysicsModule.h>
 #include <serenity/scene/Scene.h>
 #include <serenity/ecs/ECS.h>
+#include <serenity/resources/Engine_Resources.h>
 
-ComponentRigidBody::ComponentRigidBody(Entity entity) {
-    m_Owner = entity;
+ComponentRigidBody::ComponentRigidBody(Entity entity, const std::string& name)
+    : m_Owner{ entity }
+{
     rebuildRigidBody(false);
+    #ifdef ENGINE_RIGID_BODY_ENHANCED
+        setBtName(name);
+    #endif
 }
 ComponentRigidBody::~ComponentRigidBody() {
+    cleanup();
+}
+void ComponentRigidBody::cleanup() {
     if (m_Owner) { //do not call from moved from destructors
         auto& ecs          = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
         auto& systemRemove = ecs.getSystem<SystemRemoveRigidBodies>();
@@ -21,25 +30,26 @@ ComponentRigidBody::~ComponentRigidBody() {
         if (BTRigidBody) {
             systemAdd.removeBody(BTRigidBody);             // clear any deferred adding of this body
             systemRemove.removeBody(BTRigidBody);          // clear any deferred removal of this body
-            bool result = Engine::Physics::removeRigidBody(BTRigidBody); // remove it immediately 
+            bool result = removePhysicsFromWorldImmediate(); // remove it immediately 
         }
     }
 }
-ComponentRigidBody::ComponentRigidBody(ComponentRigidBody&& other) noexcept
-    : m_CollisionFunctor  { std::move(other.m_CollisionFunctor) }
-    , m_BulletRigidBody   { std::move(other.m_BulletRigidBody) }
-    , m_BulletMotionState { std::move(other.m_BulletMotionState) }
-    , m_UserPointer       { std::exchange(other.m_UserPointer, nullptr) }
-    , m_UserPointer1      { std::exchange(other.m_UserPointer1, nullptr) }
-    , m_UserPointer2      { std::exchange(other.m_UserPointer2, nullptr) }
-    , m_Mass              { std::move(other.m_Mass) }
-    , m_Owner             { std::exchange(other.m_Owner, Entity{}) }
-    , m_Group             { std::move(other.m_Group) }
-    , m_Mask              { std::move(other.m_Mask) }
-{
+ComponentRigidBody::ComponentRigidBody(ComponentRigidBody&& other) noexcept {
+    //other.cleanup();
+    m_CollisionFunctor  = std::move(other.m_CollisionFunctor);
+    m_BulletRigidBody   = std::move(other.m_BulletRigidBody);
+    m_BulletMotionState = std::move(other.m_BulletMotionState);
+    m_UserPointer       = std::exchange(other.m_UserPointer, nullptr);
+    m_UserPointer1      = std::exchange(other.m_UserPointer1, nullptr);
+    m_UserPointer2      = std::exchange(other.m_UserPointer2, nullptr);
+    m_Mass              = std::move(other.m_Mass);
+    m_Owner             = std::exchange(other.m_Owner, Entity{});
+    m_Group             = std::move(other.m_Group);
+    m_Mask              = std::move(other.m_Mask);
     internal_update_misc();
 }
 ComponentRigidBody& ComponentRigidBody::operator=(ComponentRigidBody&& other) noexcept {
+    //other.cleanup();
     m_CollisionFunctor  = std::move(other.m_CollisionFunctor);
     m_BulletRigidBody   = std::move(other.m_BulletRigidBody);
     m_BulletMotionState = std::move(other.m_BulletMotionState);
@@ -54,6 +64,22 @@ ComponentRigidBody& ComponentRigidBody::operator=(ComponentRigidBody&& other) no
     internal_update_misc();
     return *this;
 }
+[[nodiscard]] ComponentRigidBody::Flags ComponentRigidBody::getFlags() const noexcept {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    return m_BulletRigidBody->getFlags();
+}
+void ComponentRigidBody::setFlags(ComponentRigidBody::Flags flags) {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    m_BulletRigidBody->setFlags(flags);
+}
+void ComponentRigidBody::addFlags(ComponentRigidBody::Flags flags) {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    m_BulletRigidBody->setFlags(getFlags() | flags);
+}
+void ComponentRigidBody::removeFlags(ComponentRigidBody::Flags flags) {
+    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
+    m_BulletRigidBody->setFlags(getFlags() & ~flags);
+}
 glm::vec3 ComponentRigidBody::internal_getScale() const noexcept {
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
     auto btColShape     = collisionShape->getBtShape();
@@ -67,7 +93,8 @@ void ComponentRigidBody::internal_update_misc() noexcept {
         m_BulletRigidBody->setMotionState(&m_BulletMotionState);
         auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
         if (collisionShape) {
-            m_BulletRigidBody->setCollisionShape(collisionShape->getBtShape());
+            btCollisionShape* btShape = collisionShape->getBtShape();
+            m_BulletRigidBody->setCollisionShape(btShape);
             m_BulletRigidBody->setMassProps(m_Mass, collisionShape->getInertia());
         }
         m_BulletRigidBody->updateInertiaTensor();
@@ -79,10 +106,10 @@ bool ComponentRigidBody::rebuildRigidBody(bool addBodyToPhysicsWorld) {
     auto transform      = m_Owner.getComponent<ComponentTransform>();
     ASSERT(collisionShape, __FUNCTION__ << "(): collisionShape was nullptr!");
     if (m_BulletRigidBody) {
-        removePhysicsFromWorld();
+        removePhysicsFromWorldImmediate();
     }
-
-    btRigidBody::btRigidBodyConstructionInfo ci{ m_Mass, &m_BulletMotionState, collisionShape->getBtShape(), collisionShape->getInertia() };
+    btCollisionShape* btShape = collisionShape->getBtShape();
+    btRigidBody::btRigidBodyConstructionInfo ci{ m_Mass, &m_BulletMotionState, btShape, collisionShape->getInertia() };
     if (transform) {
         btTransform t;
         t.setOrigin(Engine::Math::toBT(transform->getWorldPosition()));
@@ -100,8 +127,9 @@ bool ComponentRigidBody::rebuildRigidBody(bool addBodyToPhysicsWorld) {
     m_BulletRigidBody->updateInertiaTensor();
     m_BulletRigidBody->setUserPointer(this);
     internal_calculate_mass();
+    internal_update_misc();
     if (addBodyToPhysicsWorld) {
-        addPhysicsToWorld();
+        addPhysicsToWorldImmediate();
     }
     return (collisionShape != nullptr);
 }
@@ -127,11 +155,11 @@ bool ComponentRigidBody::addPhysicsToWorld() {
 }
 decimal ComponentRigidBody::getLinearDamping() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    return static_cast<decimal>(m_BulletRigidBody->getLinearDamping());
+    return decimal(m_BulletRigidBody->getLinearDamping());
 }
 decimal ComponentRigidBody::getAngularDamping() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    return static_cast<decimal>(m_BulletRigidBody->getAngularDamping());
+    return decimal(m_BulletRigidBody->getAngularDamping());
 }
 void ComponentRigidBody::collisionResponse(RigidCollisionCallbackEventData& data) const {
     if (m_CollisionFunctor) { //TODO: find out why this is needed and possibly remove this if check
@@ -140,7 +168,7 @@ void ComponentRigidBody::collisionResponse(RigidCollisionCallbackEventData& data
 }
 MaskType ComponentRigidBody::getCollisionFlags() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    return static_cast<MaskType>(m_BulletRigidBody->getCollisionFlags());
+    return MaskType(m_BulletRigidBody->getCollisionFlags());
 }
 void ComponentRigidBody::internal_calculate_mass() {
     if (m_Mass != 0.0f) {
@@ -251,31 +279,31 @@ glm_vec3 ComponentRigidBody::getAngularVelocity() const {
 }
 void ComponentRigidBody::setDamping(decimal linearFactor, decimal angularFactor) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    m_BulletRigidBody->setDamping((btScalar)linearFactor, (btScalar)angularFactor);
+    m_BulletRigidBody->setDamping(btScalar(linearFactor), btScalar(angularFactor));
 }
 void ComponentRigidBody::setCollisionGroup(MaskType group) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorldImmediate();
     m_Group = group;
-    addPhysicsToWorldImmediate();
+    removePhysicsFromWorld();
+    addPhysicsToWorld();
 }
 void ComponentRigidBody::setCollisionMask(MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorldImmediate();
     m_Mask = mask;
-    addPhysicsToWorldImmediate();
+    removePhysicsFromWorld();
+    addPhysicsToWorld();
 }
 void ComponentRigidBody::addCollisionGroup(MaskType group) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorldImmediate();
     m_Group |= group;
-    addPhysicsToWorldImmediate();
+    removePhysicsFromWorld();
+    addPhysicsToWorld();
 }
 void ComponentRigidBody::addCollisionMask(MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorldImmediate();
     m_Mask |= mask;
-    addPhysicsToWorldImmediate();
+    removePhysicsFromWorld();
+    addPhysicsToWorld();
 }
 void ComponentRigidBody::setCollisionFlag(MaskType flag) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
@@ -287,15 +315,15 @@ void ComponentRigidBody::addCollisionFlag(MaskType flag) {
 }
 void ComponentRigidBody::removeCollisionGroup(MaskType group) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorldImmediate();
     m_Group &= ~group;
-    addPhysicsToWorldImmediate();
+    removePhysicsFromWorld();
+    addPhysicsToWorld();
 }
 void ComponentRigidBody::removeCollisionMask(MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorldImmediate();
     m_Mask &= ~mask;
-    addPhysicsToWorldImmediate();
+    removePhysicsFromWorld();
+    addPhysicsToWorld();
 }
 void ComponentRigidBody::removeCollisionFlag(MaskType flag) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
@@ -303,10 +331,10 @@ void ComponentRigidBody::removeCollisionFlag(MaskType flag) {
 }
 void ComponentRigidBody::setCollisionGroupAndMask(MaskType group, MaskType mask) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    removePhysicsFromWorldImmediate();
     m_Group = group;
     m_Mask  = mask;
-    addPhysicsToWorldImmediate();
+    removePhysicsFromWorld();
+    addPhysicsToWorld();
 }
 
 //TODO: reconsider how this works
@@ -324,7 +352,7 @@ void ComponentRigidBody::setDynamic(bool dynamic) {
 btVector3 ComponentRigidBody::internal_activate_and_get_vector(decimal x, decimal y, decimal z, bool local) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->activate();
-    btVector3 vec{ static_cast<btScalar>(x), static_cast<btScalar>(y), static_cast<btScalar>(z) };
+    btVector3 vec{ btScalar(x), btScalar(y), btScalar(z) };
     Engine::Math::translate(*m_BulletRigidBody, vec, local);
     return vec;
 }
@@ -356,19 +384,27 @@ void ComponentRigidBody::applyImpulse(const glm_vec3& impulse, const glm_vec3& o
 }
 void ComponentRigidBody::applyTorque(decimal x, decimal y, decimal z, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    btVector3 v = internal_activate_and_get_vector(x, y, z, false); //yes, keep this false
-    if (local) {
-        v = m_BulletRigidBody->getInvInertiaTensorWorld().inverse() * (m_BulletRigidBody->getWorldTransform().getBasis() * v);
+    if (m_BulletRigidBody->getCollisionShape()->getShapeType() != CollisionType::EMPTY_SHAPE_PROXYTYPE) {
+        btVector3 v = internal_activate_and_get_vector(x, y, z, false); //yes, keep this false
+        if (local) {
+            v = m_BulletRigidBody->getInvInertiaTensorWorld().inverse() * (m_BulletRigidBody->getWorldTransform().getBasis() * v);
+        }
+        m_BulletRigidBody->applyTorque(v);
     }
-    m_BulletRigidBody->applyTorque(v);
 }
+void ComponentRigidBody::applyTorqueX(decimal x, bool local) { applyTorque(x, decimal(0.0), decimal(0.0), local); }
+void ComponentRigidBody::applyTorqueY(decimal y, bool local) { applyTorque(decimal(0.0), y, decimal(0.0), local); }
+void ComponentRigidBody::applyTorqueZ(decimal z, bool local) { applyTorque(decimal(0.0), decimal(0.0), z, local); }
+
 void ComponentRigidBody::applyTorqueImpulse(decimal x, decimal y, decimal z, bool local) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    btVector3 v = internal_activate_and_get_vector(x, y, z, false); //yes, keep this false
-    if (local) {
-        v = m_BulletRigidBody->getInvInertiaTensorWorld().inverse() * (m_BulletRigidBody->getWorldTransform().getBasis() * v);
+    if (m_BulletRigidBody->getCollisionShape()->getShapeType() != CollisionType::EMPTY_SHAPE_PROXYTYPE) {
+        btVector3 v = internal_activate_and_get_vector(x, y, z, false); //yes, keep this false
+        if (local) {
+            v = m_BulletRigidBody->getInvInertiaTensorWorld().inverse() * (m_BulletRigidBody->getWorldTransform().getBasis() * v);
+        }
+        m_BulletRigidBody->applyTorqueImpulse(v);
     }
-    m_BulletRigidBody->applyTorqueImpulse(v);
 }
 void ComponentRigidBody::clearLinearForces() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");

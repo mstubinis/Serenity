@@ -11,7 +11,7 @@ class SystemCompoundChildTransforms final : public SystemCRTP<SystemCompoundChil
     private:
 
     public:
-        SystemCompoundChildTransforms(Engine::priv::ECS& ecs);
+        SystemCompoundChildTransforms(Engine::priv::ECS&);
 };
 
 #endif

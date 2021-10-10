@@ -10,10 +10,11 @@ class SystemRemoveRigidBodies final : public SystemCRTP<SystemRemoveRigidBodies>
     private:
         std::vector<btRigidBody*> m_RemovedRigidBodies;
     public:
-        SystemRemoveRigidBodies(Engine::priv::ECS& ecs);
+        SystemRemoveRigidBodies(Engine::priv::ECS&);
 
         bool enqueueBody(btRigidBody*);
         void removeBody(btRigidBody*);
+        void clear();
 };
 
 #endif

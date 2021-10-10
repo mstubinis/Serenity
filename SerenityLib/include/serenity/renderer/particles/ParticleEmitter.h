@@ -9,13 +9,11 @@ namespace Engine::priv {
     class  ParticleSystem;
 };
 
-#include <serenity/ecs/entity/EntityBody.h>
+#include <serenity/ecs/entity/Entity.h>
 #include <mutex>
 
-/*
-Class that spawns particles
-*/
-class ParticleEmitter final : public EntityBody {
+/* Class that spawns particles */
+class ParticleEmitter final : public Entity {
     friend class  Engine::priv::ParticleSystem;
     friend class  Particle;
     friend struct Engine::priv::PublicScene;

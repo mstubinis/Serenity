@@ -20,8 +20,8 @@ ComponentTransform::ComponentTransform(Entity entity, const glm_vec3& pos, const
     Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
     auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system      = ecs.getSystem<SystemTransformParentChild>();
-    auto entityIndex  = entity.id() - 1;
-    system.acquireMoreMemory(entity.id());
+    auto entityIndex  = entity.id();
+    system.acquireMoreMemory(entityIndex);
     auto& localMatrix = system.m_LocalTransforms[entityIndex];
     auto& worldMatrix = system.m_WorldTransforms[entityIndex];
     Engine::Math::setFinalModelMatrix(localMatrix, m_Position, m_Rotation, m_Scale);
@@ -62,7 +62,7 @@ decimal ComponentTransform::getDistance(Entity other) const {
     return glm::distance(my_position, other_position);
 }
 uint64_t ComponentTransform::getDistanceLL(Entity other) const {
-    return static_cast<uint64_t>(getDistance(other));
+    return uint64_t(getDistance(other));
 }
 void ComponentTransform::alignTo(float dirX, float dirY, float dirZ) {
     m_Rotation = Engine::Math::alignTo(dirX, dirY, dirZ);
@@ -111,7 +111,7 @@ void ComponentTransform::setPosition(decimal x, decimal y, decimal z) {
     
     auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system      = ecs.getSystem<SystemTransformParentChild>();
-    auto entityIndex  = m_Owner.id() - 1;
+    auto entityIndex  = m_Owner.id();
     auto& localMatrix = system.m_LocalTransforms[entityIndex];
     localMatrix[3][0] = x;
     localMatrix[3][1] = y;
@@ -129,7 +129,7 @@ void ComponentTransform::setLocalPosition(decimal x, decimal y, decimal z) {
 
     auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system      = ecs.getSystem<SystemTransformParentChild>();
-    auto& localMatrix = system.m_LocalTransforms[m_Owner.id() - 1];
+    auto& localMatrix = system.m_LocalTransforms[m_Owner.id()];
     localMatrix[3][0] = x;
     localMatrix[3][1] = y;
     localMatrix[3][2] = z;
@@ -150,7 +150,7 @@ void ComponentTransform::setScale(float x, float y, float z) {
 glm_vec3 ComponentTransform::getPosition() const {
     const auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     const auto& system = ecs.getSystem<SystemTransformParentChild>();
-    const auto& matrix = system.m_WorldTransforms[m_Owner.id() - 1];
+    const auto& matrix = system.m_WorldTransforms[m_Owner.id()];
     return Engine::Math::getMatrixPosition(matrix);
 }
 glm_vec3 ComponentTransform::getWorldPosition() const {
@@ -204,12 +204,12 @@ ScreenBoxCoordinates ComponentTransform::getScreenBoxCoordinates(float minOffset
 const glm_mat4& ComponentTransform::getWorldMatrix() const noexcept {
     auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system = ecs.getSystem<SystemTransformParentChild>();
-    return system.m_WorldTransforms[m_Owner.id() - 1];
+    return system.m_WorldTransforms[m_Owner.id()];
 }
 const glm_mat4& ComponentTransform::getLocalMatrix() const noexcept {
     auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system = ecs.getSystem<SystemTransformParentChild>();
-    return system.m_LocalTransforms[m_Owner.id() - 1];
+    return system.m_LocalTransforms[m_Owner.id()];
 }
 /*
 void ComponentTransform::setLinearVelocity(decimal x, decimal y, decimal z, bool local) {
@@ -237,7 +237,7 @@ void ComponentTransform::removeChild(Entity child) const {
 bool ComponentTransform::hasParent() const {
     auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
     auto& system = ecs.getSystem<SystemTransformParentChild>();
-    return system.m_Parents[m_Owner.id() - 1] > 0;
+    return system.m_Parents[m_Owner.id()] != SystemTransformParentChild::NULL_IDX;
 }
 Entity ComponentTransform::getParent() const {
     auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());

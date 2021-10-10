@@ -12,12 +12,11 @@ namespace Engine::priv {
             static inline uint32_t   m_RegisteredLights = 0;
 
             template<class LIGHT> inline void internal_assert_registered_light_type() noexcept {
-                ASSERT(LIGHT::TYPE_ID > 0, __FUNCTION__ << "(): type: " << typeid(LIGHT).name() << " must be registered first!");
+                ASSERT(LIGHT::TYPE_ID != std::numeric_limits<uint32_t>().max(), __FUNCTION__ << "(): type: " << typeid(LIGHT).name() << " must be registered first!");
             }
             template<class LIGHT> [[nodiscard]] LightContainer<LIGHT>* internal_get_light_container() noexcept {
-                const auto index = LIGHT::TYPE_ID - 1;
-                if (index < m_Lights.size()) {
-                    return static_cast<LightContainer<LIGHT>*>(m_Lights[index]);
+                if (LIGHT::TYPE_ID < m_Lights.size()) {
+                    return static_cast<LightContainer<LIGHT>*>(m_Lights[LIGHT::TYPE_ID]);
                 }
                 return nullptr;
             }
@@ -34,14 +33,14 @@ namespace Engine::priv {
                 return *container;
             }
             template<class LIGHT> uint32_t registerLightType() {
-                if (LIGHT::TYPE_ID == 0) {
-                    LIGHT::TYPE_ID = ++m_RegisteredLights;
+                if (LIGHT::TYPE_ID == std::numeric_limits<uint32_t>().max()) {
+                    LIGHT::TYPE_ID = m_RegisteredLights++;
                 }
                 internal_assert_registered_light_type<LIGHT>();
-                if (LIGHT::TYPE_ID > m_Lights.size()) {
+                if (LIGHT::TYPE_ID >= m_Lights.size()) {
                     m_Lights.emplace_back(NEW Engine::priv::LightContainer<LIGHT>{});
                 }
-                return LIGHT::TYPE_ID - 1;
+                return LIGHT::TYPE_ID;
             }
             template<class LIGHT, class ... ARGS> [[nodiscard]] inline Engine::view_ptr<LIGHT> createLight(ARGS&&... args) {
                 internal_assert_registered_light_type<LIGHT>();

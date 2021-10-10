@@ -38,18 +38,18 @@ namespace Engine::priv::algorithms {
 
 namespace Engine::algorithms {
     template<template<class> class CONTAINER, class ... TYPE>
-    constexpr void radix_sort(CONTAINER<TYPE...>& input) {
+    void radix_sort(CONTAINER<TYPE...>& input) {
         using ELEMENT_TYPE      = std::tuple_element_t<0, std::tuple<TYPE...>>;
         ELEMENT_TYPE maxElement = *std::max_element(input.cbegin(), input.cend());
         std::vector<ELEMENT_TYPE> aux(input.size(), 0);
-        std::array<int, 10> buckets{ 0 };
+        std::array<int, 10> buckets = { 0 };
         for (int exp = 1; maxElement / exp > 0; exp *= 10) {
             Engine::priv::algorithms::radix_sort::count_sort(input, aux, buckets, exp, 0, input.size() - 1);
         }
     }
     /*
     template<class EXECUTION_POLICY, template<class> class CONTAINER, class ... TYPE>
-    constexpr void radix_sort(EXECUTION_POLICY&& policy, CONTAINER<TYPE...>& input) {
+    void radix_sort(EXECUTION_POLICY&& policy, CONTAINER<TYPE...>& input) {
         if (std::is_same<EXECUTION_POLICY, std::execution::sequenced_policy>::value) {
             radix_sort(input);
         }else{
@@ -57,12 +57,12 @@ namespace Engine::algorithms {
     }
     */
     template<template<class> class CONTAINER, class ... TYPE>
-    inline constexpr void radix_sort_floats(CONTAINER<TYPE...>& input) {
+    inline void radix_sort_floats(CONTAINER<TYPE...>& input) {
         boost::sort::spreadsort::float_sort(std::begin(input), std::end(input));
     }
     /*
     template<class EXECUTION_POLICY, template<class> class CONTAINER, class ... TYPE>
-    inline constexpr void radix_sort_floats(EXECUTION_POLICY&& policy, CONTAINER<TYPE...>& input) {
+    inline void radix_sort_floats(EXECUTION_POLICY&& policy, CONTAINER<TYPE...>& input) {
         if (std::is_same<EXECUTION_POLICY, std::execution::sequenced_policy>::value) {
             radix_sort_floats(input);
         }else{

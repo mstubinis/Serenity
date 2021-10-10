@@ -34,13 +34,13 @@ SystemComponentRigidBody::SystemComponentRigidBody(Engine::priv::ECS& ecs)
     setSceneLeftFunction([](SystemBaseClass& inSystem, Scene& scene) {
         auto& system = static_cast<SystemComponentRigidBody&>(inSystem);
         system.forEach([](Entity entity, ComponentRigidBody* rigidBodyComponent) {
-            rigidBodyComponent->removePhysicsFromWorld();
+            bool result = rigidBodyComponent->removePhysicsFromWorld();
         }, SystemExecutionPolicy::Normal);
     });
     setSceneEnteredFunction([](SystemBaseClass& inSystem, Scene& scene) {
         auto& system = static_cast<SystemComponentRigidBody&>(inSystem);
         system.forEach([](Entity entity, ComponentRigidBody* rigidBodyComponent) {
-            rigidBodyComponent->addPhysicsToWorld();
+            bool result = rigidBodyComponent->addPhysicsToWorld();
         }, SystemExecutionPolicy::Normal);
     });
 }

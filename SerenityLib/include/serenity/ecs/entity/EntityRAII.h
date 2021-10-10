@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ENGINE_ECS_ENTITY_RAII_H
 #define ENGINE_ECS_ENTITY_RAII_H
 
@@ -10,13 +9,13 @@ Do not use this as a handle to pass around, use Entity for that.
 */
 class EntityRAII final {
     private:
-        Entity m_Entity = Entity{};
+        Entity m_Entity;
     public:
         constexpr EntityRAII() = default;
         EntityRAII(Scene& scene)
             : m_Entity{ scene }
         {}
-        constexpr EntityRAII(EntityID entityID, EntityID sceneID, EntityID versionID)
+        constexpr EntityRAII(uint32_t entityID, uint32_t sceneID, uint32_t versionID)
             : m_Entity{ entityID, sceneID, versionID }
         {}
         ~EntityRAII() {
@@ -32,6 +31,7 @@ class EntityRAII final {
             m_Entity = std::exchange(other.m_Entity, Entity{});
             return *this;
         }
+        inline std::string toString() const { return m_Entity.toString(); }
 
         //inline operator uint32_t() const noexcept { return m_Entity.m_Data; }
         inline operator bool() const noexcept { return !m_Entity.null(); }
@@ -40,16 +40,16 @@ class EntityRAII final {
         inline bool operator!=(const EntityRAII other) const noexcept { return m_Entity.operator!=(other); }
         inline bool operator==(const Entity other) const noexcept { return m_Entity.operator==(other); }
         inline bool operator!=(const Entity other) const noexcept { return m_Entity.operator!=(other); }
-        inline [[nodiscard]] bool null() const noexcept { return m_Entity.null(); }
+        [[nodiscard]] inline bool null() const noexcept { return m_Entity.null(); }
 
-        inline [[nodiscard]] bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
+        [[nodiscard]] inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
 
-        inline [[nodiscard]] EntityID id() const noexcept { return m_Entity.id(); }
-        inline [[nodiscard]] EntityID sceneID() const noexcept { return m_Entity.sceneID(); }
-        inline [[nodiscard]] EntityID versionID() const noexcept { return m_Entity.versionID(); }
+        [[nodiscard]] inline uint32_t id() const noexcept { return m_Entity.id(); }
+        [[nodiscard]] inline uint32_t sceneID() const noexcept { return m_Entity.sceneID(); }
+        [[nodiscard]] inline uint32_t versionID() const noexcept { return m_Entity.versionID(); }
 
-        inline [[nodiscard]] Engine::view_ptr<Scene> scene() const noexcept { return m_Entity.scene(); }
-        inline [[nodiscard]] bool hasParent() const noexcept { return m_Entity.hasParent(); }
+        [[nodiscard]] inline Engine::view_ptr<Scene> scene() const noexcept { return m_Entity.scene(); }
+        [[nodiscard]] inline bool hasParent() const noexcept { return m_Entity.hasParent(); }
 
         inline void addChild(Entity child) const noexcept { m_Entity.addChild(child); }
         inline void removeChild(Entity child) const noexcept { m_Entity.removeChild(child); }
@@ -74,7 +74,7 @@ class EntityRAII final {
         inline bool removeComponent(const std::string& componentClassName) {
             return m_Entity.removeComponent(componentClassName);
         }
-        inline [[nodiscard]] luabridge::LuaRef getComponent(const std::string& componentClassName) {
+        [[nodiscard]] inline luabridge::LuaRef getComponent(const std::string& componentClassName) {
             return m_Entity.getComponent(componentClassName);
         }
 };

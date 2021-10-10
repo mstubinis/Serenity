@@ -11,7 +11,7 @@ class SystemComponentCamera final : public SystemCRTP<SystemComponentCamera, Com
     private:
 
     public:
-        SystemComponentCamera(Engine::priv::ECS& ecs);
+        SystemComponentCamera(Engine::priv::ECS&);
 };
 
 #endif

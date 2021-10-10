@@ -66,12 +66,15 @@ namespace Engine {
                 --m_Count;
             }
 
-            inline typename ArrayType::iterator begin() noexcept { return m_Array.begin(); }
-            inline typename ArrayType::const_iterator begin() const noexcept { return m_Array.begin(); }
-            inline typename const ArrayType::const_iterator cbegin() const noexcept { return m_Array.cbegin(); }
-            inline typename ArrayType::iterator end() noexcept { return m_Array.begin() + m_Count; }
-            inline typename ArrayType::const_iterator end() const noexcept { return m_Array.begin() + m_Count; }
-            inline typename const ArrayType::const_iterator cend() const noexcept { return m_Array.cbegin() + m_Count; }
+            //notice the end() functions use m_Count instead of end()
+            using itr = typename ArrayType::iterator;
+            using itr_const = typename ArrayType::const_iterator;
+            inline itr begin() noexcept { return m_Array.begin(); }
+            inline itr_const begin() const noexcept { return m_Array.begin(); }
+            inline itr end() noexcept { return m_Array.begin() + m_Count; }
+            inline itr_const end() const noexcept { return m_Array.begin() + m_Count; }
+            inline const itr_const cbegin() const noexcept { return m_Array.cbegin(); }
+            inline const itr_const cend() const noexcept { return m_Array.cbegin() + m_Count; }
     };
 }
 

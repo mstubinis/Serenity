@@ -4,9 +4,9 @@
 
 #include <serenity/system/TypeDefs.h>
 
-constexpr uint32_t ID_BIT_POSITIONS      = 21U;
-constexpr uint32_t SCENE_BIT_POSITIONS   = 7U;
-constexpr uint32_t VERSION_BIT_POSITIONS = 4U;
-constexpr uint32_t ENTITY_BIT_SIZE       = sizeof(uint32_t) * 8U;
+constexpr const uint32_t ID_BIT_POSITIONS      = 21U;
+constexpr const uint32_t SCENE_BIT_POSITIONS   = 7U;
+constexpr const uint32_t VERSION_BIT_POSITIONS = 4U;
+constexpr const uint32_t ENTITY_BIT_SIZE       = sizeof(uint32_t) * 8U;
 
 #endif

@@ -7,13 +7,14 @@ struct SceneOptions;
 #include <serenity/containers/SparseSet.h>
 
 namespace Engine::priv {
-    template <typename COMPONENT>
+    template <class COMPONENT>
     class ECSComponentPool : public Engine::sparse_set<COMPONENT> {
+        using sparse_base = Engine::sparse_set<COMPONENT>;
         private:
             ECSComponentPool() = delete;
         public:
             ECSComponentPool(const SceneOptions& options)
-                : Engine::sparse_set<COMPONENT>{ 400U }
+                : sparse_base{ 200U }
             {}
 
             ECSComponentPool(const ECSComponentPool&)                = default;
@@ -21,22 +22,12 @@ namespace Engine::priv {
             ECSComponentPool(ECSComponentPool&&) noexcept            = default;
             ECSComponentPool& operator=(ECSComponentPool&&) noexcept = default;
 
-            template<typename ... ARGS> 
-            inline constexpr COMPONENT* addComponent(Entity entity, ARGS&&... args) noexcept {
-                return Engine::sparse_set<COMPONENT>::add(entity.id(), entity, std::forward<ARGS>(args)...);
-            }
-            inline bool removeComponent(Entity entity) noexcept {
-                return Engine::sparse_set<COMPONENT>::remove(entity.id());
-            }
-            inline bool removeComponent(uint32_t entityID) noexcept {
-                return Engine::sparse_set<COMPONENT>::remove(entityID);
-            }
-            [[nodiscard]] inline COMPONENT* getComponent(Entity entity) noexcept {
-                return Engine::sparse_set<COMPONENT>::get(entity.id());
-            }
-            [[nodiscard]] inline COMPONENT* getComponent(uint32_t entityID) noexcept {
-                return Engine::sparse_set<COMPONENT>::get(entityID);
-            }
+            template<class ... ARGS>
+            inline constexpr COMPONENT* addComponent(Entity entity, ARGS&&... args) noexcept { return sparse_base::add(entity.id(), entity, std::forward<ARGS>(args)...); }
+            inline bool removeComponent(Entity entity) noexcept { return sparse_base::remove(entity.id()); }
+            inline bool removeComponent(uint32_t entityID) noexcept { return sparse_base::remove(entityID); }
+            [[nodiscard]] inline COMPONENT* getComponent(Entity entity) noexcept { return sparse_base::get(entity.id()); }
+            [[nodiscard]] inline COMPONENT* getComponent(uint32_t entityID) noexcept { return sparse_base::get(entityID); }
     };
 };
 #endif

@@ -1778,108 +1778,107 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
     m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
 
     internal_render_per_frame_preparation(viewport, camera);
-    if (Engine::priv::PublicScene::HasItemsToRender(scene)) {
-        internal_init_frame_gbuffer(viewport, camera);
-        if (mainRenderFunction) {
+    internal_init_frame_gbuffer(viewport, camera);
+    if (mainRenderFunction) {
 #pragma region Camera UBO
-            if (m_UBOCamera && Engine::priv::OpenGLState::constants.supportsUBO()) {
-                UniformBufferObjectMapper mapper{ *m_UBOCamera };
-                m_CameraUBODataPtr = static_cast<UBOCameraDataStruct*>(mapper.getPtr());
+        if (m_UBOCamera && Engine::priv::OpenGLState::constants.supportsUBO()) {
+            UniformBufferObjectMapper mapper{ *m_UBOCamera };
+            m_CameraUBODataPtr = static_cast<UBOCameraDataStruct*>(mapper.getPtr());
 
-                const float logDepthBufferFCoeff = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
-                //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
+            const float logDepthBufferFCoeff = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
+            //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
 
-                //same simulation and render space
-                /*
-                m_CameraUBODataPtr->CameraView        = camera.getView();
-                m_CameraUBODataPtr->CameraProj        = camera.getProjection();
-                m_CameraUBODataPtr->CameraViewProj    = camera.getViewProjection();
-                m_CameraUBODataPtr->CameraInvProj     = camera.getProjectionInverse();
-                m_CameraUBODataPtr->CameraInvView     = camera.getViewInverse();
-                m_CameraUBODataPtr->CameraInvViewProj = camera.getViewProjectionInverse();
-                m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ camera.getPosition(), camera.getNear() };
-                m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ camera.getViewVector(), camera.getFar() };
-                m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ 0.0f, 0.0f, 0.0f, logDepthBufferFCoeff };
-                m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
-                m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
-                m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
-                */
+            //same simulation and render space
+            /*
+            m_CameraUBODataPtr->CameraView        = camera.getView();
+            m_CameraUBODataPtr->CameraProj        = camera.getProjection();
+            m_CameraUBODataPtr->CameraViewProj    = camera.getViewProjection();
+            m_CameraUBODataPtr->CameraInvProj     = camera.getProjectionInverse();
+            m_CameraUBODataPtr->CameraInvView     = camera.getViewInverse();
+            m_CameraUBODataPtr->CameraInvViewProj = camera.getViewProjectionInverse();
+            m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ camera.getPosition(), camera.getNear() };
+            m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ camera.getViewVector(), camera.getFar() };
+            m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ 0.0f, 0.0f, 0.0f, logDepthBufferFCoeff };
+            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
+            m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
+            m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
+            */
 
-                //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
-                //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
+            //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
+            //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
                 
-                glm::mat4 viewNoTranslation = camera.getView();
-                viewNoTranslation[3][0]     = 0.0001f;
-                viewNoTranslation[3][1]     = 0.0001f;
-                viewNoTranslation[3][2]     = 0.0001f;
-                m_CameraUBODataPtr->CameraView        = viewNoTranslation;
-                m_CameraUBODataPtr->CameraProj        = camera.getProjection();
-                m_CameraUBODataPtr->CameraViewProj    = m_CameraUBODataPtr->CameraProj * viewNoTranslation;
-                m_CameraUBODataPtr->CameraInvProj     = camera.getProjectionInverse();
-                m_CameraUBODataPtr->CameraInvView     = glm::inverse(m_CameraUBODataPtr->CameraView);
-                m_CameraUBODataPtr->CameraInvViewProj = glm::inverse(m_CameraUBODataPtr->CameraViewProj);
-                m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ viewNoTranslation[3][0], viewNoTranslation[3][1], viewNoTranslation[3][2], camera.getNear() };
-                m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ glm::vec3{viewNoTranslation[0][2], viewNoTranslation[1][2], viewNoTranslation[2][2]}, camera.getFar() };
-                m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ camera.getPosition(), logDepthBufferFCoeff };
-                m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ viewportDimensions.z, viewportDimensions.w, viewportDimensions.z, viewportDimensions.w };
-                m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
-                m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
-            }
+            glm::mat4 viewNoTranslation = camera.getView();
+            viewNoTranslation[3][0]     = 0.0001f;
+            viewNoTranslation[3][1]     = 0.0001f;
+            viewNoTranslation[3][2]     = 0.0001f;
+            m_CameraUBODataPtr->CameraView        = viewNoTranslation;
+            m_CameraUBODataPtr->CameraProj        = camera.getProjection();
+            m_CameraUBODataPtr->CameraViewProj    = m_CameraUBODataPtr->CameraProj * viewNoTranslation;
+            m_CameraUBODataPtr->CameraInvProj     = camera.getProjectionInverse();
+            m_CameraUBODataPtr->CameraInvView     = glm::inverse(m_CameraUBODataPtr->CameraView);
+            m_CameraUBODataPtr->CameraInvViewProj = glm::inverse(m_CameraUBODataPtr->CameraViewProj);
+            m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ viewNoTranslation[3][0], viewNoTranslation[3][1], viewNoTranslation[3][2], camera.getNear() };
+            m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ glm::vec3{viewNoTranslation[0][2], viewNoTranslation[1][2], viewNoTranslation[2][2]}, camera.getFar() };
+            m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ camera.getPosition(), logDepthBufferFCoeff };
+            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ viewportDimensions.z, viewportDimensions.w, viewportDimensions.z, viewportDimensions.w };
+            m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
+            m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
+        }
 #pragma endregion
-        }
-        internal_pass_shadows_depth(viewport, scene, camera);
-
-        bool depthPrepass = false;
-        //depthPrepass      = internal_pass_depth_prepass(viewport, camera);
-
-        internal_pass_geometry(viewport, camera);
-
-        Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
-        Engine::Renderer::GLDisablei(GL_BLEND, 0);
-
-        internal_pass_ssao(viewport, camera);
-
-        Engine::Renderer::GLDisablei(GL_BLEND, 0);
-
-        internal_pass_stencil();
-
-        Engine::Renderer::GLEnablei(GL_BLEND, 0);
-        glBlendFuncSeparatei(0, GL_ONE, GL_ONE, GL_ONE, GL_ONE);
-
-        //this needs to be cleaned up
-        m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGB");
-        Engine::Renderer::Settings::clear(true, false, false);
-        if (m_Renderer.m_Lighting) {
-            if (renderer.m_LightingAlgorithm == LightingAlgorithm::PBR) {
-                internal_pass_lighting(viewport, camera, mainRenderFunction);
-            } else {
-                internal_pass_lighting_basic(viewport, camera, mainRenderFunction);
-            }
-        }
-        Engine::Renderer::GLDisablei(GL_BLEND, 0);
-        Engine::Renderer::GLDisable(GL_STENCIL_TEST);
-        Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-        glDepthMask(GL_TRUE);
-        
-        glDepthRange(0.0f, 0.98f);
-
-        internal_render2DAPI(GBufferType::Diffuse, m_Background2DAPICommands, mainRenderFunction, viewport, false);
-        glDepthRange(0.0f, 1.0f);
-        internal_pass_forward(viewport, camera, depthPrepass);
-
-        Engine::Renderer::GLDisable(GL_DEPTH_TEST);
-        internal_pass_god_rays(viewport, camera);
-        internal_pass_normaless_diffuse();
-        internal_pass_hdr(viewport, camera, GBufferType::Normal, GBufferType::Misc);//out textures
-        internal_pass_bloom(viewport, GBufferType::Normal);//in texture
-        GBufferType::Type sceneTexture = GBufferType::Misc;
-        GBufferType::Type outTexture = GBufferType::Lighting;
-
-        internal_pass_depth_of_field(viewport, sceneTexture, outTexture);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-        internal_pass_aa(mainRenderFunction, viewport, camera, sceneTexture, outTexture);
     }
+    internal_pass_shadows_depth(viewport, scene, camera);
+
+    bool depthPrepass = false;
+    //depthPrepass      = internal_pass_depth_prepass(viewport, camera);
+
+    internal_pass_geometry(viewport, camera);
+
+    Engine::Renderer::GLDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    Engine::Renderer::GLDisablei(GL_BLEND, 0);
+
+    internal_pass_ssao(viewport, camera);
+
+    Engine::Renderer::GLDisablei(GL_BLEND, 0);
+
+    internal_pass_stencil();
+
+    Engine::Renderer::GLEnablei(GL_BLEND, 0);
+    glBlendFuncSeparatei(0, GL_ONE, GL_ONE, GL_ONE, GL_ONE);
+
+    //this needs to be cleaned up
+    m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGB");
+    Engine::Renderer::Settings::clear(true, false, false);
+    if (m_Renderer.m_Lighting) {
+        if (renderer.m_LightingAlgorithm == LightingAlgorithm::PBR) {
+            internal_pass_lighting(viewport, camera, mainRenderFunction);
+        } else {
+            internal_pass_lighting_basic(viewport, camera, mainRenderFunction);
+        }
+    }
+    Engine::Renderer::GLDisablei(GL_BLEND, 0);
+    Engine::Renderer::GLDisable(GL_STENCIL_TEST);
+    Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+        
+    glDepthRange(0.0f, 0.98f);
+
+    internal_render2DAPI(GBufferType::Diffuse, m_Background2DAPICommands, mainRenderFunction, viewport, false);
+    glDepthRange(0.0f, 1.0f);
+    internal_pass_forward(viewport, camera, depthPrepass);
+
+    Engine::Renderer::GLDisable(GL_DEPTH_TEST);
+    internal_pass_god_rays(viewport, camera);
+    internal_pass_normaless_diffuse();
+    internal_pass_hdr(viewport, camera, GBufferType::Normal, GBufferType::Misc);//out textures
+    internal_pass_bloom(viewport, GBufferType::Normal);//in texture
+    GBufferType::Type sceneTexture = GBufferType::Misc;
+    GBufferType::Type outTexture = GBufferType::Lighting;
+
+    internal_pass_depth_of_field(viewport, sceneTexture, outTexture);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    internal_pass_aa(mainRenderFunction, viewport, camera, sceneTexture, outTexture);
+
     renderPhysicsAPI(mainRenderFunction, viewport, camera, scene);
 
     m_GBuffer.bindBackbuffer(viewport);

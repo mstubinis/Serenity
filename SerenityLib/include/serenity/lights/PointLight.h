@@ -11,7 +11,7 @@ class PointLightShadowData {
 
 };
 
-class PointLight : public EntityBody, public LightAttenuationData, public LightBaseData<PointLight> {
+class PointLight : public Entity, public LightAttenuationData, public LightBaseData<PointLight> {
     friend class ::Engine::priv::RenderModule;
     protected:
         void calculateCullingRadius();

@@ -13,7 +13,7 @@ class SpotLightShadowData {
 
 };
 
-class SpotLight : public EntityBody, public LightAttenuationData, public LightBaseData<SpotLight> {
+class SpotLight : public Entity, public LightAttenuationData, public LightBaseData<SpotLight> {
     friend class ::Engine::priv::RenderModule;
     private:
         float   m_CutoffDegrees      = SPOT_LIGHT_DEFAULT_CUTOFF_DEGREES;

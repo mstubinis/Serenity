@@ -6,17 +6,27 @@ SystemRemoveRigidBodies::SystemRemoveRigidBodies(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
-        auto& system = (SystemRemoveRigidBodies&)inSystem;
-        if (system.m_RemovedRigidBodies.size() > 0) {
-            for (const auto& BTRigidBody : system.m_RemovedRigidBodies) {
-                Engine::Physics::removeRigidBody(BTRigidBody);
-            }
-            system.m_RemovedRigidBodies.clear();
+        auto& system = static_cast<SystemRemoveRigidBodies&>(inSystem);
+        for (const auto& BTRigidBody : system.m_RemovedRigidBodies) {
+            Engine::Physics::removeRigidBody(BTRigidBody);
         }
+        system.m_RemovedRigidBodies.clear();
+    });
+    setSceneLeftFunction([](SystemBaseClass& inSystem, Scene& scene) {
+        auto& system = static_cast<SystemRemoveRigidBodies&>(inSystem);
+        system.forEach<SystemRemoveRigidBodies*>([](SystemRemoveRigidBodies* inSystem, Entity entity) {
+            inSystem->clear();
+        }, &system, SystemExecutionPolicy::Normal);
+    });
+    setSceneEnteredFunction([](SystemBaseClass& inSystem, Scene& scene) {
+        auto& system = static_cast<SystemRemoveRigidBodies&>(inSystem);
+        system.forEach<SystemRemoveRigidBodies*>([](SystemRemoveRigidBodies* inSystem, Entity entity) {
+            inSystem->clear();
+        }, &system, SystemExecutionPolicy::Normal);
     });
 }
 bool SystemRemoveRigidBodies::enqueueBody(btRigidBody* inBTRigidBody) {
-    for (const auto& BTRigidBody : m_RemovedRigidBodies) {
+    for (const btRigidBody* BTRigidBody : m_RemovedRigidBodies) {
         if (BTRigidBody == inBTRigidBody) {
             return false;
         }
@@ -25,7 +35,14 @@ bool SystemRemoveRigidBodies::enqueueBody(btRigidBody* inBTRigidBody) {
     return true;
 }
 void SystemRemoveRigidBodies::removeBody(btRigidBody* inBTRigidBody) {
-    std::erase_if(m_RemovedRigidBodies, [inBTRigidBody](const auto ptr) {
-        return ptr == inBTRigidBody;
-    });
+    for (size_t i = 0; i < m_RemovedRigidBodies.size(); ++i) {
+        if (m_RemovedRigidBodies[i] == inBTRigidBody) {
+            m_RemovedRigidBodies[i] = std::move(m_RemovedRigidBodies.back());
+            m_RemovedRigidBodies.pop_back();
+            break;
+        }
+    }
+}
+void SystemRemoveRigidBodies::clear() {
+    m_RemovedRigidBodies.clear();
 }

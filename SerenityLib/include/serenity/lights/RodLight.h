@@ -12,7 +12,7 @@ class RodLightShadowData {
 
 };
 
-class RodLight : public EntityBody, public LightAttenuationData, public LightBaseData<RodLight> {
+class RodLight : public Entity, public LightAttenuationData, public LightBaseData<RodLight> {
     friend class ::Engine::priv::RenderModule;
     private:
         float m_RodLength = ROD_LIGHT_DEFAULT_ROD_LENGTH;

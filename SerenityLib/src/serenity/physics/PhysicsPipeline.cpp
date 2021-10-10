@@ -20,16 +20,16 @@ Engine::priv::PhysicsPipeline::PhysicsPipeline() {
     m_Broadphase              = std::make_unique<btDbvtBroadphase>();
     m_CollisionConfiguration  = std::make_unique<btDefaultCollisionConfiguration>();
     m_Dispatcher              = std::make_unique<btCollisionDispatcher>(m_CollisionConfiguration.get());
-    if (hardware_concurrency <= 1) {
+    //if (hardware_concurrency <= 1) {
         m_Solver              = std::make_unique<btSequentialImpulseConstraintSolver>();
         m_World               = std::make_unique<btDiscreteDynamicsWorld>(m_Dispatcher.get(), m_Broadphase.get(), m_Solver.get(), m_CollisionConfiguration.get());
-    } else {
-        m_TaskScheduler       = std::make_unique<PhysicsTaskScheduler>("PhysicsTaskScheduler");
-        btSetTaskScheduler(m_TaskScheduler.get());
-        m_SolverPool          = std::make_unique<btConstraintSolverPoolMt>(hardware_concurrency);
-        m_SolverMT            = std::make_unique<btSequentialImpulseConstraintSolverMt>();
-        m_World               = std::make_unique<btDiscreteDynamicsWorldMt>(m_Dispatcher.get(), m_Broadphase.get(), m_SolverPool.get(), m_SolverMT.get(), m_CollisionConfiguration.get());
-    }
+    //} else {
+    //    m_TaskScheduler       = std::make_unique<PhysicsTaskScheduler>("PhysicsTaskScheduler");
+    //    btSetTaskScheduler(m_TaskScheduler.get());
+    //    m_SolverPool          = std::make_unique<btConstraintSolverPoolMt>(hardware_concurrency);
+    //    m_SolverMT            = std::make_unique<btSequentialImpulseConstraintSolverMt>();
+    //    m_World               = std::make_unique<btDiscreteDynamicsWorldMt>(m_Dispatcher.get(), m_Broadphase.get(), m_SolverPool.get(), m_SolverMT.get(), m_CollisionConfiguration.get());
+    //}
     m_DebugDrawer.setDebugMode(btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
     m_World->setDebugDrawer(&m_DebugDrawer);
     m_World->setGravity(btVector3{ 0.0, 0.0, 0.0 });
@@ -55,10 +55,12 @@ void Engine::priv::PhysicsPipeline::cleanup() {
         btCollisionObject* BTCollisionObj = m_World->getCollisionObjectArray()[i];
         if (BTCollisionObj) {
             btRigidBody* BTRigidBody = btRigidBody::upcast(BTCollisionObj);
+            /*
             if (BTRigidBody) {
                 auto motionState = BTRigidBody->getMotionState();
                 SAFE_DELETE(motionState);
             }
+            */
             m_World->removeCollisionObject(BTCollisionObj);
             SAFE_DELETE(BTCollisionObj);
         }

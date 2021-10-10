@@ -23,14 +23,14 @@ namespace Engine::priv {
     class ECS final {
         friend struct Engine::priv::PublicScene;
         private:
-            static inline uint32_t                          m_RegisteredComponents = 0;
-            ECSEntityPool                                   m_EntityPool;
-            ECSSystemPool                                   m_SystemPool;
-            std::vector<Entity>                             m_JustAddedEntities;
-            std::vector<Entity>                             m_DestroyedEntities;
-            std::vector<std::unique_ptr<sparse_set_base>>   m_ComponentPools;
-            std::recursive_mutex                            m_MutexRecursive; //recursive as addComponent() can often be nested
-            SceneOptions                                    m_SceneOptions;
+            static inline uint32_t                m_RegisteredComponents = 0;
+            ECSEntityPool                         m_EntityPool;
+            ECSSystemPool                         m_SystemPool;
+            std::vector<Entity>                   m_JustAddedEntities;
+            std::vector<Entity>                   m_DestroyedEntities;
+            std::vector<sparse_set_base*>         m_ComponentPools;
+            std::recursive_mutex                  m_MutexRecursive; //recursive as addComponent() can often be nested
+            SceneOptions                          m_SceneOptions;
 
 
             template<class COMPONENT> [[nodiscard]] Engine::view_ptr<COMPONENT> internal_get_component(Entity entity) noexcept {
@@ -42,20 +42,21 @@ namespace Engine::priv {
             ECS& operator=(const ECS&)     = delete;
             ECS(ECS&&) noexcept            = delete;
             ECS& operator=(ECS&&) noexcept = delete;
+            ~ECS();
 
             void init(const SceneOptions&);
 
             [[nodiscard]] inline const ECSEntityPool& getEntityPool() const noexcept { return m_EntityPool; }
             [[nodiscard]] Entity createEntity(Scene&);
-            [[nodiscard]] inline sparse_set_base* getComponentPool(uint32_t typeID) noexcept { return m_ComponentPools[typeID - 1].get(); }
+            [[nodiscard]] inline sparse_set_base* getComponentPool(uint32_t typeID) noexcept { return m_ComponentPools[typeID]; }
 
             template<class COMPONENT>
             [[nodiscard]] inline ECSComponentPool<COMPONENT>& getComponentPool(uint32_t typeID) const noexcept { 
-                return *static_cast<ECSComponentPool<COMPONENT>*>(m_ComponentPools[typeID - 1].get()); 
+                return *static_cast<ECSComponentPool<COMPONENT>*>(m_ComponentPools[typeID]); 
             }
             template<class COMPONENT>
             [[nodiscard]] inline ECSComponentPool<COMPONENT>& getComponentPool(uint32_t typeID) noexcept { 
-                return *static_cast<ECSComponentPool<COMPONENT>*>(m_ComponentPools[typeID - 1].get()); 
+                return *static_cast<ECSComponentPool<COMPONENT>*>(m_ComponentPools[typeID]); 
             }
 
             template<class COMPONENT>
@@ -65,15 +66,16 @@ namespace Engine::priv {
 
             template<class COMPONENT>
             uint32_t registerComponent() noexcept {
-                if (COMPONENT::TYPE_ID == 0) {
-                    COMPONENT::TYPE_ID = ++m_RegisteredComponents;
+                if (COMPONENT::TYPE_ID == std::numeric_limits<uint32_t>().max()) {
+                    COMPONENT::TYPE_ID = m_RegisteredComponents++;
                 }
                 auto threshold = std::max(COMPONENT::TYPE_ID, m_RegisteredComponents);
-                if (m_ComponentPools.size() < threshold) {
-                    m_ComponentPools.resize(threshold);
+                if (m_ComponentPools.size() <= threshold) {
+                    m_ComponentPools.resize(threshold, nullptr);
                 }
-                m_ComponentPools[COMPONENT::TYPE_ID - 1].reset(NEW ECSComponentPool<COMPONENT>{m_SceneOptions});
-                return COMPONENT::TYPE_ID - 1;
+                SAFE_DELETE(m_ComponentPools[COMPONENT::TYPE_ID]);
+                m_ComponentPools[COMPONENT::TYPE_ID] = NEW ECSComponentPool<COMPONENT>{m_SceneOptions};
+                return COMPONENT::TYPE_ID;
             }
 
             template<class SYSTEM, class ARGS_TUPLE, class ... COMPONENTS>
@@ -93,25 +95,18 @@ namespace Engine::priv {
                     camera.comp.resize(width, height);
                 }
             }
-
             void removeEntity(Entity);
-            inline void update(const float dt, Scene& scene) noexcept {
-                m_SystemPool.update(dt, scene);
-            }
-            inline void onSceneEntered(Scene& scene) noexcept {
-                m_SystemPool.onSceneEntered(scene);
-            }
-            inline void onSceneLeft(Scene& scene) noexcept {
-                m_SystemPool.onSceneLeft(scene);
-            }
+            void update(const float dt, Scene&) noexcept;
+            void onSceneEntered(Scene&) noexcept;
+            void onSceneLeft(Scene&) noexcept;
 
             //add newly created entities to the scene with their components as defined in their m_Systems, etc
             void preUpdate(Scene&, const float dt);
             //destroy flagged entities & their components, if any
             void postUpdate(Scene&, const float dt);
 
-            template<class SYSTEM> [[nodiscard]] inline const SYSTEM& getSystem() const noexcept { return static_cast<const SYSTEM&>(m_SystemPool[SYSTEM::TYPE_ID - 1]); }
-            template<class SYSTEM> [[nodiscard]] inline SYSTEM& getSystem() noexcept { return static_cast<SYSTEM&>(m_SystemPool[SYSTEM::TYPE_ID - 1]); }
+            template<class SYSTEM> [[nodiscard]] inline const SYSTEM& getSystem() const noexcept { return static_cast<const SYSTEM&>(m_SystemPool[SYSTEM::TYPE_ID]); }
+            template<class SYSTEM> [[nodiscard]] inline SYSTEM& getSystem() noexcept { return static_cast<SYSTEM&>(m_SystemPool[SYSTEM::TYPE_ID]); }
 
             template<class COMPONENT, class ... ARGS> bool addComponent(Entity entity, ARGS&&... args) noexcept {
                 COMPONENT* addedComponent = nullptr;

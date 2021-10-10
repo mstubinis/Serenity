@@ -43,7 +43,7 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
         void*       m_UserPointer2      = nullptr;
         Entity      m_Owner;
     public:
-        static void recalculateAllParentChildMatrices(Scene& scene);
+        static void recalculateAllParentChildMatrices(Scene&);
     public:
         ComponentTransform(Entity);
         ComponentTransform(Entity, const glm_vec3& pos, const glm::quat& rot = glm::quat{ 1.0f, 0.0f, 0.0f, 0.0f }, const glm::vec3& scl = glm::vec3{ 1.0f });

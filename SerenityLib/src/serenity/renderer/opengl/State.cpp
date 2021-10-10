@@ -4,18 +4,14 @@
 #include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/dependencies/glm.h>
 #include <serenity/utils/Utils.h>
-
+#include <array>
 
 using namespace Engine;
 using namespace Engine::priv;
 
 namespace {
-    constexpr std::array<void(*)(GLenum), 2> GL_ENABLE_FUNCTIONS = {
-        glDisable,
-        glEnable,
-    };
     inline void call_gl_enable(GLenum isTrue, GLenum cap) noexcept {
-        GL_ENABLE_FUNCTIONS[isTrue](cap);
+        isTrue ? glEnable(cap) : glDisable(cap);
     }
 }
 

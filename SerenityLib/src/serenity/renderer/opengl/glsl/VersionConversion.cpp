@@ -3,43 +3,44 @@
 #include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/resources/shader/ShaderHelper.h>
 #include <serenity/resources/material/MaterialEnums.h>
-
 #include <boost/algorithm/string/replace.hpp>
+#include <array>
 
 //TODO: change from [const char* const] to [string] in c++20?
-constexpr std::array<const char* const, 30> TYPES {
-    "float",
-    "vec2",
-    "vec3",
-    "vec4",
-    "mat3",
-    "mat4",
-    "double",
-    "dvec2",
-    "dvec3",
-    "dvec4",
-    "dmat3",
-    "dmat4",
-    "int",
-    "ivec2",
-    "ivec3",
-    "ivec4",
-    "imat3",
-    "imat4",
-    "bool",
-    "bvec2",
-    "bvec3",
-    "bvec4",
-    "bmat3",
-    "bmat4",
-    "uint",
-    "uvec2",
-    "uvec3",
-    "uvec4",
-    "umat3",
-    "umat4",
-};
-
+namespace {
+    constexpr std::array<const char*, 30> TYPES { {
+        "float",
+        "vec2",
+        "vec3",
+        "vec4",
+        "mat3",
+        "mat4",
+        "double",
+        "dvec2",
+        "dvec3",
+        "dvec4",
+        "dmat3",
+        "dmat4",
+        "int",
+        "ivec2",
+        "ivec3",
+        "ivec4",
+        "imat3",
+        "imat4",
+        "bool",
+        "bvec2",
+        "bvec3",
+        "bvec4",
+        "bmat3",
+        "bmat4",
+        "uint",
+        "uvec2",
+        "uvec3",
+        "uvec4",
+        "umat3",
+        "umat4",
+    } };
+}
 void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
     //deal with MRT binding points
     if (versionNumber >= 130) {

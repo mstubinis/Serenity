@@ -6,7 +6,7 @@
 #include <serenity/resources/Engine_Resources.h>
 
 ProjectionLight::ProjectionLight(Scene* scene, Handle textureHandle, const glm::vec3& direction)
-    : EntityBody{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
+    : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
     , LightBaseData<ProjectionLight>{ LightType::Projection }
 {
     addComponent<ComponentTransform>();

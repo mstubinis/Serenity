@@ -1,4 +1,6 @@
 #include <serenity/ecs/systems/SystemSceneChanging.h>
+#include <serenity/ecs/systems/SystemAddRigidBodies.h>
+#include <serenity/ecs/systems/SystemRemoveRigidBodies.h>
 #include <serenity/scene/Scene.h>
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/system/Engine.h>
@@ -27,7 +29,7 @@ SystemSceneChanging::SystemSceneChanging(Engine::priv::ECS& ecs)
             Engine::priv::PublicScene::GetECS(*newScene).onSceneEntered(*newScene);
             newScene->m_SkipRenderThisFrame = true;
             newScene->m_WasJustSwappedTo    = true;
-            ENGINE_PRODUCTION_LOG("-------- Scene Change to (" << newScene->name() << ") ended --------");
+            //ENGINE_PRODUCTION_LOG("-------- Scene Change to (" << newScene->name() << ") ended --------");
         }
         hasSwap  = false;
         oldScene = newScene;

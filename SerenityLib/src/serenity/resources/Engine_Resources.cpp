@@ -52,8 +52,7 @@ void Engine::priv::ResourceManager::postUpdate() {
     }   
 }
 Engine::view_ptr<Scene> Engine::priv::ResourceManager::getSceneByID(uint32_t id) {
-    uint32_t index = id - 1;
-    return (index < m_Scenes.size()) ? m_Scenes[index].get() : nullptr;
+    return id < m_Scenes.size() ? m_Scenes[id].get() : nullptr;
 }
 
 
