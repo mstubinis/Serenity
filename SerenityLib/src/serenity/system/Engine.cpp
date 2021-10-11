@@ -130,11 +130,11 @@ void EngineCore::init(const EngineOptions& options) {
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
-void EngineCore::internal_post_input_update() {
+void EngineCore::internal_post_input_update(int frameIteration) {
     m_EventModule.m_KeyboardModule.postUpdate();
     m_EventModule.m_MouseModule.postUpdate();
 }
-void EngineCore::internal_update_logic(Scene& scene, const float dt) {
+void EngineCore::internal_update_logic(int frameIteration, Scene& scene, const float dt) {
     m_DebugManager.stop_clock();
     m_NetworkingModule.update(dt);
 
@@ -154,7 +154,7 @@ void EngineCore::internal_update_sounds(Scene& scene, const float dt) {
     m_SoundModule.update(scene, dt);
     m_DebugManager.calculate_sounds();
 }
-void EngineCore::internal_pre_update(Scene& scene, const float dt) {
+void EngineCore::internal_pre_update(int frameIteration, Scene& scene, const float dt) {
     Game::onPreUpdate(dt);
     scene.preUpdate(dt);
 }
@@ -218,10 +218,11 @@ void EngineCore::run() {
             window->internal_update_dynamic_resize();
         }
     };
-    auto   updateSimulation  = [this](const float timeElasped, Scene& scene) {
-        internal_pre_update(scene, timeElasped);
-        internal_update_logic(scene, timeElasped);
-        internal_post_input_update();
+    auto   updateSimulation  = [this](int& frameIteration, const float timeElasped, Scene& scene) {
+        internal_pre_update(frameIteration, scene, timeElasped);
+        internal_update_logic(frameIteration, scene, timeElasped);
+        internal_post_input_update(frameIteration);
+        ++frameIteration;
     };
     auto   renderSimulation  = [this, accumulator](Scene& scene) {
         const double alpha = accumulator / ENGINE_FIXED_TIMESTEP_VALUE_D;
@@ -230,7 +231,8 @@ void EngineCore::run() {
             internal_render(scene, *window, float(m_Misc.m_Dt), alpha/*, state*/);
         }
     };
-    updateSimulation(ENGINE_FIXED_TIMESTEP_VALUE, *Engine::Resources::getCurrentScene()); //initially call update once to get user code in place before the first render.
+    int frameIteration = 0;
+    updateSimulation(frameIteration, ENGINE_FIXED_TIMESTEP_VALUE, *Engine::Resources::getCurrentScene()); //initially call update once to get user code in place before the first render.
     while (!m_Misc.m_Destroyed) {
         auto newTime  = m_Misc.m_Timer.now();
         m_Misc.m_Dt   = std::chrono::duration_cast<millisecs>(newTime - currentTime).count() * 0.001; // * 0.001 converts from millisecs to secs
@@ -240,8 +242,9 @@ void EngineCore::run() {
         auto& scene   = *Engine::Resources::getCurrentScene();
         scene.m_SkipRenderThisFrame = false;
         updateWindows(float(m_Misc.m_Dt), scene);
+        frameIteration = 0;
         while (accumulator >= ENGINE_FIXED_TIMESTEP_VALUE_D) {
-            updateSimulation(ENGINE_FIXED_TIMESTEP_VALUE, scene);
+            updateSimulation(frameIteration, ENGINE_FIXED_TIMESTEP_VALUE, scene);
             accumulator -= ENGINE_FIXED_TIMESTEP_VALUE_D;
         }
         internal_update_sounds(scene, float(m_Misc.m_Dt));

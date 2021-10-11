@@ -19,4 +19,6 @@
 #include <LuaBridge/UnorderedMap.h>
 #include <LuaBridge/Vector.h>
 
+constexpr auto ENGINE_LUA_CURRENT_SCRIPT_TOKEN = "ScrNum";
+
 #endif

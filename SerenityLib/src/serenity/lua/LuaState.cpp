@@ -12,11 +12,14 @@ LUAState::~LUAState() {
         lua_close(L);
     }
 }
-int LUAState::runFile(const std::string& filename) const noexcept {
+int LUAState::runFile(const std::string& filename, size_t scriptID) const noexcept {
     int ret = -1;
     auto* filenameC = filename.c_str();
-    if (luaL_loadfile(L, filenameC) || lua_pcall(L, 0, 0, 0)) {
-        ENGINE_PRODUCTION_LOG("LUA Error: script did not compile correctly (" << filename)
+    luabridge::setGlobal(L, scriptID, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
+    bool failedToLoaded = luaL_loadfile(L, filenameC) || lua_pcall(L, 0, 0, 0);
+    luabridge::setGlobal(L, -1, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
+    if (failedToLoaded) {
+        ENGINE_PRODUCTION_LOG("LUA Error: script did not compile correctly (" << filename << ")")
         return 0;
     }
     ret = lua_getfield(L, LUA_REGISTRYINDEX, filenameC);
@@ -36,7 +39,7 @@ int LUAState::runFile(const std::string& filename) const noexcept {
     ret = lua_setmetatable(L, -2);
     lua_setfield(L, LUA_REGISTRYINDEX, filenameC);
     ret = lua_getfield(L, LUA_REGISTRYINDEX, filenameC);
-    lua_setupvalue(L, 1, 1);
+    lua_pop(L, 1);
     ret = lua_pcall(L, 0, LUA_MULTRET, 0);
     return 1;
 }

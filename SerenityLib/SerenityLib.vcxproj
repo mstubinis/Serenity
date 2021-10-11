@@ -425,7 +425,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -941,6 +941,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="src\serenity\threading\SpinLock.cpp" />
+    <ClCompile Include="src\serenity\threading\SpinLockGuard.cpp" />
     <ClCompile Include="src\serenity\threading\ThreadingHelpers.cpp" />
     <ClCompile Include="src\serenity\threading\ThreadingModule.cpp" />
     <ClCompile Include="src\serenity\threading\ThreadPool.cpp" />
@@ -954,7 +956,6 @@
     <ClInclude Include="include\serenity\algorithms\MergeSort.h" />
     <ClInclude Include="include\serenity\algorithms\RadixSort.h" />
     <ClInclude Include="include\serenity\Constraint.h" />
-    <ClInclude Include="include\serenity\containers\BST.h" />
     <ClInclude Include="include\serenity\containers\CircularBuffer.h" />
     <ClInclude Include="include\serenity\containers\Freelist.h" />
     <ClInclude Include="include\serenity\containers\Heap.h" />
@@ -1340,6 +1341,7 @@
     <ClInclude Include="include\serenity\lights\SunLight.h" />
     <ClInclude Include="include\serenity\lua\Lua.h" />
     <ClInclude Include="include\serenity\lua\LuaBinder.h" />
+    <ClInclude Include="include\serenity\lua\LuaCallable.h" />
     <ClInclude Include="include\serenity\lua\LuaIncludes.h" />
     <ClInclude Include="include\serenity\lua\LuaModule.h" />
     <ClInclude Include="include\serenity\lua\LuaScript.h" />
@@ -1490,6 +1492,8 @@
     <ClInclude Include="include\serenity\system\window\WindowData.h" />
     <ClInclude Include="include\serenity\system\window\WindowIncludes.h" />
     <ClInclude Include="include\serenity\Terrain.h" />
+    <ClInclude Include="include\serenity\threading\SpinLock.h" />
+    <ClInclude Include="include\serenity\threading\SpinLockGuard.h" />
     <ClInclude Include="include\serenity\threading\ThreadingHelpers.h" />
     <ClInclude Include="include\serenity\threading\ThreadingModule.h" />
     <ClInclude Include="include\serenity\threading\ThreadPool.h" />

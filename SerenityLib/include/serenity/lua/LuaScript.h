@@ -9,11 +9,13 @@ class LUAState;
 
 class LuaScript final {
     private:
-        LUAState&     m_LUAStateRef;
+        LUAState&     m_L;
         std::string   m_FileName;
+        size_t        m_ID        = std::numeric_limits<size_t>().max();
 
         LuaScript() = delete;
     public:
+        LuaScript(LUAState&, const std::string& fileName, bool run = true);
         LuaScript(const std::string& fileName, bool run = true);
         ~LuaScript();
 

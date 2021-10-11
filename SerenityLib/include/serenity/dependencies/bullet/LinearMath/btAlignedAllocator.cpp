@@ -235,7 +235,7 @@ void btAlignedFreeInternal(void *ptr, int line, const char *filename)
 	}
 	else
 	{
-		printf("deleting a NULL ptr, no effect\n");
+		//printf("deleting a NULL ptr, no effect\n");
 	}
 }
 

@@ -1,6 +1,6 @@
 #include <serenity/lua/LuaScript.h>
 #include <LuaBridge/LuaBridge.h>
-
+#include <serenity/lua/LuaModule.h>
 #include <serenity/lua/LuaBinder.h>
 
 #include <serenity/resources/Engine_Resources.h>
@@ -17,8 +17,8 @@
 
 using namespace Engine::priv;
 
-void print(const std::string& s) { std::cout << s << "\n"; }
-void tostring(luabridge::LuaRef r) { std::cout << r.tostring() << "\n"; }
+void print(const std::string& s) { std::cout << s << '\n'; }
+void tostring(luabridge::LuaRef r) { std::cout << r.tostring() << '\n'; }
 
 LUABinder::LUABinder()
     : m_LUA_STATE{ std::make_unique<LUAState>() }
@@ -29,6 +29,7 @@ LUABinder::LUABinder()
         .addFunction("tostring", &tostring)
         .addFunction("getDeltaTime", &Engine::Resources::dt)
         .addFunction("dt", &Engine::Resources::dt)
+        .addFunction("addOnUpdateFunction", &Engine::lua::addOnUpdateFunction)
 
         .addFunction("playSoundEffect", &Engine::Sound::playEffect)
         .addFunction("playSoundMusic", &Engine::Sound::playMusic)

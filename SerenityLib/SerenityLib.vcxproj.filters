@@ -1565,6 +1565,12 @@
     <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Vehicle\btWheelInfo.cpp">
       <Filter>Header Files\Engine\Core\Dependencies\bullet\BulletDynamics\Vehicle</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\threading\SpinLock.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\threading\SpinLockGuard.cpp">
+      <Filter>Source Files\Engine\Core\Threading</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -1593,9 +1599,6 @@
     </ClInclude>
     <ClInclude Include="include\serenity\algorithms\RadixSort.h">
       <Filter>Header Files\Engine\Core\Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\containers\BST.h">
-      <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\containers\CircularBuffer.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
@@ -3231,6 +3234,15 @@
     </ClInclude>
     <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Vehicle\btWheelInfo.h">
       <Filter>Header Files\Engine\Core\Dependencies\bullet\BulletDynamics\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\threading\SpinLock.h">
+      <Filter>Header Files\Engine\Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\threading\SpinLockGuard.h">
+      <Filter>Header Files\Engine\Core\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\lua\LuaCallable.h">
+      <Filter>Header Files\Engine\Core\LUA</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
