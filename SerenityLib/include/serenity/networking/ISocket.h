@@ -3,12 +3,17 @@
 #define ENGINE_NETWORKING_I_SOCKET_H
 
 #include <serenity/system/TypeDefs.h>
+#include <serenity/system/Macros.h>
 
-enum class SocketType : uint8_t {
-    Unknown,
-    TCP,
-    UDP,
-    TCPListener,
+class SocketType {
+    public:
+        enum Type : uint8_t {
+            Unknown = 0,
+            TCP,
+            UDP,
+            TCPListener,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(SocketType, Type)
 };
 
 #include <SFML/Network.hpp>

@@ -32,6 +32,7 @@ void LuaScript::clean() noexcept {
     lua_pop(m_L, n);
 
     Engine::priv::Core::m_Engine->m_LUAModule.cleanupScript(m_ID);
+    Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.cleanupScript(m_ID);
 
     lua_gc(m_L, LUA_GCCOLLECT, 0);
 }

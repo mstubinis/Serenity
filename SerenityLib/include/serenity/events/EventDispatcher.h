@@ -6,21 +6,22 @@ class  Observer;
 struct Event;
 
 #include <serenity/events/EventIncludes.h>
-#include <vector>
 #include <array>
 #include <utility>
 #include <mutex>
+#include <serenity/lua/LuaIncludes.h>
 
 namespace Engine::priv {
     class EventDispatcher final {
-        using ObserverVector = std::vector<Observer*>;
         private:
-            mutable std::mutex                                m_Mutex;
-            std::array<ObserverVector, EventType::_TOTAL>     m_Observers;
-            std::vector<std::pair<Observer*, size_t>>         m_UnregisteredObservers;
+            std::array<std::vector<Observer*>, EventType::_TOTAL>           m_Observers;
 
-            [[nodiscard]] bool internal_has_duplicate(const Observer&, const ObserverVector&) const noexcept;
-            void internal_dispatch_event(const Event&);
+            //std::array<std::vector<size_t>, EventType::_TOTAL>              m_ScriptObservers;
+            std::vector<luabridge::LuaRef>                                  m_ScriptFunctions;
+
+            mutable std::mutex                                              m_Mutex;
+            std::vector<std::pair<Observer*, size_t>>                       m_UnregisteredObservers;
+
         public:
             EventDispatcher() = default;
             EventDispatcher(const EventDispatcher&)                = delete;
@@ -29,6 +30,8 @@ namespace Engine::priv {
             EventDispatcher& operator=(EventDispatcher&&) noexcept = delete;
 
             void postUpdate();
+            void addScriptOnEventFunction(lua_State*, size_t scriptID, luabridge::LuaRef eventFunction);
+            void cleanupScript(size_t scriptID);
 
             template<class T> void registerObject(Observer&, const T&) noexcept = delete;
             template<class T> void unregisterObject(Observer&, const T&) noexcept = delete;
@@ -44,4 +47,9 @@ namespace Engine::priv {
             void dispatchEvent(EventType) noexcept;
     };
 };
+
+namespace Engine::lua {
+    void addOnEventFunction(luabridge::LuaRef eventFunction);
+}
+
 #endif

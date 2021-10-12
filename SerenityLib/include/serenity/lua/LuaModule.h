@@ -27,6 +27,7 @@ namespace Engine::priv {
 
 namespace Engine::lua {
     void addOnUpdateFunction(luabridge::LuaRef updateFunction);
+    void addOnEventFunction(luabridge::LuaRef eventFunction);
 }
 
 #endif

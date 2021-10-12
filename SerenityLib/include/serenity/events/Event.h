@@ -21,7 +21,7 @@ namespace Engine::Networking {
 namespace Engine::priv {
     struct EventEnum final {
         uint32_t enumValue = 0;
-        void* enumPtr      = nullptr;
+        void*    enumPtr   = nullptr;
         EventEnum() = default;
         EventEnum(uint32_t enum_)
             : enumValue{ enum_ }
@@ -32,10 +32,10 @@ namespace Engine::priv {
         {}
     };
     struct EventSocket final {
+        sf::IpAddress  remoteIP   = sf::IpAddress::None;
         uint16_t       localPort  = 0;
         uint16_t       remotePort = 0;
-        sf::IpAddress  remoteIP   = sf::IpAddress::None;
-        SocketType     type       = SocketType::Unknown;
+        uint8_t        type       = SocketType::Unknown;
 
         EventSocket() = default;
         EventSocket(uint16_t localPort_, uint16_t remotePort_, sf::IpAddress remoteIP_, SocketType type_)
@@ -43,7 +43,11 @@ namespace Engine::priv {
             , remotePort{ remotePort_ }
             , remoteIP{ remoteIP_ }
             , type{ type_ }
-        {}
+        {
+        }
+        [[nodiscard]] inline const std::string& ipToString() const { 
+            return remoteIP.toString(); 
+        }
     };
     struct EventServer final {
         Engine::Networking::Server* server = nullptr;
@@ -83,7 +87,7 @@ namespace Engine::priv {
         }
     };
     struct EventKeyboard final{ 
-        KeyboardKey       key;
+        uint32_t          key;
         bool              alt, control, shift, system;
         EventKeyboard() = default;
         EventKeyboard(KeyboardKey key_, bool alt_ = false, bool control_ = false, bool shift_ = false, bool system_ = false)
@@ -115,9 +119,9 @@ namespace Engine::priv {
         }
     };
     struct EventMouseButton final{ 
-        MouseButton button; 
-        float x = 0.0f;
-        float y = 0.0f;
+        uint32_t  button  = MouseButton::Unknown;
+        float     x       = 0.0f;
+        float     y       = 0.0f;
         EventMouseButton() = default;
         EventMouseButton(MouseButton button_, float x_, float y_) 
             : button{ button_ }
@@ -159,7 +163,7 @@ namespace Engine::priv {
     };
     struct EventJoystickMoved final{ 
         uint32_t            joystickID = 0;
-        JoystickAxis        axis       = JoystickAxis::Unknown;
+        uint32_t            axis       = JoystickAxis::Unknown;
         float               position   = 0.0f;
         EventJoystickMoved() = default;
         EventJoystickMoved(uint32_t joystickID_, JoystickAxis axis_, float position_)
@@ -203,7 +207,7 @@ namespace Engine::priv {
     };
 };
 struct Event final{
-    EventType type = EventType::Unknown;
+    uint32_t type = EventType::Unknown;
     union {
         Engine::priv::EventEnum                       eventEnum{};
         Engine::priv::EventWindowResized              eventWindowResized;
@@ -235,7 +239,6 @@ struct Event final{
     {
         eventEnum = std::move(eventEnum_);
     }
-
     Event(EventType type_, Engine::priv::EventWindowResized&& eventWindowResized_)
         : Event{ type_ }
     {

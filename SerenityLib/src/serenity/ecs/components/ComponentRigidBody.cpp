@@ -10,13 +10,24 @@
 #include <serenity/ecs/ECS.h>
 #include <serenity/resources/Engine_Resources.h>
 
-ComponentRigidBody::ComponentRigidBody(Entity entity, const std::string& name)
-    : m_Owner{ entity }
+ComponentRigidBody::ComponentRigidBody(Entity entity, CollisionFilter group, CollisionFilter mask, const std::string& name)
+    : m_Owner { entity }
+    , m_Group { group }
+    , m_Mask  { mask }
 {
     rebuildRigidBody(false);
-    #ifdef ENGINE_RIGID_BODY_ENHANCED
-        setBtName(name);
-    #endif
+#ifdef ENGINE_RIGID_BODY_ENHANCED
+    setBtName(name);
+#endif
+}
+ComponentRigidBody::ComponentRigidBody(Entity entity, const std::string& name)
+    : ComponentRigidBody{ entity, CollisionFilter::DefaultFilter, CollisionFilter::AllFilter, name }
+{
+    /*
+        bool isDynamic = !(body->isStaticObject() || body->isKinematicObject());
+        int collisionFilterGroup = isDynamic ? CollisionFilter::DefaultFilter : CollisionFilter::StaticFilter;
+        int collisionFilterMask = isDynamic ? CollisionFilter::AllFilter : CollisionFilter::AllFilter ^ CollisionFilter::StaticFilter;
+    */
 }
 ComponentRigidBody::~ComponentRigidBody() {
     cleanup();
@@ -281,55 +292,55 @@ void ComponentRigidBody::setDamping(decimal linearFactor, decimal angularFactor)
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setDamping(btScalar(linearFactor), btScalar(angularFactor));
 }
-void ComponentRigidBody::setCollisionGroup(MaskType group) {
+void ComponentRigidBody::setCollisionGroup(CollisionFilter group) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_Group = group;
     removePhysicsFromWorld();
     addPhysicsToWorld();
 }
-void ComponentRigidBody::setCollisionMask(MaskType mask) {
+void ComponentRigidBody::setCollisionMask(CollisionFilter mask) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_Mask = mask;
     removePhysicsFromWorld();
     addPhysicsToWorld();
 }
-void ComponentRigidBody::addCollisionGroup(MaskType group) {
+void ComponentRigidBody::addCollisionGroup(CollisionFilter group) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_Group |= group;
     removePhysicsFromWorld();
     addPhysicsToWorld();
 }
-void ComponentRigidBody::addCollisionMask(MaskType mask) {
+void ComponentRigidBody::addCollisionMask(CollisionFilter mask) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_Mask |= mask;
     removePhysicsFromWorld();
     addPhysicsToWorld();
 }
-void ComponentRigidBody::setCollisionFlag(MaskType flag) {
+void ComponentRigidBody::setCollisionFlag(CollisionFlag flag) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setCollisionFlags(flag);
 }
-void ComponentRigidBody::addCollisionFlag(MaskType flag) {
+void ComponentRigidBody::addCollisionFlag(CollisionFlag flag) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setCollisionFlags(m_BulletRigidBody->getCollisionFlags() | flag);
 }
-void ComponentRigidBody::removeCollisionGroup(MaskType group) {
+void ComponentRigidBody::removeCollisionGroup(CollisionFilter group) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_Group &= ~group;
     removePhysicsFromWorld();
     addPhysicsToWorld();
 }
-void ComponentRigidBody::removeCollisionMask(MaskType mask) {
+void ComponentRigidBody::removeCollisionMask(CollisionFilter mask) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_Mask &= ~mask;
     removePhysicsFromWorld();
     addPhysicsToWorld();
 }
-void ComponentRigidBody::removeCollisionFlag(MaskType flag) {
+void ComponentRigidBody::removeCollisionFlag(CollisionFlag flag) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_BulletRigidBody->setCollisionFlags(m_BulletRigidBody->getCollisionFlags() & ~flag);
 }
-void ComponentRigidBody::setCollisionGroupAndMask(MaskType group, MaskType mask) {
+void ComponentRigidBody::setCollisionGroupAndMask(CollisionFilter group, CollisionFilter mask) noexcept {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_Group = group;
     m_Mask  = mask;

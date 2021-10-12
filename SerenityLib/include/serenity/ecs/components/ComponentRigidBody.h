@@ -127,6 +127,7 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
         bool addPhysicsToWorldImmediate();
     public:
         ComponentRigidBody(Entity, const std::string& name = {});
+        ComponentRigidBody(Entity, CollisionFilter group, CollisionFilter mask, const std::string& name = {});
         ComponentRigidBody(const ComponentRigidBody&)            = delete;
         ComponentRigidBody& operator=(const ComponentRigidBody&) = delete;
         ComponentRigidBody(ComponentRigidBody&&) noexcept;
@@ -192,25 +193,16 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
         [[nodiscard]] glm_vec3 getAngularVelocity() const;
         [[nodiscard]] inline btRigidBody* getBtBody() const noexcept { return m_BulletRigidBody.get(); }
 
-        void setCollisionGroup(MaskType group);
-        void setCollisionMask(MaskType mask);
-        void setCollisionFlag(MaskType flag);
-        inline void setCollisionGroup(CollisionFilter::Filter group) noexcept { setCollisionGroup((MaskType)group); }
-        inline void setCollisionMask(CollisionFilter::Filter mask) noexcept { setCollisionMask((MaskType)mask); }
-        inline void setCollisionFlag(CollisionFlag::Flag flag) noexcept { setCollisionFlag((MaskType)flag); }
-        void addCollisionGroup(MaskType group);
-        void addCollisionMask(MaskType mask);
-        void addCollisionFlag(MaskType flag);
-        inline void addCollisionGroup(CollisionFilter::Filter group) noexcept { addCollisionGroup((MaskType)group); }
-        inline void addCollisionMask(CollisionFilter::Filter mask) noexcept { addCollisionMask((MaskType)mask); }
-        inline void addCollisionFlag(CollisionFlag::Flag flag) noexcept { addCollisionFlag((MaskType)flag); }
-        void removeCollisionGroup(MaskType group);
-        void removeCollisionMask(MaskType mask);
-        void removeCollisionFlag(MaskType flag);
-        inline void removeCollisionGroup(CollisionFilter::Filter group) noexcept { removeCollisionGroup((MaskType)group); }
-        inline void removeCollisionMask(CollisionFilter::Filter mask) noexcept { removeCollisionMask((MaskType)mask); }
-        inline void removeCollisionFlag(CollisionFlag::Flag flag) noexcept { removeCollisionFlag((MaskType)flag); }
-        void setCollisionGroupAndMask(MaskType group, MaskType mask);
+        void setCollisionGroup(CollisionFilter group) noexcept;
+        void setCollisionMask(CollisionFilter mask) noexcept;
+        void setCollisionFlag(CollisionFlag flag) noexcept;
+        void addCollisionGroup(CollisionFilter group) noexcept;
+        void addCollisionMask(CollisionFilter mask) noexcept;
+        void addCollisionFlag(CollisionFlag flag) noexcept;
+        void removeCollisionGroup(CollisionFilter group) noexcept;
+        void removeCollisionMask(CollisionFilter mask) noexcept;
+        void removeCollisionFlag(CollisionFlag flag) noexcept;
+        void setCollisionGroupAndMask(CollisionFilter group, CollisionFilter mask) noexcept;
 
         void setDamping(decimal linear, decimal angular);
 
