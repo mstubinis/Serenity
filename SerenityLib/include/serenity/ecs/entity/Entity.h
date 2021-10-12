@@ -44,6 +44,14 @@ class Entity {
             m_SceneID == getMaxEntityIDBits(SCENE_BIT_POSITIONS) && 
             m_VersionID == getMaxEntityIDBits(VERSION_BIT_POSITIONS)); 
         }
+
+        inline constexpr bool operator<(uint32_t otherID) const noexcept { return m_ID < otherID; }
+        inline constexpr bool operator<=(uint32_t otherID) const noexcept { return m_ID <= otherID; }
+        inline constexpr bool operator>(uint32_t otherID) const noexcept { return m_ID > otherID; }
+        inline constexpr bool operator>=(uint32_t otherID) const noexcept { return m_ID >= otherID; }
+        inline constexpr bool operator==(uint32_t otherID) const noexcept { return (m_ID == otherID); }
+        inline constexpr bool operator!=(uint32_t otherID) const noexcept { return !Entity::operator==(otherID); }
+
         inline constexpr bool operator<(Entity other) const noexcept { return m_ID < other.m_ID; }
         inline constexpr bool operator<=(Entity other) const noexcept { return m_ID <= other.m_ID; }
         inline constexpr bool operator>(Entity other) const noexcept { return m_ID > other.m_ID; }

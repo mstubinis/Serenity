@@ -16,7 +16,7 @@ namespace Engine::priv {
         private:
             std::array<std::vector<Observer*>, EventType::_TOTAL>           m_Observers;
 
-            //std::array<std::vector<size_t>, EventType::_TOTAL>              m_ScriptObservers;
+            std::array<std::vector<uint32_t>, EventType::_TOTAL>            m_ScriptObservers;
             std::vector<luabridge::LuaRef>                                  m_ScriptFunctions;
 
             mutable std::mutex                                              m_Mutex;
@@ -30,8 +30,9 @@ namespace Engine::priv {
             EventDispatcher& operator=(EventDispatcher&&) noexcept = delete;
 
             void postUpdate();
-            void addScriptOnEventFunction(lua_State*, size_t scriptID, luabridge::LuaRef eventFunction);
-            void cleanupScript(size_t scriptID);
+            void addScriptOnEventFunction(lua_State*, uint32_t scriptID, luabridge::LuaRef eventFunction);
+            void registerScriptEvent(uint32_t scriptID, uint32_t eventID);
+            void cleanupScript(uint32_t scriptID);
 
             template<class T> void registerObject(Observer&, const T&) noexcept = delete;
             template<class T> void unregisterObject(Observer&, const T&) noexcept = delete;
@@ -50,6 +51,7 @@ namespace Engine::priv {
 
 namespace Engine::lua {
     void addOnEventFunction(luabridge::LuaRef eventFunction);
+    void registerEvent(uint32_t eventID);
 }
 
 #endif

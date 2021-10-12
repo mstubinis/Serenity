@@ -6,7 +6,7 @@ namespace {
 
     std::vector<luabridge::LuaRef> LUA_SCRIPT_ON_UPDATE_FUNCTIONS;
 
-    void cleanup_on_update_function(size_t scriptID) {
+    void cleanup_on_update_function(uint32_t scriptID) {
         if (LUA_SCRIPT_ON_UPDATE_FUNCTIONS.size() > scriptID) {
             LUA_SCRIPT_ON_UPDATE_FUNCTIONS[scriptID] = luabridge::LuaRef(Engine::priv::getLUABinder().getState()->getState());
         }
@@ -23,7 +23,7 @@ Engine::priv::LUAModule::~LUAModule() {
 void Engine::priv::LUAModule::init() {
 
 }
-void Engine::priv::LUAModule::cleanupScript(size_t scriptID) {
+void Engine::priv::LUAModule::cleanupScript(uint32_t scriptID) {
     cleanup_on_update_function(scriptID);
 }
 void Engine::priv::LUAModule::update(const float dt) {
@@ -46,9 +46,9 @@ const Engine::priv::LUABinder& Engine::priv::getLUABinder() {
     return LUA_MODULE->getBinder();
 }
 void Engine::lua::addOnUpdateFunction(luabridge::LuaRef updateFunction) {
-    lua_State* L     = Engine::priv::getLUABinder().getState()->getState();
-    auto scriptIDRef = luabridge::getGlobal(L, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
-    size_t scriptID  = scriptIDRef.cast<size_t>();
+    lua_State* L       = Engine::priv::getLUABinder().getState()->getState();
+    auto scriptIDRef   = luabridge::getGlobal(L, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
+    uint32_t scriptID  = scriptIDRef.cast<uint32_t>();
     LUA_SCRIPT_ON_UPDATE_FUNCTIONS.resize(scriptID + 1, luabridge::LuaRef{L});
     LUA_SCRIPT_ON_UPDATE_FUNCTIONS[scriptID] = updateFunction;
 }

@@ -273,7 +273,10 @@ LUABinder::LUABinder()
         .addFunction("getDeltaTime", &Engine::Resources::dt)
         .addFunction("dt", &Engine::Resources::dt)
         .addFunction("addOnUpdateFunction", &Engine::lua::addOnUpdateFunction)
+
         .addFunction("addOnEventFunction", &Engine::lua::addOnEventFunction)
+        .addFunction("registerEvent", &Engine::lua::registerEvent)
+
         .addFunction("playSoundEffect", &Engine::Sound::playEffect)
         .addFunction("playSoundMusic", &Engine::Sound::playMusic)
         .addFunction("stopAllSoundEffects", &Engine::Sound::stop_all_effects)

@@ -16,7 +16,7 @@
 
 using namespace Engine;
 
-constexpr float ROTATION_THRESHOLD = 0.005f;
+constexpr float ROTATION_THRESHOLD = 0.001f;
 
 //could use some fixing
 glm::vec3 Math::polynomial_interpolate_linear(const std::vector<glm::vec3>& points, float time) {

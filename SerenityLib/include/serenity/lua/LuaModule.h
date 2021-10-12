@@ -13,7 +13,7 @@ namespace Engine::priv {
             LUAModule();
             ~LUAModule();
 
-            void cleanupScript(size_t scriptID);
+            void cleanupScript(uint32_t scriptID);
 
             void init();
             void update(const float dt);

@@ -180,13 +180,18 @@ void Engine::priv::PhysicsModule::internal_process_contact_manifolds() {
         }
     }
 }
-void Engine::priv::PhysicsModule::update(Scene& scene, const float dt, int maxSubSteps, float fixedTimeStep){
-    Engine::priv::Core::m_Engine->m_DebugManager.stop_clock_physics();
+void Engine::priv::PhysicsModule::update(Scene& scene, const float dt, int maxSubSteps, float fixedTimeStep) {
+#ifndef ENGINE_PRODUCTION
+    using Clock = std::chrono::high_resolution_clock;
+    auto start  = Clock::now();
+#endif
     if (!m_Paused) {
         m_Pipeline.m_World->stepSimulation(btScalar(dt), maxSubSteps, btScalar(fixedTimeStep));
         internal_process_contact_manifolds();
     }
-    Engine::priv::Core::m_Engine->m_DebugManager.calculate_physics();
+#ifndef ENGINE_PRODUCTION
+    Engine::priv::Core::m_Engine->m_DebugManager.calculate(DebugTimerTypes::Physics, std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - start));
+#endif
 }
 void Engine::priv::PhysicsModule::render(Scene& scene, const Camera& camera){
     m_Pipeline.m_World->debugDrawWorld();

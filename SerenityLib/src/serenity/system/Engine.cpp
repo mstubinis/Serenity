@@ -135,7 +135,10 @@ void EngineCore::internal_post_input_update(int frameIteration) {
     m_EventModule.m_MouseModule.postUpdate();
 }
 void EngineCore::internal_update_logic(int frameIteration, Scene& scene, const float dt) {
-    m_DebugManager.stop_clock();
+#ifndef ENGINE_PRODUCTION
+    using Clock = std::chrono::high_resolution_clock;
+    auto start = Clock::now();
+#endif
     m_NetworkingModule.update(dt);
 
     m_Misc.m_QueuedCommands.for_each_and_clear([](std::function<void()>& item) mutable { item(); });
@@ -144,15 +147,22 @@ void EngineCore::internal_update_logic(int frameIteration, Scene& scene, const f
     m_ThreadingModule.update(dt);
 
     m_DiscordModule.update();
-    m_DebugManager.calculate_logic();
 
     Game::onPostUpdate(dt);
     scene.postUpdate(dt);
+#ifndef ENGINE_PRODUCTION
+    Engine::priv::Core::m_Engine->m_DebugManager.calculate(DebugTimerTypes::Logic, std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - start));
+#endif
 }
 void EngineCore::internal_update_sounds(Scene& scene, const float dt) {
-    m_DebugManager.stop_clock();
+#ifndef ENGINE_PRODUCTION
+    using Clock = std::chrono::high_resolution_clock;
+    auto start = Clock::now();
+#endif
     m_SoundModule.update(scene, dt);
-    m_DebugManager.calculate_sounds();
+#ifndef ENGINE_PRODUCTION
+    Engine::priv::Core::m_Engine->m_DebugManager.calculate(DebugTimerTypes::Sound, std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - start));
+#endif
 }
 void EngineCore::internal_pre_update(int frameIteration, Scene& scene, const float dt) {
     Game::onPreUpdate(dt);
@@ -163,7 +173,10 @@ void EngineCore::internal_post_update(Scene& scene, Window& window, const float 
     window.m_Data.internal_update_on_reset_events(dt);
 }
 void EngineCore::internal_render(Scene& scene, Window& window, const float dt, const double alpha) {
-    m_DebugManager.stop_clock();
+#ifndef ENGINE_PRODUCTION
+    using Clock = std::chrono::high_resolution_clock;
+    auto start = Clock::now();
+#endif
     Game::render();
     if (!scene.m_SkipRenderThisFrame) {
         scene.render();
@@ -179,8 +192,10 @@ void EngineCore::internal_render(Scene& scene, Window& window, const float dt, c
         window.display();
     }
     m_RenderModule._clear2DAPICommands();
-    m_DebugManager.calculate_render();
     m_Misc.m_FPS.incrementFPSCount();
+#ifndef ENGINE_PRODUCTION
+    Engine::priv::Core::m_Engine->m_DebugManager.calculate(DebugTimerTypes::Render, std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - start));
+#endif
 }
 void EngineCore::internal_cleanup() {
     m_ResourceManager.postUpdate();
@@ -206,7 +221,7 @@ void Engine::stop() noexcept {
     Core::m_Engine->m_Misc.m_Destroyed = true;
 }
 void EngineCore::run() {
-    using  millisecs         = std::chrono::duration<double, std::milli>;
+    using  seconds           = std::chrono::duration<double, std::chrono::seconds>;
     double accumulator       = ENGINE_FIXED_TIMESTEP_VALUE_D;
     auto   currentTime       = m_Misc.m_Timer.now();
 
@@ -235,19 +250,25 @@ void EngineCore::run() {
     updateSimulation(frameIteration, ENGINE_FIXED_TIMESTEP_VALUE, *Engine::Resources::getCurrentScene()); //initially call update once to get user code in place before the first render.
     while (!m_Misc.m_Destroyed) {
         auto newTime  = m_Misc.m_Timer.now();
-        m_Misc.m_Dt   = std::chrono::duration_cast<millisecs>(newTime - currentTime).count() * 0.001; // * 0.001 converts from millisecs to secs
+        std::chrono::duration<double> duration = newTime - currentTime;
+        m_Misc.m_Dt   = duration.count();
         m_Misc.m_Dt   = std::min(m_Misc.m_Dt, 0.25); //not sure if this is needed or what this purpose is... if alot of time was "lost" due to a slow hardware fault, we should not throw away that time
         currentTime   = newTime;
         accumulator  += m_Misc.m_Dt;
         auto& scene   = *Engine::Resources::getCurrentScene();
         scene.m_SkipRenderThisFrame = false;
-        updateWindows(float(m_Misc.m_Dt), scene);
+        Engine::priv::Core::m_Engine->m_DebugManager.reset_timers();
         frameIteration = 0;
         while (accumulator >= ENGINE_FIXED_TIMESTEP_VALUE_D) {
+            if (frameIteration == 0) {
+                updateWindows(float(m_Misc.m_Dt), scene);
+            }
             updateSimulation(frameIteration, ENGINE_FIXED_TIMESTEP_VALUE, scene);
             accumulator -= ENGINE_FIXED_TIMESTEP_VALUE_D;
         }
-        internal_update_sounds(scene, float(m_Misc.m_Dt));
+        if (frameIteration > 0) {
+            internal_update_sounds(scene, float(m_Misc.m_Dt));
+        }
         renderSimulation(scene);
         internal_cleanup();
         m_DebugManager.calculate();

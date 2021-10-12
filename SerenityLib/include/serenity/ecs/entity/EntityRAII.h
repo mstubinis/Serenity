@@ -36,10 +36,12 @@ class EntityRAII final {
         //inline operator uint32_t() const noexcept { return m_Entity.m_Data; }
         inline operator bool() const noexcept { return !m_Entity.null(); }
         inline operator Entity() const noexcept { return m_Entity; }
-        inline bool operator==(const EntityRAII other) const noexcept { return m_Entity.operator==(other); }
-        inline bool operator!=(const EntityRAII other) const noexcept { return m_Entity.operator!=(other); }
+
+        inline bool operator==(const EntityRAII other) const noexcept { return m_Entity.operator==(other.m_Entity); }
+        inline bool operator!=(const EntityRAII other) const noexcept { return m_Entity.operator!=(other.m_Entity); }
         inline bool operator==(const Entity other) const noexcept { return m_Entity.operator==(other); }
         inline bool operator!=(const Entity other) const noexcept { return m_Entity.operator!=(other); }
+
         [[nodiscard]] inline bool null() const noexcept { return m_Entity.null(); }
 
         [[nodiscard]] inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }

@@ -12,7 +12,7 @@ LUAState::~LUAState() {
         lua_close(L);
     }
 }
-int LUAState::runFile(const std::string& filename, size_t scriptID) const noexcept {
+int LUAState::runFile(const std::string& filename, uint32_t scriptID) const noexcept {
     int ret = -1;
     auto* filenameC = filename.c_str();
     luabridge::setGlobal(L, scriptID, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);

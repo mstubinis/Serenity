@@ -53,6 +53,12 @@ void Engine::priv::EditorCore::update(Window& window, const float dt) {
     if (m_Enabled && m_Shown && isWindowRegistered(window)) {
         sf::Time t(sf::seconds(dt));
         ImGui::SFML::Update(window.getSFMLHandle(), t);
+    }
+}
+void Engine::priv::EditorCore::render(Window& window) {
+    if (m_Enabled && m_Shown && isWindowRegistered(window)) {
+        //ImGui::SFML::Render(window.getSFMLHandle());
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
 
@@ -60,11 +66,7 @@ void Engine::priv::EditorCore::update(Window& window, const float dt) {
         windowScene.update();
 
         ImGui::EndFrame();
-    }
-}
-void Engine::priv::EditorCore::render(Window& window) {
-    if (m_Enabled && m_Shown && isWindowRegistered(window)) {
-        //ImGui::SFML::Render(window.getSFMLHandle());
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }

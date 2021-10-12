@@ -24,44 +24,26 @@ void SystemBaseClass::addEntity(Entity entity) noexcept {
     sortEntities();
 }
 Entity SystemBaseClass::getEntity(uint32_t entityID) const noexcept {
-    auto idx = getEntityIdxInContainer(entityID);
+    auto idx = Engine::binary_search(m_Entities, entityID);
     return idx != std::numeric_limits<size_t>().max() ? m_Entities[idx] : Entity{};
 }
-size_t SystemBaseClass::getEntityIdxInContainer(uint32_t entityID) const noexcept {
-    //binary search
-    using signed_size_t = std::make_signed_t<std::size_t>;
-    signed_size_t left  = 0;
-    signed_size_t right = static_cast<signed_size_t>(m_Entities.size()) - 1;
-    while (left <= right) {
-        const signed_size_t mid = left + (right - left) / 2;
-        const auto itrID = m_Entities[mid].id();
-        if (itrID == entityID) {
-            return mid;
-        } else if (itrID > entityID) {
-            right = mid - 1;
-        } else {
-            left = mid + 1;
-        }
-    }
-    return std::numeric_limits<size_t>().max();
-}
 size_t SystemBaseClass::getEntityIdxInContainer(Entity entity) const noexcept {
-    return getEntityIdxInContainer(entity.id());
+    return Engine::binary_search(m_Entities, entity.id());
 }
-bool SystemBaseClass::eraseEntity(std::vector<Entity>& entityVector, Entity entity) {
-    size_t entityIndexInContainer = getEntityIdxInContainer(entity.id());
+bool SystemBaseClass::eraseEntity(Entity entity) {
+    size_t entityIndexInContainer = Engine::binary_search(m_Entities, entity.id());
     if (entityIndexInContainer != std::numeric_limits<size_t>().max()) {
-        auto backIdx = entityVector.size() - 1;
+        auto backIdx = m_Entities.size() - 1;
         if (entityIndexInContainer != backIdx) {
-            std::swap(entityVector[entityIndexInContainer], entityVector[backIdx]);
+            std::swap(m_Entities[entityIndexInContainer], m_Entities[backIdx]);
         }
-        entityVector.pop_back();
+        m_Entities.pop_back();
         return true;
     }
     return false;
 }
 void SystemBaseClass::removeEntity(Entity entity) noexcept {
-    bool erased = eraseEntity(m_Entities, entity);
+    bool erased = eraseEntity(entity);
     if (erased) {
         sortEntities();
     }

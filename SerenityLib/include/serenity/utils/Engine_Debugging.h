@@ -10,28 +10,33 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <serenity/system/Macros.h>
+
+class DebugTimerTypes {
+    public:
+        enum Type : uint16_t {
+            Logic = 0,
+            Physics,
+            Sound,
+            Render,
+            Delta,
+            _TOTAL
+        };
+        BUILD_ENUM_CLASS_MEMBERS(DebugTimerTypes, Type)
+};
 
 namespace Engine::priv {
     class DebugManager {
         private:
-            std::stringstream m_Strm;
             sf::Clock m_Clock;
             sf::Clock m_ClockPhysics;
-            sf::Int64 m_LogicTime         = 0;
-            sf::Int64 m_PhysicsTime       = 0;
-            sf::Int64 m_RenderTime        = 0;
-            sf::Int64 m_SoundTime         = 0;
+
+            std::array<std::chrono::nanoseconds, DebugTimerTypes::_TOTAL> m_TimesNanoPrev;
+            std::array<std::chrono::nanoseconds, DebugTimerTypes::_TOTAL> m_TimesNano;
+
             float m_TimeScale             = 1.0;
             double m_TotalTime            = 0.0;
-            double m_Divisor              = 1'000'000.0;
-            uint32_t m_Output_frame_delay = 4;
-            uint32_t m_Output_frame       = 0;
             uint32_t m_Decimals           = 4;
-            std::string m_Output;
-
-            //opengl timers
-            GLuint queryID                = 0;
-            GLuint queryObject            = 0;
 
             //general text debugging
             std::vector<std::string> m_Text_Queue;
@@ -46,27 +51,15 @@ namespace Engine::priv {
             void beginGLQuery();
             void endGLQuery(const char* tag);
 
-            inline void stop_clock() noexcept { m_Clock.restart(); }
-            inline void stop_clock_physics() noexcept { m_ClockPhysics.restart(); }
-            inline void calculate_logic() noexcept { m_LogicTime = m_Clock.restart().asMicroseconds(); }
-            inline void calculate_physics() noexcept { m_PhysicsTime = m_ClockPhysics.restart().asMicroseconds(); }
-            inline void calculate_sounds() noexcept { m_SoundTime = m_Clock.restart().asMicroseconds(); }
-            inline void calculate_render() noexcept { m_RenderTime = m_Clock.restart().asMicroseconds(); }
+            void calculate(DebugTimerTypes type, std::chrono::nanoseconds timeNanoseconds) noexcept;
+            void reset_timers();
 
-            [[nodiscard]] std::string updateTimeInMs() noexcept;
-            [[nodiscard]] std::string physicsTimeInMs() noexcept;
-            [[nodiscard]] std::string soundsTimeInMs() noexcept;
-            [[nodiscard]] std::string renderTimeInMs() noexcept;
+            [[nodiscard]] std::string getTimeInMs(DebugTimerTypes) noexcept;
             [[nodiscard]] std::string deltaTimeInMs() noexcept;
-
             [[nodiscard]] std::string fps() const noexcept;
 
-            [[nodiscard]] inline constexpr double logicTime() const noexcept { return (double)((double)m_LogicTime / m_Divisor); }
-            [[nodiscard]] inline constexpr double physicsTime() const noexcept { return (double)((double)m_PhysicsTime / m_Divisor); }
-            [[nodiscard]] inline constexpr double renderTime() const noexcept { return (double)((double)m_RenderTime / m_Divisor); }
-            [[nodiscard]] inline constexpr double soundsTime() const noexcept { return (double)((double)m_SoundTime / m_Divisor); }
-            [[nodiscard]] inline constexpr double totalTime() const noexcept { return m_TotalTime; }
-            [[nodiscard]] inline constexpr float timeScale() const noexcept { return m_TimeScale; }
+            [[nodiscard]] inline double totalTime() const noexcept { return m_TotalTime; }
+            [[nodiscard]] inline float timeScale() const noexcept { return m_TimeScale; }
             inline void setTimeScale(float timeScale) noexcept { m_TimeScale = std::max(0.0f, timeScale); }
 
             inline std::string& reportTime() noexcept { return reportTime(m_Decimals); }

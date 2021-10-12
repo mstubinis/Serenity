@@ -11,7 +11,7 @@ class LuaScript final {
     private:
         LUAState&     m_L;
         std::string   m_FileName;
-        size_t        m_ID        = std::numeric_limits<size_t>().max();
+        uint32_t      m_ID        = std::numeric_limits<uint32_t>().max();
 
         LuaScript() = delete;
     public:

@@ -302,10 +302,10 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
 void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentScene) {
     auto& debugging = Engine::priv::Core::m_Engine->m_DebugManager;
     const ImVec4 yellow   = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-    ImGui::TextColored(yellow, ("Update Time:  " + debugging.updateTimeInMs() + " ms").c_str());
-    ImGui::TextColored(yellow, ("Physics Time: " + debugging.physicsTimeInMs() + " ms").c_str());
-    ImGui::TextColored(yellow, ("Sounds Time:  " + debugging.soundsTimeInMs() + " ms").c_str());
-    ImGui::TextColored(yellow, ("Render Time:  " + debugging.renderTimeInMs() + " ms").c_str());
+    ImGui::TextColored(yellow, ("Update Time:  " + debugging.getTimeInMs(DebugTimerTypes::Logic) + " ms").c_str());
+    ImGui::TextColored(yellow, ("Physics Time: " + debugging.getTimeInMs(DebugTimerTypes::Physics) + " ms").c_str());
+    ImGui::TextColored(yellow, ("Sounds Time:  " + debugging.getTimeInMs(DebugTimerTypes::Sound) + " ms").c_str());
+    ImGui::TextColored(yellow, ("Render Time:  " + debugging.getTimeInMs(DebugTimerTypes::Render) + " ms").c_str());
     ImGui::TextColored(yellow, ("Delta Time:   " + debugging.deltaTimeInMs() + " ms").c_str());
     ImGui::TextColored(yellow, ("FPS:  " + debugging.fps()).c_str());
 

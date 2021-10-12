@@ -12,8 +12,8 @@ namespace {
         auto transform         = camera.getComponent<ComponentTransform>();
         const auto& mouse      = Engine::getMouseDifference();
 
-        const auto rotSpeedX   = (mouse.x * dt) * 0.4f;
-        const auto rotSpeedY   = -(mouse.y * dt) * 0.4f;
+        const auto rotSpeedX   = (mouse.x) * 0.4f * dt;
+        const auto rotSpeedY   = -(mouse.y) * 0.4f * dt;
         auto transSpeed        = static_cast<decimal>(5.0f * dt);
         const auto transSpeed2 = static_cast<decimal>(5.0f * dt);
 
@@ -34,10 +34,10 @@ namespace {
 
 
         if (Engine::isMouseButtonDown(MouseButton::Left)) {
-            if (std::abs(mouse.x) > 0.05f) {
+            if (std::abs(mouse.x) > 0.005f) {
                 camera.m_UserFloats.x += glm::degrees(rotSpeedX);
             }
-            if (std::abs(mouse.y) > 0.05f) {
+            if (std::abs(mouse.y) > 0.005f) {
                 camera.m_UserFloats.y += glm::degrees(rotSpeedY);
             }
         }
@@ -60,8 +60,8 @@ namespace {
         auto transform         = camera.getComponent<ComponentTransform>();
         const auto& mouse      = Engine::getMouseDifference();
 
-        const auto rotSpeedX   = (mouse.x * dt) * 0.4f;
-        const auto rotSpeedY   = -(mouse.y * dt) * 0.4f;
+        const auto rotSpeedX   = (mouse.x) * 0.4f * dt;
+        const auto rotSpeedY   = -(mouse.y) * 0.4f * dt;
         auto transSpeed        = static_cast<decimal>(5.0f * dt);
         const auto transSpeed2 = static_cast<decimal>(5.0f * dt);
 
@@ -81,10 +81,10 @@ namespace {
         }
 
         if (Engine::isMouseButtonDown(MouseButton::Left)) {
-            if (std::abs(mouse.x) > 0.05f) {
+            if (std::abs(mouse.x) > 0.01f) {
                 transform->rotateYaw(rotSpeedX);
             }
-            if (std::abs(mouse.y) > 0.05f) {
+            if (std::abs(mouse.y) > 0.01f) {
                 transform->rotatePitch(rotSpeedY);
             }
         }

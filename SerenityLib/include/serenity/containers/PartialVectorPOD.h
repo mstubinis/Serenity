@@ -49,13 +49,13 @@ namespace Engine {
                     return -1;
                 }
                 m_Items[m_Count] = std::forward<T>(item); 
-                int res = m_Count++;
+                int res = static_cast<int>(m_Count++);
                 return res;
             }
             template<class ... ARGS>
             int emplace_push(ARGS&&... args) noexcept {
                 m_Items[m_Count] = T(std::forward<ARGS>(args)...);
-                int res = m_Count++;
+                int res = static_cast<int>(m_Count++);
                 return res;
             }
 

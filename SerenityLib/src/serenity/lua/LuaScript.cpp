@@ -4,7 +4,7 @@
 #include <serenity/system/Engine.h>
 
 namespace {
-    std::atomic<size_t> ID_COUNTER = 0;
+    std::atomic<uint32_t> ID_COUNTER = 0;
 }
 
 LuaScript::LuaScript(LUAState& state, const std::string& fileName, bool run)

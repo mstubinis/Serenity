@@ -55,6 +55,25 @@ namespace Engine {
             i += 1;
         }
     }
+    template<class CONTAINER, class VALUE>
+    [[nodiscard]] size_t binary_search(const CONTAINER& container, const VALUE& entityID) noexcept {
+        //binary search
+        using signed_size_t = std::make_signed_t<std::size_t>;
+        signed_size_t left  = 0;
+        signed_size_t right = static_cast<signed_size_t>(container.size()) - 1;
+        while (left <= right) {
+            const signed_size_t mid = left + (right - left) / 2;
+            const auto itrID = container[mid];
+            if (itrID == entityID) {
+                return mid;
+            } else if (itrID > entityID) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return std::numeric_limits<size_t>().max();
+    }
 
 
     template<class KEY, class VALUE> using unordered_string_map = std::unordered_map<KEY, VALUE, Engine::string_hash, Engine::string_hash::equals>;

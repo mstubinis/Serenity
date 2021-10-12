@@ -31,7 +31,6 @@ class SystemBaseClass {
     using FuncSceneLeft                  = void(*)(SystemBaseClass&, Scene&);
     private:
         bool hasEntity(Entity) const noexcept;
-        [[nodiscard]] size_t getEntityIdxInContainer(uint32_t entityID) const noexcept;
         [[nodiscard]] size_t getEntityIdxInContainer(Entity) const noexcept;
         bool hasAssociatedComponent(uint32_t typeID) noexcept;
         void associateComponentImpl(uint32_t typeID);
@@ -64,7 +63,7 @@ class SystemBaseClass {
 
         void addEntity(Entity) noexcept;
         void removeEntity(Entity) noexcept;
-        bool eraseEntity(std::vector<Entity>& vec, Entity);
+        bool eraseEntity(Entity);
 
         template<class FUNC> void setUpdateFunction(FUNC&& func) noexcept;
         template<class FUNC> void setComponentAddedToEntityFunction(FUNC&& func) noexcept;
