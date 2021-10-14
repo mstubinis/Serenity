@@ -14,11 +14,6 @@ SystemTransformParentChild::SystemTransformParentChild(Engine::priv::ECS& ecs)
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
         auto& system = static_cast<SystemTransformParentChild&>(inSystem);
         system.computeAllParentChildWorldTransforms();
-        system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArg, Entity entity, ComponentTransform* transform) {
-            auto rigidBody      = entity.getComponent<ComponentRigidBody>();
-            auto collisionShape = entity.getComponent<ComponentCollisionShape>();
-            pcsArg->syncRigidToTransform(rigidBody, collisionShape, entity);
-        }, &system, SystemExecutionPolicy::ParallelWait);
     });
     setComponentAddedToEntityFunction([](SystemBaseClass& inSystem, void* component, Entity entity) {
         auto& system  = static_cast<SystemTransformParentChild&>(inSystem);

@@ -26,8 +26,8 @@ SystemComponentRigidBody::SystemComponentRigidBody(Engine::priv::ECS& ecs)
         if (rigidBodyComponent) {
             auto currentScene = Engine::Resources::getCurrentScene();
             if (currentScene && currentScene == &scene) {
-                rigidBodyComponent->addPhysicsToWorld();
-                rigidBodyComponent->internal_calculate_mass();
+                //rigidBodyComponent->addPhysicsToWorld();
+                //rigidBodyComponent->internal_calculate_mass();
             }
         }
     });

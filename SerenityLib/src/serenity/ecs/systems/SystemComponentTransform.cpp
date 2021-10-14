@@ -12,11 +12,7 @@ SystemComponentTransform::SystemComponentTransform(Engine::priv::ECS& ecs)
         auto& system   = static_cast<SystemComponentTransform&>(inSystem);
         auto& systemPC = inSystem.getECS().getSystem<SystemTransformParentChild>();
         system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArgs, Entity entity, ComponentTransform* transform) {
-            const uint32_t entityIdx = entity.id();
-            auto& worldMatrix = pcsArgs->m_WorldTransforms[entityIdx];
-            auto& localMatrix = pcsArgs->m_LocalTransforms[entityIdx];
-            Engine::Math::setFinalModelMatrix(localMatrix, transform->m_Position, transform->m_Rotation, transform->m_Scale);
-            worldMatrix = localMatrix;
+            SystemComponentTransform::syncLocalVariablesToTransforms(pcsArgs, entity, transform);
         }, &systemPC, SystemExecutionPolicy::ParallelWait);
 
         /*
@@ -33,4 +29,11 @@ SystemComponentTransform::SystemComponentTransform(Engine::priv::ECS& ecs)
             Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
         }
     });
+}
+void SystemComponentTransform::syncLocalVariablesToTransforms(SystemTransformParentChild* pcsArgs, Entity entity, ComponentTransform* transform) {
+    const uint32_t entityIdx = entity.id();
+    auto& worldMatrix        = pcsArgs->m_WorldTransforms[entityIdx];
+    auto& localMatrix        = pcsArgs->m_LocalTransforms[entityIdx];
+    Engine::Math::setFinalModelMatrix(localMatrix, transform->m_Position, transform->m_Rotation, transform->m_Scale);
+    worldMatrix = localMatrix;
 }

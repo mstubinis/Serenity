@@ -15,7 +15,7 @@ ComponentRigidBody::ComponentRigidBody(Entity entity, CollisionFilter group, Col
     , m_Group { group }
     , m_Mask  { mask }
 {
-    rebuildRigidBody(false);
+    rebuildRigidBody(entity.scene().equals(Engine::Resources::getCurrentScene()));
 #ifdef ENGINE_RIGID_BODY_ENHANCED
     setBtName(name);
 #endif
@@ -34,19 +34,18 @@ ComponentRigidBody::~ComponentRigidBody() {
 }
 void ComponentRigidBody::cleanup() {
     if (m_Owner) { //do not call from moved from destructors
-        auto& ecs          = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-        auto& systemRemove = ecs.getSystem<SystemRemoveRigidBodies>();
-        auto& systemAdd    = ecs.getSystem<SystemAddRigidBodies>();
+        //auto& ecs          = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
+        //auto& systemRemove = ecs.getSystem<SystemRemoveRigidBodies>();
+        //auto& systemAdd    = ecs.getSystem<SystemAddRigidBodies>();
         auto BTRigidBody   = getBtBody();
         if (BTRigidBody) {
-            systemAdd.removeBody(BTRigidBody);             // clear any deferred adding of this body
-            systemRemove.removeBody(BTRigidBody);          // clear any deferred removal of this body
-            bool result = removePhysicsFromWorldImmediate(); // remove it immediately 
+            //systemAdd.removeBody(BTRigidBody);             // clear any deferred adding of this body
+            //systemRemove.removeBody(BTRigidBody);          // clear any deferred removal of this body
+            bool result = removePhysicsFromWorld(); // remove it immediately 
         }
     }
 }
 ComponentRigidBody::ComponentRigidBody(ComponentRigidBody&& other) noexcept {
-    //other.cleanup();
     m_CollisionFunctor  = std::move(other.m_CollisionFunctor);
     m_BulletRigidBody   = std::move(other.m_BulletRigidBody);
     m_BulletMotionState = std::move(other.m_BulletMotionState);
@@ -60,7 +59,6 @@ ComponentRigidBody::ComponentRigidBody(ComponentRigidBody&& other) noexcept {
     internal_update_misc();
 }
 ComponentRigidBody& ComponentRigidBody::operator=(ComponentRigidBody&& other) noexcept {
-    //other.cleanup();
     m_CollisionFunctor  = std::move(other.m_CollisionFunctor);
     m_BulletRigidBody   = std::move(other.m_BulletRigidBody);
     m_BulletMotionState = std::move(other.m_BulletMotionState);
@@ -106,7 +104,7 @@ void ComponentRigidBody::internal_update_misc() noexcept {
         if (collisionShape) {
             btCollisionShape* btShape = collisionShape->getBtShape();
             m_BulletRigidBody->setCollisionShape(btShape);
-            m_BulletRigidBody->setMassProps(m_Mass, collisionShape->getInertia());
+            setMass(m_Mass);
         }
         m_BulletRigidBody->updateInertiaTensor();
         m_BulletRigidBody->setUserPointer(this);
@@ -115,18 +113,21 @@ void ComponentRigidBody::internal_update_misc() noexcept {
 bool ComponentRigidBody::rebuildRigidBody(bool addBodyToPhysicsWorld) {
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
     auto transform      = m_Owner.getComponent<ComponentTransform>();
+    ASSERT(transform, __FUNCTION__ << "(): transform was nullptr!");
     ASSERT(collisionShape, __FUNCTION__ << "(): collisionShape was nullptr!");
     if (m_BulletRigidBody) {
-        removePhysicsFromWorldImmediate();
+        removePhysicsFromWorld();
     }
     btCollisionShape* btShape = collisionShape->getBtShape();
-    btRigidBody::btRigidBodyConstructionInfo ci{ m_Mass, &m_BulletMotionState, btShape, collisionShape->getInertia() };
+    btTransform t;
     if (transform) {
-        btTransform t;
         t.setOrigin(Engine::Math::toBT(transform->getWorldPosition()));
         t.setRotation(Engine::Math::toBT(transform->getWorldRotation()));
-        ci.m_startWorldTransform  = t;
+    } else {
+        t.setIdentity();
     }
+    m_BulletMotionState.setWorldTransform(t);
+    btRigidBody::btRigidBodyConstructionInfo ci{ m_Mass, &m_BulletMotionState, btShape, collisionShape->getInertia() };
     ci.m_linearDamping            = btScalar(0.1);
     ci.m_angularDamping           = btScalar(0.4);
     ci.m_friction                 = btScalar(0.3);
@@ -140,18 +141,19 @@ bool ComponentRigidBody::rebuildRigidBody(bool addBodyToPhysicsWorld) {
     internal_calculate_mass();
     internal_update_misc();
     if (addBodyToPhysicsWorld) {
-        addPhysicsToWorldImmediate();
+        addPhysicsToWorld();
     }
     return (collisionShape != nullptr);
 }
-bool ComponentRigidBody::removePhysicsFromWorldImmediate() {
+bool ComponentRigidBody::removePhysicsFromWorld() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return Engine::Physics::removeRigidBody(getBtBody());
 }
-bool ComponentRigidBody::addPhysicsToWorldImmediate() {
+bool ComponentRigidBody::addPhysicsToWorld() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return Engine::Physics::addRigidBody(getBtBody(), m_Group, m_Mask);
 }
+/*
 bool ComponentRigidBody::removePhysicsFromWorld() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     auto& ecs          = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
@@ -164,6 +166,7 @@ bool ComponentRigidBody::addPhysicsToWorld() {
     auto& systemAdd = ecs.getSystem<SystemAddRigidBodies>();
     return systemAdd.enqueueBody(getBtBody(), m_Group, m_Mask);
 }
+*/
 decimal ComponentRigidBody::getLinearDamping() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return decimal(m_BulletRigidBody->getLinearDamping());
@@ -438,9 +441,11 @@ void ComponentRigidBody::setMass(float mass) {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     m_Mass = mass;
     auto collisionShape = m_Owner.getComponent<ComponentCollisionShape>();
+    removePhysicsFromWorld();
     if (collisionShape) {
         collisionShape->calculateLocalInertia(mass);
         m_BulletRigidBody->setMassProps(mass, collisionShape->getInertia());
     }
     m_BulletRigidBody->updateInertiaTensor();
+    addPhysicsToWorld();
 }

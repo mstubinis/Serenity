@@ -123,8 +123,8 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
         btTransform internal_get_bt_transform_motion_state() const;
 
         void cleanup();
-        bool removePhysicsFromWorldImmediate();
-        bool addPhysicsToWorldImmediate();
+        //bool removePhysicsFromWorldImmediate();
+        //bool addPhysicsToWorldImmediate();
     public:
         ComponentRigidBody(Entity, const std::string& name = {});
         ComponentRigidBody(Entity, CollisionFilter group, CollisionFilter mask, const std::string& name = {});

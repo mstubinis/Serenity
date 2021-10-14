@@ -52,6 +52,8 @@ subject to the following restrictions:
 
 //for debug rendering
 #include "BulletCollision/CollisionShapes/btBoxShape.h"
+#include "BulletCollision/CollisionShapes/btConvexHullShape.h"
+#include "BulletCollision/CollisionShapes/btUniformScalingShape.h"
 #include "BulletCollision/CollisionShapes/btCapsuleShape.h"
 #include "BulletCollision/CollisionShapes/btCompoundShape.h"
 #include "BulletCollision/CollisionShapes/btConeShape.h"
@@ -1392,6 +1394,23 @@ void btCollisionWorld::debugDrawObject(const btTransform& worldTransform, const 
 				getDebugDrawer()->drawPlane(planeNormal, planeConst, worldTransform, color);
 				break;
 			}
+			case CONVEX_HULL_SHAPE_PROXYTYPE: {
+				const btConvexHullShape* con = static_cast<const btConvexHullShape*>(shape);
+				btVector3 start;
+				btVector3 end;
+				for (int i = 0; i < con->getNumEdges(); ++i) {
+					con->getEdge(i, start, end);
+					getDebugDrawer()->drawLine(worldTransform * start, worldTransform * end, color);
+				}
+				break;
+			}
+
+			case UNIFORM_SCALING_SHAPE_PROXYTYPE: {
+				const btUniformScalingShape* con = static_cast<const btUniformScalingShape*>(shape);
+				debugDrawObject(worldTransform /** con->getLocalScaling()*/, con->getChildShape(), color);
+				break;
+			}
+
 			default:
 			{
 				/// for polyhedral shapes
