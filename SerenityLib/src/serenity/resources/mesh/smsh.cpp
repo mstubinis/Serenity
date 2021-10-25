@@ -115,10 +115,11 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
             }
         };
         auto lambda_read_keyframe_component = [&blockStart, &streamDataBuffer]<typename KEYFRAME, size_t size>(KEYFRAME& keyframe) {
+            using len_type = decltype(KEYFRAME::value)::length_type;
             uint16_t data[size];
             for (size_t i = 0; i < size; ++i) {
                 readBigEndian(data[i], streamDataBuffer, 2, blockStart);
-                Engine::Math::Float32From16(&keyframe.value[i], data[i]);
+                Engine::Math::Float32From16(&keyframe.value[len_type(i)], data[i]);
             }
             uint16_t time;
             readBigEndian(time, streamDataBuffer, 2, blockStart);
@@ -226,7 +227,8 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
     std::vector<uint16_t> positions_packed(positions.size() * 3);
     for (size_t i = 0; i < positions.size(); ++i) {
         for (size_t j = 0; j < 3; ++j) {
-            Engine::Math::Float16From32(&positions_packed[(i * 3) + j], positions[i][j]);
+            using len_type = glm::vec3::length_type;
+            Engine::Math::Float16From32(&positions_packed[(i * 3) + j], positions[i][len_type(j)]);
         }
     }
     positions_attr.setBuffer(reinterpret_cast<const uint8_t*>(positions_packed.data()), (uint32_t)(positions_packed.size() * 2));
@@ -239,7 +241,8 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
     std::vector<uint16_t> uvs_packed(uvs.size() * 2);
     for (size_t i = 0; i < uvs.size(); ++i) {
         for (size_t j = 0; j < 2; ++j) {
-            Engine::Math::Float16From32(&uvs_packed[(i * 2) + j], uvs[i][j]);
+            using len_type = glm::vec2::length_type;
+            Engine::Math::Float16From32(&uvs_packed[(i * 2) + j], uvs[i][len_type(j)]);
         }
     }
     uvs_attr.setBuffer(reinterpret_cast<const uint8_t*>(uvs_packed.data()), (uint32_t)(uvs_packed.size() * 2));
@@ -286,7 +289,8 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
     std::vector<uint16_t> boneweights_packed(boneweights.size()*4);
     for (size_t i = 0; i < boneweights.size(); ++i) {
         for (size_t j = 0; j < 4; ++j) {
-            Engine::Math::Float16From32(&boneweights_packed[(i * 4) + j], boneweights[i][j]);
+            using len_type = glm::vec4::length_type;
+            Engine::Math::Float16From32(&boneweights_packed[(i * 4) + j], boneweights[i][len_type(j)]);
         }
     }
     boneweights_attr.setBuffer(reinterpret_cast<const uint8_t*>(boneweights_packed.data()), (uint32_t)(boneweights_packed.size() * 2));

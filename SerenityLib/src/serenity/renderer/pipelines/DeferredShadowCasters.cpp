@@ -40,7 +40,7 @@ bool Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
     glDeleteFramebuffers(1, &m_FBO);
     glDeleteTextures(GLsizei(m_DepthTexture.size()), m_DepthTexture.data());
 
-    glGenTextures(m_DepthTexture.size(), m_DepthTexture.data());
+    glGenTextures(GLsizei(m_DepthTexture.size()), m_DepthTexture.data());
     for (uint32_t i = 0; i < m_DepthTexture.size(); ++i) {
         glBindTexture(GL_TEXTURE_2D, m_DepthTexture[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_ShadowWidth, m_ShadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);

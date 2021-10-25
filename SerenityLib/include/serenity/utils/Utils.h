@@ -74,7 +74,76 @@ namespace Engine {
         }
         return std::numeric_limits<size_t>().max();
     }
-
+    template<class CONTAINER, class FUNC, class ... ARGS>
+    bool swap_and_pop_single(CONTAINER& container, FUNC&& func, ARGS&&... args) {
+        size_t i = 0;
+        while (i < container.size()) {
+            if (func(container[i], std::forward<ARGS>(args)...)) {
+                size_t last = container.size() - 1;
+                if (i != last) {
+                    std::swap(container[i], container[last]);
+                }
+                container.pop_back();
+                return true;
+            }
+            ++i;
+        }
+        return false;
+    }
+    template<class CONTAINER, class FUNC, class ... ARGS>
+    size_t swap_and_pop(CONTAINER& container, FUNC&& func, ARGS&&... args) {
+        size_t i = 0;
+        size_t totalRemoved = 0;
+        while (i < container.size()) {
+            if (func(container[i], std::forward<ARGS>(args)...)) {
+                size_t last = container.size() - 1;
+                if (i != last) {
+                    std::swap(container[i], container[last]);
+                    --i;
+                }
+                container.pop_back();
+                ++totalRemoved;
+            }
+            ++i;
+        }
+        return totalRemoved;
+    }
+    template<class CONTAINER, class FUNC, class THEN, class ... ARGS>
+    bool swap_and_pop_single_then(CONTAINER& container, FUNC&& func, THEN&& then, ARGS&&... args) {
+        size_t i = 0;
+        while (i < container.size()) {
+            if (func(container[i], std::forward<ARGS>(args)...)) {
+                then(container[i], std::forward<ARGS>(args)...);
+                size_t last = container.size() - 1;
+                if (i != last) {
+                    std::swap(container[i], container[last]);
+                }
+                container.pop_back();
+                return true;
+            }
+            ++i;
+        }
+        return false;
+    }
+    template<class CONTAINER, class FUNC, class THEN, class ... ARGS>
+    size_t swap_and_pop_then(CONTAINER& container, FUNC&& func, THEN&& then, ARGS&&... args) {
+        size_t i = 0;
+        size_t totalRemoved = 0;
+        while (i < container.size()) {
+            if (func(container[i], std::forward<ARGS>(args)...)) {
+                then(container[i], std::forward<ARGS>(args)...);
+                size_t last = container.size() - 1;
+                if (i != last) {
+                    std::swap(container[i], container[last]);
+                    --i;
+                }
+                container.pop_back();
+                ++totalRemoved;
+            }
+            ++i;
+        }
+        return totalRemoved;
+    }
 
     template<class KEY, class VALUE> using unordered_string_map = std::unordered_map<KEY, VALUE, Engine::string_hash, Engine::string_hash::equals>;
     template<class KEY>              using unordered_string_set = std::unordered_set<KEY, Engine::string_hash, Engine::string_hash::equals>;

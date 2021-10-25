@@ -165,7 +165,7 @@ void SystemTransformParentChild::removeChild(uint32_t parentID, uint32_t childID
     uint32_t childBlockSize = (childBlock.second - childBlock.first) + 1;
     if (childBlockSize == 1) {
         m_Order.erase(std::cbegin(m_Order) + childBlock.first);
-    }else{
+    } else {
         auto temp = Engine::create_and_reserve<std::vector<uint32_t>>(childBlockSize);
         for (uint32_t i = childBlock.first; i <= childBlock.second; ++i) {
             temp.push_back(m_Order[i]);

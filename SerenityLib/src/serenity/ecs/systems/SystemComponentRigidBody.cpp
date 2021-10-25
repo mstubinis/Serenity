@@ -20,17 +20,6 @@ SystemComponentRigidBody::SystemComponentRigidBody(Engine::priv::ECS& ecs)
             rigidBodyComponent->internal_calculate_mass();
         }
     });
-    setEntityAddedToSceneFunction([](SystemBaseClass& inSystem, Scene& scene, Entity entity) {
-        auto& pool               = inSystem.getComponentPool<ComponentRigidBody>(0);
-        auto  rigidBodyComponent = pool.getComponent(entity);
-        if (rigidBodyComponent) {
-            auto currentScene = Engine::Resources::getCurrentScene();
-            if (currentScene && currentScene == &scene) {
-                //rigidBodyComponent->addPhysicsToWorld();
-                //rigidBodyComponent->internal_calculate_mass();
-            }
-        }
-    });
     setSceneLeftFunction([](SystemBaseClass& inSystem, Scene& scene) {
         auto& system = static_cast<SystemComponentRigidBody&>(inSystem);
         system.forEach([](Entity entity, ComponentRigidBody* rigidBodyComponent) {

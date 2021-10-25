@@ -2011,7 +2011,7 @@ void btMultiBody::fillConstraintJacobianMultiDof(int link,
 		// calculate required normals & positions in the local frames.
         for (int a = 0; a < numLinksChildToRoot; a++)
         {
-            int i = links[numLinksChildToRoot-1-a];
+            int i = static_cast<int>(links[numLinksChildToRoot - 1 - a]);
         	// transform to local frame
 			const int parent = m_links[i].m_parent;
 			const btMatrix3x3 mtx(m_links[i].m_cachedRotParentToThis);

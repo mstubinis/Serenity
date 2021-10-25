@@ -35,8 +35,8 @@ class Entity {
 
         Entity(const Entity&)                = default;
         Entity& operator=(const Entity&)     = default;
-        Entity(Entity&&) noexcept            = default;
-        Entity& operator=(Entity&&) noexcept = default;
+        Entity(Entity&&) noexcept;
+        Entity& operator=(Entity&&) noexcept;
 
         inline constexpr operator bool() const noexcept { return !null(); }
         inline constexpr bool null() const noexcept { return (

@@ -77,15 +77,9 @@ void Engine::priv::EventDispatcher::postUpdate() {
     if (m_UnregisteredObservers.size() > 0) {
         std::lock_guard lock{ m_Mutex };
         for (const auto& [observer, idx] : m_UnregisteredObservers) {
-            auto& observers_with_event = m_Observers[idx];
-            auto it = observers_with_event.begin();
-            while (it != observers_with_event.end()) {
-                if (observer == *it) {
-                    it = observers_with_event.erase(it);
-                } else {
-                    ++it;
-                }
-            }
+            Engine::swap_and_pop(m_Observers[idx], [](auto& item, Observer* observer) {
+                return observer == item;
+            }, observer);
         }
         m_UnregisteredObservers.clear();
     }

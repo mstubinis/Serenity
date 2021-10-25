@@ -195,7 +195,12 @@ namespace Engine::Resources {
 
     [[nodiscard]] Handle addShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader);
 };
-namespace Engine::Data{
+namespace Engine::priv::lua::resources {
+
+}
+
+
+namespace Engine::Data {
     [[nodiscard]] std::string reportTime();
 };
 

@@ -113,7 +113,6 @@ namespace Engine {
                 super::m_Sparse[m_Dense[lastIndex].idx] = removedComponentID;
                 super::m_Sparse[id] = NULL_IDX;
                 if (removedComponentID != lastIndex) {
-                    //m_Dense[removedComponentID] = std::move(m_Dense[lastIndex]);
                     std::swap(m_Dense[removedComponentID], m_Dense[lastIndex]);
                 }
                 m_Dense.pop_back();

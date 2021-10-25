@@ -10,16 +10,23 @@
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/resources/material/Material.h>
 
+namespace {
+    void internal_add_debugging_visual(ParticleEmitter& emitter) {
+        emitter.addComponent<ComponentModel>(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), Material::Checkers);
+        auto& modelComponent = *emitter.getComponent<ComponentModel>();
+        modelComponent.getModel().setScale(0.01f, 0.01f, 0.1f);
+        modelComponent.getModel().translate(0.0f, 0.0f, 0.1f);
+    }
+}
+
+
 ParticleEmitter::ParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) 
     : Entity{ scene }
 {
     addComponent<ComponentTransform>();
-    /*
-    addComponent<ComponentModel>(Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh(), Material::Checkers);
-    auto& modelComponent = *getComponent<ComponentModel>();
-    modelComponent.getModel().setScale(0.01f, 0.01f, 0.1f);
-    modelComponent.getModel().translate(0.0f, 0.0f, 0.1f);
-    */
+
+    //internal_add_debugging_visual(*this);
+
     init(properties, scene, lifetime, parent);
 }
 void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
@@ -38,29 +45,27 @@ void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene,
 
 ParticleEmitter::ParticleEmitter(ParticleEmitter&& other) noexcept 
     : Entity         { std::move(other) }
+    , m_UserData     { std::move(other.m_UserData) }
+    , m_UpdateFunctor{ std::move(other.m_UpdateFunctor) }
+    , m_Properties   { std::exchange(other.m_Properties, nullptr) }
     , m_SpawningTimer{ std::move(other.m_SpawningTimer) }
-    , m_Active       { std::move(other.m_Active) }
     , m_Timer        { std::move(other.m_Timer) }
     , m_Lifetime     { std::move(other.m_Lifetime) }
-    , m_Parent       { std::move(other.m_Parent) }
-    , m_UpdateFunctor{ std::move(other.m_UpdateFunctor) }
-    , m_UserData     { std::move(other.m_UserData) }
-    , m_Properties   { std::move(other.m_Properties) }
+    , m_Parent       { std::exchange(other.m_Parent, Entity{}) }
+    , m_Active       { std::exchange(other.m_Active, false) }
 {}
 ParticleEmitter& ParticleEmitter::operator=(ParticleEmitter&& other) noexcept {  
     Entity::operator=(std::move(other));
-    m_Properties     = std::move(other.m_Properties);
-    m_SpawningTimer  = std::move(other.m_SpawningTimer);
-    m_Active         = std::move(other.m_Active);
-    m_Timer          = std::move(other.m_Timer);
-    m_Lifetime       = std::move(other.m_Lifetime);
-    m_Parent         = std::move(other.m_Parent);
-    m_UpdateFunctor  = std::move(other.m_UpdateFunctor);
-    m_UserData       = std::move(other.m_UserData);
+    m_UserData      = std::move(other.m_UserData);
+    m_UpdateFunctor = std::move(other.m_UpdateFunctor);
+    m_Properties    = std::exchange(other.m_Properties, nullptr);
+    m_SpawningTimer = std::move(other.m_SpawningTimer);
+    m_Timer         = std::move(other.m_Timer);
+    m_Lifetime      = std::move(other.m_Lifetime);
+    m_Parent        = std::exchange(other.m_Parent, Entity{});
+    m_Active        = std::exchange(other.m_Active, false);
     return *this;
 }
-
-
 void ParticleEmitter::setProperties(ParticleEmissionProperties& properties) {
     m_Properties = &properties;
 }
@@ -81,16 +86,16 @@ void ParticleEmitter::update(size_t index, const float dt, Engine::priv::Particl
                     particleSystem.add_particle(*this);
                 }
             }
-            m_SpawningTimer = 0.0;
+            m_SpawningTimer = 0.0f;
         }
-        if (m_Lifetime > 0.0 && m_Timer >= m_Lifetime) {
+        if (m_Lifetime > 0.0f && m_Timer >= m_Lifetime) {
             m_Active = false;
-            m_Timer  = 0.0;
+            m_Timer  = 0.0f;
             if (multi_threaded) {
                 std::lock_guard lock{ particleSystem.m_Mutex };
-                particleSystem.m_ParticleEmitterFreelist.emplace(index);
+                particleSystem.m_ParticleEmitterFreelist.emplace_back(index);
             } else {
-                particleSystem.m_ParticleEmitterFreelist.emplace(index);
+                particleSystem.m_ParticleEmitterFreelist.emplace_back(index);
             }
         }
     }

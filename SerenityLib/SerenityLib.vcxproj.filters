@@ -911,12 +911,6 @@
     <ClCompile Include="src\serenity\ecs\components\ComponentCollisionShape.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\ecs\systems\SystemAddRigidBodies.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\ecs\systems\SystemRemoveRigidBodies.cpp">
-      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\ecs\systems\SystemSceneChanging.cpp">
       <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
     </ClCompile>
@@ -2253,12 +2247,6 @@
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\components\ComponentCollisionShape.h">
       <Filter>Header Files\Engine\Core\ECS\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\systems\SystemRemoveRigidBodies.h">
-      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\ecs\systems\SystemAddRigidBodies.h">
-      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\systems\SystemSceneChanging.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>

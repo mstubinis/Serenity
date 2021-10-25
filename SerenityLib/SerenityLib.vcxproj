@@ -425,7 +425,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -747,7 +747,6 @@
     <ClCompile Include="src\serenity\ecs\ECSEntityPool.cpp" />
     <ClCompile Include="src\serenity\ecs\ECSSystemPool.cpp" />
     <ClCompile Include="src\serenity\ecs\entity\Entity.cpp" />
-    <ClCompile Include="src\serenity\ecs\systems\SystemAddRigidBodies.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransform.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransformDebugDraw.cpp" />
@@ -760,7 +759,6 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentModel.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemCompoundChildTransforms.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemGameUpdate.cpp" />
-    <ClCompile Include="src\serenity\ecs\systems\SystemRemoveRigidBodies.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemSceneChanging.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemSceneUpdate.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemStepPhysics.cpp" />
@@ -918,7 +916,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\serenity\tests\TestEntities.cpp" />
+    <ClCompile Include="src\serenity\tests\TestEntities.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\serenity\tests\TestGLTypes.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
@@ -929,8 +934,22 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\serenity\tests\TestOpenGLRenderableProperties.cpp" />
-    <ClCompile Include="src\serenity\tests\TestSystemParentChild.cpp" />
+    <ClCompile Include="src\serenity\tests\TestOpenGLRenderableProperties.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestSystemParentChild.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\serenity\tests\TestTextureTypes.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
@@ -1283,7 +1302,6 @@
     <ClInclude Include="include\serenity\ecs\ECSSystemPool.h" />
     <ClInclude Include="include\serenity\ecs\entity\Entity.h" />
     <ClInclude Include="include\serenity\ecs\entity\EntityRAII.h" />
-    <ClInclude Include="include\serenity\ecs\systems\SystemAddRigidBodies.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransform.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransformDebugDraw.h" />
@@ -1296,7 +1314,6 @@
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentModel.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemCompoundChildTransforms.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemGameUpdate.h" />
-    <ClInclude Include="include\serenity\ecs\systems\SystemRemoveRigidBodies.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemSceneChanging.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemSceneUpdate.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemStepPhysics.h" />

@@ -15,8 +15,6 @@
 #include <serenity/ecs/systems/SystemSceneChanging.h>
 #include <serenity/ecs/systems/SystemComponentTransform.h>
 #include <serenity/ecs/systems/SystemComponentRigidBody.h>
-#include <serenity/ecs/systems/SystemAddRigidBodies.h>
-#include <serenity/ecs/systems/SystemRemoveRigidBodies.h>
 #include <serenity/ecs/systems/SystemSyncTransformToRigid.h>
 #include <serenity/ecs/systems/SystemStepPhysics.h>
 #include <serenity/ecs/systems/SystemSyncRigidToTransform.h>
@@ -332,6 +330,12 @@ Viewport& Scene::addViewport(float x, float y, float width, float height, Camera
 }
 Entity Scene::createEntity() { 
     return m_ECS.createEntity(*this); 
+}
+std::vector<Entity> Scene::createEntity(uint32_t amount) {
+    return m_ECS.createEntity(*this, amount);
+}
+std::vector<Entity> Scene::createEntities(uint32_t amount) {
+    return m_ECS.createEntity(*this, amount);
 }
 void Scene::removeEntity(Entity entity) { 
     m_ECS.removeEntity(entity);

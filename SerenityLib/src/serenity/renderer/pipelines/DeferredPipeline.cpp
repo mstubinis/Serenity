@@ -357,10 +357,12 @@ void DeferredPipeline::init() {
     Material::Checkers = Engine::Resources::addResource<Material>("DCheckers", Texture::Checkers);
     Material::Checkers.get<Material>()->setSpecularModel(SpecularModel::None);
     Material::Checkers.get<Material>()->setSmoothness(0_uc);
+    Material::Checkers.get<Material>()->setMetalness(0_uc);
 
     Material::WhiteShadeless = Engine::Resources::addResource<Material>("DWhiteShadeless", Texture::White);
     Material::WhiteShadeless.get<Material>()->setSpecularModel(SpecularModel::None);
     Material::WhiteShadeless.get<Material>()->setSmoothness(0_uc);
+    Material::WhiteShadeless.get<Material>()->setMetalness(0_uc);
     Material::WhiteShadeless.get<Material>()->setShadeless(true);
 
     Texture::BRDF = Engine::Resources::addResource<Texture>(512, 512, ImagePixelType::FLOAT, ImagePixelFormat::RG, ImageInternalFormat::RG16F, 1.0f);

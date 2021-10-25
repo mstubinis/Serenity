@@ -129,6 +129,8 @@ class Scene: public Observer {
 
 
         [[nodiscard]] Entity createEntity();
+        [[nodiscard]] std::vector<Entity> createEntity(uint32_t amount);
+        [[nodiscard]] std::vector<Entity> createEntities(uint32_t amount);
         void removeEntity(Entity);
 
         [[nodiscard]] size_t getNumLights() const noexcept;

@@ -10,7 +10,27 @@ using namespace Engine::priv;
 Entity::Entity(Scene& scene) {
     fill(scene.createEntity());
 }
-
+Entity::Entity(Entity&& other) noexcept {
+    if (&other != this) {
+        m_ID              = (other.m_ID);
+        m_SceneID         = (other.m_SceneID);
+        m_VersionID       = (other.m_VersionID);
+        other.m_ID        = getMaxEntityIDBits(ID_BIT_POSITIONS);
+        other.m_SceneID   = getMaxEntityIDBits(SCENE_BIT_POSITIONS);
+        other.m_VersionID = getMaxEntityIDBits(VERSION_BIT_POSITIONS);
+    }
+}
+Entity& Entity::operator=(Entity&& other) noexcept {
+    if (&other != this) {
+        m_ID              = (other.m_ID);
+        m_SceneID         = (other.m_SceneID);
+        m_VersionID       = (other.m_VersionID);
+        other.m_ID        = getMaxEntityIDBits(ID_BIT_POSITIONS);
+        other.m_SceneID   = getMaxEntityIDBits(SCENE_BIT_POSITIONS);
+        other.m_VersionID = getMaxEntityIDBits(VERSION_BIT_POSITIONS);
+    }
+    return *this;
+}
 void Entity::destroy() noexcept {
     if (!null()) {
         Scene* scene_ptr = scene();
@@ -46,12 +66,12 @@ std::vector<Entity> Entity::getChildren() const noexcept {
     auto transform = getComponent<ComponentTransform>();
     std::vector<Entity> output;
     if (transform) {
-        auto& ecs = *Engine::priv::PublicEntity::GetECS(*this);
-        auto& pcs = ecs.getSystem<SystemTransformParentChild>();
+        const auto& ecs = *Engine::priv::PublicEntity::GetECS(*this);
+        const auto& pcs = ecs.getSystem<SystemTransformParentChild>();
         for (size_t i = 0; i < pcs.m_Parents.size(); ++i) {
             const auto parentID = pcs.m_Parents[i];
             if (parentID == m_ID) {
-                output.push_back(ecs.getEntityPool().getEntityFromID(i));
+                output.push_back(ecs.getEntityPool().getEntityFromID(uint32_t(i)));
             }
         }
     }
@@ -70,52 +90,52 @@ Engine::view_ptr<Scene> Entity::scene() const noexcept {
     return Core::m_Engine->m_ResourceManager.getSceneByID(sceneID());
 }
 bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
-    if (componentClassName == "ComponentBody") {
+    if (componentClassName == "ComponentTransform") {
         return addComponent<ComponentTransform>();
-    }else if ("ComponentRigidBody") {
+    } else if ("ComponentRigidBody") {
         return addComponent<ComponentRigidBody>();
-    }else if ("ComponentCollisionShape") {
+    } else if ("ComponentCollisionShape") {
         if (!a1.isNil()) {
             return addComponent<ComponentCollisionShape>(a1);
         }
-    }else if (componentClassName == "ComponentModel") {
+    } else if (componentClassName == "ComponentModel") {
         if (!a3.isNil() && !a4.isNil()) {
             return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage>());
-        }else if(a4.isNil()){
+        } else if(a4.isNil()) {
             return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>());
-        }else{
+        } else {
             return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>());
         }
-    }else if (componentClassName == "ComponentCamera") {
+    } else if (componentClassName == "ComponentCamera") {
         if (!a5.isNil() || !a6.isNil()) {
             return addComponent<ComponentCamera>(a1.cast<float>(), a2.cast<float>(), a3.cast<float>(), a4.cast<float>(), a5.cast<float>(), a6.cast<float>());
-        }else{
+        } else {
             return addComponent<ComponentCamera>(a1.cast<float>(), a2.cast<float>(), a3.cast<float>(), a4.cast<float>());
         }
-    }else if (componentClassName == "ComponentName") {
+    } else if (componentClassName == "ComponentName") {
         return addComponent<ComponentName>(a1.cast<const char*>());
-    }else if (componentClassName == "ComponentLogic") {
+    } else if (componentClassName == "ComponentLogic") {
         if (!a1.isNil() && a1.isFunction()) {
             return addComponent<ComponentLogic>(a1);
-        }else{
+        } else {
             return addComponent<ComponentLogic>();
         }
-    }else if (componentClassName == "ComponentLogic1") {
+    } else if (componentClassName == "ComponentLogic1") {
         if (!a1.isNil() && a1.isFunction()) {
             return addComponent<ComponentLogic1>(a1);
-        }else{
+        } else {
             return addComponent<ComponentLogic1>();
         }
-    }else if (componentClassName == "ComponentLogic2") {
+    } else if (componentClassName == "ComponentLogic2") {
         if (!a1.isNil() && a1.isFunction()) {
             return addComponent<ComponentLogic2>(a1);
-        }else{
+        } else {
             return addComponent<ComponentLogic2>();
         }
-    }else if (componentClassName == "ComponentLogic3") {
+    } else if (componentClassName == "ComponentLogic3") {
         if (!a1.isNil() && a1.isFunction()) {
             return addComponent<ComponentLogic3>(a1);
-        }else{
+        } else {
             return addComponent<ComponentLogic3>();
         }
     }

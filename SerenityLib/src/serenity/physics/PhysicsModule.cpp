@@ -45,23 +45,23 @@ namespace {
         }
         return result;
     }
-    bool internal_add_rigid_body(btRigidBody* inRigidBody) noexcept {
-        ASSERT(inRigidBody, __FUNCTION__ << "(): rigidBody was nullptr!");
-        if (!inRigidBody || (inRigidBody && inRigidBody->isInWorld())) {
+    bool internal_add_rigid_body_impl(btRigidBody* body, MaskType group, MaskType mask, bool doGroupAndMask) noexcept {
+        ASSERT(body, __FUNCTION__ << "(): rigidBody was nullptr!");
+        if (!body || (body && body->isInWorld())) {
             return false;
         }
-        PHYSICS_MANAGER->m_Pipeline.m_World->addRigidBody(inRigidBody);
-        inRigidBody->setGravity(inRigidBody->getGravity());
+        {
+            std::lock_guard lock{ PHYSICS_MANAGER->m_Mutex };
+            doGroupAndMask ? PHYSICS_MANAGER->m_Pipeline.m_World->addRigidBody(body, group, mask) : PHYSICS_MANAGER->m_Pipeline.m_World->addRigidBody(body);
+        }
+        body->setGravity(body->getGravity());
         return true;
     }
+    bool internal_add_rigid_body(btRigidBody* inRigidBody) noexcept {
+        return internal_add_rigid_body_impl(inRigidBody, 0, 0, false);
+    }
     bool internal_add_rigid_body(btRigidBody* inRigidBody, MaskType group, MaskType mask) noexcept {
-        ASSERT(inRigidBody, __FUNCTION__ << "(): rigidBody was nullptr!");
-        if (!inRigidBody || (inRigidBody && inRigidBody->isInWorld())) {
-            return false;
-        }
-        PHYSICS_MANAGER->m_Pipeline.m_World->addRigidBody(inRigidBody, group, mask);
-        inRigidBody->setGravity(inRigidBody->getGravity());
-        return true;
+        return internal_add_rigid_body_impl(inRigidBody, group, mask, true);
     }
     void ProcessManifoldContact(btManifoldPoint& cp, btCollisionObject* collObjA, btCollisionObject* collObjB, btCollisionShape* childShapeA, btCollisionShape* childShapeB, const btCollisionShape* shapeA, const btCollisionShape* shapeB) {
         auto aRigidBody = static_cast<ComponentRigidBody*>(collObjA->getUserPointer());
@@ -244,35 +244,17 @@ bool Engine::Physics::removeRigidBody(btRigidBody* rigidBody){
     if (!rigidBody || (rigidBody && !rigidBody->isInWorld())) {
         return false;
     }
+    std::lock_guard lock{ PHYSICS_MANAGER->m_Mutex };
     PHYSICS_MANAGER->m_Pipeline.m_World->removeRigidBody(rigidBody);
     return true;
 }
 bool Engine::Physics::removeCollisionObject(btCollisionObject* object) {
+    std::lock_guard lock{ PHYSICS_MANAGER->m_Mutex };
     PHYSICS_MANAGER->m_Pipeline.m_World->removeCollisionObject(object);
     return true;
 }
 void Engine::Physics::updateRigidBody(btRigidBody* rigidBody){
     PHYSICS_MANAGER->m_Pipeline.m_World->updateSingleAabb(rigidBody);
-}
-bool Engine::Physics::addRigidBodyThreadSafe(btRigidBody* body, MaskType group, MaskType mask) {
-    std::lock_guard lock{ PHYSICS_MANAGER->m_Mutex };
-    return Engine::Physics::addRigidBody(body, group, mask);
-}
-bool Engine::Physics::addRigidBodyThreadSafe(btRigidBody* body) {
-    std::lock_guard lock{ PHYSICS_MANAGER->m_Mutex };
-    return Engine::Physics::addRigidBody(body);
-}
-bool Engine::Physics::removeRigidBodyThreadSafe(btRigidBody* body) {
-    std::lock_guard lock{ PHYSICS_MANAGER->m_Mutex };
-    return Engine::Physics::removeRigidBody(body);
-}
-void Engine::Physics::updateRigidBodyThreadSafe(btRigidBody* body) {
-    std::lock_guard lock{ PHYSICS_MANAGER->m_Mutex };
-    Engine::Physics::updateRigidBody(body);
-}
-bool Engine::Physics::removeCollisionObjectThreadSafe(btCollisionObject* object) {
-    std::lock_guard lock{ PHYSICS_MANAGER->m_Mutex };
-    return Engine::Physics::removeCollisionObject(object);
 }
 std::vector<Engine::RayCastResult> Engine::Physics::rayCast(const glm::vec3& start, const glm::vec3& end, MaskType group, MaskType mask) {
     return internal_ray_cast(Engine::Math::toBT(start), Engine::Math::toBT(end), group, mask, std::vector<Entity>{});

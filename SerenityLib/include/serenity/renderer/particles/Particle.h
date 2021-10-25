@@ -12,17 +12,15 @@ namespace Engine::priv {
 #include <serenity/dependencies/glm.h>
 #include <serenity/types/ColorVector.h>
 
-/*
-2D Sprite that is optimized to render fast and in very large numbers
-*/
+/* 2D Sprite that is optimized to render fast and in very large numbers */
 class Particle final {
     friend struct Engine::priv::PublicScene;
     friend class  Engine::priv::ParticleSystem;
     public:
-        glm::vec3                 m_Position        = glm::vec3(0.0f); //96 bits  (pass to gpu 3 floats)    
-        glm::vec3                 m_Velocity        = glm::vec3(0.0f); //96 bits
+        glm::vec3                 m_Position        = glm::vec3{ 0.0f }; //96 bits  (pass to gpu 3 floats)    
+        glm::vec3                 m_Velocity        = glm::vec3{ 0.0f }; //96 bits
 
-        glm::vec2                 m_Scale           = glm::vec2(1.0f); //64 bits (pass to gpu 2 floats)
+        glm::vec2                 m_Scale           = glm::vec2{ 1.0f }; //64 bits (pass to gpu 2 floats)
         ParticleEmitter*          m_EmitterSource   = nullptr;         //64 bits
         Material*                 m_Material        = nullptr;         //64 bits (pass to gpu as index (uint))
 

@@ -30,7 +30,7 @@ bool Server::startup(uint16_t port, std::string ip_restriction) {
                 m_TCPListener = make_unique<ListenerTCP>(port, ip_restriction);
             }
             break;
-        }case ServerType::UDP: {
+        } case ServerType::UDP: {
             if (!m_UdpSocket) {
                 m_UdpSocket   = make_unique<SocketUDP>(port, ip_restriction);
             }
@@ -132,10 +132,10 @@ bool Server::internal_add_client(const std::string& hash, ServerClient* client) 
     if (!client) {
         return false;
     }
-    bool result = m_Clients.addClient(hash, client);
-    if(result){
+    const bool result = m_Clients.addClient(hash, client);
+    if (result) {
         ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): accepted new client: " << client->ip() << " on port: " << client->port())
-    }else{
+    } else {
         ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): REJECTED new client: " << client->ip() << " on port: " << client->port() << " due to not finding a next_thread")
         SAFE_DELETE(client);
     }
@@ -160,37 +160,40 @@ void Server::internal_on_receive_udp_packet(Engine::Networking::Packet& packet, 
     Server::m_CustomOnReceiveUDPFunction(packet, ipAsString, port);
 }
 void Server::update(const float dt) {
-    auto serverActive = isActive();
+    const bool serverActive = isActive();
     m_CustomUpdateFunction(dt, serverActive);
     m_Clients.internal_update_remove_clients();
 }
 SocketStatus::Status Server::onUpdateReceiveUDPPackets() {
-    const auto serverActive = isActive();
+    const bool serverActive = isActive();
     if (!serverActive) {
         return SocketStatus::Error;
     }
     Engine::Networking::Packet   packet;
     sf::IpAddress                ipSender;
     uint16_t                     portSender;
-    auto status = m_UdpSocket->receive(packet, ipSender, portSender);
-    switch (status) {
-        case SocketStatus::Done: {
-            internal_on_receive_udp_packet(packet, ipSender, portSender);
-            break;
-        } case SocketStatus::NotReady: {
-            break;
-        } case SocketStatus::Partial: {
-            break;
-        } case SocketStatus::Disconnected: {
-            break;
-        } case SocketStatus::Error: {
-            break;
+    SocketStatus::Status status = SocketStatus::NotReady;
+    do {
+        status = m_UdpSocket->receive(packet, ipSender, portSender);
+        switch (status) {
+            case SocketStatus::Done: {
+                internal_on_receive_udp_packet(packet, ipSender, portSender);
+                break;
+            } case SocketStatus::NotReady: {
+                break;
+            } case SocketStatus::Partial: {
+                break;
+            } case SocketStatus::Disconnected: {
+                break;
+            } case SocketStatus::Error: {
+                break;
+            }
         }
-    }
+    } while (status == SocketStatus::Done);
     return status;
 }
 void Server::onUpdateReceiveTCPPackets(const float dt) {
-    const auto serverActive = isActive();
+    const bool serverActive = isActive();
     if (!serverActive) {
         return;
     }
@@ -219,21 +222,25 @@ void Server::onUpdateReceiveTCPPackets(const float dt) {
         }
     }
 }
-void Server::onUpdateProcessTCPListeners() {
-    const auto serverActive = isActive();
+SocketStatus::Status Server::onUpdateProcessTCPListeners() {
+    const bool serverActive = isActive();
     if (!serverActive) {
-        return;
+        return SocketStatus::Error;
     }
+    SocketStatus::Status status = SocketStatus::NotReady;
     if (m_TCPListener) {
-        SocketTCP* tcpSocket = NEW SocketTCP();
-        auto status = m_TCPListener->accept(*tcpSocket);
-        if (status == sf::Socket::Status::Done) {
-            auto client_ip   = tcpSocket->ip();
-            auto client_port = tcpSocket->remotePort();
-            auto client_hash = m_CustomClientHashFunction(client_ip, client_port);
-            internal_add_client( client_hash, addNewClient(client_hash, client_ip, client_port, tcpSocket) );
-        } else {
-            SAFE_DELETE(tcpSocket);
-        }
+        do {
+            SocketTCP* tcpSocket = NEW SocketTCP();
+            status = m_TCPListener->accept(*tcpSocket);
+            if (status == SocketStatus::Done) {
+                auto client_ip = tcpSocket->ip();
+                auto client_port = tcpSocket->remotePort();
+                auto client_hash = m_CustomClientHashFunction(client_ip, client_port);
+                internal_add_client(client_hash, addNewClient(client_hash, client_ip, client_port, tcpSocket));
+            } else {
+                SAFE_DELETE(tcpSocket);
+            }
+        } while (status == SocketStatus::Done);
     }
+    return status;
 }

@@ -87,12 +87,6 @@ namespace Engine{
         bool removeRigidBody(btRigidBody*);
         bool removeCollisionObject(btCollisionObject*);
         void updateRigidBody(btRigidBody*);
-
-        bool addRigidBodyThreadSafe(btRigidBody*, MaskType group, MaskType mask);
-        bool addRigidBodyThreadSafe(btRigidBody*);
-        bool removeRigidBodyThreadSafe(btRigidBody*);
-        bool removeCollisionObjectThreadSafe(btCollisionObject*);
-        void updateRigidBodyThreadSafe(btRigidBody*);
     };
 };
 #endif

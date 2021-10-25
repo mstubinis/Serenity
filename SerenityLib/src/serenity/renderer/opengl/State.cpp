@@ -274,7 +274,7 @@ void OpenGLState::GL_RESTORE_CURRENT_STATE_MACHINE() {
 }
 bool OpenGLState::GL_glActiveTexture(GLenum textureUnit) {
     currentActiveTextureUnit = textureUnit;
-    const GLuint capacity    = textureUnits.capacity() - 1;
+    const GLuint capacity    = GLuint(textureUnits.capacity()) - GLuint(1);
     currentActiveTextureUnit = std::min(currentActiveTextureUnit, capacity);
     glActiveTexture(GL_TEXTURE0 + currentActiveTextureUnit);
     return true;
@@ -285,7 +285,7 @@ bool OpenGLState::GL_glUnbindTexture(GLenum textureUnit, GLenum textureTarget) {
     return true;
 }
 bool OpenGLState::GL_glBindTextureForModification(GLenum textureTarget, GLuint textureObject) {
-    const GLuint capacity = textureUnits.capacity() - 1;
+    const GLuint capacity = GLuint(textureUnits.capacity()) - GLuint(1);
     GL_glActiveTexture(GLenum(capacity));
     GL_glBindTextureForRendering(textureTarget, textureObject);
     return true;

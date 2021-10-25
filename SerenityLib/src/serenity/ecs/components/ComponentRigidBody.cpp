@@ -3,8 +3,6 @@
 #include <serenity/ecs/components/ComponentCollisionShape.h>
 #include <serenity/ecs/components/ComponentModel.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
-#include <serenity/ecs/systems/SystemAddRigidBodies.h>
-#include <serenity/ecs/systems/SystemRemoveRigidBodies.h>
 #include <serenity/physics/PhysicsModule.h>
 #include <serenity/scene/Scene.h>
 #include <serenity/ecs/ECS.h>
@@ -22,25 +20,14 @@ ComponentRigidBody::ComponentRigidBody(Entity entity, CollisionFilter group, Col
 }
 ComponentRigidBody::ComponentRigidBody(Entity entity, const std::string& name)
     : ComponentRigidBody{ entity, CollisionFilter::DefaultFilter, CollisionFilter::AllFilter, name }
-{
-    /*
-        bool isDynamic = !(body->isStaticObject() || body->isKinematicObject());
-        int collisionFilterGroup = isDynamic ? CollisionFilter::DefaultFilter : CollisionFilter::StaticFilter;
-        int collisionFilterMask = isDynamic ? CollisionFilter::AllFilter : CollisionFilter::AllFilter ^ CollisionFilter::StaticFilter;
-    */
-}
+{}
 ComponentRigidBody::~ComponentRigidBody() {
     cleanup();
 }
 void ComponentRigidBody::cleanup() {
     if (m_Owner) { //do not call from moved from destructors
-        //auto& ecs          = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-        //auto& systemRemove = ecs.getSystem<SystemRemoveRigidBodies>();
-        //auto& systemAdd    = ecs.getSystem<SystemAddRigidBodies>();
         auto BTRigidBody   = getBtBody();
         if (BTRigidBody) {
-            //systemAdd.removeBody(BTRigidBody);             // clear any deferred adding of this body
-            //systemRemove.removeBody(BTRigidBody);          // clear any deferred removal of this body
             bool result = removePhysicsFromWorld(); // remove it immediately 
         }
     }

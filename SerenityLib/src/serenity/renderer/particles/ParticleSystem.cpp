@@ -70,7 +70,7 @@ void Engine::priv::ParticleSystem::internal_update_particles(const float dt, Cam
                 particle.m_Timer  = 0.0f;
                 {
                     std::lock_guard lock{ m_Mutex };
-                    m_ParticleFreelist.emplace(j);
+                    m_ParticleFreelist.emplace_back(j);
                 }
             }
         }
@@ -80,8 +80,8 @@ void Engine::priv::ParticleSystem::internal_update_particles(const float dt, Cam
 
 ParticleEmitter* Engine::priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     while (m_ParticleEmitterFreelist.size() > 0) { //first, try to reuse an empty
-        size_t freeindex = m_ParticleEmitterFreelist.front();
-        m_ParticleEmitterFreelist.pop();
+        size_t freeindex = m_ParticleEmitterFreelist.back();
+        m_ParticleEmitterFreelist.pop_back();
         if (freeindex >= m_ParticleEmitters.size() && m_ParticleEmitterFreelist.size() > 0) {
             continue;
         }
@@ -100,8 +100,8 @@ ParticleEmitter* Engine::priv::ParticleSystem::add_emitter(ParticleEmissionPrope
 }
 bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
     while (m_ParticleFreelist.size() > 0) { //first, try to reuse an empty
-        size_t freeindex = m_ParticleFreelist.front();
-        m_ParticleFreelist.pop();
+        size_t freeindex = m_ParticleFreelist.back();
+        m_ParticleFreelist.pop_back();
         if (freeindex >= m_Particles.size() && m_ParticleFreelist.size() > 0) {
             continue;
         }

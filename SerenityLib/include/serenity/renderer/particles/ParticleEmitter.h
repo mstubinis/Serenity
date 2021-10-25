@@ -21,19 +21,19 @@ class ParticleEmitter final : public Entity {
     using update_func = std::function<void(ParticleEmitter*, const float dt, std::mutex&)>;
 
     public:
-        glm::vec4                      m_UserData       = glm::vec4(0.0f);
+        glm::vec4                      m_UserData       = glm::vec4{ 0.0f };
     private:
         update_func                    m_UpdateFunctor  = [](ParticleEmitter*, const float, std::mutex&) {};
         ParticleEmissionProperties*    m_Properties     = nullptr;
         float                          m_SpawningTimer  = 0.0f;
         float                          m_Timer          = 0.0f;
         float                          m_Lifetime       = 0.0f;
-        Entity                         m_Parent         = Entity();
-        bool                           m_Active = false;
+        Entity                         m_Parent;
+        bool                           m_Active         = false;
 
         ParticleEmitter() = delete;
     public:
-        ParticleEmitter(ParticleEmissionProperties&, Scene&, float lifetime, Entity parent = Entity{});
+        ParticleEmitter(ParticleEmissionProperties&, Scene&, float lifetime, Entity parent = {});
         ~ParticleEmitter() = default;
 
         ParticleEmitter(const ParticleEmitter&)                = delete;

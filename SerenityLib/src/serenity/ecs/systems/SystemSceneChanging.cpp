@@ -1,6 +1,4 @@
 #include <serenity/ecs/systems/SystemSceneChanging.h>
-#include <serenity/ecs/systems/SystemAddRigidBodies.h>
-#include <serenity/ecs/systems/SystemRemoveRigidBodies.h>
 #include <serenity/scene/Scene.h>
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/system/Engine.h>

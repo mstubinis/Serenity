@@ -26,7 +26,6 @@ namespace Engine::priv {
             static inline uint32_t                m_RegisteredComponents = 0;
             ECSEntityPool                         m_EntityPool;
             ECSSystemPool                         m_SystemPool;
-            std::vector<Entity>                   m_JustAddedEntities;
             std::vector<Entity>                   m_DestroyedEntities;
             std::vector<sparse_set_base*>         m_ComponentPools;
             std::recursive_mutex                  m_MutexRecursive; //recursive as addComponent() can often be nested
@@ -48,6 +47,8 @@ namespace Engine::priv {
 
             [[nodiscard]] inline const ECSEntityPool& getEntityPool() const noexcept { return m_EntityPool; }
             [[nodiscard]] Entity createEntity(Scene&);
+            [[nodiscard]] std::vector<Entity> createEntity(Scene&, uint32_t amount);
+            [[nodiscard]] std::vector<Entity> createEntities(Scene&, uint32_t amount);
             [[nodiscard]] inline sparse_set_base* getComponentPool(uint32_t typeID) noexcept { return m_ComponentPools[typeID]; }
 
             template<class COMPONENT>

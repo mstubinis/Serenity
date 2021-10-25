@@ -44,6 +44,7 @@ class EntityRAII final {
 
         [[nodiscard]] inline bool null() const noexcept { return m_Entity.null(); }
 
+        inline void destroy() noexcept { m_Entity.destroy(); }
         [[nodiscard]] inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
 
         [[nodiscard]] inline uint32_t id() const noexcept { return m_Entity.id(); }

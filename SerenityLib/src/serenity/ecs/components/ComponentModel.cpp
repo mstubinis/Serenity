@@ -131,11 +131,16 @@ ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
     m_Radius         = std::move(other.m_Radius);
     m_Owner          = std::exchange(other.m_Owner, Entity{});
 
-    if (other.isRegistered(EventType::ResourceLoaded) && &other != this) {
+    if (other.isRegistered(EventType::ResourceLoaded) && this != &other) {
         registerEvent(EventType::ResourceLoaded);
         other.unregisterEvent(EventType::ResourceLoaded);
     }
     return *this;
+}
+ComponentModel::~ComponentModel() {
+    if (isRegistered(EventType::ResourceLoaded)) {
+        unregisterEvent(EventType::ResourceLoaded);
+    }
 }
 void ComponentModel::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {

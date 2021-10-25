@@ -52,6 +52,7 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
         ComponentModel& operator=(const ComponentModel&)     = delete;
         ComponentModel(ComponentModel&&) noexcept;
         ComponentModel& operator=(ComponentModel&&) noexcept;
+        ~ComponentModel();
 
         [[nodiscard]] inline constexpr Entity getOwner() const noexcept { return m_Owner; }
 

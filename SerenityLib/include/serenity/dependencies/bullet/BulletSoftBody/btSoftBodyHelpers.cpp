@@ -1439,7 +1439,7 @@ void btSoftBodyHelpers::writeObj(const char* filename, const btSoftBody* psb)
 				int index = psb->m_faces[i].m_n[d]->index;
 				if (dict.find(index) == dict.end())
 				{
-					int dict_size = dict.size();
+					int dict_size = (int)dict.size();
 					dict[index] = dict_size;
 					fs << "v";
 					for (int k = 0; k < 3; k++)

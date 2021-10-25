@@ -15,11 +15,11 @@
 
 using namespace Engine;
 
-namespace Engine::priv {
-    constexpr auto DefaultDecalBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
+namespace {
+    constexpr auto Default_Decal_Bind_Functor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
         renderer->m_Pipeline->renderDecal(*i);
     };
-    constexpr auto DefaultDecalUnbindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
+    constexpr auto Default_Decal_Unbind_Functor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
     };
 };
 
@@ -44,28 +44,29 @@ Decal::Decal(Handle materialHandle, const glm_vec3& localPosition, const glm::ve
     m_InitialRotation = q;
     transform.setRotation(q);
       
-    model.setCustomBindFunctor(Engine::priv::DefaultDecalBindFunctor);
-    model.setCustomUnbindFunctor(Engine::priv::DefaultDecalUnbindFunctor);
-}
-Decal::Decal(Decal&& other) noexcept 
-    : Entity           { std::move(other) }
-    , m_LifetimeCurrent{ std::move(other.m_LifetimeCurrent) }
-    , m_LifetimeMax    { std::move(other.m_LifetimeMax) }
-    , m_Active         { std::move(other.m_Active) }
-    , m_InitialPosition{ std::move(other.m_InitialPosition) }
-    , m_InitialRotation{ std::move(other.m_InitialRotation) }
-{}
-Decal& Decal::operator=(Decal&& other) noexcept {
-    Entity::operator=( std::move(other) );
-    m_LifetimeCurrent   = std::move(other.m_LifetimeCurrent);
-    m_LifetimeMax       = std::move(other.m_LifetimeMax);
-    m_Active            = std::move(other.m_Active);
-    m_InitialPosition   = std::move(other.m_InitialPosition);
-    m_InitialRotation   = std::move(other.m_InitialRotation);
-    return *this;
+    model.setCustomBindFunctor(Default_Decal_Bind_Functor);
+    model.setCustomUnbindFunctor(Default_Decal_Unbind_Functor);
 }
 Decal::~Decal() {
     Entity::destroy();
+}
+Decal::Decal(Decal&& other) noexcept 
+    : Entity{ std::move(other) }
+{
+    m_InitialRotation = std::move(other.m_InitialRotation);
+    m_InitialPosition = std::move(other.m_InitialPosition);
+    m_LifetimeCurrent = std::move(other.m_LifetimeCurrent);
+    m_LifetimeMax     = std::move(other.m_LifetimeMax);
+    m_Active          = std::move(other.m_Active);
+}
+Decal& Decal::operator=(Decal&& other) noexcept {
+    Entity::operator=(std::move(other));
+    m_InitialRotation = std::move(other.m_InitialRotation);
+    m_InitialPosition = std::move(other.m_InitialPosition);
+    m_LifetimeCurrent = std::move(other.m_LifetimeCurrent);
+    m_LifetimeMax     = std::move(other.m_LifetimeMax);
+    m_Active          = std::move(other.m_Active);
+    return *this;
 }
 void Decal::update(const float dt) {
     if (m_Active) {
@@ -79,7 +80,6 @@ void Decal::update(const float dt) {
         }
         if (m_LifetimeCurrent >= m_LifetimeMax) {
             m_Active = false;
-            Entity::destroy();
         }
     }
 }

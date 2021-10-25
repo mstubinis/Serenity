@@ -92,7 +92,7 @@ namespace Engine::Networking {
             //per frame update methods
             SocketStatus::Status onUpdateReceiveUDPPackets();
             void onUpdateReceiveTCPPackets(const float dt);
-            void onUpdateProcessTCPListeners();
+            SocketStatus::Status onUpdateProcessTCPListeners();
     };
 };
 #endif

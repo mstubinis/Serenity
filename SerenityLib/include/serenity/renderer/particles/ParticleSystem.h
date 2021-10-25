@@ -85,8 +85,8 @@ namespace Engine::priv {
             std::vector<ParticleEmitter>    m_ParticleEmitters;
             std::vector<Particle>           m_Particles;
 
-            std::queue<size_t>              m_ParticleEmitterFreelist;
-            std::queue<size_t>              m_ParticleFreelist;
+            std::vector<size_t>             m_ParticleEmitterFreelist;
+            std::vector<size_t>             m_ParticleFreelist;
             mutable std::mutex              m_Mutex;
 
             void internal_update_emitters(const float dt);

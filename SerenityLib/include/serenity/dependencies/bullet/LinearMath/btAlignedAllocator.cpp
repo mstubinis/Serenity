@@ -160,7 +160,7 @@ void *btAlignedAllocInternal(size_t size, int alignment, int line, const char *f
 	//		printf("big alloc!%d\n", size);
 	//	}
 
-	gTotalBytesAlignedAllocs += size;
+	gTotalBytesAlignedAllocs += (int)size;
 	gNumAlignedAllocs++;
 
 	int sz4prt = 4 * sizeof(void *);
@@ -174,12 +174,12 @@ void *btAlignedAllocInternal(size_t size, int alignment, int line, const char *f
 		p.cptr -= sizeof(void *);
 		*p.vptrptr = (void *)real;
 		p.cptr -= sizeof(void *);
-		*p.iptr = size;
+		*p.iptr = (int)size;
 		p.cptr -= sizeof(void *);
 		*p.iptr = allocId;
 
 		allocations_id[mynumallocs] = allocId;
-		allocations_bytes[mynumallocs] = size;
+		allocations_bytes[mynumallocs] = (int)size;
 		mynumallocs++;
 	}
 	else
@@ -187,7 +187,7 @@ void *btAlignedAllocInternal(size_t size, int alignment, int line, const char *f
 		ret = (void *)(real);  //??
 	}
 
-	printf("allocation %d at address %x, from %s,line %d, size %d (total allocated = %d)\n", allocId, real, filename, line, size, gTotalBytesAlignedAllocs);
+	printf("allocation %d at address %x, from %s,line %d, size %d (total allocated = %d)\n", allocId, real, filename, line, (int)size, gTotalBytesAlignedAllocs);
 	allocId++;
 
 	int *ptr = (int *)ret;

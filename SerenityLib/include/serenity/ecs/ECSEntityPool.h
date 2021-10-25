@@ -10,13 +10,15 @@ namespace Engine::priv {
 
 #include <serenity/ecs/entity/Entity.h>
 #include <serenity/system/Macros.h>
+#include <mutex>
 
 namespace Engine::priv {
     class ECSEntityPool final{
         friend struct Engine::priv::PublicScene;
         private:
+            mutable std::mutex     m_Mutex;
             std::vector<Entity>    m_Pool;
-            std::vector<uint32_t>  m_Freelist;
+            std::vector<uint32_t>  m_FreelistEntityIDs;
         public:
             ECSEntityPool() = default;
             ECSEntityPool(const ECSEntityPool&)                = delete;
@@ -32,11 +34,13 @@ namespace Engine::priv {
             void destroyFlaggedEntity(uint32_t entityID);
 
             [[nodiscard]] Entity createEntity(const Scene&) noexcept;
+            [[nodiscard]] std::vector<Entity> createEntity(const Scene&, uint32_t amount) noexcept;
+            [[nodiscard]] std::vector<Entity> createEntities(const Scene&, uint32_t amount) noexcept;
             [[nodiscard]] Entity getEntityFromID(uint32_t entityID) const noexcept;
 
             void clear() noexcept {
                 m_Pool.clear(); 
-                m_Freelist.clear();
+                m_FreelistEntityIDs.clear();
             }
 
             BUILD_BEGIN_END_ITR_CLASS_MEMBERS(std::vector<Entity>, m_Pool)

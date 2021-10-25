@@ -99,7 +99,7 @@ bool btMiniSDF::load(const char* data, int size)
 	{
 		return m_isValid;
 	}
-	m_nodes.resize(n_nodes0);
+	m_nodes.resize((int)n_nodes0);
 	for (unsigned int i = 0; i < n_nodes0; i++)
 	{
 		unsigned long long int n_nodes1;
@@ -115,14 +115,14 @@ bool btMiniSDF::load(const char* data, int size)
 
 	unsigned long long int n_cells0;
 	ds.read(n_cells0);
-	m_cells.resize(n_cells0);
-	for (int i = 0; i < n_cells0; i++)
+	m_cells.resize((int)n_cells0);
+	for (int i = 0; i < (int)n_cells0; i++)
 	{
 		unsigned long long int n_cells1;
 		btAlignedObjectArray<btCell32>& cells = m_cells[i];
 		ds.read(n_cells1);
 		cells.resize(n_cells1);
-		for (int j = 0; j < n_cells1; j++)
+		for (int j = 0; j < (int)n_cells1; j++)
 		{
 			btCell32& cell = cells[j];
 			ds.read(cell);
@@ -133,14 +133,14 @@ bool btMiniSDF::load(const char* data, int size)
 		unsigned long long int n_cell_maps0;
 		ds.read(n_cell_maps0);
 
-		m_cell_map.resize(n_cell_maps0);
-		for (int i = 0; i < n_cell_maps0; i++)
+		m_cell_map.resize((int)n_cell_maps0);
+		for (int i = 0; i < (int)n_cell_maps0; i++)
 		{
 			unsigned long long int n_cell_maps1;
 			btAlignedObjectArray<unsigned int>& cell_maps = m_cell_map[i];
 			ds.read(n_cell_maps1);
-			cell_maps.resize(n_cell_maps1);
-			for (int j = 0; j < n_cell_maps1; j++)
+			cell_maps.resize((int)n_cell_maps1);
+			for (int j = 0; j < (int)n_cell_maps1; j++)
 			{
 				unsigned int& cell_map = cell_maps[j];
 				ds.read(cell_map);
