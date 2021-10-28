@@ -14,6 +14,6 @@ SystemSyncRigidToTransform::SystemSyncRigidToTransform(Engine::priv::ECS& ecs)
         system.forEach<SystemTransformParentChild*>([](SystemTransformParentChild* pcsArg, Entity entity, ComponentTransform* transform, ComponentRigidBody* rigidBody) {
             auto collisionShape = entity.getComponent<ComponentCollisionShape>();
             pcsArg->syncRigidToTransform(rigidBody, collisionShape, entity);
-        }, & systemPC, SystemExecutionPolicy::ParallelWait);
+        }, &systemPC, SystemExecutionPolicy::ParallelWait);
     });
 }

@@ -11,6 +11,7 @@ namespace Engine::priv {
 #include <cstdint>
 #include <vector>
 #include <tuple>
+#include <stop_token>
 #include <serenity/ecs/entity/Entity.h>
 #include <serenity/ecs/ECSComponentPool.h>
 #include <serenity/threading/ThreadingModule.h>
@@ -99,18 +100,18 @@ class SystemCRTP : public SystemBaseClass {
             return std::tuple<Entity, COMPONENTS*...>{ entity, buildTupleImpl<COMPONENTS>(entity, idx)... }; //this MUST use brace-initialization as it forces left to right parameter pack processing
         }
 
-        template<class TArgStruct, class F1, class F2>
-        void forEachImpl(TArgStruct argStruct, F1 f1, F2 f2, SystemExecutionPolicy execPolicy) {
+        template<class TArgStruct, class F1, class FUNC_TUPLE_BUILDER>
+        void forEachImpl(TArgStruct argStruct, F1 f1, FUNC_TUPLE_BUILDER funcTupleBuilder, SystemExecutionPolicy execPolicy) {
             if (m_Entities.size() < 100 || execPolicy == SystemExecutionPolicy::Normal) {
                 for (const auto entity : m_Entities) {
-                    std::apply(  f1, (this->*f2)(argStruct, entity) );
+                    std::apply(  f1, (this->*funcTupleBuilder)(argStruct, entity) );
                 }
-            }else{
+            } else {
                 auto pairs = Engine::splitVectorPairs(m_Entities);
                 for (size_t k = 0U; k < pairs.size(); ++k) {
-                    Engine::priv::threading::addJob([&pairs, k, &f2, &f1, &argStruct, this]() {
+                    Engine::priv::threading::addJob([&pairs, k, &funcTupleBuilder, &f1, &argStruct, this]() {
                         for (size_t j = pairs[k].first; j <= pairs[k].second; ++j) {
-                            std::apply(  f1, (this->*f2)(argStruct, m_Entities[j]) );
+                            std::apply(  f1, (this->*funcTupleBuilder)(argStruct, m_Entities[j]) );
                         }
                     });
                 }
@@ -119,18 +120,18 @@ class SystemCRTP : public SystemBaseClass {
                 }
             }
         }
-        template<class F1, class F2>
-        void forEachImpl(F1 f1, F2 f2, SystemExecutionPolicy execPolicy) {
+        template<class F1, class FUNC_TUPLE_BUILDER>
+        void forEachImpl(F1 f1, FUNC_TUPLE_BUILDER funcTupleBuilder, SystemExecutionPolicy execPolicy) {
             if (m_Entities.size() < 100 || execPolicy == SystemExecutionPolicy::Normal) {
                 for (const auto entity : m_Entities) {
-                    std::apply( f1, (this->*f2)(entity) );
+                    std::apply( f1, (this->*funcTupleBuilder)(entity) );
                 }
-            }else{
+            } else {
                 auto pairs = Engine::splitVectorPairs(m_Entities);
                 for (size_t k = 0U; k < pairs.size(); ++k) {
-                    Engine::priv::threading::addJob([&pairs, k, &f2, &f1, this]() {
+                    Engine::priv::threading::addJob([&pairs, k, &funcTupleBuilder, &f1, this]() {
                         for (size_t j = pairs[k].first; j <= pairs[k].second; ++j) {
-                            std::apply( f1, (this->*f2)(m_Entities[j]) );
+                            std::apply(f1, (this->*funcTupleBuilder)(m_Entities[j]) );
                         }
                     });
                 }
@@ -144,14 +145,15 @@ class SystemCRTP : public SystemBaseClass {
             : SystemBaseClass{ ecs }
         {}
 
+
         template<class TArgStruct>
-        inline void forEach(void(*func)(TArgStruct, Entity, COMPONENTS*...), TArgStruct argStruct, SystemExecutionPolicy execPolicy = SystemExecutionPolicy::Normal) noexcept {
-            using F = std::tuple<TArgStruct, Entity, COMPONENTS*...>(SystemCRTP::*)(TArgStruct, Entity);
-            forEachImpl<TArgStruct, decltype(func), F>(argStruct, func, &SystemCRTP::buildTuple, execPolicy);
+        inline void forEach(void(*func)(TArgStruct, Entity, COMPONENTS*...), TArgStruct arg, SystemExecutionPolicy policy = SystemExecutionPolicy::Normal) noexcept {
+            using FUNC_TUPLE_BUILDER = std::tuple<TArgStruct, Entity, COMPONENTS*...>(SystemCRTP::*)(TArgStruct, Entity);
+            forEachImpl<TArgStruct, decltype(func), FUNC_TUPLE_BUILDER>(arg, func, &SystemCRTP::buildTuple, policy);
         }
-        inline void forEach(void(*func)(Entity, COMPONENTS*...), SystemExecutionPolicy execPolicy = SystemExecutionPolicy::Normal) noexcept {
-            using F = std::tuple<Entity, COMPONENTS*...>(SystemCRTP::*)(Entity);
-            forEachImpl<decltype(func), F>(func, &SystemCRTP::buildTuple, execPolicy);
+        inline void forEach(void(*func)(Entity, COMPONENTS*...), SystemExecutionPolicy policy = SystemExecutionPolicy::Normal) noexcept {
+            using FUNC_TUPLE_BUILDER = std::tuple<Entity, COMPONENTS*...>(SystemCRTP::*)(Entity);
+            forEachImpl<decltype(func), FUNC_TUPLE_BUILDER>(func, &SystemCRTP::buildTuple, policy);
         }
 };
 

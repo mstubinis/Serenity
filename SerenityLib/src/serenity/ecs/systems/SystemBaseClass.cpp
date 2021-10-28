@@ -33,12 +33,7 @@ size_t SystemBaseClass::getEntityIdxInContainer(Entity entity) const noexcept {
 bool SystemBaseClass::eraseEntity(Entity entity) {
     size_t entityIndexInContainer = Engine::binary_search(m_Entities, entity.id());
     if (entityIndexInContainer != std::numeric_limits<size_t>().max()) {
-        auto backIdx = m_Entities.size() - 1;
-        if (entityIndexInContainer != backIdx) {
-            std::swap(m_Entities[entityIndexInContainer], m_Entities[backIdx]);
-        }
-        m_Entities.pop_back();
-        return true;
+        return Engine::swap_and_pop(m_Entities, entityIndexInContainer);
     }
     return false;
 }

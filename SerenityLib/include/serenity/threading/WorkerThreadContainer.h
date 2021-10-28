@@ -10,8 +10,9 @@
 
 namespace Engine::priv {
     class WorkerThreadContainer final {
-        using ThreadID      = std::jthread::id;
-        using ThreadVector  = std::vector<std::jthread>;
+        using ThreadType    = std::jthread;
+        using ThreadID      = ThreadType::id;
+        using ThreadVector  = std::vector<ThreadType>;
         using ThreadHashMap = std::unordered_map<ThreadID, std::jthread*>;
         private:
             ThreadVector           m_WorkerThreads;
@@ -21,10 +22,10 @@ namespace Engine::priv {
 
             void clear() noexcept;
             void reserve(size_t newReserveSize) noexcept;
-
+            [[nodiscard]] inline bool contains(ThreadID id) const noexcept { return m_WorkerThreadsHashed.contains(id); }
             [[nodiscard]] inline size_t size() const noexcept { return m_WorkerThreads.size(); }
 
-            template<class FUNC> Engine::view_ptr<std::jthread> add_thread(FUNC&& func) noexcept {
+            template<class FUNC> Engine::view_ptr<ThreadType> add_thread(FUNC&& func) noexcept {
                 if (m_WorkerThreads.size() >= m_WorkerThreads.capacity()) {
                     ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_WorkerThreads reached its capacity!")
                     return nullptr;
@@ -34,7 +35,8 @@ namespace Engine::priv {
                 return &worker;
             }
 
-            [[nodiscard]] inline std::jthread* operator[](std::thread::id threadID) noexcept { return m_WorkerThreadsHashed.at(threadID); }
+            [[nodiscard]] inline ThreadType* operator[](ThreadType::id threadID) noexcept { return m_WorkerThreadsHashed.at(threadID); }
+            [[nodiscard]] inline const ThreadType* const operator[](ThreadType::id threadID) const noexcept { return m_WorkerThreadsHashed.at(threadID); }
 
             BUILD_BEGIN_END_ITR_CLASS_MEMBERS(ThreadVector, m_WorkerThreads)
     };

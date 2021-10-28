@@ -18,6 +18,9 @@ Engine::priv::ThreadPool::~ThreadPool() {
 }
 void Engine::priv::ThreadPool::shutdown() noexcept {
     if (!m_Stopped) {
+        for (auto& workerThread : m_WorkerThreads) {
+            workerThread.get_stop_source().request_stop();
+        }
         m_WaitCounter = 0;
         m_Stopped = true;
         m_ConditionVariableAny.notify_all();// wake up all threads.
@@ -36,7 +39,7 @@ bool Engine::priv::ThreadPool::startup(int numThreads) {
 #if !defined(ENGINE_FORCE_NO_THEAD_POOL)
         m_WorkerThreads.reserve(numThreads);
         for (int i = 0; i < numThreads; ++i) {
-            m_WorkerThreads.add_thread([this]() {
+            m_WorkerThreads.add_thread([this](std::stop_token stopToken) {
                 while (!m_Stopped) {
                     PoolTaskPtr job;
                     {
@@ -45,6 +48,7 @@ bool Engine::priv::ThreadPool::startup(int numThreads) {
                         if (m_Stopped) {
                             return;
                         }
+                        ASSERT(!m_TaskQueue.empty(), __FUNCTION__ << "(): task queue was empty!");
                         job = m_TaskQueue.front();
                         m_TaskQueue.pop();
                     }
@@ -58,6 +62,12 @@ bool Engine::priv::ThreadPool::startup(int numThreads) {
         return true;
     }
     return false;
+}
+std::optional<std::stop_token> Engine::priv::ThreadPool::getThreadStopToken() noexcept {
+    return m_WorkerThreads.contains(std::this_thread::get_id()) ? m_WorkerThreads[std::this_thread::get_id()]->get_stop_token() : std::optional<std::stop_token>{};
+}
+bool Engine::priv::ThreadPool::isWorkerThreadStopped() const noexcept {
+    return m_WorkerThreads.contains(std::this_thread::get_id()) ? m_WorkerThreads[std::this_thread::get_id()]->get_stop_token().stop_requested() : false;
 }
 void Engine::priv::ThreadPool::internal_execute_callbacks() {
     m_FuturesCallback.erase(std::remove_if(std::begin(m_FuturesCallback), std::end(m_FuturesCallback), [](const auto& future) {

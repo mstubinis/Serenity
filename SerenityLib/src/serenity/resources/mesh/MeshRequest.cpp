@@ -123,7 +123,13 @@ void PublicMeshRequest::LoadCPU(MeshRequest& meshRequest) {
     if (meshRequest.m_FileExtension != ".smsh") {
         auto& aiscene     = *meshRequest.m_Importer.m_AIScene;
         auto& aiRootNode  = *meshRequest.m_Importer.m_AIRoot;
+        if (Engine::priv::threading::isWorkerThreadStopped()) {
+            return;
+        }
         MeshLoader::LoadProcessNodeData(meshRequest, aiscene, aiRootNode);
+        if (Engine::priv::threading::isWorkerThreadStopped()) {
+            return;
+        }
         auto& part        = meshRequest.m_Parts[0];
         auto mutex        = part.handle.getMutex();
 
@@ -136,10 +142,16 @@ void PublicMeshRequest::LoadCPU(MeshRequest& meshRequest) {
         //TODO: this just saves any imported model as the engine's optimized format. Remove this upon release.
         std::string saveFileName = (meshRequest.m_FileOrData.substr(0, meshRequest.m_FileOrData.find_last_of(".")) + ".smsh").c_str();
         SMSH_File::SaveFile(saveFileName.c_str(), mesh.m_CPUData);
-    }else if (meshRequest.m_FileExtension == ".smsh") {
+    } else if (meshRequest.m_FileExtension == ".smsh") {
         for (auto& part : meshRequest.m_Parts) {
+            if (Engine::priv::threading::isWorkerThreadStopped()) {
+                return;
+            }
             part.cpuData.m_Threshold = meshRequest.m_Threshold;
             SMSH_File::LoadFile(meshRequest.m_FileOrData.c_str(), part.cpuData);
+            if (Engine::priv::threading::isWorkerThreadStopped()) {
+                return;
+            }
             part.cpuData.internal_calculate_radius();
             part.cpuData.m_CollisionFactory = NEW MeshCollisionFactory{ part.cpuData, meshRequest.m_CollisionLoadingFlags };
             auto mutex                      = part.handle.getMutex();

@@ -26,21 +26,30 @@ namespace Engine::priv {
         bool isOpenGLThread() noexcept;
         bool isMainThread() noexcept;
 
+        [[nodiscard]] inline std::optional<std::stop_token> getThreadStopToken() noexcept { return ThreadingModule::THREADING_MODULE->m_ThreadPool.getThreadStopToken(); }
+        [[nodiscard]] inline bool isWorkerThreadStopped() noexcept { return ThreadingModule::THREADING_MODULE->m_ThreadPool.isWorkerThreadStopped(); }
+
         void submitTaskForMainThread(std::function<void()>&& task) noexcept;
 
         void waitForAll() noexcept;
 
         template<class JOB> inline void finalizeJob(JOB&& task) {
-            ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task));
+            ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job( std::forward<JOB>(task) );
         }
         template<class JOB, class THEN> inline Engine::view_ptr<FutureType> finalizeJob(JOB&& task, THEN&& then) {
-            return ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(task), std::forward<THEN>(then));
+            return ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(
+                std::forward<JOB>(task), 
+                std::forward<THEN>(then)
+            );
         }
         template<class JOB> inline void addJob(JOB&& job) {
-            finalizeJob(std::forward<JOB>(job));
+            finalizeJob( std::forward<JOB>(job) );
         }
         template<class JOB, class THEN> inline Engine::view_ptr<FutureType> addJobWithPostCallback(JOB&& job, THEN&& then){
-            return finalizeJob(std::forward<JOB>(job), std::forward<THEN>(then));
+            return finalizeJob(
+                std::forward<JOB>(job), 
+                std::forward<THEN>(then)
+            );
         }
         template<class JOB, class T> void addJobSplitVectored(JOB&& job, std::vector<T>& collection, bool waitForAll) {
             if (Engine::hardware_concurrency() > 1) {
@@ -49,13 +58,13 @@ namespace Engine::priv {
                     Engine::priv::threading::addJob([&pairs, k, &job, &collection]() {
                         for (size_t j = pairs[k].first; j <= pairs[k].second; ++j) {
                             job(collection[j], j, k);
-                        }  
+                        }
                     });
                 }
                 if (waitForAll) {
                     Engine::priv::threading::waitForAll();
                 }
-            }else{
+            } else {
                 for (size_t j = 0; j < collection.size(); ++j) {
                     job(collection[j], j, 0U);
                 }

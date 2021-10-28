@@ -17,12 +17,25 @@ void Engine::priv::ECS::init(const SceneOptions& options) {
     m_EntityPool.init(m_SceneOptions);
 }
 void Engine::priv::ECS::removeEntity(Entity removedEntity) {
+    const auto id = removedEntity.id();
+    {
+        m_SystemPool.onComponentRemovedFromEntity(removedEntity);
+        for (auto& componentPool : m_ComponentPools) {
+            componentPool->remove(id);
+        }
+        m_EntityPool.destroyFlaggedEntity(id);
+        //for (auto& componentPool : m_ComponentPools) {
+        //    componentPool->reserve(150);
+        //}
+    }
+    /*
     #ifndef ENGINE_PRODUCTION
         for (const auto entity : m_DestroyedEntities) {
             ASSERT(entity != removedEntity, __FUNCTION__ << "(): " << removedEntity.toString() << " already in m_DestroyedEntities!");
         }
     #endif
     m_DestroyedEntities.emplace_back(removedEntity);
+    */
 }
 void Engine::priv::ECS::update(const float dt, Scene& scene) noexcept {
     m_SystemPool.update(dt, scene);
@@ -37,6 +50,7 @@ void Engine::priv::ECS::preUpdate(Scene& scene, const float dt) {
 
 }
 void Engine::priv::ECS::postUpdate(Scene& scene, const float dt) {
+    /*
     if (m_DestroyedEntities.size() > 0) {
         for (const auto destroyedEntity : m_DestroyedEntities) {
             const auto id = destroyedEntity.id();
@@ -51,4 +65,5 @@ void Engine::priv::ECS::postUpdate(Scene& scene, const float dt) {
             componentPool->reserve(150);
         }
     }
+    */
 }

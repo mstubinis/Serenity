@@ -26,8 +26,7 @@ ComponentRigidBody::~ComponentRigidBody() {
 }
 void ComponentRigidBody::cleanup() {
     if (m_Owner) { //do not call from moved from destructors
-        auto BTRigidBody   = getBtBody();
-        if (BTRigidBody) {
+        if (getBtBody()) {
             bool result = removePhysicsFromWorld(); // remove it immediately 
         }
     }

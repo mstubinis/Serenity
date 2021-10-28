@@ -14,13 +14,13 @@ namespace Engine::priv {
 #include <queue>
 #include <mutex>
 
-using ThreadJob = std::function<void()>;
+using ThreadCallback = std::function<void()>;
 
 namespace Engine::priv {
     using PoolTask           = std::packaged_task<void()>;
     using PoolTaskPtr        = std::shared_ptr<PoolTask>;
     using FutureType         = std::future<void>;
-    using FutureCallbackType = std::pair<FutureType, ThreadJob>;
+    using FutureCallbackType = std::pair<FutureType, ThreadCallback>;
     using TaskQueueType      = std::queue<PoolTaskPtr>;
 
     class ThreadPool final{
@@ -50,7 +50,11 @@ namespace Engine::priv {
             bool startup(int num_threads);
 
             void shutdown() noexcept;
+            void update();
+            void wait_for_all() noexcept;
 
+            [[nodiscard]] std::optional<std::stop_token> getThreadStopToken() noexcept;
+            [[nodiscard]] bool isWorkerThreadStopped() const noexcept;
             [[nodiscard]] inline int size() const noexcept { return static_cast<int>(m_WorkerThreads.size()); }
 
             template<class JOB> [[nodiscard]] void add_job(JOB&& job) {
@@ -58,7 +62,7 @@ namespace Engine::priv {
                     if (size() > 0) {
                         {
                             std::lock_guard lock{ m_Mutex };
-                            m_TaskQueue.emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
+                            m_TaskQueue.emplace(std::make_shared<PoolTask>( std::forward<JOB>(job) ));
                         }
                         m_ConditionVariableAny.notify_one();
                         m_WaitCounter += 1;
@@ -75,7 +79,7 @@ namespace Engine::priv {
                         FutureType* ret = nullptr;
                         {
                             std::lock_guard lock{ m_Mutex };
-                            auto& task = m_TaskQueue.emplace(std::make_shared<PoolTask>(std::forward<JOB>(job)));
+                            auto& task = m_TaskQueue.emplace(std::make_shared<PoolTask>( std::forward<JOB>(job) ));
                             ret = &m_FuturesCallback.emplace_back(task->get_future(), std::forward<THEN>(callback)).first;
                         }
                         m_ConditionVariableAny.notify_one();
@@ -91,9 +95,6 @@ namespace Engine::priv {
                 #endif
                     return nullptr;
             }
-
-            void update();
-            void wait_for_all() noexcept;
     };
 };
 #endif

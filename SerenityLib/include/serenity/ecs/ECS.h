@@ -26,7 +26,7 @@ namespace Engine::priv {
             static inline uint32_t                m_RegisteredComponents = 0;
             ECSEntityPool                         m_EntityPool;
             ECSSystemPool                         m_SystemPool;
-            std::vector<Entity>                   m_DestroyedEntities;
+            //std::vector<Entity>                   m_DestroyedEntities;
             std::vector<sparse_set_base*>         m_ComponentPools;
             std::recursive_mutex                  m_MutexRecursive; //recursive as addComponent() can often be nested
             SceneOptions                          m_SceneOptions;

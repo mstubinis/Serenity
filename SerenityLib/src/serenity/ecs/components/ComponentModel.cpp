@@ -17,12 +17,12 @@ std::pair<glm::vec3, float> ComponentModel_Functions::CalculateBoundingBoxAndRad
     float     maxRadius = 0.0f;
     glm::vec3 maxBoundingBox{ 0.0f };
     for (const auto& point : points) {
-        auto abs_point   = glm::abs(point);
-        float radius     = glm::length(abs_point);
-        maxRadius        = std::max(maxRadius, radius);
-        maxBoundingBox.x = std::max(maxBoundingBox.x, abs_point.x);
-        maxBoundingBox.y = std::max(maxBoundingBox.y, abs_point.y);
-        maxBoundingBox.z = std::max(maxBoundingBox.z, abs_point.z);
+        const auto abs_point = glm::abs(point);
+        const float radius   = glm::length(abs_point);
+        maxRadius            = std::max(maxRadius, radius);
+        maxBoundingBox.x     = std::max(maxBoundingBox.x, abs_point.x);
+        maxBoundingBox.y     = std::max(maxBoundingBox.y, abs_point.y);
+        maxBoundingBox.z     = std::max(maxBoundingBox.z, abs_point.z);
     }
     return {maxBoundingBox, maxRadius};
 }
@@ -145,8 +145,8 @@ ComponentModel::~ComponentModel() {
 void ComponentModel::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
         auto unfinishedMeshes = Engine::create_and_reserve<std::vector<Handle>>(m_ModelInstances.size());
-        for (auto& instance : m_ModelInstances) {
-            auto& mesh = *instance->m_MeshHandle.get<Mesh>();
+        for (const auto& instance : m_ModelInstances) {
+            const auto& mesh = *instance->m_MeshHandle.get<Mesh>();
             if (!mesh.isLoaded()) {
                 unfinishedMeshes.emplace_back(instance->m_MeshHandle);
             }

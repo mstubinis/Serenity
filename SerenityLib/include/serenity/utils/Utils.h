@@ -2,6 +2,7 @@
 #ifndef ENGINE_UTILS_H
 #define ENGINE_UTILS_H
 
+#include <cassert>
 #include <vector>
 #include <string>
 #include <unordered_map>
@@ -57,66 +58,45 @@ namespace Engine {
     }
     template<class CONTAINER, class VALUE>
     [[nodiscard]] size_t binary_search(const CONTAINER& container, const VALUE& entityID) noexcept {
-        //binary search
-        using signed_size_t = std::make_signed_t<std::size_t>;
-        signed_size_t left  = 0;
-        signed_size_t right = static_cast<signed_size_t>(container.size()) - 1;
-        while (left <= right) {
-            const signed_size_t mid = left + (right - left) / 2;
-            const auto itrID = container[mid];
-            if (itrID == entityID) {
-                return mid;
-            } else if (itrID > entityID) {
-                right = mid - 1;
-            } else {
-                left = mid + 1;
+        if (container.size() > 0) {
+            if (container.size() == 1) {
+                return container[0] == entityID ? 0 : std::numeric_limits<size_t>().max();
+            }
+            //binary search
+            using signed_size_t = std::make_signed_t<size_t>;
+            signed_size_t left  = 0;
+            signed_size_t right = signed_size_t(container.size()) - signed_size_t(1);
+            assert(right >= 0 && right < container.size());
+            while (left <= right) {
+                const signed_size_t mid = left + (right - left) / 2;
+                assert(left >= 0 && left < container.size());
+                assert(right >= 0 && right < container.size());
+                assert(mid >= 0 && mid < container.size());
+                const auto itrID = container[mid];
+                if (itrID == entityID) {
+                    return mid;
+                } else if (itrID > entityID) {
+                    right = mid - 1; //this is why we need signed integers
+                } else {
+                    left  = mid + 1;
+                }
             }
         }
         return std::numeric_limits<size_t>().max();
     }
-    template<class CONTAINER, class FUNC, class ... ARGS>
-    bool swap_and_pop_single(CONTAINER& container, FUNC&& func, ARGS&&... args) {
-        size_t i = 0;
-        while (i < container.size()) {
-            if (func(container[i], std::forward<ARGS>(args)...)) {
-                size_t last = container.size() - 1;
-                if (i != last) {
-                    std::swap(container[i], container[last]);
-                }
-                container.pop_back();
-                return true;
-            }
-            ++i;
-        }
-        return false;
-    }
-    template<class CONTAINER, class FUNC, class ... ARGS>
-    size_t swap_and_pop(CONTAINER& container, FUNC&& func, ARGS&&... args) {
-        size_t i = 0;
-        size_t totalRemoved = 0;
-        while (i < container.size()) {
-            if (func(container[i], std::forward<ARGS>(args)...)) {
-                size_t last = container.size() - 1;
-                if (i != last) {
-                    std::swap(container[i], container[last]);
-                    --i;
-                }
-                container.pop_back();
-                ++totalRemoved;
-            }
-            ++i;
-        }
-        return totalRemoved;
-    }
+
     template<class CONTAINER, class FUNC, class THEN, class ... ARGS>
     bool swap_and_pop_single_then(CONTAINER& container, FUNC&& func, THEN&& then, ARGS&&... args) {
         size_t i = 0;
         while (i < container.size()) {
             if (func(container[i], std::forward<ARGS>(args)...)) {
                 then(container[i], std::forward<ARGS>(args)...);
-                size_t last = container.size() - 1;
-                if (i != last) {
-                    std::swap(container[i], container[last]);
+                if (container.size() >= 2) {
+                    size_t last = container.size() - 1;
+                    assert(last >= 0 && last < container.size());
+                    if (i != last) {
+                        std::swap(container[i], container[last]);
+                    }
                 }
                 container.pop_back();
                 return true;
@@ -124,6 +104,10 @@ namespace Engine {
             ++i;
         }
         return false;
+    }
+    template<class CONTAINER, class FUNC, class ... ARGS>
+    bool swap_and_pop_single(CONTAINER& container, FUNC&& func, ARGS&&... args) {
+        return swap_and_pop_single_then(container, func, FUNC{}, std::forward<ARGS>(args)...); //blank then function. FUNC uses same signature as THEN
     }
     template<class CONTAINER, class FUNC, class THEN, class ... ARGS>
     size_t swap_and_pop_then(CONTAINER& container, FUNC&& func, THEN&& then, ARGS&&... args) {
@@ -132,10 +116,12 @@ namespace Engine {
         while (i < container.size()) {
             if (func(container[i], std::forward<ARGS>(args)...)) {
                 then(container[i], std::forward<ARGS>(args)...);
-                size_t last = container.size() - 1;
-                if (i != last) {
-                    std::swap(container[i], container[last]);
-                    --i;
+                if (container.size() >= 2) {
+                    size_t last = container.size() - 1;
+                    if (i != last) {
+                        std::swap(container[i], container[last]);
+                        --i;
+                    }
                 }
                 container.pop_back();
                 ++totalRemoved;
@@ -143,6 +129,25 @@ namespace Engine {
             ++i;
         }
         return totalRemoved;
+    }
+    template<class CONTAINER, class FUNC, class ... ARGS>
+    size_t swap_and_pop(CONTAINER& container, FUNC&& func, ARGS&&... args) {
+        return swap_and_pop_then(container, func, FUNC{}, std::forward<ARGS>(args)...);  //blank then function. FUNC uses same signature as THEN
+    }
+    template<class CONTAINER>
+    bool swap_and_pop(CONTAINER& container, size_t index) {
+        if (index < container.size()) {
+            if (container.size() >= 2) {
+                size_t last = container.size() - 1;
+                assert(last >= 0 && last < container.size());
+                if (index != last) {
+                    std::swap(container[index], container[last]);
+                }
+            }
+            container.pop_back();
+            return true;
+        }
+        return false;
     }
 
     template<class KEY, class VALUE> using unordered_string_map = std::unordered_map<KEY, VALUE, Engine::string_hash, Engine::string_hash::equals>;
@@ -178,6 +183,7 @@ namespace Engine {
 }
 
 template <class OutType, class Data> void readBigEndian(OutType& out, const Data& dataBuffer, const uint32_t inBufferSizeInBytes, uint32_t& offset) noexcept {
+    assert(inBufferSizeInBytes > 0);
     out = (OutType)dataBuffer[offset] << 8 * (inBufferSizeInBytes - 1);
     for (uint32_t i = 1; i < inBufferSizeInBytes; ++i) {
         out |= (OutType)dataBuffer[offset + i] << 8 * ((inBufferSizeInBytes - i) - 1);
@@ -185,6 +191,7 @@ template <class OutType, class Data> void readBigEndian(OutType& out, const Data
     offset += inBufferSizeInBytes;
 }
 template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out, const uint32_t inBufferSizeInBytes) noexcept {
+    assert(inBufferSizeInBytes > 0);
     std::vector<uint8_t> buffer( inBufferSizeInBytes, 0 );
     inStream.read((char*)buffer.data(), inBufferSizeInBytes);
     out = (OutType)buffer[0] << 8 * (inBufferSizeInBytes - 1);
@@ -196,9 +203,10 @@ template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutT
     readBigEndian(inStream, out, sizeof(out));
 }
 template <class InType, class Stream> void writeBigEndian(Stream& inStream, const InType& in, const uint32_t inBufferSizeInBytes) noexcept {
+    assert(inBufferSizeInBytes > 0);
     std::vector<uint8_t> buffer( inBufferSizeInBytes, 0 );
     uint64_t offset    = 255;
-    for (int i = int(inBufferSizeInBytes) - 1; i >= 0; --i) {
+    for (int64_t i = int64_t(inBufferSizeInBytes) - 1; i >= 0; --i) {
         uint32_t shift = (8 * ((inBufferSizeInBytes - 1) - i));
         buffer[i]      = (in & (InType)offset) >> shift;
         offset       <<= 8;
@@ -207,15 +215,6 @@ template <class InType, class Stream> void writeBigEndian(Stream& inStream, cons
 }
 template <class InType, class Stream> void writeBigEndian(Stream& inStream, const InType& in) noexcept {
     writeBigEndian(inStream, in, sizeof(in));
-}
-//specifies if a specific pointer element is in a vector
-template<class E, class B> bool isInVector(const std::vector<B*>& inVector, const E* element) noexcept {
-    for (auto& item : inVector) {
-        if (item == element) {
-            return true;
-        }
-    }
-    return false;
 }
 
 //formats a number to have commas to represent thousandth places
