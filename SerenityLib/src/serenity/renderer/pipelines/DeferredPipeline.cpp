@@ -1108,7 +1108,7 @@ void DeferredPipeline::renderProjectionLight(Camera& camera, ProjectionLight& pr
     cullFace(GL_BACK);
 }
 void DeferredPipeline::renderDecal(ModelInstance& decalModelInstance) {
-    Entity parent          = decalModelInstance.getParent();
+    Entity parent          = decalModelInstance.getOwner();
     auto transform         = parent.getComponent<ComponentTransform>();
     glm::mat4 parentModel  = transform->getWorldMatrixRendering();
     auto maxTextures       = getMaxNumTextureUnits() - 1U;

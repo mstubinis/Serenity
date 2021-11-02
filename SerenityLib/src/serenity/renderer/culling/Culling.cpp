@@ -16,7 +16,7 @@ namespace {
     template<class FUNC>
     void cull_impl(const std::vector<ModelInstance*>& inModelInstances, const Viewport* const viewport, const auto& cameraOrMatrixOrPlanes, const Camera* const camera, FUNC&& resultFunc) {
         for (const auto& modelInstancePtr : inModelInstances) {
-            const auto parent            = modelInstancePtr->getParent();
+            const auto parent            = modelInstancePtr->getOwner();
             const auto transform         = parent.getComponent<ComponentTransform>();
             const auto model             = parent.getComponent<ComponentModel>();
             const bool is_valid_viewport = viewport ? Engine::priv::PublicModelInstance::IsViewportValid(*modelInstancePtr, *viewport) : true;

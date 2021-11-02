@@ -138,12 +138,14 @@ ComponentCollisionShape::ComponentCollisionShape(ComponentCollisionShape&& other
     internal_update_ptrs();
 }
 ComponentCollisionShape& ComponentCollisionShape::operator=(ComponentCollisionShape&& other) noexcept {
-    m_BtInertia        = std::move(other.m_BtInertia);
-    m_ParentCompound   = std::move(other.m_ParentCompound);
-    m_BtCollisionShape = std::exchange(other.m_BtCollisionShape, nullptr);
-    m_Owner            = std::exchange(other.m_Owner, Entity{});
-
-    internal_update_ptrs();
+    if (this != &other) {
+        internal_free_memory();
+        m_BtInertia        = std::move(other.m_BtInertia);
+        m_ParentCompound   = std::move(other.m_ParentCompound);
+        m_BtCollisionShape = std::exchange(other.m_BtCollisionShape, nullptr);
+        m_Owner            = std::exchange(other.m_Owner, Entity{});
+        internal_update_ptrs();
+    }
     return *this;
 }
 void ComponentCollisionShape::internal_free_memory() {
@@ -426,7 +428,7 @@ void Engine::priv::ComponentCollisionShapeDeferredLoading::internal_load_multipl
     auto btCompound = (btCompoundShape*)collisionShape.getBtShape();
     for (auto& instance : instances) {
         ASSERT(instance, __FUNCTION__ << "(): instance in instances was null!");
-        auto transformChild = instance->getParent().getComponent<ComponentTransform>();
+        auto transformChild = instance->getOwner().getComponent<ComponentTransform>();
         btCollisionShape* newBtShape = Engine::priv::PublicMesh::BuildCollision(instance, collisionType, true);
         btTransform localTransform;
         if (transformChild && &(*transformChild) != &(*transform)) {

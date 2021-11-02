@@ -101,6 +101,7 @@ class RenderStage {
 
             _TOTAL,
         };
+        [[nodiscard]] const char* toString() const noexcept;
         BUILD_ENUM_CLASS_MEMBERS(RenderStage, Type)
 };
 

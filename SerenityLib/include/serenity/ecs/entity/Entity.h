@@ -59,7 +59,7 @@ class Entity {
         inline constexpr bool operator==(Entity other) const noexcept { return (m_ID == other.m_ID && m_SceneID == other.m_SceneID && m_VersionID == other.m_VersionID); }
         inline constexpr bool operator!=(Entity other) const noexcept { return !Entity::operator==(other); }
 
-        inline std::string toString() const { return std::to_string(m_ID) + "," + std::to_string(m_SceneID) + "," + std::to_string(m_VersionID); }
+        inline std::string toString() const { return std::to_string(m_ID) + ", " + std::to_string(m_SceneID) + ", " + std::to_string(m_VersionID); }
         void fill(uint32_t entityID, uint32_t sceneID, uint32_t versionID) noexcept {
             m_ID        = entityID;
             m_SceneID   = sceneID;

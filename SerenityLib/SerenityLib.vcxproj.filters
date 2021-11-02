@@ -1565,6 +1565,9 @@
     <ClCompile Include="src\serenity\threading\SpinLockGuard.cpp">
       <Filter>Source Files\Engine\Core\Threading</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\renderer\RendererIncludes.cpp">
+      <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">

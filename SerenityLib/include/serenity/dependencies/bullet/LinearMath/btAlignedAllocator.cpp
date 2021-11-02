@@ -187,7 +187,7 @@ void *btAlignedAllocInternal(size_t size, int alignment, int line, const char *f
 		ret = (void *)(real);  //??
 	}
 
-	printf("allocation %d at address %x, from %s,line %d, size %d (total allocated = %d)\n", allocId, real, filename, line, (int)size, gTotalBytesAlignedAllocs);
+	//printf("allocation %d at address %x, from %s,line %d, size %d (total allocated = %d)\n", allocId, real, filename, line, (int)size, gTotalBytesAlignedAllocs);
 	allocId++;
 
 	int *ptr = (int *)ret;
@@ -229,7 +229,7 @@ void btAlignedFreeInternal(void *ptr, int line, const char *filename)
 		gTotalBytesAlignedAllocs -= size;
 
 		int diff = gNumAlignedAllocs - gNumAlignedFree;
-		printf("free %d at address %x, from %s,line %d, size %d (total remain = %d in %d non-freed allocations)\n", allocId, real, filename, line, size, gTotalBytesAlignedAllocs, diff);
+		//printf("free %d at address %x, from %s,line %d, size %d (total remain = %d in %d non-freed allocations)\n", allocId, real, filename, line, size, gTotalBytesAlignedAllocs, diff);
 
 		sFreeFunc(real);
 	}

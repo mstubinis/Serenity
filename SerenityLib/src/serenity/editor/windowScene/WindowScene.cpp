@@ -14,6 +14,7 @@
 #include <serenity/renderer/postprocess/Bloom.h>
 
 #include <serenity/resources/material/Material.h>
+#include <serenity/resources/shader/ShaderProgram.h>
 
 #include <serenity/networking/Networking.h>
 
@@ -38,6 +39,7 @@ namespace Engine::priv {
             } };
     };
 }
+
 
 void Engine::priv::EditorWindowScene::internal_render_network(Scene& currentScene) {
     const ImVec4 yellow      = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
@@ -122,6 +124,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                 auto model     = e.getComponent<ComponentModel>();
                 auto cam       = e.getComponent<ComponentCamera>();
                 if (name && ImGui::TreeNode("ComponentName")) {
+                    ImGui::Text(("Name: " + name->name()).c_str());
                     ImGui::TreePop();
                 }
                 if (transform && ImGui::TreeNode("ComponentTransform")) {
@@ -134,7 +137,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                     if (children.size() > 0) {
                         ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Children:");
                         for (const auto child : children) {
-                            ImGui::Text(("Entity " + std::to_string(child.id())).c_str());
+                            ImGui::Text(("Entity: " + child.toString()).c_str());
                         }
                         ImGui::Separator();
                     }
@@ -148,12 +151,12 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                 }
                 if (model && ImGui::TreeNode("ComponentModel")) {
                     for (size_t i = 0; i < model->getNumModels(); ++i) {
+                        ModelInstance& instance = model->getModel(i);
                         if (ImGui::TreeNode(("ModelInstance " + std::to_string(i)).c_str())) {
-                            ModelInstance& instance = model->getModel(i);
-                            const auto& color       = instance.getColor();
-                            const auto& GRColor     = instance.getGodRaysColor();
-                            float aColor[4]         = { color.r(), color.g(), color.b(), color.a() };
-                            float aGodRays[3]       = { GRColor.r(), GRColor.g(), GRColor.b() };
+                            const auto& color    = instance.getColor();
+                            const auto& GRColor  = instance.getGodRaysColor();
+                            float aColor[4]      = { color.r(), color.g(), color.b(), color.a() };
+                            float aGodRays[3]    = { GRColor.r(), GRColor.g(), GRColor.b() };
                             ImGui::ColorEdit4("Color", &aColor[0]);
                             ImGui::ColorEdit3("God Rays Color", &aGodRays[0]);
                             ImGui::Checkbox("Force Render", &instance.m_ForceRender);
@@ -163,7 +166,16 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                             ImGui::InputFloat3("position", &instance.m_Position[0]);
                             ImGui::InputFloat4("rotation", &instance.m_Orientation[0]);
                             ImGui::InputFloat3("scale", &instance.m_Scale[0]);
-
+                            ImGui::Text(("Radius: " + std::to_string(instance.m_Radius)).c_str());
+                            ImGui::Separator();
+                            const std::string a = instance.m_MeshHandle.null() ? "N/A" : instance.m_MeshHandle.get<Mesh>()->name();
+                            const std::string b = instance.m_MaterialHandle.null() ? "N/A" : instance.m_MaterialHandle.get<Material>()->name();
+                            const std::string c = instance.m_ShaderProgramHandle.null() ? "N/A" : instance.m_ShaderProgramHandle.get<ShaderProgram>()->name();
+                            ImGui::Text(("Mesh: " + a).c_str());
+                            ImGui::Text(("Material: " + b).c_str());
+                            ImGui::Text(("Shader: " + c).c_str());
+                            ImGui::Text(("Stage: " + std::string(instance.m_Stage.toString())).c_str());
+                            ImGui::Separator();
                             instance.setColor(aColor[0], aColor[1], aColor[2], aColor[3]);
                             instance.setGodRaysColor(aGodRays[0], aGodRays[1], aGodRays[2]);
                             instance.internal_update_model_matrix(false);

@@ -25,7 +25,7 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     const auto stage                   = i->getStage();
     auto& scene                        = *Engine::Resources::getCurrentScene();
     auto* camera                       = scene.getActiveCamera();
-    const Entity parent                = i->getParent();
+    const Entity parent                = i->getOwner();
     const auto transform               = parent.getComponent<ComponentTransform>();
     const glm::mat4 parentWorldMatrix  = transform->getWorldMatrixRendering();
     const auto& animationContainer     = i->getRunningAnimations();
@@ -65,64 +65,73 @@ bool priv::PublicModelInstance::IsViewportValid(const ModelInstance& modelInstan
 }
 
 ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle shaderProgram)
-    : m_Parent{ parent }
+    : m_Owner{ parent }
 {
     internal_init(mesh, material, shaderProgram);
     setCustomBindFunctor(DefaultModelInstanceBindFunctor);
     setCustomUnbindFunctor(DefaultModelInstanceUnbindFunctor);
 }
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept
-    : m_DrawingMode         { std::move(other.m_DrawingMode) }
-    , m_Animations          { std::move(other.m_Animations) }
-    , m_Parent              { std::move(other.m_Parent) }
-    , m_Stage               { std::move(other.m_Stage) }
-    , m_Position            { std::move(other.m_Position) }
-    , m_Scale               { std::move(other.m_Scale) }
-    , m_GodRaysColor        { std::move(other.m_GodRaysColor) }
-    , m_Orientation         { std::move(other.m_Orientation) }
-    , m_ModelMatrix         { std::move(other.m_ModelMatrix) }
-    , m_Color               { std::move(other.m_Color) }
-    , m_PassedRenderCheck   { std::move(other.m_PassedRenderCheck) }
-    , m_Visible             { std::move(other.m_Visible) }
-    , m_ForceRender         { std::move(other.m_ForceRender) }
-    , m_Index               { std::move(other.m_Index) }
-    , m_ShaderProgramHandle { std::move(other.m_ShaderProgramHandle) }
-    , m_MeshHandle          { std::move(other.m_MeshHandle) }
-    , m_MaterialHandle      { std::move(other.m_MaterialHandle) }
-    , m_CustomBindFunctor   { std::move(other.m_CustomBindFunctor) }
-    , m_CustomUnbindFunctor { std::move(other.m_CustomUnbindFunctor) }
-    , m_ViewportFlag        { std::move(other.m_ViewportFlagDefault) }
+    : m_ModelMatrix        { std::move(other.m_ModelMatrix) }
+    , m_Orientation        { std::move(other.m_Orientation) }
+    , m_Position           { std::move(other.m_Position) }
+    , m_Scale              { std::move(other.m_Scale) }
+    , m_CustomBindFunctor  { std::move(other.m_CustomBindFunctor) }
+    , m_CustomUnbindFunctor{ std::move(other.m_CustomUnbindFunctor) }
+    , m_DrawingMode        { std::move(other.m_DrawingMode) }
+    , m_ViewportFlag       { std::move(other.m_ViewportFlag) }
+    , m_Animations         { std::move(other.m_Animations) }
+    , m_Owner              { std::move(other.m_Owner) }
+    , m_ShaderProgramHandle{ std::move(other.m_ShaderProgramHandle) }
+    , m_MeshHandle         { std::move(other.m_MeshHandle) }
+    , m_MaterialHandle     { std::move(other.m_MaterialHandle) }
+    , m_Stage              { std::move(other.m_Stage) }
+    , m_GodRaysColor       { std::move(other.m_GodRaysColor) }
+    , m_Color              { std::move(other.m_Color) }
+    , m_UserPointer        { std::exchange(other.m_UserPointer, nullptr) }
+    , m_Radius             { std::move(other.m_Radius) }
+    , m_Index              { std::move(other.m_Index) }
+    , m_PassedRenderCheck  { std::move(other.m_PassedRenderCheck) }
+    , m_Visible            { std::move(other.m_Visible) }
+    , m_ForceRender        { std::move(other.m_ForceRender) }
+    , m_IsShadowCaster     { std::move(other.m_IsShadowCaster) }
 {
-    m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
-    m_UserPointer            = std::move(other.m_UserPointer);
-
-    internal_calculate_radius();
+    //internal_calculate_radius();
+    if (other.isRegistered(EventType::ResourceLoaded)) {
+        registerEvent(EventType::ResourceLoaded);
+    }
 }
 ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
-    m_DrawingMode            = std::move(other.m_DrawingMode);
-    m_ViewportFlagDefault    = std::move(other.m_ViewportFlagDefault);
-    m_ViewportFlag           = std::move(other.m_ViewportFlagDefault);
-    m_Animations             = std::move(other.m_Animations);
-    m_Parent                 = std::move(other.m_Parent);
-    m_Stage                  = std::move(other.m_Stage);
-    m_Position               = std::move(other.m_Position);
-    m_Scale                  = std::move(other.m_Scale);
-    m_GodRaysColor           = std::move(other.m_GodRaysColor);
-    m_Orientation            = std::move(other.m_Orientation);
-    m_ModelMatrix            = std::move(other.m_ModelMatrix);
-    m_Color                  = std::move(other.m_Color);
-    m_PassedRenderCheck      = std::move(other.m_PassedRenderCheck);
-    m_Visible                = std::move(other.m_Visible);
-    m_ForceRender            = std::move(other.m_ForceRender);
-    m_Index                  = std::move(other.m_Index);
-    m_UserPointer            = std::move(other.m_UserPointer);
-    m_ShaderProgramHandle    = std::move(other.m_ShaderProgramHandle);
-    m_MeshHandle             = std::move(other.m_MeshHandle);
-    m_MaterialHandle         = std::move(other.m_MaterialHandle);
-    m_CustomBindFunctor      = std::move(other.m_CustomBindFunctor);
-    m_CustomUnbindFunctor    = std::move(other.m_CustomUnbindFunctor);
-
-    internal_calculate_radius();
+    if (this != &other) {
+        m_ModelMatrix         = std::move(other.m_ModelMatrix);
+        m_Orientation         = std::move(other.m_Orientation);
+        m_Position            = std::move(other.m_Position);
+        m_Scale               = std::move(other.m_Scale);
+        m_CustomBindFunctor   = std::move(other.m_CustomBindFunctor);
+        m_CustomUnbindFunctor = std::move(other.m_CustomUnbindFunctor);
+        m_DrawingMode         = std::move(other.m_DrawingMode);
+        m_ViewportFlag        = std::move(other.m_ViewportFlag);
+        m_Animations          = std::move(other.m_Animations);
+        m_Owner               = std::move(other.m_Owner);
+        m_ShaderProgramHandle = std::move(other.m_ShaderProgramHandle);
+        m_MeshHandle          = std::move(other.m_MeshHandle);
+        m_MaterialHandle      = std::move(other.m_MaterialHandle);
+        m_Stage               = std::move(other.m_Stage);
+        m_GodRaysColor        = std::move(other.m_GodRaysColor);
+        m_Color               = std::move(other.m_Color);
+        m_UserPointer         = std::exchange(other.m_UserPointer, nullptr);
+        m_Radius              = std::move(other.m_Radius);
+        m_Index               = std::move(other.m_Index);
+        m_PassedRenderCheck   = std::move(other.m_PassedRenderCheck);
+        m_Visible             = std::move(other.m_Visible);
+        m_ForceRender         = std::move(other.m_ForceRender);
+        m_IsShadowCaster      = std::move(other.m_IsShadowCaster);
+        //internal_calculate_radius();
+        unregisterEvent(EventType::ResourceLoaded);
+        if (other.isRegistered(EventType::ResourceLoaded)) {
+            registerEvent(EventType::ResourceLoaded);
+        }
+    }
     return *this;
 }
 ModelInstance::~ModelInstance() {
@@ -151,7 +160,7 @@ void ModelInstance::internal_update_model_matrix(bool recalcRadius) {
     if (recalcRadius) {
         internal_calculate_radius();
     }
-    auto model = m_Parent.getComponent<ComponentModel>();
+    auto model = m_Owner.getComponent<ComponentModel>();
     if (model && recalcRadius) {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }
@@ -206,7 +215,7 @@ void ModelInstance::setMaterial(Handle material, ComponentModel& componentModel)
 }
 void ModelInstance::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
-        Mesh* mesh           = (Mesh*)e.eventResource.resource;
+        Mesh* mesh           = static_cast<Mesh*>(e.eventResource.resource);
         Mesh* meshFromHandle = m_MeshHandle.get<Mesh>();
         if (meshFromHandle->isLoaded()) {
             internal_update_model_matrix(true);

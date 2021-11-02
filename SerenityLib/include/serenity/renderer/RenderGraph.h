@@ -29,38 +29,42 @@ namespace Engine::priv {
         friend class  RenderGraph;
         friend struct PublicScene;
         private:
-            Handle                       mesh;
+            Handle                       meshHandle;
             std::vector<ModelInstance*>  instanceNodes;
 
             MeshNode() = delete;
         public:
             MeshNode(Handle mesh_)
-                : mesh{ mesh_ }
-            {}
+                : meshHandle{ mesh_ }
+            {
+                assert(!meshHandle.null());
+            }
             
-            inline bool operator<(const MeshNode& other) const noexcept { return mesh < other.mesh; }
-            inline bool operator>(const MeshNode& other) const noexcept { return mesh > other.mesh; }
-            inline bool operator<=(const MeshNode& other) const noexcept { return mesh <= other.mesh; }
-            inline bool operator>=(const MeshNode& other) const noexcept { return mesh >= other.mesh; }
+            inline bool operator<(const MeshNode& other) const noexcept { return meshHandle < other.meshHandle; }
+            inline bool operator>(const MeshNode& other) const noexcept { return meshHandle > other.meshHandle; }
+            inline bool operator<=(const MeshNode& other) const noexcept { return meshHandle <= other.meshHandle; }
+            inline bool operator>=(const MeshNode& other) const noexcept { return meshHandle >= other.meshHandle; }
             
     };
     class MaterialNode final {
         friend class  RenderGraph;
         friend struct PublicScene;
         private:
-            Handle                 material;
+            Handle                 materialHandle;
             std::vector<MeshNode>  meshNodes;
 
             MaterialNode() = delete;
         public:
             MaterialNode(Handle material_)
-                : material{ material_ }
-            {}
+                : materialHandle{ material_ }
+            {
+                assert(!materialHandle.null());
+            }
             
-            inline bool operator<(const MaterialNode& other) const noexcept { return material < other.material; }
-            inline bool operator>(const MaterialNode& other) const noexcept { return material > other.material; }
-            inline bool operator<=(const MaterialNode& other) const noexcept { return material <= other.material; }
-            inline bool operator>=(const MaterialNode& other) const noexcept { return material >= other.material; }
+            inline bool operator<(const MaterialNode& other) const noexcept { return materialHandle < other.materialHandle; }
+            inline bool operator>(const MaterialNode& other) const noexcept { return materialHandle > other.materialHandle; }
+            inline bool operator<=(const MaterialNode& other) const noexcept { return materialHandle <= other.materialHandle; }
+            inline bool operator>=(const MaterialNode& other) const noexcept { return materialHandle >= other.materialHandle; }
             
     };
     class RenderGraph final {
@@ -91,7 +95,7 @@ namespace Engine::priv {
 
             template<class FUNC> void iterateMaterials(FUNC&& func) {
                 for (auto& materialNode : m_MaterialNodes) {
-                    func(*materialNode.material.get<Material>());
+                    func(*materialNode.materialHandle.get<Material>());
                 }
             }
 

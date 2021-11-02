@@ -122,25 +122,24 @@ ComponentModel::ComponentModel(ComponentModel&& other) noexcept
 {
     if (other.isRegistered(EventType::ResourceLoaded)) {
         registerEvent(EventType::ResourceLoaded);
-        other.unregisterEvent(EventType::ResourceLoaded);
     }
 }
 ComponentModel& ComponentModel::operator=(ComponentModel&& other) noexcept {
-    m_ModelInstances = std::move(other.m_ModelInstances);
-    m_RadiusBox      = std::move(other.m_RadiusBox);
-    m_Radius         = std::move(other.m_Radius);
-    m_Owner          = std::exchange(other.m_Owner, Entity{});
-
-    if (other.isRegistered(EventType::ResourceLoaded) && this != &other) {
-        registerEvent(EventType::ResourceLoaded);
-        other.unregisterEvent(EventType::ResourceLoaded);
+    if (this != &other) {
+        //TODO: cleanup model instances before the move occurs?
+        m_ModelInstances = std::move(other.m_ModelInstances);
+        m_RadiusBox      = std::move(other.m_RadiusBox);
+        m_Radius         = std::move(other.m_Radius);
+        m_Owner          = std::exchange(other.m_Owner, Entity{});
+        if (other.isRegistered(EventType::ResourceLoaded)) {
+            registerEvent(EventType::ResourceLoaded);
+        }
     }
     return *this;
 }
 ComponentModel::~ComponentModel() {
-    if (isRegistered(EventType::ResourceLoaded)) {
-        unregisterEvent(EventType::ResourceLoaded);
-    }
+    //TODO: cleanup model instances?
+    unregisterEvent(EventType::ResourceLoaded);
 }
 void ComponentModel::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {

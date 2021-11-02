@@ -855,6 +855,7 @@
     <ClCompile Include="src\serenity\renderer\postprocess\SMAA.cpp" />
     <ClCompile Include="src\serenity\renderer\postprocess\SSAO.cpp" />
     <ClCompile Include="src\serenity\renderer\Renderer.cpp" />
+    <ClCompile Include="src\serenity\renderer\RendererIncludes.cpp" />
     <ClCompile Include="src\serenity\renderer\RenderGraph.cpp" />
     <ClCompile Include="src\serenity\renderer\text\TextRenderer.cpp" />
     <ClCompile Include="src\serenity\renderer\text\TextStringBuilderColor.cpp" />

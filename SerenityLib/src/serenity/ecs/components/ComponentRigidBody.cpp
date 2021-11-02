@@ -45,18 +45,20 @@ ComponentRigidBody::ComponentRigidBody(ComponentRigidBody&& other) noexcept {
     internal_update_misc();
 }
 ComponentRigidBody& ComponentRigidBody::operator=(ComponentRigidBody&& other) noexcept {
-    m_CollisionFunctor  = std::move(other.m_CollisionFunctor);
-    m_BulletRigidBody   = std::move(other.m_BulletRigidBody);
-    m_BulletMotionState = std::move(other.m_BulletMotionState);
-    m_UserPointer       = std::exchange(other.m_UserPointer, nullptr);
-    m_UserPointer1      = std::exchange(other.m_UserPointer1, nullptr);
-    m_UserPointer2      = std::exchange(other.m_UserPointer2, nullptr);
-    m_Mass              = std::move(other.m_Mass);
-    m_Owner             = std::exchange(other.m_Owner, Entity{});
-    m_Group             = std::move(other.m_Group);
-    m_Mask              = std::move(other.m_Mask);
-
-    internal_update_misc();
+    if (this != &other) {
+        cleanup();
+        m_CollisionFunctor  = std::move(other.m_CollisionFunctor);
+        m_BulletRigidBody   = std::move(other.m_BulletRigidBody);
+        m_BulletMotionState = std::move(other.m_BulletMotionState);
+        m_UserPointer       = std::exchange(other.m_UserPointer, nullptr);
+        m_UserPointer1      = std::exchange(other.m_UserPointer1, nullptr);
+        m_UserPointer2      = std::exchange(other.m_UserPointer2, nullptr);
+        m_Mass              = std::move(other.m_Mass);
+        m_Owner             = std::exchange(other.m_Owner, Entity{});
+        m_Group             = std::move(other.m_Group);
+        m_Mask              = std::move(other.m_Mask);
+        internal_update_misc();
+    }
     return *this;
 }
 [[nodiscard]] ComponentRigidBody::Flags ComponentRigidBody::getFlags() const noexcept {

@@ -57,7 +57,7 @@ class ModelInstance final : public Observer {
         ModelDrawingMode                                  m_DrawingMode         = ModelDrawingMode::Triangles;
         Engine::Flag<uint32_t>                            m_ViewportFlag;     //determine what viewports this can be seen in
         Engine::priv::ModelInstanceAnimationContainer     m_Animations;
-        Entity                                            m_Parent;
+        Entity                                            m_Owner;
         Handle                                            m_ShaderProgramHandle;
         Handle                                            m_MeshHandle;
         Handle                                            m_MaterialHandle;
@@ -125,7 +125,7 @@ class ModelInstance final : public Observer {
         inline void setDrawingMode(ModelDrawingMode drawMode) noexcept { m_DrawingMode = drawMode; }
         inline void forceRender(bool forced = true) noexcept { m_ForceRender = forced; }
         [[nodiscard]] inline bool isForceRendered() const noexcept { return m_ForceRender; }
-        [[nodiscard]] inline Entity getParent() const noexcept { return m_Parent; }
+        [[nodiscard]] inline Entity getOwner() const noexcept { return m_Owner; }
         [[nodiscard]] inline const Engine::color_vector_4& getColor() const noexcept { return m_Color; }
         [[nodiscard]] inline const Engine::color_vector_4& getGodRaysColor() const noexcept { return m_GodRaysColor; }
         [[nodiscard]] inline const glm::mat4& getModelMatrix() const noexcept { return m_ModelMatrix; }
