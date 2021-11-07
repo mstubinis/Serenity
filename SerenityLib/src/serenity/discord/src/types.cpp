@@ -3,6 +3,7 @@
 #endif
 
 #include <serenity/discord/src/types.h>
+#include <serenity/system/Macros.h>
 
 #include <cstring>
 #include <memory>

@@ -22,7 +22,7 @@ void TextureLoader::ImportIntoOpengl(Texture& texture, const Engine::priv::Image
     auto& imageData = texture.m_CPUData.m_ImagesDatas[0];
     if (imageData.m_InternalFormat.isCompressedType() && mipmap.compressedSize != 0) {
         glCompressedTexImage2D(textureType.toGLType(), mipmap.level, imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, mipmap.compressedSize, &mipmap.pixels[0]);
-    }else{
+    } else {
         glTexImage2D(textureType.toGLType(), mipmap.level, imageData.m_InternalFormat, mipmap.width, mipmap.height, 0, imageData.m_PixelFormat, imageData.m_PixelType, &mipmap.pixels[0]);
     }
 }
@@ -71,36 +71,36 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
             blockSize = 8;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT;
             break;
-        }case FourCC_DXT2: {
+        } case FourCC_DXT2: {
             factor    = 4;
             blockSize = 16;
             break;
-        }case FourCC_DXT3: {
+        } case FourCC_DXT3: {
             factor    = 4;
             blockSize = 16;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
             break;
-        }case FourCC_DXT4: {
+        } case FourCC_DXT4: {
             factor    = 4;
             blockSize = 16;
             break;
-        }case FourCC_DXT5: {
+        } case FourCC_DXT5: {
             factor    = 4;
             blockSize = 16;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
             break;
-        }case FourCC_DX10: {
+        } case FourCC_DX10: {
             break;
-        }case FourCC_ATI1: { //useful for 1 channel textures (greyscales, glow / specular / ao / smoothness / metalness etc)
+        } case FourCC_ATI1: { //useful for 1 channel textures (greyscales, glow / specular / ao / smoothness / metalness etc)
             factor    = 2;
             blockSize = 8;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RED_RGTC1;
             break;
-        }case FourCC_ATI2: {//aka ATI2n aka 3Dc aka LATC2 aka BC5 - used for normal maps (store x,y recalc z) z = sqrt( 1-x*x-y*y )
+        } case FourCC_ATI2: {//aka ATI2n aka 3Dc aka LATC2 aka BC5 - used for normal maps (store x,y recalc z) z = sqrt( 1-x*x-y*y )
             blockSize = 16;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;
             break;
-        }case FourCC_RXGB: { //By its design, it is just a DXT5 image with reading it in the shader differently
+        } case FourCC_RXGB: { //By its design, it is just a DXT5 image with reading it in the shader differently
             //As I recall, the most you would have to do in the shader is something like:
             //vec3 normal;
             //normal.xy = texture2D(RXGBnormalmap, texcoord).ag;
@@ -109,35 +109,35 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
             blockSize = 16;
             image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
             break;
-        }case FourCC_$: {
+        } case FourCC_$: {
             break;
-        }case FourCC_o: {
+        } case FourCC_o: {
             break;
-        }case FourCC_p: {
+        } case FourCC_p: {
             break;
-        }case FourCC_q: {
+        } case FourCC_q: {
             break;
-        }case FourCC_r: {
+        } case FourCC_r: {
             break;
-        }case FourCC_s: {
+        } case FourCC_s: {
             break;
-        }case FourCC_t: {
+        } case FourCC_t: {
             break;
-        }case FourCC_BC4U: {
+        } case FourCC_BC4U: {
             break;
-        }case FourCC_BC4S: {
+        } case FourCC_BC4S: {
             break;
-        }case FourCC_BC5U: {
+        } case FourCC_BC5U: {
             break;
-        }case FourCC_BC5S: {
+        } case FourCC_BC5S: {
             break;
-        }case FourCC_RGBG: {
+        } case FourCC_RGBG: {
             break;
-        }case FourCC_GRGB: {
+        } case FourCC_GRGB: {
             break;
-        }case FourCC_YUY2: {
+        } case FourCC_YUY2: {
             break;
-        }default: {
+        } default: {
             ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): could not evalutate switch statement for head.format.fourCC!")
             return false;
         }
@@ -166,12 +166,12 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
         ImageData* imgPtr = nullptr;
         if (i == 0) {
             imgPtr = &image_loaded_struct;
-        }else if (i >= cpuData.m_ImagesDatas.size()) {
+        } else if (i >= cpuData.m_ImagesDatas.size()) {
             imgPtr                    = &cpuData.m_ImagesDatas.emplace_back();
             imgPtr->m_PixelFormat     = image_loaded_struct.m_PixelFormat;
             imgPtr->m_PixelType       = image_loaded_struct.m_PixelType;
             imgPtr->m_InternalFormat  = image_loaded_struct.m_InternalFormat;
-        }else{
+        } else {
             imgPtr = &cpuData.m_ImagesDatas[i];
         }
         width_  = head.w;
@@ -183,7 +183,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
             ImageMipmap* mipmap = nullptr;
             if (level > 0) {
                 mipmap = &imgPtr->m_Mipmaps.emplace_back();
-            }else{
+            } else {
                 mipmap = &imgPtr->m_Mipmaps[0];
             }
             mipmap->level                  = level;
@@ -248,7 +248,7 @@ bool TextureLoader::GenerateMipmapsOpenGL(Texture& texture) {
     glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_BASE_LEVEL, 0);
     if (texture.m_CPUData.m_MinFilter == GL_LINEAR) {
         texture.m_CPUData.m_MinFilter = GL_LINEAR_MIPMAP_LINEAR;
-    }else if (texture.m_CPUData.m_MinFilter == GL_NEAREST) {
+    } else if (texture.m_CPUData.m_MinFilter == GL_NEAREST) {
         texture.m_CPUData.m_MinFilter = GL_NEAREST_MIPMAP_NEAREST;
     }
     glTexParameteri(texture.m_CPUData.m_TextureType.toGLType(), GL_TEXTURE_MIN_FILTER, texture.m_CPUData.m_MinFilter);
@@ -263,7 +263,7 @@ void TextureLoader::LoadCPU(TextureCPUData& cpuData, Handle inHandle) {
                 const std::string extension = std::filesystem::path(imageData.m_Filename).extension().string();
                 if (extension == ".dds") {
                     TextureLoader::LoadDDSFile(cpuData, imageData);
-                }else {
+                } else {
                     sf::Image sfImage;
                     sfImage.loadFromFile(imageData.m_Filename);
                     imageData.load(sfImage, imageData.m_Filename);
@@ -286,14 +286,14 @@ void TextureLoader::LoadGPU(Texture& texture) {
         case TextureType::RenderTarget: {
             TextureLoader::LoadTextureFramebufferIntoOpenGL(texture);
             break;
-        }case TextureType::Texture1D: {
+        } case TextureType::Texture1D: {
             break;
-        }case TextureType::Texture2D: {
+        } case TextureType::Texture2D: {
             TextureLoader::LoadTexture2DIntoOpenGL(texture);
             break;
-        }case TextureType::Texture3D: {
+        } case TextureType::Texture3D: {
             break;
-        }case TextureType::CubeMap: {
+        } case TextureType::CubeMap: {
             TextureLoader::LoadTextureCubemapIntoOpenGL(texture);
             break;
         }

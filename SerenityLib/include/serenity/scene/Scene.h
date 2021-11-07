@@ -46,15 +46,15 @@ namespace Engine::priv {
 #include <serenity/renderer/particles/ParticleSystem.h>
 
 class Scene: public Observer {
-    friend struct SceneImpl;
+    friend struct ::SceneImpl;
     friend class  Engine::priv::RenderGraph;
     friend class  Engine::priv::ResourceManager;
     friend struct Engine::priv::PublicScene;
     friend class  Engine::priv::EngineCore;
-    friend class  SystemSceneUpdate;
-    friend class  SystemSceneChanging;
-    friend class  SystemAddRigidBodies;
-    friend class  SystemRemoveRigidBodies;
+    friend class  ::SystemSceneUpdate;
+    friend class  ::SystemSceneChanging;
+    friend class  ::SystemAddRigidBodies;
+    friend class  ::SystemRemoveRigidBodies;
     using UpdateFP = void(*)(Scene*, const float);
     private:
         Engine::priv::ECS                           m_ECS;
@@ -176,8 +176,8 @@ class Scene: public Observer {
 };
 namespace Engine::priv {
     struct PublicScene final {
-        friend class  Scene;
-        friend struct SceneImpl;
+        friend class  ::Scene;
+        friend struct ::SceneImpl;
         friend class  Engine::priv::RenderGraph;
 
         static std::vector<Particle>&            GetParticles(const Scene&);

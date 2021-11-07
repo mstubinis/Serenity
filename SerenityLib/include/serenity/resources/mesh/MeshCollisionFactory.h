@@ -24,7 +24,7 @@ class  btGImpactMeshShape;
 
 namespace Engine::priv {
     class MeshCollisionFactory final {
-        friend struct MeshCPUData;
+        friend struct ::MeshCPUData;
         private:
             btConvexHullShape       m_ConvesHullShape;
             btTriangleMesh          m_TriangleStaticData;

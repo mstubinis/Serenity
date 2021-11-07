@@ -88,23 +88,25 @@ void ShaderProgram::internal_init(std::string_view inName, const ShaderProgramPa
 }
 ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept 
     : Resource{ std::move(other) }
-    , m_Shaders           { std::move(other.m_Shaders) }
     , m_CustomBindFunctor { std::move(other.m_CustomBindFunctor) }
-    , m_ShaderProgram     { std::move(other.m_ShaderProgram) }
     , m_UniformLocations  { std::move(other.m_UniformLocations) }
     , m_AttachedUBOs      { std::move(other.m_AttachedUBOs) }
+    , m_Shaders           { std::move(other.m_Shaders) }
+    , m_ShaderProgram     { std::move(other.m_ShaderProgram) }
     , m_LoadedCPU         { std::move(other.m_LoadedCPU) }
     , m_LoadedGPU         { std::move(other.m_LoadedGPU) }
 {}
 ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept {
-    Resource::operator=(std::move(other));
-    m_Shaders            = std::move(other.m_Shaders);
-    m_CustomBindFunctor  = std::move(other.m_CustomBindFunctor);
-    m_ShaderProgram      = std::move(other.m_ShaderProgram);
-    m_UniformLocations   = std::move(other.m_UniformLocations);
-    m_AttachedUBOs       = std::move(other.m_AttachedUBOs);
-    m_LoadedCPU          = std::move(other.m_LoadedCPU);
-    m_LoadedGPU          = std::move(other.m_LoadedGPU);
+    if (this != &other) {
+        Resource::operator=(std::move(other));
+        m_CustomBindFunctor = std::move(other.m_CustomBindFunctor);
+        m_UniformLocations  = std::move(other.m_UniformLocations);
+        m_AttachedUBOs      = std::move(other.m_AttachedUBOs);
+        m_Shaders           = std::move(other.m_Shaders);
+        m_ShaderProgram     = std::move(other.m_ShaderProgram);
+        m_LoadedCPU         = std::move(other.m_LoadedCPU);
+        m_LoadedGPU         = std::move(other.m_LoadedGPU);
+    }
     return *this;
 }
 ShaderProgram::~ShaderProgram(){ 

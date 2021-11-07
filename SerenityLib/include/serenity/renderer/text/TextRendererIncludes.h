@@ -8,4 +8,4 @@ enum TextStringBuilderColorToken {
     End = 2,
 };
 
-#endif-
+#endif

@@ -4,7 +4,7 @@
 #include <serenity/resources/Engine_Resources.h>
 
 Cursor::Cursor() {
-    bool success = m_SFMLCursor.loadFromSystem(sf::Cursor::Type::Arrow);
+    /*bool success = */m_SFMLCursor.loadFromSystem(sf::Cursor::Type::Arrow);
 }
 Cursor::Cursor(std::string_view textureFile) {
     auto texture = Engine::Resources::getResource<Texture>(textureFile);
@@ -12,7 +12,7 @@ Cursor::Cursor(std::string_view textureFile) {
         texture.m_Handle   = Engine::Resources::loadTexture(textureFile);
         texture.m_Resource = texture.m_Handle.get<Texture>();
     }
-    bool success = loadFromPixels(texture.m_Resource, glm::uvec2{ 0, 0 });
+    /*bool success = */loadFromPixels(texture.m_Resource, glm::uvec2{0, 0});
 }
 Cursor::~Cursor() {
 
@@ -35,8 +35,7 @@ bool Cursor::internal_load_from_pixels(const uint8_t* pixels, uint32_t width, ui
         m_PixelsColored[i + 2] = b;
         m_PixelsColored[i + 3] = a;
     }
-    bool result = m_SFMLCursor.loadFromPixels(m_PixelsColored.data(), sf::Vector2u(width, height), sf::Vector2u(hotspotX, hotspotY));
-    return result;
+    return m_SFMLCursor.loadFromPixels(m_PixelsColored.data(), sf::Vector2u(width, height), sf::Vector2u(hotspotX, hotspotY));
 }
 bool Cursor::internal_rotate(int64_t startIndex, int64_t increment1, int64_t increment2, bool left) noexcept {
     const size_t oldWidth  = size_t(m_Width);

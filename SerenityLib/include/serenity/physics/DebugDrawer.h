@@ -57,31 +57,31 @@ namespace Engine::priv {
             GLDebugDrawer() = default;
             ~GLDebugDrawer();
 
-            inline void setDebugMode(int mode) noexcept { m_Mode = mode; }
-            [[nodiscard]] inline int getDebugMode() const noexcept { return m_Mode; }
+            inline void setDebugMode(int mode) noexcept override { m_Mode = mode; }
+            [[nodiscard]] inline int getDebugMode() const noexcept override { return m_Mode; }
 
             void drawAccumulatedLines();
             void onEvent(const Event&) override;
-            void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha);
-            void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar);
-            void drawLine(const btVector3& from, const btVector3& to, const btVector3& color);
-            void drawSphere(btScalar radius, const btTransform&, const btVector3& color);
-            void drawSphere(const btVector3& p, btScalar radius, const btVector3& color);
-            void drawArc(const btVector3& center, const btVector3& normal, const btVector3& axis, btScalar radiusA, btScalar radiusB, btScalar minAngle, btScalar maxAngle, const btVector3& color, bool drawSect, btScalar stepDegrees = btScalar(10.f));
-            void drawSpherePatch(const btVector3& center, const btVector3& up, const btVector3& axis, btScalar radius, btScalar minTh, btScalar maxTh, btScalar minPs, btScalar maxPs, const btVector3& color, btScalar stepDegrees = btScalar(10.f), bool drawCenter = true);
-            void drawTransform(const btTransform&, btScalar orthoLen);
-            void drawAabb(const btVector3& from, const btVector3& to, const btVector3& color);
-            void drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform&, const btVector3& color);
-            void drawCapsule(btScalar radius, btScalar halfHeight, int upAxis, const btTransform&, const btVector3& color);
-            void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color);
-            void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btTransform&, const btVector3& color);
-            void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color){}
-            void drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform&, const btVector3& color);
-            void drawCone(btScalar radius, btScalar height, int upAxis, const btTransform&, const btVector3& color);
-            void reportErrorWarning(const char* errWarning) {
-                ENGINE_PRODUCTION_LOG("DebugDraw error: " << errWarning)
+            void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha) override;
+            void drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3& color, btScalar) override;
+            void drawLine(const btVector3& from, const btVector3& to, const btVector3& color) override;
+            void drawSphere(btScalar radius, const btTransform&, const btVector3& color) override;
+            void drawSphere(const btVector3& p, btScalar radius, const btVector3& color) override;
+            void drawArc(const btVector3& center, const btVector3& normal, const btVector3& axis, btScalar radiusA, btScalar radiusB, btScalar minAngle, btScalar maxAngle, const btVector3& color, bool drawSect, btScalar stepDegrees = btScalar(10.f)) override;
+            void drawSpherePatch(const btVector3& center, const btVector3& up, const btVector3& axis, btScalar radius, btScalar minTh, btScalar maxTh, btScalar minPs, btScalar maxPs, const btVector3& color, btScalar stepDegrees = btScalar(10.f), bool drawCenter = true) override;
+            void drawTransform(const btTransform&, btScalar orthoLen) override;
+            void drawAabb(const btVector3& from, const btVector3& to, const btVector3& color) override;
+            void drawCylinder(btScalar radius, btScalar halfHeight, int upAxis, const btTransform&, const btVector3& color) override;
+            void drawCapsule(btScalar radius, btScalar halfHeight, int upAxis, const btTransform&, const btVector3& color) override;
+            void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btVector3& color) override;
+            void drawBox(const btVector3& bbMin, const btVector3& bbMax, const btTransform&, const btVector3& color) override;
+            void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) override {}
+            void drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform&, const btVector3& color) override;
+            void drawCone(btScalar radius, btScalar height, int upAxis, const btTransform&, const btVector3& color) override;
+            void reportErrorWarning(const char* errWarning) override {
+                ENGINE_PRODUCTION_LOG("btDebugDraw error: " << errWarning)
             }
-            void draw3dText(const btVector3& location, const char* text) {}
+            void draw3dText(const btVector3& location, const char* text) override {}
     };
 };
 

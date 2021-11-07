@@ -61,7 +61,7 @@ void Engine::Networking::ServerClientsContainer::internal_update_remove_clients(
         Engine::priv::threading::waitForAll();
         for (const auto& [hash, client] : m_RemovedClients) {
             Engine::erase(m_HashedClients, m_HashedClients.find(hash));
-            bool result = m_ThreadContainer.removeClient(hash);
+            /*bool result = */m_ThreadContainer.removeClient(hash);
         }
         m_RemovedClients.clear();
     }

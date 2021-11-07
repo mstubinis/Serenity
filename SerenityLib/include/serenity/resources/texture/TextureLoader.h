@@ -11,7 +11,7 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     class TextureLoader final {
-        friend class Texture;
+        friend class ::Texture;
         public:
             static bool LoadDDSFile(TextureCPUData&, priv::ImageData&);
 

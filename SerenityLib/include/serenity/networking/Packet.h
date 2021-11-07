@@ -121,7 +121,7 @@ namespace Engine::Networking {
             inline constexpr bool isNull() const noexcept { return m_Timestamp == 0 || m_PacketType == 0 || m_Valid == false; }
 
             void initial_build() {
-                bool initial_build = (*this
+                (*this
                     << m_PacketType
                     << m_Timestamp
                     << m_AckBitfield

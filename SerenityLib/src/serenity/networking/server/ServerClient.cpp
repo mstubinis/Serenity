@@ -81,13 +81,13 @@ void ServerClient::internal_update_receive_tcp_packet() noexcept {
             internal_on_received_data();
             m_On_Received_TCP_Function(packet);
             break;
-        }case SocketStatus::NotReady: {
+        } case SocketStatus::NotReady: {
             break;
-        }case SocketStatus::Partial: {
+        } case SocketStatus::Partial: {
             break;
-        }case SocketStatus::Disconnected: {
+        } case SocketStatus::Disconnected: {
             break;
-        }case SocketStatus::Error: {
+        } case SocketStatus::Error: {
             break;
         }
     }
@@ -101,14 +101,14 @@ void ServerClient::internal_update_connection_state(const float dt) noexcept {
                 m_ConnectionState = ConnectionState::Disconnected;
             }
             break;
-        }case ConnectionState::Disconnected: {
+        } case ConnectionState::Disconnected: {
             m_Recovery_Timeout_Timer += dt;
             if (m_Recovery_Timeout_Timer >= m_Recovery_Timeout_Timer_Limit) {
                 m_On_Recovery_Timed_Out_Function();
                 m_ConnectionState = ConnectionState::Inactive;
             }
             break;
-        }case ConnectionState::Inactive: {
+        } case ConnectionState::Inactive: {
             break;
         }
     }

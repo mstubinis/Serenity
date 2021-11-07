@@ -215,7 +215,7 @@ void ModelInstance::setMaterial(Handle material, ComponentModel& componentModel)
 }
 void ModelInstance::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
-        Mesh* mesh           = static_cast<Mesh*>(e.eventResource.resource);
+        //Mesh* mesh           = static_cast<Mesh*>(e.eventResource.resource);
         Mesh* meshFromHandle = m_MeshHandle.get<Mesh>();
         if (meshFromHandle->isLoaded()) {
             internal_update_model_matrix(true);

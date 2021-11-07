@@ -81,7 +81,7 @@ bool Engine::priv::FXAA::init() {
     return true;
 }
 void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer) {
-    const auto& dimensions = viewport.getViewportDimensions();
+    //const auto& dimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MIN", reduce_min);

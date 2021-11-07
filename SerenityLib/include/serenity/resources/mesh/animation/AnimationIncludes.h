@@ -34,8 +34,8 @@ namespace Engine::priv {
         float     time  = 0.0f;
         Vector3Key() = default;
         Vector3Key(float time_, const glm::vec3& value_) 
-            : time{ time_ }
-            , value{ value_ }
+            : value{ value_ }
+            , time{ time_ }
         {}
     };
     struct QuatKey final {
@@ -43,8 +43,8 @@ namespace Engine::priv {
         float      time  = 0.0f;
         QuatKey() = default;
         QuatKey(float time_, const glm::quat& value_)
-            : time{ time_ }
-            , value{ value_ }
+            : value{ value_ }
+            , time{ time_ }
         {}
     };
     struct AnimationChannel final {

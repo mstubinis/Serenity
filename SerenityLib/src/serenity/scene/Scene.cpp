@@ -259,6 +259,7 @@ Scene::Scene(uint32_t id, std::string_view name)
 Scene::~Scene() {
     SAFE_DELETE(m_Skybox);
     SAFE_DELETE_VECTOR(m_Cameras);
+    m_ECS.destruct();
     unregisterEvent(EventType::SceneChanged);
 }
 void Scene::internal_register_lights() {
@@ -315,8 +316,8 @@ void Scene::internal_register_systems() {
 }
 size_t Scene::getNumLights() const noexcept {
     size_t count = 0;
-    for (const auto& itr : m_LightsModule) {
-        count += itr->size();
+    for (const auto& lightContainer : m_LightsModule) {
+        count += lightContainer->size();
     }
     return count;
 }

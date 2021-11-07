@@ -22,9 +22,9 @@ namespace Engine::priv {
     class AnimationData final {
         friend class  Engine::priv::MeshSkeleton;
         friend class  Engine::priv::ModelInstanceAnimation;
-        friend class  Mesh;
-        friend struct MeshCPUData;
-        friend class  SMSH_File;
+        friend class  ::Mesh;
+        friend struct ::MeshCPUData;
+        friend class  ::SMSH_File;
         private:
             std::vector<AnimationChannel>  m_Channels;
             float                          m_TicksPerSecond  = 0.0f;

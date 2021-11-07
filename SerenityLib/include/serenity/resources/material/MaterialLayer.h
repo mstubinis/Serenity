@@ -77,9 +77,9 @@ class MaterialLayer final {
         float   y    = 0.0f;
 
         FuncModifyUVs(float x_, float y_, FuncPtr func_)
-            : x { x_ }
+            : func{ func_ }
+            , x { x_ }
             , y { y_ }
-            , func{ func_ }
         {}
     };
     private:

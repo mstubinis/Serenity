@@ -27,7 +27,7 @@ ComponentRigidBody::~ComponentRigidBody() {
 void ComponentRigidBody::cleanup() {
     if (m_Owner) { //do not call from moved from destructors
         if (getBtBody()) {
-            bool result = removePhysicsFromWorld(); // remove it immediately 
+            /*bool result = */removePhysicsFromWorld();
         }
     }
 }

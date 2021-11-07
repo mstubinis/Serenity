@@ -61,7 +61,7 @@ void DiscordModule::log_errors(bool logErrors) {
     m_LoggingErrors = logErrors;
 }
 std::string DiscordModule::internal_get_result_string_message(const discord::Result& result) {
-    return [this, &result]() -> std::string {
+    return [&result]() -> std::string {
         switch (result) {
             case discord::Result::Ok: {
                 return "There is no error!";

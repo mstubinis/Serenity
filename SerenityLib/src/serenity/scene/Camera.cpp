@@ -15,7 +15,6 @@ namespace {
         const auto rotSpeedX   = (mouse.x) * 0.4f * dt;
         const auto rotSpeedY   = -(mouse.y) * 0.4f * dt;
         auto transSpeed        = static_cast<decimal>(5.0f * dt);
-        const auto transSpeed2 = static_cast<decimal>(5.0f * dt);
 
         if (Engine::isKeyDown(KeyboardKey::LeftShift) || Engine::isKeyDown(KeyboardKey::RightShift)) {
             transSpeed *= static_cast<decimal>(6.0);
@@ -126,7 +125,6 @@ Camera::Camera(Scene* scene, float left, float right, float bottom, float top, f
 
     auto camera     = getComponent<ComponentCamera>();
     auto logic      = getComponent<CameraLogicComponent>();
-    auto transform  = getComponent<ComponentTransform>();
 
     camera->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3{ 0.0f, 1.0f, 0.0f });
     logic->setUserPointer(this);
@@ -138,8 +136,7 @@ void Camera::setUpdateFunction(CameraLogicType logicType) noexcept {
         case CameraLogicType::FPS_Mouselook: {
             setUpdateFunction(CAMERA_DEFAULT_MOUSELOOK_FUNCTION);
             break;
-        }
-        case CameraLogicType::SpaceSimulator: {
+        } case CameraLogicType::SpaceSimulator: {
             setUpdateFunction(CAMERA_DEFAULT_MOUSELOOK_NO_GIMBLE_LOCK_FUNCTION);
             break;
         }

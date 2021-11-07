@@ -1,6 +1,9 @@
 #include <serenity/ecs/ECS.h>
 
 Engine::priv::ECS::~ECS() {
+    destruct();
+}
+void Engine::priv::ECS::destruct() {
     SAFE_DELETE_VECTOR(m_ComponentPools);
 }
 Entity Engine::priv::ECS::createEntity(Scene& scene) {

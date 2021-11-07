@@ -26,7 +26,7 @@ namespace Engine::priv {
 struct MeshRequestPart final {
     MeshCPUData  cpuData;
     std::string  name;
-    Handle       handle   = Handle();
+    Handle       handle;
 
     MeshRequestPart() = default;
 
@@ -40,10 +40,8 @@ using MeshRequestCallback = std::function<void(const std::vector<Handle>&)>;
 struct MeshRequest final {
     MeshCollisionLoadingFlag::Flag     m_CollisionLoadingFlags = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG;
     Engine::priv::AssimpSceneImport    m_Importer;
-
-    MeshNodeData m_NodeData;
-    std::vector<std::string> m_NodeStrVector;
-
+    MeshNodeData                       m_NodeData;
+    std::vector<std::string>           m_NodeStrVector;
     MeshRequestCallback                m_Callback;
     std::vector<MeshRequestPart>       m_Parts;
     std::string                        m_FileOrData;
@@ -66,7 +64,7 @@ struct MeshRequest final {
 
 namespace Engine::priv {
     struct PublicMeshRequest final {
-        friend class  Mesh;
+        friend class  ::Mesh;
         static void LoadCPU(MeshRequest& meshRequest);
     };
 };

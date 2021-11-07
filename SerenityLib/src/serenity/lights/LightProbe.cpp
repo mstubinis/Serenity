@@ -4,9 +4,8 @@
 
 LightProbe::LightProbe(Scene* scene, ProbeType::Type type, const glm::vec3& position)
     : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
-    , m_Camera{ scene, glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f }
-    , m_Viewport{}
     , m_ProbeType{ type }
+    , m_Camera{ scene, glm::radians(90.0f), 1.0f, 0.1f, 3000000.0f }
 {
     addComponent<ComponentTransform>();
     getComponent<ComponentTransform>()->setPosition(position);
@@ -18,8 +17,8 @@ LightProbe::~LightProbe() {
 }
 void LightProbe::addIgnoredEntity(Entity entity) {
     if (!entity.null()) {
-        for (auto itr : m_Ignored) {
-            if (entity == itr) {
+        for (const Entity ignoredEntity : m_Ignored) {
+            if (entity == ignoredEntity) {
                 return;
             }
         }

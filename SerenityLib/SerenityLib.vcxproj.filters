@@ -408,6 +408,9 @@
     <Filter Include="Header Files\Engine\Core\Dependencies\bullet\BulletDynamics\Featherstone">
       <UniqueIdentifier>{717f73b9-57aa-475d-88d3-da52be00ba0d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Editor\EmbeddedImages">
+      <UniqueIdentifier>{1d99bc49-602e-4f97-adf2-7c529dddecdb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp">
@@ -1567,6 +1570,18 @@
     </ClCompile>
     <ClCompile Include="src\serenity\renderer\RendererIncludes.cpp">
       <Filter>Source Files\Engine\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\embeddedImages\PointLightImage.cpp">
+      <Filter>Source Files\Engine\Core\Editor\EmbeddedImages</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\embeddedImages\RodLightImage.cpp">
+      <Filter>Source Files\Engine\Core\Editor\EmbeddedImages</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\embeddedImages\SpotLightImage.cpp">
+      <Filter>Source Files\Engine\Core\Editor\EmbeddedImages</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\editor\embeddedImages\SunLightImage.cpp">
+      <Filter>Source Files\Engine\Core\Editor\EmbeddedImages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

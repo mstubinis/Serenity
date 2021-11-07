@@ -26,8 +26,8 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     class MeshNode final {
-        friend class  RenderGraph;
-        friend struct PublicScene;
+        friend class  Engine::priv::RenderGraph;
+        friend struct Engine::priv::PublicScene;
         private:
             Handle                       meshHandle;
             std::vector<ModelInstance*>  instanceNodes;
@@ -47,8 +47,8 @@ namespace Engine::priv {
             
     };
     class MaterialNode final {
-        friend class  RenderGraph;
-        friend struct PublicScene;
+        friend class  Engine::priv::RenderGraph;
+        friend struct Engine::priv::PublicScene;
         private:
             Handle                 materialHandle;
             std::vector<MeshNode>  meshNodes;
@@ -68,8 +68,8 @@ namespace Engine::priv {
             
     };
     class RenderGraph final {
-        friend class  Scene;
-        friend class  RenderGraphContainer;
+        friend class  ::Scene;
+        friend class  Engine::priv::RenderGraphContainer;
         friend struct Engine::priv::PublicScene;
         private:
             std::vector<MaterialNode>     m_MaterialNodes;
@@ -91,7 +91,7 @@ namespace Engine::priv {
             RenderGraph(const RenderGraph&)                = delete;
             RenderGraph& operator=(const RenderGraph&)     = delete;
             RenderGraph(RenderGraph&&) noexcept            = default;
-            RenderGraph& operator=(RenderGraph&&) noexcept = default;
+            RenderGraph& operator=(RenderGraph&&) noexcept = delete;
 
             template<class FUNC> void iterateMaterials(FUNC&& func) {
                 for (auto& materialNode : m_MaterialNodes) {

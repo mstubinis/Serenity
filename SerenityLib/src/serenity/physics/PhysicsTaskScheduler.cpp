@@ -22,7 +22,7 @@ void Engine::priv::PhysicsTaskScheduler::setNumThreads(int numThreads) {
 
 }
 void Engine::priv::PhysicsTaskScheduler::parallelFor(int iBegin, int iEnd, int grainSize, const btIParallelForBody& body) {
-    auto parallel = [this, &body, iEnd, iBegin]() {
+    auto parallel = [&body, iEnd, iBegin]() {
         auto pairs = Engine::splitVectorPairs(iEnd - iBegin, 0);
         for (size_t i = 0; i < pairs.size(); ++i) {
             auto lambda = [&body, i, iBegin, &pairs]() {

@@ -23,7 +23,7 @@ void Engine::priv::EngineEventHandler::internal_dispatch_event(Event&& inEvent) 
     m_EventModule.m_EventDispatcher.dispatchEvent(std::move(inEvent));
 }
 
-void Engine::priv::EngineEventHandler::internal_on_event_resize(Window& window, uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize) {
+void Engine::priv::EngineEventHandler::internal_on_event_resize(Window& window, uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize, GameCore& gameCore) {
     m_RenderModule._resize(newWindowWidth, newWindowHeight);
     window.m_Data.internal_on_resize(newWindowWidth, newWindowHeight, saveSize);
     //resize cameras and viewports here
@@ -38,7 +38,7 @@ void Engine::priv::EngineEventHandler::internal_on_event_resize(Window& window, 
             }
         }
     }
-    Game::onResize(window, newWindowWidth, newWindowHeight);
+    Game::onResize(window, newWindowWidth, newWindowHeight, gameCore);
     internal_dispatch_event(Event{ EventType::WindowResized, EventWindowResized{ newWindowWidth, newWindowHeight } });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_game_ended() {
@@ -56,14 +56,14 @@ void Engine::priv::EngineEventHandler::internal_on_event_window_requested_closed
     Game::onWindowRequestedToBeClosed(window);
     window.close();
 }
-void Engine::priv::EngineEventHandler::internal_on_event_lost_focus(Window& window) {
+void Engine::priv::EngineEventHandler::internal_on_event_lost_focus(Window& window, GameCore& gameCore) {
     m_EventModule.onWindowLostFocus();
-    Game::onLostFocus(window);
+    Game::onLostFocus(window, gameCore);
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowLostFocus);
 }
-void Engine::priv::EngineEventHandler::internal_on_event_gained_focus(Window& window) {
+void Engine::priv::EngineEventHandler::internal_on_event_gained_focus(Window& window, GameCore& gameCore) {
     m_EventModule.onWindowGainedFocus();
-    Game::onGainedFocus(window);
+    Game::onGainedFocus(window, gameCore);
     window.m_Data.internal_update_on_reset_events(0.0f);
     m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowGainedFocus);
 }
@@ -114,21 +114,21 @@ void Engine::priv::EngineEventHandler::internal_on_event_mouse_button_released(W
     Game::onMouseButtonReleased(window, mouseButton);
     internal_dispatch_event(Event{ EventType::MouseButtonReleased, EventMouseButton( mouseButton, window ) });
 }
-void Engine::priv::EngineEventHandler::internal_on_event_mouse_moved(Window& window, int mouseX, int mouseY) {
+void Engine::priv::EngineEventHandler::internal_on_event_mouse_moved(Window& window, int mouseX, int mouseY, GameCore& gameCore) {
     const float mX = float(mouseX);
     const float mY = float(mouseY);
     if (window.hasFocus()) {
         window.updateMousePosition(mX, mY, false, false);
     }
-    Game::onMouseMoved(window, mX, mY);
+    Game::onMouseMoved(window, mX, mY, gameCore);
     internal_dispatch_event(Event{ EventType::MouseMoved, EventMouseMove{ mX, mY } });
 }
-void Engine::priv::EngineEventHandler::internal_on_event_mouse_entered(Window& window) {
-    Game::onMouseEntered(window);
+void Engine::priv::EngineEventHandler::internal_on_event_mouse_entered(Window& window, GameCore& gameCore) {
+    Game::onMouseEntered(window, gameCore);
     internal_dispatch_event(Event{ EventType::MouseEnteredWindow, EventMouseMove{ window } });
 }
-void Engine::priv::EngineEventHandler::internal_on_event_mouse_left(Window& window) {
-    Game::onMouseLeft(window);
+void Engine::priv::EngineEventHandler::internal_on_event_mouse_left(Window& window, GameCore& gameCore) {
+    Game::onMouseLeft(window, gameCore);
     internal_dispatch_event(Event{ EventType::MouseLeftWindow, EventMouseMove{ window } });
 }
 void Engine::priv::EngineEventHandler::internal_on_event_joystick_button_pressed(Window& window, uint32_t button, uint32_t id) {
@@ -151,7 +151,7 @@ void Engine::priv::EngineEventHandler::internal_on_event_joystick_disconnected(W
     Game::onJoystickDisconnected();
     internal_dispatch_event(Event{ EventType::JoystickDisconnected, EventJoystickConnection{ id } });
 }
-void Engine::priv::EngineEventHandler::poll_events(Window& window) {
+void Engine::priv::EngineEventHandler::poll_events(Window& window, GameCore& gameCore) {
     sf::Event e;
     while (window.pollEvents(e)) {
         m_EditorCore.processEvent(e);
@@ -159,9 +159,9 @@ void Engine::priv::EngineEventHandler::poll_events(Window& window) {
             case sf::Event::Closed: {
                 internal_on_event_window_requested_closed(window); break;
             } case sf::Event::LostFocus: {
-                internal_on_event_lost_focus(window); break;
+                internal_on_event_lost_focus(window, gameCore); break;
             } case sf::Event::GainedFocus: {
-                internal_on_event_gained_focus(window); break;
+                internal_on_event_gained_focus(window, gameCore); break;
             } case sf::Event::KeyReleased: {
                 internal_on_event_key_released(window, e.key.code); break;
             } case sf::Event::KeyPressed: {
@@ -171,15 +171,15 @@ void Engine::priv::EngineEventHandler::poll_events(Window& window) {
             } case sf::Event::MouseButtonReleased: {
                 internal_on_event_mouse_button_released(window, e.mouseButton.button); break;
             } case sf::Event::MouseEntered: {
-                internal_on_event_mouse_entered(window); break;
+                internal_on_event_mouse_entered(window, gameCore); break;
             } case sf::Event::MouseLeft: {
-                internal_on_event_mouse_left(window); break;
+                internal_on_event_mouse_left(window, gameCore); break;
             } case sf::Event::MouseWheelScrolled: {
                 internal_on_event_mouse_wheel_scrolled(window, e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y); break;
             } case sf::Event::MouseMoved: {
-                internal_on_event_mouse_moved(window, e.mouseMove.x, e.mouseMove.y); break;
+                internal_on_event_mouse_moved(window, e.mouseMove.x, e.mouseMove.y, gameCore); break;
             } case sf::Event::Resized: {
-                internal_on_event_resize(window, e.size.width, e.size.height, true); break;
+                internal_on_event_resize(window, e.size.width, e.size.height, true, gameCore); break;
             } case sf::Event::TextEntered: {
                 internal_on_event_text_entered(window, e.text.unicode); break;
             } case sf::Event::JoystickButtonPressed: {

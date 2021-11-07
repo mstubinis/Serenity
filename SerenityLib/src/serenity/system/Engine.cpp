@@ -58,17 +58,15 @@ using namespace Engine::priv;
 #endif
 
 EngineCore::EngineCore(const EngineOptions& options) 
-    : m_ResourceManager{ options }
-    , m_RenderModule{ options }
-    , m_Editor{ options }
+    : m_Editor            { options }
+    , m_RenderModule      { options }
+    , m_ResourceManager   { options }
     , m_EngineEventHandler{ m_Editor, m_EventModule, m_RenderModule, m_ResourceManager }
 {
     std::srand(static_cast<uint32_t>(std::time(0)));
     m_Misc.m_MainThreadID = std::this_thread::get_id();
 }
 EngineCore::~EngineCore() {
-    m_EngineEventHandler.internal_on_event_game_ended();
-    Game::cleanup();
     internal_cleanup_os_specific();
 }
 void EngineCore::internal_init_os_specific(const EngineOptions& options) {
@@ -103,7 +101,8 @@ void EngineCore::internal_cleanup_os_specific() {
     //    }
     //#endif
 }
-void EngineCore::init(const EngineOptions& options) {
+void EngineCore::init(const EngineOptions& options, GameCore* gameCore) {
+    m_GameCore = gameCore;
     internal_init_os_specific(options);
 
     m_ResourceManager.init(options);
@@ -115,13 +114,13 @@ void EngineCore::init(const EngineOptions& options) {
 
     //init the game here
     Engine::setMousePosition(options.width / 2, options.height / 2);
-    Game::initResources(options);
-    Game::initLogic(options);
+    Game::initResources(options, *gameCore);
+    Game::initLogic(options, *gameCore);
 
     //the scene is the root of all games. create the default scene if 1 does not exist already
     if (m_ResourceManager.m_Scenes.size() == 0) {
         Scene& defaultScene = Engine::Resources::addScene<Scene>("Default");
-        auto default_camera = defaultScene.addCamera<Camera>(60.0f, (float)options.width / (float)options.height, 0.01f, 1000.0f);
+        /*auto default_camera = */defaultScene.addCamera<Camera>(60.0f, (float)options.width / (float)options.height, 0.01f, 1000.0f);
         Engine::Resources::setCurrentScene(&defaultScene);
     }
     Engine::Renderer::ssao::setLevel((SSAOLevel::Level)options.ssao_level);
@@ -134,7 +133,7 @@ void EngineCore::internal_post_input_update(int frameIteration) {
     m_EventModule.m_KeyboardModule.postUpdate();
     m_EventModule.m_MouseModule.postUpdate();
 }
-void EngineCore::internal_update_logic(int frameIteration, Scene& scene, const float dt) {
+void EngineCore::internal_update_logic(GameCore& gameCore, int frameIteration, Scene& scene, const float dt) {
 #ifndef ENGINE_PRODUCTION
     using Clock = std::chrono::high_resolution_clock;
     auto start = Clock::now();
@@ -148,13 +147,13 @@ void EngineCore::internal_update_logic(int frameIteration, Scene& scene, const f
 
     m_DiscordModule.update();
 
-    Game::onPostUpdate(dt);
+    Game::onPostUpdate(dt, gameCore);
     scene.postUpdate(dt);
 #ifndef ENGINE_PRODUCTION
     Engine::priv::Core::m_Engine->m_DebugManager.calculate(DebugTimerTypes::Logic, std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - start));
 #endif
 }
-void EngineCore::internal_update_sounds(Scene& scene, const float dt) {
+void EngineCore::internal_update_sounds(GameCore& gameCore, Scene& scene, const float dt) {
 #ifndef ENGINE_PRODUCTION
     using Clock = std::chrono::high_resolution_clock;
     auto start = Clock::now();
@@ -164,20 +163,20 @@ void EngineCore::internal_update_sounds(Scene& scene, const float dt) {
     Engine::priv::Core::m_Engine->m_DebugManager.calculate(DebugTimerTypes::Sound, std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - start));
 #endif
 }
-void EngineCore::internal_pre_update(int frameIteration, Scene& scene, const float dt) {
-    Game::onPreUpdate(dt);
+void EngineCore::internal_pre_update(GameCore& gameCore, int frameIteration, Scene& scene, const float dt) {
+    Game::onPreUpdate(dt, gameCore);
     scene.preUpdate(dt);
 }
 void EngineCore::internal_post_update(Scene& scene, Window& window, const float dt) {
     m_EventModule.postUpdate();
     window.m_Data.internal_update_on_reset_events(dt);
 }
-void EngineCore::internal_render(Scene& scene, Window& window, const float dt, const double alpha) {
+void EngineCore::internal_render(GameCore& gameCore, Scene& scene, Window& window, const float dt, const double alpha) {
 #ifndef ENGINE_PRODUCTION
     using Clock = std::chrono::high_resolution_clock;
     auto start = Clock::now();
 #endif
-    Game::render();
+    Game::render(gameCore);
     if (!scene.m_SkipRenderThisFrame) {
         scene.render();
         m_Editor.renderLightIcons(scene);
@@ -220,30 +219,30 @@ double Engine::getFPS() noexcept {
 void Engine::stop() noexcept {
     Core::m_Engine->m_Misc.m_Destroyed = true;
 }
-void EngineCore::run() {
-    using  seconds           = std::chrono::duration<double, std::chrono::seconds>;
+void EngineCore::run(GameCore* gameCore) {
+    //using  seconds           = std::chrono::duration<double, std::chrono::seconds>;
     double accumulator       = ENGINE_FIXED_TIMESTEP_VALUE_D;
     auto   currentTime       = m_Misc.m_Timer.now();
 
-    auto   updateWindows     = [this](const float timeElasped, Scene& scene) {
+    auto   updateWindows     = [this, gameCore](const float timeElasped, Scene& scene) {
         for (const auto& window : m_ResourceManager.m_Windows) {
             internal_post_update(scene, *window, timeElasped);
-            m_EngineEventHandler.poll_events(*window);
+            m_EngineEventHandler.poll_events(*window, *gameCore);
             m_Editor.update(*window, timeElasped);
             window->internal_update_dynamic_resize();
         }
     };
-    auto   updateSimulation  = [this](int& frameIteration, const float timeElasped, Scene& scene) {
-        internal_pre_update(frameIteration, scene, timeElasped);
-        internal_update_logic(frameIteration, scene, timeElasped);
+    auto   updateSimulation  = [this, gameCore](int& frameIteration, const float timeElasped, Scene& scene) {
+        internal_pre_update(*gameCore, frameIteration, scene, timeElasped);
+        internal_update_logic(*gameCore, frameIteration, scene, timeElasped);
         internal_post_input_update(frameIteration);
         ++frameIteration;
     };
-    auto   renderSimulation  = [this, accumulator](Scene& scene) {
+    auto   renderSimulation  = [this, accumulator, gameCore](Scene& scene) {
         const double alpha = accumulator / ENGINE_FIXED_TIMESTEP_VALUE_D;
         //State state = currentState * alpha + previousState * (1.0 - alpha);
         for (const auto& window : m_ResourceManager.m_Windows) {
-            internal_render(scene, *window, float(m_Misc.m_Dt), alpha/*, state*/);
+            internal_render(*gameCore, scene, *window, float(m_Misc.m_Dt), alpha/*, state*/);
         }
     };
     int frameIteration = 0;
@@ -267,11 +266,13 @@ void EngineCore::run() {
             accumulator -= ENGINE_FIXED_TIMESTEP_VALUE_D;
         }
         if (frameIteration > 0) {
-            internal_update_sounds(scene, float(m_Misc.m_Dt));
+            internal_update_sounds(*gameCore, scene, float(m_Misc.m_Dt));
         }
         renderSimulation(scene);
         internal_cleanup();
         m_DebugManager.calculate();
         m_Misc.m_FPS.update(m_Misc.m_Dt);  
     }
+    m_EngineEventHandler.internal_on_event_game_ended();
+    Game::cleanup();
 }

@@ -32,7 +32,7 @@ namespace Engine::Networking {
             SocketTCP(uint16_t port, sf::IpAddress);
             SocketTCP(const SocketTCP&)                 = delete;
             SocketTCP& operator=(const SocketTCP&)      = delete;
-            ~SocketTCP();
+            virtual ~SocketTCP();
 
             void disconnect();
             void setBlocking(bool blocking) override { m_SocketTCP.setBlocking(blocking); }

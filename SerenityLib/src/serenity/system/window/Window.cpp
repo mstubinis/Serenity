@@ -27,7 +27,7 @@ void Window::init(const EngineOptions& options) noexcept {
     m_Data.m_WindowTitle       = options.window_title;
     m_Data.m_VideoMode         = sf::VideoMode{ options.width, options.height, m_Data.m_VideoMode.bitsPerPixel };
     m_Data.m_SFContextSettings = m_Data.internal_create(*this, options.window_title);
-    int opengl_version         = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
+    //int opengl_version         = std::stoi(std::to_string(m_Data.m_SFContextSettings.majorVersion) + std::to_string(m_Data.m_SFContextSettings.minorVersion));
     Engine::priv::Core::m_Engine->m_RenderModule._onOpenGLContextCreation(m_Data.m_VideoMode.width, m_Data.m_VideoMode.height);
 
     m_Data.internal_init_position(*this);
@@ -91,7 +91,7 @@ void Window::internal_update_dynamic_resize() {
 
         if (current_size.x != old_size.x || current_size.y != old_size.y) {
             Window::setSize(current_size.x, current_size.y);
-            Engine::priv::Core::m_Engine->m_EngineEventHandler.internal_on_event_resize(*this, current_size.x, current_size.y, true);
+            Engine::priv::Core::m_Engine->m_EngineEventHandler.internal_on_event_resize(*this, current_size.x, current_size.y, true, *Engine::priv::Core::m_Engine->m_GameCore);
         }
     #endif
 }

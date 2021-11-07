@@ -41,7 +41,7 @@ void MaterialRequest::internal_set_async(bool inAsync) noexcept {
 void MaterialRequest::internal_init_material_components() noexcept {
     for (size_t i = 0; i < m_Part.m_TextureRequests.size(); ++i) {
         if (m_Part.m_TextureRequests[i]->m_FileData.m_FileExists) {
-            auto& component = m_Part.m_Handle.get<Material>()->addComponent(uint32_t(i), {});
+            /*auto& component = */m_Part.m_Handle.get<Material>()->addComponent(uint32_t(i), {});
         }
     }
 }

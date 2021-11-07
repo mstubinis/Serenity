@@ -137,24 +137,24 @@ struct SMSH_Fileheader final {
 };
 
 struct SMSH_AttributeNoBuffer {
-    uint8_t     m_Normalized              = 0;
     uint32_t    m_Stride                  = 0;
-    uint32_t    m_AttributeType           = (uint32_t)SMSH_AttributeDataType::Float;
+    uint32_t    m_AttributeType           = uint32_t(SMSH_AttributeDataType::Float);
     uint32_t    m_SizeOfAttribute         = 0;
     uint32_t    m_AttributeBufferSize     = 0;
-    uint32_t    m_AttributeComponentCount = (uint32_t)SMSH_AttributeComponentSize::_4;
+    uint32_t    m_AttributeComponentCount = uint32_t(SMSH_AttributeComponentSize::_4);
     uint32_t    m_Offset                  = 0;
+    uint8_t     m_Normalized              = 0;
 
     SMSH_AttributeNoBuffer() = default;
 
     SMSH_AttributeNoBuffer(SMSH_AttributeDataType type, uint32_t componentCount, uint32_t offset, uint8_t normalized, uint32_t stride, uint32_t sizeOfAttr, uint32_t attributeBufferSize)
-        : m_AttributeType{ (uint32_t)type }
+        : m_Stride                 { stride }
+        , m_AttributeType          { uint32_t(type) }
+        , m_SizeOfAttribute        { sizeOfAttr }
+        , m_AttributeBufferSize    { attributeBufferSize }
         , m_AttributeComponentCount{ componentCount }
-        , m_Offset{ offset }
-        , m_Normalized{ normalized }
-        , m_Stride{ stride }
-        , m_SizeOfAttribute{ sizeOfAttr }
-        , m_AttributeBufferSize{ attributeBufferSize }
+        , m_Offset                 { offset }
+        , m_Normalized             { normalized }
     {}
 };
 

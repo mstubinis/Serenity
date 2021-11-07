@@ -16,7 +16,7 @@
 #pragma region PhysicsPipeline
 
 Engine::priv::PhysicsPipeline::PhysicsPipeline() {
-    auto hardware_concurrency = Engine::hardware_concurrency();
+    const auto hardware_concurrency = Engine::hardware_concurrency();
     m_Broadphase              = std::make_unique<btDbvtBroadphase>();
     m_CollisionConfiguration  = std::make_unique<btDefaultCollisionConfiguration>();
     m_Dispatcher              = std::make_unique<btCollisionDispatcher>(m_CollisionConfiguration.get());

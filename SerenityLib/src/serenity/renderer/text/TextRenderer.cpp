@@ -3,7 +3,7 @@
 #include <serenity/system/Engine.h>
 
 namespace {
-    constexpr const glm::u8vec4 WHITE = glm::u8vec4(255_uc, 255_uc, 255_uc, 255_uc);
+    //constexpr const glm::u8vec4 WHITE = glm::u8vec4(255_uc, 255_uc, 255_uc, 255_uc);
 }
 
 
@@ -13,7 +13,7 @@ namespace {
 
     uint8_t internal_hex_to_color(const std::string& hex) {
         uint8_t res = 0;
-        for (const auto character : hex) {
+        for (const char character : hex) {
             int number;
             if (character >= 'A' && character <= 'F') {
                 number = (character - 'A' + 10);

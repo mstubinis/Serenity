@@ -8,6 +8,11 @@
 
 #include <serenity/utils/Utils.h>
 
+namespace {
+    std::vector<uint32_t> TEMP_BUFFER;
+}
+
+
 SystemTransformParentChild::SystemTransformParentChild(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
@@ -75,7 +80,7 @@ void SystemTransformParentChild::syncRigidToTransform(ComponentRigidBody* rigidB
         if (collisionShape && collisionShape->isChildShape()) {
             const auto& parentWorldMatrix  = m_WorldTransforms[collisionShape->getParent().id()];
             auto localMatrix               = glm::inverse(parentWorldMatrix) * thisWorldMatrix;
-            const auto localScale          = Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(localMatrix);
+            /*const auto localScale = */Engine::Math::removeMatrixScale<glm_mat4, glm_vec3>(localMatrix);
             collisionShape->updateChildShapeTransform(localMatrix);
         } else {
             rigidBody->internal_set_matrix(thisWorldMatrix);
@@ -162,19 +167,22 @@ void SystemTransformParentChild::removeChild(uint32_t parentID, uint32_t childID
         return;
     }
     auto childBlock         = getBlockIndices(childID);  //O(order.size())
-    uint32_t childBlockSize = (childBlock.second - childBlock.first) + 1;
-    if (childBlockSize == 1) {
-        m_Order.erase(std::cbegin(m_Order) + childBlock.first);
-    } else {
-        auto temp = Engine::create_and_reserve<std::vector<uint32_t>>(childBlockSize);
-        for (uint32_t i = childBlock.first; i <= childBlock.second; ++i) {
-            temp.push_back(m_Order[i]);
+    if (childBlock.first != NULL_IDX) {
+        uint32_t childBlockSize = (childBlock.second - childBlock.first) + 1;
+        if (childBlockSize == 1) {
+            m_Order.erase(std::cbegin(m_Order) + childBlock.first);
+        } else {
+            TEMP_BUFFER.clear();
+            TEMP_BUFFER.reserve(childBlockSize);
+            for (uint32_t i = childBlock.first; i <= childBlock.second; ++i) {
+                TEMP_BUFFER.push_back(m_Order[i]);
+            }
+            m_Order.erase(std::cbegin(m_Order) + childBlock.first, std::cbegin(m_Order) + childBlock.second + 1);
+            m_Order.insert(std::cend(m_Order), std::begin(TEMP_BUFFER), std::end(TEMP_BUFFER));
         }
-        m_Order.erase(std::cbegin(m_Order) + childBlock.first, std::cbegin(m_Order) + childBlock.second + 1);
-        m_Order.insert(std::cend(m_Order), std::begin(temp), std::end(temp));
-    }
-    if (parentBlock.first == m_Order.size() - 1 || getParent(m_Order[parentBlock.first + 1]) == NULL_IDX) { //TODO: check for out of bounds possibility
-        m_Order.erase(std::cbegin(m_Order) + parentBlock.first);
+        if (parentBlock.first == m_Order.size() - 1 || getParent(m_Order[parentBlock.first + 1]) == NULL_IDX) { //TODO: check for out of bounds possibility
+            m_Order.erase(std::cbegin(m_Order) + parentBlock.first);
+        }
     }
     getParent(childID) = NULL_IDX;
 }

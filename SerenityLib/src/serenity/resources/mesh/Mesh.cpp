@@ -520,23 +520,23 @@ Mesh::Mesh(std::string_view fileOrData, float threshold)
         if (line[0] == 'o') {
 
         } else if (line[0] == 'v' && line[1] == ' ') {
-            if (flags && Engine::priv::MeshLoadingFlags::Points) {
+            if (flags & Engine::priv::MeshLoadingFlags::Points) {
                 auto& p = data.m_FilePoints.emplace_back();
-                auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
+                std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &p.x, &p.y, &p.z);
             }
         } else if (line[0] == 'v' && line[1] == 't') {
-            if (flags && Engine::priv::MeshLoadingFlags::UVs) {
+            if (flags & Engine::priv::MeshLoadingFlags::UVs) {
                 auto& uv = data.m_FileUVs.emplace_back();
-                auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
+                std::sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
                 uv.y = 1.0f - uv.y;
             }
         } else if (line[0] == 'v' && line[1] == 'n') {
-            if (flags && Engine::priv::MeshLoadingFlags::Normals) {
+            if (flags & Engine::priv::MeshLoadingFlags::Normals) {
                 auto& n = data.m_FileNormals.emplace_back();
-                auto res = std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
+                std::sscanf(line.substr(2, line.size()).c_str(), "%f %f %f", &n.x, &n.y, &n.z);
             }
         } else if (line[0] == 'f' && line[1] == ' ') {
-            if (flags && Engine::priv::MeshLoadingFlags::Faces) {
+            if (flags & Engine::priv::MeshLoadingFlags::Faces) {
                 glm::uvec3 f1, f2, f3, f4 = glm::uvec3{ 1 };
                 int matches = std::sscanf(line.substr(2, line.size()).c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d", &f1.x, &f1.y, &f1.z, &f2.x, &f2.y, &f2.z, &f3.x, &f3.y, &f3.z, &f4.x, &f4.y, &f4.z);
                 if (matches < 3) {

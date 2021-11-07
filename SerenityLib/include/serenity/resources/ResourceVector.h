@@ -24,7 +24,6 @@ namespace Engine::priv {
 namespace Engine::priv {
     template<class RESOURCE>
     class ResourceVector final : public IResourceVector {
-
         struct Entry final {
             RESOURCE*  m_Resource  = nullptr;
             uint32_t   m_Version   = 0;
@@ -36,12 +35,14 @@ namespace Engine::priv {
             Entry(const Entry&)                = delete;
             Entry& operator=(const Entry&)     = delete;
             Entry(Entry&& other) noexcept
-                : m_Version  { std::move(other.m_Version) }
-                , m_Resource { std::exchange(other.m_Resource, nullptr) }
+                : m_Resource{ std::exchange(other.m_Resource, nullptr) }
+                , m_Version  { std::move(other.m_Version) }
             {}
             Entry& operator=(Entry&& other) noexcept {
-                m_Version    = std::move(other.m_Version);
-                m_Resource   = std::exchange(other.m_Resource, nullptr);
+                if (this != &other) {
+                    m_Resource = std::exchange(other.m_Resource, nullptr);
+                    m_Version  = std::move(other.m_Version);
+                }
                 return *this;
             }
             ~Entry() {
@@ -65,7 +66,7 @@ namespace Engine::priv {
             ResourceVector(ResourceVector&&) noexcept            = delete;
             ResourceVector& operator=(ResourceVector&&) noexcept = delete;
 
-            [[nodiscard]] inline constexpr size_t size() const noexcept override {
+            [[nodiscard]] inline size_t size() const noexcept override {
                 return m_Resources.size(); 
             }
             void shrink_to_fit() override {

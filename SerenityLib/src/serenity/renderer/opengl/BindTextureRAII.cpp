@@ -6,10 +6,10 @@
 #include <serenity/resources/texture/TextureCubemap.h>
 
 Engine::priv::OpenGLBindTextureRAII::OpenGLBindTextureRAII(std::string_view location, GLuint address, GLuint textureTypeAsGL, int slot, bool safe)
-    : m_TextureTypeAsGL{ textureTypeAsGL }
-    , m_Location{ location }
-    , m_Slot{ slot }
-    , m_Safe{ safe }
+    : m_Location       { location }
+    , m_TextureTypeAsGL{ textureTypeAsGL }
+    , m_Slot           { slot }
+    , m_Safe           { safe }
 {
     bind(address);
 }

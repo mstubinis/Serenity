@@ -3,15 +3,16 @@
 #endif
 
 #include <serenity/discord/src/core.h>
+#include <serenity/system/Macros.h>
 
 #include <cstring>
 #include <memory>
-#include <iostream>
+//#include <iostream>
 
 discord::Result discord::Core::Create(ClientId clientId, std::uint64_t flags, Core** instance)
 {
     if (!instance) {
-        std::cout << "Error in creating Discord core module - the Core** instance parameter needs to exist!\n";
+        //std::cout << "Error in creating Discord core module - the Core** instance parameter needs to exist!\n";
         return Result::InternalError;
     }
 
@@ -35,7 +36,7 @@ discord::Result discord::Core::Create(ClientId clientId, std::uint64_t flags, Co
     if (result != DiscordResult_Ok || !(*instance)->internal_) {
         delete (*instance);
         (*instance) = nullptr;
-        std::cout << "Error in creating Discord core module!\n";
+        //std::cout << "Error in creating Discord core module!\n";
     }
 
     return static_cast<Result>(result);
@@ -68,8 +69,7 @@ void discord::Core::SetLogHook(LogLevel minLevel, std::function<void(LogLevel, c
         (*cb)(static_cast<LogLevel>(level), static_cast<const char*>(message));
     };
 
-    internal_->set_log_hook(
-      internal_, static_cast<EDiscordLogLevel>(minLevel), &setLogHook_, wrapper);
+    internal_->set_log_hook(internal_, static_cast<EDiscordLogLevel>(minLevel), &setLogHook_, wrapper);
 }
 
 discord::ApplicationManager& discord::Core::ApplicationManager()

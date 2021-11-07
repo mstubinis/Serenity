@@ -45,8 +45,8 @@ namespace Engine::priv {
                     return false;
                 }
                 light->destroy();
-                auto resultEraseLight           = std::erase_if(m_Lights,        [&light](auto& itr) { return itr == light; });
-                auto resultEraseLightShdwCaster = std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
+                std::erase_if(m_Lights,        [&light](auto& itr) { return itr == light; });
+                std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
                 SAFE_DELETE(light);
                 return true;
             }
@@ -58,7 +58,7 @@ namespace Engine::priv {
                     }
                 }else{
                     const auto result = std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
-                    return (bool)result;
+                    return bool(result);
                 }
                 return false;
             }

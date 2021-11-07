@@ -19,8 +19,8 @@ void ProjectionLight::recalc_frustum_points() noexcept {
     //4-7 : far plane
     //both in order: top left, top right, btm left, btm right
 
-    Texture* texture = m_Texture.get<Texture>();
-    glm::vec2 texture_dimension_ratio = (texture) ? texture->sizeAsRatio() : glm::vec2{ 1.0f };
+    //Texture* texture = m_Texture.get<Texture>();
+    //glm::vec2 texture_dimension_ratio = (texture) ? texture->sizeAsRatio() : glm::vec2{ 1.0f };
     std::array<glm::vec2, 4> offsets = {
         glm::vec2{-1.0f,  1.0f},
         glm::vec2{ 1.0f,  1.0f},

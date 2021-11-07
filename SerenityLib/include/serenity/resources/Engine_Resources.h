@@ -34,19 +34,20 @@ class  SystemSceneChanging;
 
 namespace Engine::priv {
     class ResourceManager final{
-        friend class  Scene;
-        friend class  SystemSceneChanging;
+        friend class  ::Scene;
+        friend class  ::SystemSceneChanging;
         public:
             static Engine::view_ptr<ResourceManager> RESOURCE_MANAGER;
         public:
             ResourceModule                         m_ResourceModule;
             std::vector<std::unique_ptr<Window>>   m_Windows;
-            std::vector<std::unique_ptr<Scene>>    m_Scenes;
+            std::vector<Scene*>                    m_Scenes;
             std::vector<Scene*>                    m_ScenesToBeDeleted;
-            std::tuple<Scene*, Scene*, bool>       m_SceneSwap = {nullptr, nullptr, false}; // { oldScene, newScene, isSwapOccuring }
-            Scene*                                 m_CurrentScene = nullptr;
+            std::tuple<Scene*, Scene*, bool>       m_SceneSwap          = {nullptr, nullptr, false}; // { oldScene, newScene, isSwapOccuring }
+            Scene*                                 m_CurrentScene       = nullptr;
         public:
             ResourceManager(const EngineOptions&);
+            ~ResourceManager();
 
             void postUpdate();
 
@@ -59,7 +60,7 @@ namespace Engine::priv {
 
             [[nodiscard]] Engine::view_ptr<Scene> getSceneByID(uint32_t sceneID);
 
-            [[nodiscard]] inline constexpr std::vector<std::unique_ptr<Scene>>& scenes() noexcept { return m_Scenes; }
+            [[nodiscard]] inline constexpr std::vector<Scene*>& scenes() noexcept { return m_Scenes; }
 
             template<class TResource>
             [[nodiscard]] inline std::list<Engine::view_ptr<TResource>> GetAllResourcesOfType() noexcept {
@@ -79,12 +80,12 @@ namespace Engine::Resources {
         auto& mgr = *Engine::priv::ResourceManager::RESOURCE_MANAGER;
         for (uint32_t i = 0; i < mgr.m_Scenes.size(); ++i) {
             if (mgr.m_Scenes[i] == nullptr) {
-                mgr.m_Scenes[i].reset( NEW T{ i, std::forward<ARGS>(args)... } );
-                return *static_cast<T*>(mgr.m_Scenes[i].get());
+                mgr.m_Scenes[i] = NEW T{ i, std::forward<ARGS>(args)... };
+                return *static_cast<T*>(mgr.m_Scenes[i]);
             }
         }
-        mgr.m_Scenes.emplace_back(std::unique_ptr<T>( NEW T{ uint32_t(mgr.m_Scenes.size()), std::forward<ARGS>(args)... } ));
-        return *static_cast<T*>(mgr.m_Scenes.back().get());
+        mgr.m_Scenes.emplace_back( NEW T{ uint32_t(mgr.m_Scenes.size()), std::forward<ARGS>(args)... } );
+        return *static_cast<T*>(mgr.m_Scenes.back());
     }
 
     [[nodiscard]] std::mutex& getMutex() noexcept;
@@ -102,7 +103,7 @@ namespace Engine::Resources {
 
     [[nodiscard]] Engine::view_ptr<Scene> getScene(std::string_view sceneName);
     bool deleteScene(std::string_view sceneName);
-    bool deleteScene(Scene& scene);
+    bool deleteScene(Scene&);
 
     [[nodiscard]] std::vector<Handle> loadMesh(
         std::string_view fileOrData,

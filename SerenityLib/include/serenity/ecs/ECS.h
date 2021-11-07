@@ -44,6 +44,7 @@ namespace Engine::priv {
             ~ECS();
 
             void init(const SceneOptions&);
+            void destruct();
 
             [[nodiscard]] inline const ECSEntityPool& getEntityPool() const noexcept { return m_EntityPool; }
             [[nodiscard]] Entity createEntity(Scene&);

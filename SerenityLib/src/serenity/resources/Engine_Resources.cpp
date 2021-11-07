@@ -31,6 +31,9 @@ Engine::priv::ResourceManager::ResourceManager(const EngineOptions& options) {
     m_ResourceModule.registerResourceTypeID<UniformBufferObject>();
     m_ResourceModule.registerResourceTypeID<SoundData>();
 }
+Engine::priv::ResourceManager::~ResourceManager() {
+    SAFE_DELETE_VECTOR(m_Scenes);
+}
 void Engine::priv::ResourceManager::init(const EngineOptions& options){
     m_Windows.push_back(std::make_unique<Window>());
     m_Windows.back()->init(options);
@@ -41,7 +44,7 @@ void Engine::priv::ResourceManager::postUpdate() {
             if (m_ScenesToBeDeleted[i]) {
                 for (size_t j = 0; j < m_Scenes.size(); ++j) {
                     if (m_Scenes[j] && m_Scenes[j]->name() == m_ScenesToBeDeleted[i]->name()) {
-                        m_Scenes[j].reset(nullptr);
+                        SAFE_DELETE(m_Scenes[j]);
                         m_ScenesToBeDeleted[i] = nullptr;
                         break;
                     }
@@ -52,7 +55,7 @@ void Engine::priv::ResourceManager::postUpdate() {
     }   
 }
 Engine::view_ptr<Scene> Engine::priv::ResourceManager::getSceneByID(uint32_t id) {
-    return id < m_Scenes.size() ? m_Scenes[id].get() : nullptr;
+    return id < m_Scenes.size() ? m_Scenes[id] : nullptr;
 }
 
 
@@ -110,7 +113,7 @@ bool Engine::Resources::deleteScene(Scene& scene) {
 Engine::view_ptr<Scene> Engine::Resources::getScene(std::string_view sceneName){
     for (auto& scene_ptr : Engine::priv::ResourceManager::RESOURCE_MANAGER->m_Scenes) {
         if (scene_ptr && scene_ptr->name() == sceneName) {
-            return scene_ptr.get();
+            return scene_ptr;
         }
     }
     return nullptr;
@@ -200,8 +203,8 @@ Handle Engine::Resources::addShader(std::string_view fileOrData, ShaderType type
     return Engine::Resources::addResource<Shader>(fileOrData, type, fromFile);
 }
 Handle Engine::Resources::addShaderProgram(std::string_view n, Handle v, Handle f){
-    auto vertexShader   = Engine::Resources::getResource<Shader>(v);
-    auto fragmentShader = Engine::Resources::getResource<Shader>(f);
+    //auto vertexShader   = Engine::Resources::getResource<Shader>(v);
+    //auto fragmentShader = Engine::Resources::getResource<Shader>(f);
     return Engine::Resources::addResource<ShaderProgram>(n, v, f);
 }
 bool Engine::Resources::setCurrentScene(Scene* newScene){

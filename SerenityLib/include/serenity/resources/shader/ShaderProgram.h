@@ -45,8 +45,8 @@ struct ShaderProgramParameters final {
 };
 
 class ShaderProgram final : public Resource<ShaderProgram> {
-    friend class  UniformBufferObject;
-    friend class  Shader;
+    friend class  ::UniformBufferObject;
+    friend class  ::Shader;
     friend class  Engine::priv::PublicShaderProgram;
     friend class  Engine::priv::RenderModule;
     friend class  Engine::priv::IRenderingPipeline;
@@ -81,8 +81,8 @@ class ShaderProgram final : public Resource<ShaderProgram> {
 
         //inline constexpr operator GLuint() const noexcept { return m_ShaderProgram; }
 
-        void load() override;
-        void unload() override;
+        void load();
+        void unload();
 
         [[nodiscard]] inline constexpr GLuint program() const noexcept { return m_ShaderProgram; }
         [[nodiscard]] inline const UniformsContainer& uniforms() const noexcept { return m_UniformLocations; }

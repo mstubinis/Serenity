@@ -68,18 +68,18 @@ void Engine::priv::RenderGraph::internal_removeModelInstanceFromPipeline(ModelIn
     remove_material_node(materialNode);
 }
 bool Engine::priv::RenderGraph::remove_material_node(const MaterialNode* materialNode) {
-    if (materialNode) {
+    if (materialNode && materialNode->meshNodes.size() == 0) { //only remove if we have no more mesh nodes
         size_t removedMaterialNodes = Engine::swap_and_pop_single(m_MaterialNodes, [](auto& item, const MaterialNode* inMaterialNode) {
-            return &item == inMaterialNode && inMaterialNode->meshNodes.size() == 0;
+            return &item == inMaterialNode;
         }, materialNode);
         return removedMaterialNodes > 0;
     }
     return false;
 }
 bool Engine::priv::RenderGraph::remove_mesh_node(MaterialNode* materialNode, const MeshNode* meshNode) {
-    if (materialNode && meshNode) {
+    if (materialNode && meshNode && meshNode->instanceNodes.size() == 0) { //only remove if we have no more instance nodes
         size_t removedMeshNodes = Engine::swap_and_pop_single(materialNode->meshNodes, [](auto& item, const MeshNode* inMeshNode) {
-            return &item == inMeshNode && inMeshNode->instanceNodes.size() == 0;
+            return &item == inMeshNode;
         }, meshNode);
         return removedMeshNodes > 0;
     }

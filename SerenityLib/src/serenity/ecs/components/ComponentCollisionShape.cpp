@@ -268,8 +268,6 @@ void ComponentCollisionShape::setCollision(btCollisionShape* shape) {
     //SAFE_DELETE(m_BtCollisionShape);
     m_BtCollisionShape = shape;
 
-    auto& deferredSystem = Engine::priv::ComponentCollisionShapeDeferredLoading::get();
-
     //we dont need the old collision that was going to be assigned to this entity once its loaded anymore since we are changing it
     internal_cleanup_single_using_entity(m_Owner);
     internal_cleanup_multi_using_entity(m_Owner);

@@ -243,7 +243,7 @@ bool RenderModule::bind(Mesh* mesh) const {
     return res;
 }
 bool RenderModule::unbind(Mesh* mesh) const {
-    bool res = m_Pipeline->unbind(mesh);
+    m_Pipeline->unbind(mesh);
     if (mesh->isLoaded()) {
         mesh->m_CustomUnbindFunctor(mesh, this);
     } else {

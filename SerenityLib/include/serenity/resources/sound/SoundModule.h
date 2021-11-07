@@ -20,7 +20,7 @@ constexpr uint32_t MAX_SOUND_MUSIC   = 6;
 
 namespace Engine::priv {
     class SoundModule final {
-        friend class SoundQueue;
+        friend class ::SoundQueue;
         private:
             std::stack<uint32_t>                       m_FreelistEffects;
             std::stack<uint32_t>                       m_FreelistMusics;

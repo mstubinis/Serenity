@@ -4,6 +4,7 @@
 
 #include <serenity/discord/src/image_manager.h>
 #include <serenity/discord/src/core.h>
+#include <serenity/system/Macros.h>
 
 #include <cstring>
 #include <memory>
@@ -24,7 +25,7 @@ void ImageManager::Fetch(ImageHandle handle,
         (*cb)(static_cast<Result>(result), *reinterpret_cast<ImageHandle const*>(&handleResult));
     };
     std::unique_ptr<std::function<void(Result, ImageHandle)>> cb{};
-    cb.reset(new std::function<void(Result, ImageHandle)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result, ImageHandle)>(std::move(callback)));
     internal_->fetch(internal_,
                      *reinterpret_cast<DiscordImageHandle const*>(&handle),
                      (refresh ? 1 : 0),

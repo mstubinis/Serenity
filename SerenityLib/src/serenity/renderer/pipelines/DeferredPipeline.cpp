@@ -224,8 +224,8 @@ void DeferredPipeline::internal_gl_scissor(const glm::vec4& scissor, float depth
 }
 void DeferredPipeline::init() {
     const auto window_size = Engine::Resources::getWindowSize();
-    const auto majorVersion = Engine::priv::OpenGLState::constants.MAJOR_VERSION;
-    const auto minorVersion = Engine::priv::OpenGLState::constants.MINOR_VERSION;
+    //const auto majorVersion = Engine::priv::OpenGLState::constants.MAJOR_VERSION;
+    //const auto minorVersion = Engine::priv::OpenGLState::constants.MINOR_VERSION;
     m_2DProjectionMatrix   = glm::ortho(0.0f, float(window_size.x), 0.0f, float(window_size.y), 0.005f, 99999999.0f);
 
     const float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -1353,7 +1353,7 @@ bool DeferredPipeline::internal_pass_depth_prepass(Viewport& viewport, Camera& c
 }
 void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera) {
     Scene& scene           = viewport.getScene();
-    const glm::vec4& clear = viewport.getBackgroundColor();
+    //const glm::vec4& clear = viewport.getBackgroundColor();
 
     m_GBuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
     Engine::Renderer::Settings::clear(true, false, false); // clear color only

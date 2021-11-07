@@ -13,7 +13,6 @@ namespace Engine::priv {
 #include <serenity/lua/LuaIncludes.h>
 #include <serenity/lua/LuaState.h>
 
-
 constexpr const uint32_t ENTITY_NULL_ID = std::numeric_limits<uint32_t>().max();
 inline constexpr uint32_t getMaxEntityIDBits(uint32_t bits) { return (1 << bits) - 1; }
 
@@ -21,9 +20,9 @@ inline constexpr uint32_t getMaxEntityIDBits(uint32_t bits) { return (1 << bits)
 class Entity {
     friend class  Engine::priv::ECSEntityPool;
     private:
-        uint32_t        m_ID : ID_BIT_POSITIONS      = ENTITY_NULL_ID;
-        uint32_t   m_SceneID : SCENE_BIT_POSITIONS   = ENTITY_NULL_ID;
-        uint32_t m_VersionID : VERSION_BIT_POSITIONS = ENTITY_NULL_ID;
+        uint32_t        m_ID : ID_BIT_POSITIONS      = getMaxEntityIDBits(ID_BIT_POSITIONS);
+        uint32_t   m_SceneID : SCENE_BIT_POSITIONS   = getMaxEntityIDBits(SCENE_BIT_POSITIONS);
+        uint32_t m_VersionID : VERSION_BIT_POSITIONS = getMaxEntityIDBits(VERSION_BIT_POSITIONS);
     public:
         constexpr Entity() = default;
         Entity(Scene&);

@@ -4,6 +4,7 @@
 
 struct EngineOptions;
 class  Window;
+class  GameCore;
 namespace Engine::priv {
     class WindowData;
 };
@@ -27,19 +28,19 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     class EngineCore final {
-        friend class Window;
+        friend class ::Window;
         friend class Engine::priv::WindowData;
         private:
             void internal_init_os_specific(const EngineOptions&);
             void internal_cleanup_os_specific();
 
             void internal_post_input_update(int frameIteration);
-            void internal_pre_update(int frameIteration, Scene&, const float dt);
+            void internal_pre_update(GameCore&, int frameIteration, Scene&, const float dt);
             void internal_post_update(Scene&, Window&, const float dt);
 
-            void internal_update_logic(int frameIteration, Scene&, const float dt);
-            void internal_update_sounds(Scene&, const float dt);
-            void internal_render(Scene&, Window&, const float dt, const double alpha);
+            void internal_update_logic(GameCore&, int frameIteration, Scene&, const float dt);
+            void internal_update_sounds(GameCore&, Scene&, const float dt);
+            void internal_render(GameCore&, Scene&, Window&, const float dt, const double alpha);
             void internal_cleanup();
         public:
             class FPSTimer final {
@@ -72,7 +73,6 @@ namespace Engine::priv {
                 bool                                     m_Destroyed       = false;
             };
             Misc                m_Misc;
-
             EditorCore          m_Editor;
             LUAModule           m_LUAModule;
             NetworkingModule    m_NetworkingModule;
@@ -85,12 +85,13 @@ namespace Engine::priv {
             DebugManager        m_DebugManager;
             ThreadingModule     m_ThreadingModule;
             EngineEventHandler  m_EngineEventHandler;
+            GameCore*           m_GameCore            = nullptr;
 
             EngineCore(const EngineOptions&);
             ~EngineCore();
 
-            void init(const EngineOptions&);
-            void run();
+            void init(const EngineOptions&, GameCore* = nullptr);
+            void run(GameCore* = nullptr);
     };
     class Core final {
         public:

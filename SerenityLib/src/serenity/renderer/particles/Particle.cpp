@@ -43,28 +43,29 @@ void Particle::init(const glm::vec3& emitterPosition, const glm::quat& emitterRo
     m_AngularVelocity = emitter.m_Properties->m_InitialAngularVelocityFunctor(*this);
     m_Color           = emitter.m_Properties->m_ColorFunctor(0.0f, *this);
 }
-
 Particle::Particle(Particle&& other) noexcept 
-    : m_Velocity        { std::move(other.m_Velocity) }
-    , m_Timer           { std::move(other.m_Timer) }
+    : m_Position        { std::move(other.m_Position) }
+    , m_Velocity        { std::move(other.m_Velocity) }
+    , m_Scale           { std::move(other.m_Scale) }
+    , m_EmitterSource   { std::move(other.m_EmitterSource) }
+    , m_Material        { std::move(other.m_Material) }
     , m_Color           { std::move(other.m_Color) }
     , m_Angle           { std::move(other.m_Angle) }
-    , m_Scale           { std::move(other.m_Scale) }
     , m_AngularVelocity { std::move(other.m_AngularVelocity) }
-    , m_Position        { std::move(other.m_Position) }
-    , m_Material        { std::move(other.m_Material) }
-    , m_EmitterSource   { std::move(other.m_EmitterSource) }
+    , m_Timer           { std::move(other.m_Timer) }
 {}
 Particle& Particle::operator=(Particle&& other) noexcept {
-    m_Velocity        = std::move(other.m_Velocity);
-    m_Timer           = std::move(other.m_Timer);
-    m_Color           = std::move(other.m_Color);
-    m_Angle           = std::move(other.m_Angle);
-    m_Scale           = std::move(other.m_Scale);
-    m_AngularVelocity = std::move(other.m_AngularVelocity);
-    m_Position        = std::move(other.m_Position);
-    m_Material        = std::move(other.m_Material);
-    m_EmitterSource   = std::move(other.m_EmitterSource);
+    if (this != &other) {
+        m_Position        = std::move(other.m_Position);
+        m_Velocity        = std::move(other.m_Velocity);
+        m_Scale           = std::move(other.m_Scale);
+        m_EmitterSource   = std::move(other.m_EmitterSource);
+        m_Material        = std::move(other.m_Material);
+        m_Color           = std::move(other.m_Color);
+        m_Angle           = std::move(other.m_Angle);
+        m_AngularVelocity = std::move(other.m_AngularVelocity);
+        m_Timer           = std::move(other.m_Timer);
+    }
     return *this;
 }
 float Particle::lifetime() const noexcept {

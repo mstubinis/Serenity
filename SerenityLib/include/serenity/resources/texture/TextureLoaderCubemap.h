@@ -13,7 +13,7 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     class TextureLoaderCubemap final {
-        friend class  TextureCubemap;
+        friend class  ::TextureCubemap;
         friend struct Engine::priv::TextureCubemapCPUData;
         public:
             static bool LoadDDSFile(TextureCubemapCPUData&, priv::ImageData& image);

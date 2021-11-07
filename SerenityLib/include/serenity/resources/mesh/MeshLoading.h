@@ -31,8 +31,8 @@ namespace Engine::priv {
         //= 1 << 15,
     };};
     class MeshLoader final {
-        friend class  Mesh;
-        friend struct MeshRequest;
+        friend class  ::Mesh;
+        friend struct ::MeshRequest;
         friend class  Engine::priv::MeshSkeleton;
         public:
             static void    LoadProcessNodeData(MeshRequest& meshRequest, const aiScene& scene, const aiNode& rootAINode);

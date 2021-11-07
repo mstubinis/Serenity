@@ -22,7 +22,7 @@ namespace Engine::priv {
 #include <serenity/ecs/components/ComponentBaseClass.h>
 
 class ComponentCollisionShape final : public ComponentBaseClass<ComponentCollisionShape> {
-    friend class ComponentRigidBody;
+    friend class ::ComponentRigidBody;
     friend class Engine::priv::ComponentCollisionShapeDeferredLoading;
     private:
         struct ParentCompound final {
@@ -89,7 +89,7 @@ class ComponentCollisionShape final : public ComponentBaseClass<ComponentCollisi
 
 namespace Engine::priv {
     class ComponentCollisionShapeDeferredLoading final : public Observer {
-        friend class  ComponentCollisionShape;
+        friend class  ::ComponentCollisionShape;
         public:
             static inline ComponentCollisionShapeDeferredLoading& get() {
                 static ComponentCollisionShapeDeferredLoading m_Instance;

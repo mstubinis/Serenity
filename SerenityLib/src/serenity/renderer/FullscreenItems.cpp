@@ -6,8 +6,8 @@
 #pragma region Triangle
 
 void Engine::priv::FullscreenTriangle::init() {
-    MeshVertexDataFullscreen v1, v2, v3;
-    auto winSize = glm::vec2(Engine::Resources::getWindowSize());
+    //MeshVertexDataFullscreen v1, v2, v3;
+    const auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
 
     m_Buffers.emplace_back(0);
     glGenBuffers(1, &m_Buffers[0]);
@@ -25,7 +25,7 @@ void Engine::priv::FullscreenTriangle::init() {
     glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(MeshVertexDataFullscreen), &m_Vertices[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(uint16_t), &m_Indices[0], GL_STATIC_DRAW);
 
     buildVAO();
     registerEvent(EventType::WindowFullscreenChanged);
@@ -121,7 +121,7 @@ void Engine::priv::FullscreenQuad::init() {
     changeDimensions(winSize.x, winSize.y);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned short), &m_Indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(uint16_t), &m_Indices[0], GL_STATIC_DRAW);
 
     buildVAO();
     registerEvent(EventType::WindowFullscreenChanged);

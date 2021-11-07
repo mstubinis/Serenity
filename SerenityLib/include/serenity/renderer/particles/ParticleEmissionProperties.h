@@ -44,21 +44,20 @@ class ParticleEmissionProperties final {
     public:
         ParticleEmissionProperties() = default;
         ParticleEmissionProperties(Handle materialHandle, float lifeTime, float spawnRate, uint32_t ParticlesPerSpawn = 1, float drag = 1.0f);
-        ~ParticleEmissionProperties() = default;
- 
+
         ParticleEmissionProperties(const ParticleEmissionProperties&)                = delete;
         ParticleEmissionProperties& operator=(const ParticleEmissionProperties&)     = delete;
         ParticleEmissionProperties(ParticleEmissionProperties&&) noexcept            = default;
         ParticleEmissionProperties& operator=(ParticleEmissionProperties&&) noexcept = default;
         
-        inline float getLifetime() const noexcept { return m_Lifetime; }
-        inline float getSpawnRate() const noexcept { return m_SpawnRate; }
+        [[nodiscard]] inline float getLifetime() const noexcept { return m_Lifetime; }
+        [[nodiscard]] inline float getSpawnRate() const noexcept { return m_SpawnRate; }
 
         bool addMaterial(Handle materialHandle);
         bool addMaterial(Material&);
 
-        const Material& getParticleMaterialRandom() const noexcept;
-        const Material& getParticleMaterial(size_t index = 0) const noexcept;
+        [[nodiscard]] const Material& getParticleMaterialRandom() const noexcept;
+        [[nodiscard]] const Material& getParticleMaterial(size_t index = 0) const noexcept;
 
         inline void setColorFunctor(color_func&& functor) noexcept { m_ColorFunctor = std::move(functor); }
         inline void setChangeInAngularVelocityFunctor(change_in_angular_velocity_func&& functor) noexcept { m_ChangeInAngularVelocityFunctor = std::move(functor); }

@@ -23,9 +23,9 @@ namespace Engine::Networking {
                 uint16_t                    port         = 0;
    
                 UDPPacketInfo(uint16_t inPort, sf::IpAddress&& inAddress, Engine::Networking::Packet& packet_)
-                    : port{ inPort }
+                    : packet{ packet_ }
                     , ip{ std::move(inAddress) }
-                    , packet{ packet_ }
+                    , port{ inPort }
                 {}
                 UDPPacketInfo(const UDPPacketInfo&)            = delete;
                 UDPPacketInfo& operator=(const UDPPacketInfo&) = delete;

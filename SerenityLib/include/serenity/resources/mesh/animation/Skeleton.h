@@ -21,9 +21,9 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     class MeshSkeleton final {
-        friend class  Mesh;
-        friend struct MeshCPUData;
-        friend class  SMSH_File;
+        friend class  ::Mesh;
+        friend struct ::MeshCPUData;
+        friend class  ::SMSH_File;
         friend class  Engine::priv::MeshLoader;
         friend class  Engine::priv::AnimationData;
         friend class  Engine::priv::PublicMesh;

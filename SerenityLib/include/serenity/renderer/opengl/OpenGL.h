@@ -2,13 +2,13 @@
 #ifndef ENGINE_RENDERER_OPENGL_H
 #define ENGINE_RENDERER_OPENGL_H
 
-class Window;
-
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include <serenity/system/Macros.h>
 
 #define GLASSERT(x) if((!x)) __debugbreak();
+
+#ifdef _DEBUG
 
 static void GLClearErrors() {
     GLenum error = glGetError(); //will infinetly return error 1282 if called once opengl context is destroyed
@@ -23,5 +23,7 @@ static bool GLLogCall(const char* function, const char* file, int line) {
     }
     return true;
 }
+
+#endif
 
 #endif

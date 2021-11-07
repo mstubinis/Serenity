@@ -27,17 +27,19 @@ Font::Font(const std::string& filename, int height, int width, float line_height
 }
 Font::Font(Font&& other) noexcept 
     : Resource(std::move(other))
-    , m_FontTexture{ std::exchange(other.m_FontTexture, Handle{}) }
+    , m_CharGlyphs  { std::move(other.m_CharGlyphs) }
+    , m_FontTexture { std::exchange(other.m_FontTexture, Handle{}) }
     , m_MaxHeight   { std::move(other.m_MaxHeight) }
     , m_LineHeight  { std::move(other.m_LineHeight) }
-    , m_CharGlyphs  { std::move(other.m_CharGlyphs) }
 {}
 Font& Font::operator=(Font&& other) noexcept {
-    Resource::operator=(std::move(other));
-    m_FontTexture = std::exchange(other.m_FontTexture, Handle{});
-    m_MaxHeight   = std::move(other.m_MaxHeight);
-    m_LineHeight  = std::move(other.m_LineHeight);
-    m_CharGlyphs  = std::move(other.m_CharGlyphs);
+    if (this != &other) {
+        Resource::operator=(std::move(other));
+        m_CharGlyphs  = std::move(other.m_CharGlyphs);
+        m_FontTexture = std::exchange(other.m_FontTexture, Handle{});
+        m_MaxHeight   = std::move(other.m_MaxHeight);
+        m_LineHeight  = std::move(other.m_LineHeight);
+    }
     return *this;
 }
 void Font::init(const std::string& filename, int height, int width) {
@@ -225,7 +227,7 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
             for (uint32_t y = startY; y < startY + glyph_y_size; ++y) {
                 uint32_t cy           = 0;
                 uint32_t glyph_xEnd   = (startX + glyph_x_size);
-                uint32_t glyph_yEnd   = (startY + glyph_y_size);
+                //uint32_t glyph_yEnd   = (startY + glyph_y_size);
                 for (uint32_t x = startX; x < glyph_xEnd; ++x) {
                     auto gray = getFromRowCol(face->glyph->bitmap.buffer, cx, cy, glyph_x_size);
                     atlas_image.setPixel(x, y, sf::Color(gray, gray, gray, gray));

@@ -92,7 +92,7 @@ Handle Engine::priv::EditorCore::internal_load_embedded_image(const uint8_t* dat
 }
 void Engine::priv::EditorCore::renderLightIcons(Scene& scene) {
     if (m_Enabled && m_Shown) {
-        auto& directionalLights = Engine::priv::PublicScene::GetLights<DirectionalLight>(scene);
+        //auto& directionalLights = Engine::priv::PublicScene::GetLights<DirectionalLight>(scene);
         auto& sunLights         = Engine::priv::PublicScene::GetLights<SunLight>(scene);
         auto& pointLights       = Engine::priv::PublicScene::GetLights<PointLight>(scene);
         auto& spotLights        = Engine::priv::PublicScene::GetLights<SpotLight>(scene);

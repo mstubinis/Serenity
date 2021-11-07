@@ -10,15 +10,13 @@ using namespace Engine::priv;
 
 ModelInstanceAnimation::ModelInstanceAnimation(MeshNodeData& nodeData, AnimationData& animData, MeshSkeleton& skeleton, float startTime, float endTime, uint16_t requestedLoops)
     : m_AnimationData  { &animData }
-    , m_NodeData       { &nodeData }
     , m_Skeleton       { &skeleton }
-    , m_NumBones       { skeleton.numBones() }
-    , m_RequestedLoops { requestedLoops }
+    , m_NodeData       { &nodeData }
     , m_StartTime      { startTime }
     , m_EndTime        { (endTime < 0.0f) ? animData.duration() : endTime }
-{
-}
-
+    , m_NumBones       { skeleton.numBones() }
+    , m_RequestedLoops { requestedLoops }
+{}
 void ModelInstanceAnimation::update(const float dt, std::vector<glm::mat4>& transforms) {
     m_CurrentTime  += dt;
     transforms.resize(m_NumBones, glm::mat4{ 1.0f });

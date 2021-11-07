@@ -21,10 +21,9 @@ TextureRequest::TextureRequest(std::string_view filename, bool genMipMaps, Image
 {
     m_Part.m_Callback = std::move(callback);
 }
-
 TextureRequest::TextureRequest(const sf::Image& sfImage, std::string_view filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, Engine::ResourceCallback&& callback)
-    : m_SFMLImage{ sfImage }
-    , m_Part{ filename, intFmt, genMipMaps, textureType }
+    : m_Part{ filename, intFmt, genMipMaps, textureType }
+    , m_SFMLImage{ sfImage }
 {
     m_FromMemory      = true;
     m_Part.m_Callback = std::move(callback);

@@ -12,10 +12,10 @@ ComponentTransform::ComponentTransform(Entity entity)
     : m_Owner{ entity }
 {}
 ComponentTransform::ComponentTransform(Entity entity, const glm_vec3& pos, const glm::quat& rot, const glm::vec3& scl)
-    : m_Owner{ entity }
-    , m_Position{ pos }
+    : m_Position{ pos }
     , m_Rotation{ rot }
     , m_Scale{ scl }
+    , m_Owner{ entity }
 {
     Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
     auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
@@ -42,17 +42,19 @@ ComponentTransform::ComponentTransform(ComponentTransform&& other) noexcept
 {
 }
 ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) noexcept {
-    m_Position         = std::move(other.m_Position);
-    m_Rotation         = std::move(other.m_Rotation);
-    m_Scale            = std::move(other.m_Scale);
-    //m_LinearVelocity   = std::move(other.m_LinearVelocity);
-    m_Forward          = std::move(other.m_Forward);
-    m_Right            = std::move(other.m_Right);
-    m_Up               = std::move(other.m_Up);
-    m_UserPointer      = std::exchange(other.m_UserPointer, nullptr);
-    m_UserPointer1     = std::exchange(other.m_UserPointer1, nullptr);
-    m_UserPointer2     = std::exchange(other.m_UserPointer2, nullptr);
-    m_Owner            = std::exchange(other.m_Owner, Entity{});
+    if (this != &other) {
+        m_Position       = std::move(other.m_Position);
+        m_Rotation       = std::move(other.m_Rotation);
+        m_Scale          = std::move(other.m_Scale);
+        //m_LinearVelocity = std::move(other.m_LinearVelocity);
+        m_Forward        = std::move(other.m_Forward);
+        m_Right          = std::move(other.m_Right);
+        m_Up             = std::move(other.m_Up);
+        m_UserPointer    = std::exchange(other.m_UserPointer, nullptr);
+        m_UserPointer1   = std::exchange(other.m_UserPointer1, nullptr);
+        m_UserPointer2   = std::exchange(other.m_UserPointer2, nullptr);
+        m_Owner          = std::exchange(other.m_Owner, Entity{});
+    }
     return *this;
 }
 decimal ComponentTransform::getDistance(Entity other) const {

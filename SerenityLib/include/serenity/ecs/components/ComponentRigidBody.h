@@ -66,9 +66,9 @@ struct RigidCollisionCallbackEventData final {
         , otherRigid{ otherRigid_ }
         , ownerHit{ ownerHit_ }
         , otherHit{ otherHit_ }
-        , normalOnB{ normal_ }
         , ownerLocalHit{ ownerLocalHit_ }
         , otherLocalHit{ otherLocalHit_ }
+        , normalOnB{ normal_ }
         , normalFromA{ normalFromA_ }
         , normalFromB{ normalFromB_ }
     {}

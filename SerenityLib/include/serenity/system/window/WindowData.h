@@ -34,7 +34,7 @@ namespace Engine::priv {
         friend class Engine::priv::EngineCore;
         friend class Engine::priv::EventManager;
         friend class Engine::priv::EngineEventHandler;
-        friend class Window;
+        friend class ::Window;
         private:
             sf::ContextSettings             m_SFContextSettings;
             glm::vec2                       m_MousePosition          = glm::vec2{ 0.0f };

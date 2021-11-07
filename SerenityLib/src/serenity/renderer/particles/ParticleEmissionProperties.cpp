@@ -10,7 +10,6 @@ ParticleEmissionProperties::ParticleEmissionProperties(Handle materialHandle, fl
 {
     m_ParticleMaterials.emplace_back(materialHandle.get<Material>());
 }
-
 bool ParticleEmissionProperties::addMaterial(Material& inMaterial) {
     for (const auto& material : m_ParticleMaterials) {
         if (&inMaterial == material) {
@@ -24,8 +23,11 @@ bool ParticleEmissionProperties::addMaterial(Handle materialHandle) {
     return ParticleEmissionProperties::addMaterial(*Engine::Resources::getResource<Material>(materialHandle));
 }
 const Material& ParticleEmissionProperties::getParticleMaterialRandom() const noexcept {
-    return (m_ParticleMaterials.size() == 0) ? *Material::Checkers.get<Material>() : *m_ParticleMaterials[rand() % m_ParticleMaterials.size()];
+    const size_t randomIndex = static_cast<size_t>(rand()) % m_ParticleMaterials.size();
+    assert(randomIndex >= 0 && randomIndex < m_ParticleMaterials.size());
+    return (m_ParticleMaterials.size() == 0) ? *Material::Checkers.get<Material>() : *m_ParticleMaterials[randomIndex];
 }
 const Material& ParticleEmissionProperties::getParticleMaterial(size_t index) const noexcept {
+    assert(index >= 0 && index < m_ParticleMaterials.size());
     return (m_ParticleMaterials.size() == 0) ? *Material::Checkers.get<Material>() : *m_ParticleMaterials[index];
 }

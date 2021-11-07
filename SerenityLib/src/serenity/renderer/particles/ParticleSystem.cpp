@@ -204,7 +204,7 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
     //Core::m_Engine->m_DebugManager.addDebugLine(to_string(f));
 
     //sorting
-    auto lambda = [&camPos](const ParticleDOD& l, const ParticleDOD& r) {
+    auto lambda = [](const ParticleDOD& l, const ParticleDOD& r) {
 #if defined(ENGINE_PARTICLES_HALF_SIZE)
         glm::vec3 lPos{ Math::Float32From16(l.PositionX), Math::Float32From16(l.PositionY), Math::Float32From16(l.PositionZ) };
         glm::vec3 rPos{ Math::Float32From16(r.PositionX), Math::Float32From16(r.PositionY), Math::Float32From16(r.PositionZ) };

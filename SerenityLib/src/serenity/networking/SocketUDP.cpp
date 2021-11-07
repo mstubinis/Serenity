@@ -7,8 +7,8 @@
 #include <serenity/utils/Utils.h>
 
 Engine::Networking::SocketUDP::SocketUDP(uint16_t port, sf::IpAddress ip)
-    : m_Port{ port }
-    , m_IP{ ip }
+    : m_IP{ ip }
+    , m_Port{ port }
 {
     Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.add_udp_socket(this);
 }
@@ -29,13 +29,13 @@ SocketStatus::Status Engine::Networking::SocketUDP::internal_send_packet(UDPPack
     switch (status) {
         case sf::Socket::Status::Done: {
             break;
-        }case sf::Socket::Status::Disconnected: {
+        } case sf::Socket::Status::Disconnected: {
             break;
-        }case sf::Socket::Status::Error: {
+        } case sf::Socket::Status::Error: {
             break;
-        }case sf::Socket::Status::NotReady: {
+        } case sf::Socket::Status::NotReady: {
             break;
-        }case sf::Socket::Status::Partial: {
+        } case sf::Socket::Status::Partial: {
             break;
         }
     }
@@ -51,15 +51,15 @@ SocketStatus::Status Engine::Networking::SocketUDP::internal_send_partial_packet
             case SocketStatus::Done: {
                 m_PartialPackets.pop_front();
                 break;
-            }case SocketStatus::Disconnected: {
+            } case SocketStatus::Disconnected: {
                 m_PartialPackets.pop_front();
                 break;
-            }case SocketStatus::Error: {
+            } case SocketStatus::Error: {
                 m_PartialPackets.pop_front();
                 break;
-            }case SocketStatus::NotReady: {
+            } case SocketStatus::NotReady: {
                 break;
-            }case SocketStatus::Partial: {
+            } case SocketStatus::Partial: {
                 break;
             }
         }
@@ -68,8 +68,8 @@ SocketStatus::Status Engine::Networking::SocketUDP::internal_send_partial_packet
 }
 void Engine::Networking::SocketUDP::update(const float dt) {
     if (isBound()) {
-        auto status = internal_send_partial_packets_loop();
-    }else{
+        internal_send_partial_packets_loop();
+    } else {
         //TODO: add a notification that this socket is no longer bound?
     }
 }

@@ -30,28 +30,32 @@ MeshRequest::MeshRequest(std::string_view filenameOrData, float threshold, MeshC
     }
 }
 MeshRequest::MeshRequest(MeshRequest&& other) noexcept
-    : m_FileOrData    { std::move(other.m_FileOrData) }
-    , m_FileExtension { std::move(other.m_FileExtension) }
-    , m_FileExists    { std::move(other.m_FileExists) }
-    , m_Async         { std::move(other.m_Async) }
-    , m_Threshold     { std::move(other.m_Threshold) }
-    , m_NodeData      { std::move(other.m_NodeData) }
-    , m_NodeStrVector { std::move(other.m_NodeStrVector) }
-    , m_Parts         { std::move(other.m_Parts) }
-    , m_Callback      { std::move(other.m_Callback) }
-    , m_Importer      { other.m_Importer }
+    : m_CollisionLoadingFlags{ std::move(other.m_CollisionLoadingFlags) }
+    , m_Importer             { (other.m_Importer) }
+    , m_NodeData             { std::move(other.m_NodeData) }
+    , m_NodeStrVector        { std::move(other.m_NodeStrVector) }
+    , m_Callback             { std::move(other.m_Callback) }
+    , m_Parts                { std::move(other.m_Parts) }
+    , m_FileOrData           { std::move(other.m_FileOrData) }
+    , m_FileExtension        { std::move(other.m_FileExtension) }
+    , m_Threshold            { std::move(other.m_Threshold) }
+    , m_FileExists           { std::move(other.m_FileExists) }
+    , m_Async                { std::move(other.m_Async) }
 {}
 MeshRequest& MeshRequest::operator=(MeshRequest&& other) noexcept {
-    m_FileOrData    = std::move(other.m_FileOrData);
-    m_FileExtension = std::move(other.m_FileExtension);
-    m_FileExists    = std::move(other.m_FileExists);
-    m_Async         = std::move(other.m_Async);
-    m_Threshold     = std::move(other.m_Threshold);
-    m_NodeData      = std::move(other.m_NodeData);
-    m_NodeStrVector = std::move(other.m_NodeStrVector);
-    m_Parts         = std::move(other.m_Parts);
-    m_Callback      = std::move(other.m_Callback);
-    m_Importer      = (other.m_Importer);
+    if (this != &other) {
+        m_CollisionLoadingFlags = std::move(other.m_CollisionLoadingFlags);
+        m_Importer              = (other.m_Importer);
+        m_NodeData              = std::move(other.m_NodeData);
+        m_NodeStrVector         = std::move(other.m_NodeStrVector);
+        m_Callback              = std::move(other.m_Callback);
+        m_Parts                 = std::move(other.m_Parts);
+        m_FileOrData            = std::move(other.m_FileOrData);
+        m_FileExtension         = std::move(other.m_FileExtension);
+        m_Threshold             = std::move(other.m_Threshold);
+        m_FileExists            = std::move(other.m_FileExists);
+        m_Async                 = std::move(other.m_Async);
+    }
     return *this;
 }
 void MeshRequest::request(bool inAsync) {

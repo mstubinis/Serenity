@@ -25,8 +25,8 @@ class SoundMusic {
         SoundMusic();
         SoundMusic(const SoundMusic& other)                = delete;
         SoundMusic& operator=(const SoundMusic& other)     = delete;
-        SoundMusic(SoundMusic&& other) noexcept            = default;
-        SoundMusic& operator=(SoundMusic&& other) noexcept = default;
+        SoundMusic(SoundMusic&& other) noexcept            = delete;
+        SoundMusic& operator=(SoundMusic&& other) noexcept = delete;
         virtual ~SoundMusic()                              = default;
 
         [[nodiscard]] inline constexpr SoundStatus status() const noexcept { return m_Status; }

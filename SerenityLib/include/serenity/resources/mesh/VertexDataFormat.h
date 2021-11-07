@@ -20,10 +20,10 @@ struct VertexAttributeInfo final {
 
     VertexAttributeInfo() = default;
     VertexAttributeInfo(int numComponents_, int type_, bool normalized_, int stride_, size_t offset_, size_t typeSize_)
-        : numComponents{ numComponents_ }
-        , type{ type_ }
-        , typeSize{ typeSize_ }
+        : typeSize{ typeSize_ }
         , offset{ offset_ }
+        , numComponents{ numComponents_ }
+        , type{ type_ }
         , stride{ stride_ }
         , normalized{ normalized_ }
     {}
@@ -41,7 +41,7 @@ struct VertexDataFormat {
     inline void add(int numComponents, int type, bool normalized, int stride, size_t offset, size_t typeSize) {
         m_Attributes.emplace_back(numComponents, type, normalized, stride, offset, typeSize);
     }
-    void bind(const VertexData& vertData) const noexcept;
+    void bind(const VertexData&) const noexcept;
     void unbind() const noexcept;
 
     static VertexDataFormat   VertexDataPositionsOnly, 

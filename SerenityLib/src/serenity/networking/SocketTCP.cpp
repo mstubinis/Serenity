@@ -25,13 +25,13 @@ SocketStatus::Status Engine::Networking::SocketTCP::internal_send_packet(Engine:
     switch (status) {
         case sf::Socket::Status::Done: {
             break;
-        }case sf::Socket::Status::Disconnected: {
+        } case sf::Socket::Status::Disconnected: {
             break;
-        }case sf::Socket::Status::Error: {
+        } case sf::Socket::Status::Error: {
             break;
-        }case sf::Socket::Status::NotReady: {
+        } case sf::Socket::Status::NotReady: {
             break;
-        }case sf::Socket::Status::Partial: {
+        } case sf::Socket::Status::Partial: {
             break;
         }
     }
@@ -45,13 +45,13 @@ SocketStatus::Status Engine::Networking::SocketTCP::internal_send_partial_packet
             case SocketStatus::Done: {
                 m_PartialPackets.pop();
                 break;
-            }case SocketStatus::Disconnected: {
+            } case SocketStatus::Disconnected: {
                 break;
-            }case SocketStatus::Error: {
+            } case SocketStatus::Error: {
                 break;
-            }case SocketStatus::NotReady: {
+            } case SocketStatus::NotReady: {
                 break;
-            }case SocketStatus::Partial: {
+            } case SocketStatus::Partial: {
                 break;
             }
         }
@@ -60,7 +60,7 @@ SocketStatus::Status Engine::Networking::SocketTCP::internal_send_partial_packet
 }
 void Engine::Networking::SocketTCP::update(const float dt) {
     if (isConnected()) {
-        auto status = internal_send_partial_packets_loop();
+        internal_send_partial_packets_loop();
     }
 }
 void Engine::Networking::SocketTCP::disconnect() {

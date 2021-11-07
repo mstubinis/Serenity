@@ -11,8 +11,8 @@ using namespace Engine;
 using namespace Engine::priv;
 
 Networking::ListenerTCP::ListenerTCP(const uint16_t port, const std::string& ip)
-    : m_Port{ port }
-    , m_IP{ ip }
+    : m_IP{ ip }
+    , m_Port{ port }
 {
     m_Listener.setBlocking(false);
 

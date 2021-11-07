@@ -41,11 +41,11 @@ void Engine::priv::WindowData::internal_init_position(Window& super) {
     auto desktopSize           = sf::VideoMode::getDesktopMode();
     float final_desktop_width  = float(desktopSize.width);
     float final_desktop_height = float(desktopSize.height);
-    float x_other              = 0.0f;
+    //float x_other              = 0.0f;
     float y_other              = 0.0f;
     #ifdef _WIN32
         //get the dimensions of the desktop's bottom task bar. Only tested on Windows 10
-        auto os_handle         = super.getSFMLHandle().getSystemHandle();
+        //auto os_handle         = super.getSFMLHandle().getSystemHandle();
         //            left   right   top   bottom
         RECT rect; //[0,     1920,   0,    1040]  //bottom task bar
         SystemParametersInfoA(SPI_GETWORKAREA, 0, &rect, 0);
@@ -88,10 +88,10 @@ void Engine::priv::WindowData::internal_on_fullscreen(Window& super, bool isToBe
     super.setVisible(false);
     Engine::priv::Core::m_Engine->m_RenderModule._onFullscreen(m_VideoMode.width, m_VideoMode.height);
 
-    auto winSize = super.getSize();
+    const auto winSize = super.getSize();
 
     //this does not trigger the sfml event resize method automatically so we must call it here
-    Engine::priv::Core::m_Engine->m_EngineEventHandler.internal_on_event_resize(super, winSize.x, winSize.y, false);
+    Engine::priv::Core::m_Engine->m_EngineEventHandler.internal_on_event_resize(super, winSize.x, winSize.y, false, *Engine::priv::Core::m_Engine->m_GameCore);
 
     internal_restore_state(super);
     if (isMaximized) {

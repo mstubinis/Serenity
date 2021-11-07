@@ -4,6 +4,7 @@
 
 #include <serenity/discord/src/achievement_manager.h>
 #include <serenity/discord/src/core.h>
+#include <serenity/system/Macros.h>
 
 #include <cstring>
 #include <memory>
@@ -34,7 +35,7 @@ void AchievementManager::SetUserAchievement(Snowflake achievementId, uint8_t per
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->set_user_achievement(internal_, achievementId, percentComplete, cb.release(), wrapper);
 }
 void AchievementManager::FetchUserAchievements(std::function<void(Result)> callback){
@@ -46,7 +47,7 @@ void AchievementManager::FetchUserAchievements(std::function<void(Result)> callb
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->fetch_user_achievements(internal_, cb.release(), wrapper);
 }
 void AchievementManager::CountUserAchievements(std::int32_t* count){

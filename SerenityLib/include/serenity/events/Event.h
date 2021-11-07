@@ -39,13 +39,13 @@ namespace Engine::priv {
 
         EventSocket() = default;
         EventSocket(uint16_t localPort_, uint16_t remotePort_, sf::IpAddress remoteIP_, SocketType type_)
-            : localPort{ localPort_ }
+            : remoteIP  { remoteIP_ }
+            , localPort { localPort_ }
             , remotePort{ remotePort_ }
-            , remoteIP{ remoteIP_ }
-            , type{ type_ }
+            , type      { type_ }
         {
         }
-        [[nodiscard]] inline const std::string& ipToString() const { 
+        [[nodiscard]] inline const std::string ipToString() const { 
             return remoteIP.toString(); 
         }
     };

@@ -4,6 +4,7 @@
 
 #include <serenity/discord/src/voice_manager.h>
 #include <serenity/discord/src/core.h>
+#include <serenity/system/Macros.h>
 
 #include <cstring>
 #include <memory>
@@ -50,7 +51,7 @@ void VoiceManager::SetInputMode(InputMode inputMode, std::function<void(Result)>
         (*cb)(static_cast<Result>(result));
     };
     std::unique_ptr<std::function<void(Result)>> cb{};
-    cb.reset(new std::function<void(Result)>(std::move(callback)));
+    cb.reset(NEW std::function<void(Result)>(std::move(callback)));
     internal_->set_input_mode(
       internal_, *reinterpret_cast<DiscordInputMode const*>(&inputMode), cb.release(), wrapper);
 }

@@ -43,11 +43,7 @@ class LightProbe : public Entity {
         //these two are not owned in any way by the scene, they are simply used to fill in values for the rendering function
         Viewport            m_Viewport;
     public:
-        LightProbe(
-            Scene*,
-            ProbeType::Type,
-            const glm::vec3& position   = glm::vec3(0.0f, 0.0f, 0.0f)
-        );
+        LightProbe(Scene*, ProbeType::Type, const glm::vec3& position = glm::vec3{ 0.0f });
         ~LightProbe();
 
         void addIgnoredEntity(Entity);

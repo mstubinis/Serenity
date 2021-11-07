@@ -23,7 +23,7 @@ SystemComponentTransform::SystemComponentTransform(Engine::priv::ECS& ecs)
     });
 
     setComponentAddedToEntityFunction([](SystemBaseClass& inSystem, void* component, Entity entity) {
-        auto& system  = static_cast<SystemComponentTransform&>(inSystem);
+        //auto& system  = static_cast<SystemComponentTransform&>(inSystem);
         auto model    = entity.getComponent<ComponentModel>();
         if (model) {
             Engine::priv::ComponentModel_Functions::CalculateRadius(*model);

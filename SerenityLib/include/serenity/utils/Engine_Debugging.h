@@ -10,6 +10,8 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <chrono>
+#include <array>
 #include <serenity/system/Macros.h>
 
 class DebugTimerTypes {

@@ -13,7 +13,7 @@ Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene
     uint16_t BoneIndex = 0;
     for (uint32_t k = 0; k < assimpMesh.mNumBones; ++k) {
         auto boneName      = std::string{ assimpMesh.mBones[k]->mName.C_Str() };
-        auto& assimpBone   = *assimpMesh.mBones[k];
+        //auto& assimpBone   = *assimpMesh.mBones[k];
         hashedBones.emplace(boneName, BoneIndex);
         ++BoneIndex;
     }
@@ -43,7 +43,7 @@ Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene
             if (key.empty()) {
                 key = "Animation " + std::to_string(numAnimations());
             }
-            const auto animIndex = addAnimation(key, Ai_Animation, request);
+            /*const auto animIndex = */addAnimation(key, Ai_Animation, request);
         }
     }
 }

@@ -4,6 +4,7 @@
 
 #include <serenity/discord/src/relationship_manager.h>
 #include <serenity/discord/src/core.h>
+#include <serenity/system/Macros.h>
 
 #include <cstring>
 #include <memory>
@@ -50,7 +51,7 @@ void RelationshipManager::Filter(std::function<bool(Relationship const&)> filter
         return (*cb)(*reinterpret_cast<Relationship const*>(relationship));
     };
     std::unique_ptr<std::function<bool(Relationship const&)>> cb{};
-    cb.reset(new std::function<bool(Relationship const&)>(std::move(filter)));
+    cb.reset(NEW std::function<bool(Relationship const&)>(std::move(filter)));
     internal_->filter(internal_, cb.get(), wrapper);
 }
 

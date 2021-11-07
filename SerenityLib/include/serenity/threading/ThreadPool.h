@@ -57,7 +57,7 @@ namespace Engine::priv {
             [[nodiscard]] bool isWorkerThreadStopped() const noexcept;
             [[nodiscard]] inline int size() const noexcept { return static_cast<int>(m_WorkerThreads.size()); }
 
-            template<class JOB> [[nodiscard]] void add_job(JOB&& job) {
+            template<class JOB> void add_job(JOB&& job) {
                 #if !defined(ENGINE_FORCE_NO_THEAD_POOL)
                     if (size() > 0) {
                         {

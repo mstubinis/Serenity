@@ -46,19 +46,19 @@ void Engine::priv::EditorWindowScene::internal_render_network(Scene& currentScen
     const auto& tcpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_TCPSockets;
     const auto& tcpListeners = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_TCPListeners;
     const auto& udpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_UDPSockets;
-    ImGui::TextColored(yellow, ("Number of TCP sockets:   " + std::to_string(tcpSockets.size())).c_str());
-    ImGui::TextColored(yellow, ("Number of TCP listeners: " + std::to_string(tcpListeners.size())).c_str());
-    ImGui::TextColored(yellow, ("Number of UDP sockets:   " + std::to_string(udpSockets.size())).c_str());
+    ImGui::TextColored(yellow, std::string("Number of TCP sockets:   " + std::to_string(tcpSockets.size())).c_str());
+    ImGui::TextColored(yellow, std::string("Number of TCP listeners: " + std::to_string(tcpListeners.size())).c_str());
+    ImGui::TextColored(yellow, std::string("Number of UDP sockets:   " + std::to_string(udpSockets.size())).c_str());
 
     ImGui::BeginChild("NetworkSockets");
     if (tcpSockets.size() > 0) {
         if (ImGui::TreeNode("TCP Sockets")) {
             for (const auto& tcpSocket : tcpSockets) {
-                ImGui::Text(("Ip:          " + tcpSocket->ip().toString()).c_str());
-                ImGui::Text(("Connected:   " + std::string(tcpSocket->isConnected() ? "true" : "false")).c_str());
-                ImGui::Text(("Blocking:    " + std::string(tcpSocket->isBlocking() ? "true" : "false")).c_str());
-                ImGui::Text(("Local Port:  " + std::to_string(tcpSocket->localPort())).c_str());
-                ImGui::Text(("Remote Port: " + std::to_string(tcpSocket->remotePort())).c_str());
+                ImGui::Text(std::string("Ip:          " + tcpSocket->ip().toString()).c_str());
+                ImGui::Text(std::string("Connected:   " + std::string(tcpSocket->isConnected() ? "true" : "false")).c_str());
+                ImGui::Text(std::string("Blocking:    " + std::string(tcpSocket->isBlocking() ? "true" : "false")).c_str());
+                ImGui::Text(std::string("Local Port:  " + std::to_string(tcpSocket->localPort())).c_str());
+                ImGui::Text(std::string("Remote Port: " + std::to_string(tcpSocket->remotePort())).c_str());
 
                 ImGui::Separator();
             }
@@ -69,9 +69,9 @@ void Engine::priv::EditorWindowScene::internal_render_network(Scene& currentScen
     if (tcpListeners.size() > 0) {
         if (ImGui::TreeNode("TCP Listeners")) {
             for (const auto& tcpListener : tcpListeners) {
-                ImGui::Text(("Listening:  " + std::string(tcpListener->isListening() ? "true" : "false")).c_str());
-                ImGui::Text(("Blocking:   " + std::string(tcpListener->isBlocking() ? "true" : "false")).c_str());
-                ImGui::Text(("Local Port: " + std::to_string(tcpListener->localPort())).c_str());
+                ImGui::Text(std::string("Listening:  " + std::string(tcpListener->isListening() ? "true" : "false")).c_str());
+                ImGui::Text(std::string("Blocking:   " + std::string(tcpListener->isBlocking() ? "true" : "false")).c_str());
+                ImGui::Text(std::string("Local Port: " + std::to_string(tcpListener->localPort())).c_str());
 
                 ImGui::Separator();
             }
@@ -82,21 +82,21 @@ void Engine::priv::EditorWindowScene::internal_render_network(Scene& currentScen
     if (udpSockets.size() > 0) {
         if (ImGui::TreeNode("UDP Sockets")) {
             for (const auto& udpSocket : udpSockets) {
-                ImGui::Text(("Ip:                  " + udpSocket->m_IP.toString()).c_str());
-                ImGui::Text(("Bound:               " + std::string(udpSocket->isBound() ? "true" : "false")).c_str());
-                ImGui::Text(("Blocking:            " + std::string(udpSocket->isBlocking() ? "true" : "false")).c_str());
-                ImGui::Text(("Local Port:          " + std::to_string(udpSocket->localPort())).c_str());
-                ImGui::Text(("Num Partial Packets: " + std::to_string(udpSocket->getNumPartialPackets())).c_str());
+                ImGui::Text(std::string("Ip:                  " + udpSocket->m_IP.toString()).c_str());
+                ImGui::Text(std::string("Bound:               " + std::string(udpSocket->isBound() ? "true" : "false")).c_str());
+                ImGui::Text(std::string("Blocking:            " + std::string(udpSocket->isBlocking() ? "true" : "false")).c_str());
+                ImGui::Text(std::string("Local Port:          " + std::to_string(udpSocket->localPort())).c_str());
+                ImGui::Text(std::string("Num Partial Packets: " + std::to_string(udpSocket->getNumPartialPackets())).c_str());
                 if (udpSocket->getNumPartialPackets() > 0) {
                     if (ImGui::TreeNode("Partial Packets")) {
                         for (const auto& packetInfo : udpSocket->m_PartialPackets) {
-                            ImGui::Text(("Valid:           " + std::string(packetInfo.packet.m_Valid ? "true" : "false")).c_str());
-                            ImGui::Text(("Timestamp:       " + std::to_string(packetInfo.packet.m_Timestamp)).c_str());
-                            ImGui::Text(("Type:            " + std::to_string(packetInfo.packet.m_PacketType)).c_str());
-                            ImGui::Text(("Ack:             " + std::to_string(packetInfo.packet.m_Ack)).c_str());
-                            ImGui::Text(("Ack Bitfield:    " + std::to_string(packetInfo.packet.m_AckBitfield)).c_str());
-                            ImGui::Text(("Sequence Number: " + std::to_string(packetInfo.packet.m_SequenceNumber)).c_str());
-                            ImGui::Text(("Data Size Bytes: " + std::to_string(packetInfo.packet.getDataSize())).c_str());
+                            ImGui::Text(std::string("Valid:           " + std::string(packetInfo.packet.m_Valid ? "true" : "false")).c_str());
+                            ImGui::Text(std::string("Timestamp:       " + std::to_string(packetInfo.packet.m_Timestamp)).c_str());
+                            ImGui::Text(std::string("Type:            " + std::to_string(packetInfo.packet.m_PacketType)).c_str());
+                            ImGui::Text(std::string("Ack:             " + std::to_string(packetInfo.packet.m_Ack)).c_str());
+                            ImGui::Text(std::string("Ack Bitfield:    " + std::to_string(packetInfo.packet.m_AckBitfield)).c_str());
+                            ImGui::Text(std::string("Sequence Number: " + std::to_string(packetInfo.packet.m_SequenceNumber)).c_str());
+                            ImGui::Text(std::string("Data Size Bytes: " + std::to_string(packetInfo.packet.getDataSize())).c_str());
                         }
                         ImGui::TreePop();
                         ImGui::Separator();
@@ -124,7 +124,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                 auto model     = e.getComponent<ComponentModel>();
                 auto cam       = e.getComponent<ComponentCamera>();
                 if (name && ImGui::TreeNode("ComponentName")) {
-                    ImGui::Text(("Name: " + name->name()).c_str());
+                    ImGui::Text(std::string("Name: " + name->name()).c_str());
                     ImGui::TreePop();
                 }
                 if (transform && ImGui::TreeNode("ComponentTransform")) {
@@ -137,7 +137,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                     if (children.size() > 0) {
                         ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Children:");
                         for (const auto child : children) {
-                            ImGui::Text(("Entity: " + child.toString()).c_str());
+                            ImGui::Text(std::string("Entity: " + child.toString()).c_str());
                         }
                         ImGui::Separator();
                     }
@@ -166,15 +166,15 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                             ImGui::InputFloat3("position", &instance.m_Position[0]);
                             ImGui::InputFloat4("rotation", &instance.m_Orientation[0]);
                             ImGui::InputFloat3("scale", &instance.m_Scale[0]);
-                            ImGui::Text(("Radius: " + std::to_string(instance.m_Radius)).c_str());
+                            ImGui::Text(std::string("Radius: " + std::to_string(instance.m_Radius)).c_str());
                             ImGui::Separator();
                             const std::string a = instance.m_MeshHandle.null() ? "N/A" : instance.m_MeshHandle.get<Mesh>()->name();
                             const std::string b = instance.m_MaterialHandle.null() ? "N/A" : instance.m_MaterialHandle.get<Material>()->name();
                             const std::string c = instance.m_ShaderProgramHandle.null() ? "N/A" : instance.m_ShaderProgramHandle.get<ShaderProgram>()->name();
-                            ImGui::Text(("Mesh: " + a).c_str());
-                            ImGui::Text(("Material: " + b).c_str());
-                            ImGui::Text(("Shader: " + c).c_str());
-                            ImGui::Text(("Stage: " + std::string(instance.m_Stage.toString())).c_str());
+                            ImGui::Text(std::string("Mesh: " + a).c_str());
+                            ImGui::Text(std::string("Material: " + b).c_str());
+                            ImGui::Text(std::string("Shader: " + c).c_str());
+                            ImGui::Text(std::string("Stage: " + std::string(instance.m_Stage.toString())).c_str());
                             ImGui::Separator();
                             instance.setColor(aColor[0], aColor[1], aColor[2], aColor[3]);
                             instance.setGodRaysColor(aGodRays[0], aGodRays[1], aGodRays[2]);
@@ -314,12 +314,12 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
 void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentScene) {
     auto& debugging = Engine::priv::Core::m_Engine->m_DebugManager;
     const ImVec4 yellow   = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-    ImGui::TextColored(yellow, ("Update Time:  " + debugging.getTimeInMs(DebugTimerTypes::Logic) + " ms").c_str());
-    ImGui::TextColored(yellow, ("Physics Time: " + debugging.getTimeInMs(DebugTimerTypes::Physics) + " ms").c_str());
-    ImGui::TextColored(yellow, ("Sounds Time:  " + debugging.getTimeInMs(DebugTimerTypes::Sound) + " ms").c_str());
-    ImGui::TextColored(yellow, ("Render Time:  " + debugging.getTimeInMs(DebugTimerTypes::Render) + " ms").c_str());
-    ImGui::TextColored(yellow, ("Delta Time:   " + debugging.deltaTimeInMs() + " ms").c_str());
-    ImGui::TextColored(yellow, ("FPS:  " + debugging.fps()).c_str());
+    ImGui::TextColored(yellow, std::string("Update Time:  " + debugging.getTimeInMs(DebugTimerTypes::Logic) + " ms").c_str());
+    ImGui::TextColored(yellow, std::string("Physics Time: " + debugging.getTimeInMs(DebugTimerTypes::Physics) + " ms").c_str());
+    ImGui::TextColored(yellow, std::string("Sounds Time:  " + debugging.getTimeInMs(DebugTimerTypes::Sound) + " ms").c_str());
+    ImGui::TextColored(yellow, std::string("Render Time:  " + debugging.getTimeInMs(DebugTimerTypes::Render) + " ms").c_str());
+    ImGui::TextColored(yellow, std::string("Delta Time:   " + debugging.deltaTimeInMs() + " ms").c_str());
+    ImGui::TextColored(yellow, std::string("FPS:  " + debugging.fps()).c_str());
 
 #ifdef _WIN32
 
@@ -353,18 +353,18 @@ void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentSce
     DWORDLONG totalPhysMem    = memInfo.ullTotalPhys; //Total Physical Memory (RAM)
     DWORDLONG physMemUsed     = memInfo.ullTotalPhys - memInfo.ullAvailPhys; //Physical Memory currently used
 
-    ImGui::TextColored(yellow, ("Total Virtual Memory: " + byte_format(totalVirtualMem, m_Strm)).c_str());
-    ImGui::TextColored(yellow, ("Virtual Memory Used: " + byte_format(virtualMemUsed, m_Strm)).c_str());
-    ImGui::TextColored(yellow, ("Total Physical Memory (RAM): " + byte_format(totalPhysMem, m_Strm)).c_str());
-    ImGui::TextColored(yellow, ("Physical Memory Used: " + byte_format(physMemUsed, m_Strm)).c_str());
+    ImGui::TextColored(yellow, std::string("Total Virtual Memory: " + byte_format(totalVirtualMem, m_Strm)).c_str());
+    ImGui::TextColored(yellow, std::string("Virtual Memory Used: " + byte_format(virtualMemUsed, m_Strm)).c_str());
+    ImGui::TextColored(yellow, std::string("Total Physical Memory (RAM): " + byte_format(totalPhysMem, m_Strm)).c_str());
+    ImGui::TextColored(yellow, std::string("Physical Memory Used: " + byte_format(physMemUsed, m_Strm)).c_str());
 
     PROCESS_MEMORY_COUNTERS_EX pmc;
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
 
     SIZE_T virtualMemUsedByMe = pmc.PrivateUsage; //Virtual Memory currently used by current process
     SIZE_T physMemUsedByMe    = pmc.WorkingSetSize; //Physical Memory currently used by current process
-    ImGui::TextColored(yellow, ("Virtual Memory used by current process: " + byte_format(virtualMemUsedByMe, m_Strm)).c_str());
-    ImGui::TextColored(yellow, ("Physical Memory used by current process: " + byte_format(physMemUsedByMe, m_Strm)).c_str());
+    ImGui::TextColored(yellow, std::string("Virtual Memory used by current process: " + byte_format(virtualMemUsedByMe, m_Strm)).c_str());
+    ImGui::TextColored(yellow, std::string("Physical Memory used by current process: " + byte_format(physMemUsedByMe, m_Strm)).c_str());
 #endif
 
 }

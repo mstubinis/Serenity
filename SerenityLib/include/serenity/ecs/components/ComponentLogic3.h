@@ -23,26 +23,26 @@ class ComponentLogic3 : public ComponentBaseClass<ComponentLogic3> {
             : m_Owner{ entity }
         {}
         ComponentLogic3(Entity entity, CFunction&& CFunctor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr)
-            : m_Owner       { entity }
-            , m_UserPointer { Ptr1 }
+            : m_UserPointer{ Ptr1 }
             , m_UserPointer1{ Ptr2 }
             , m_UserPointer2{ Ptr3 }
+            , m_Owner       { entity }
         {
             setFunctor(std::move(CFunctor));
         }
         ComponentLogic3(Entity entity, const CFunction& CFunctor, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr)
-            : m_Owner       { entity }
-            , m_UserPointer { Ptr1 }
+            : m_UserPointer{ Ptr1 }
             , m_UserPointer1{ Ptr2 }
             , m_UserPointer2{ Ptr3 }
+            , m_Owner       { entity }
         {
             setFunctor(CFunctor);
         }
         ComponentLogic3(Entity entity, luabridge::LuaRef luaFunction, void* Ptr1 = nullptr, void* Ptr2 = nullptr, void* Ptr3 = nullptr)
-            : m_Owner       { entity }
-            , m_UserPointer { Ptr1 }
+            : m_UserPointer{ Ptr1 }
             , m_UserPointer1{ Ptr2 }
             , m_UserPointer2{ Ptr3 }
+            , m_Owner       { entity }
         {
             setFunctor(luaFunction);
         }

@@ -112,7 +112,7 @@ class LightAttenuationData {
         float              m_E                = LIGHT_DEFAULT_EXPONENT;
         float              m_CullingRadius    = 0.0f;
 
-        virtual void calculateCullingRadius(ComponentTransform*, const glm::vec4& lightColor);
+        void calculateCullingRadius(ComponentTransform*, const glm::vec4& lightColor);
     public:
         void setConstant(ComponentTransform*, float constant, const glm::vec4& lightColor);
         void setLinear(ComponentTransform*, float linear, const glm::vec4& lightColor);

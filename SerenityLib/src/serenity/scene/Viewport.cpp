@@ -25,28 +25,32 @@ Viewport::Viewport(Scene& scene, Camera& camera, RenderFunc renderFunc)
     setViewportDimensions(0.0f, 0.0f, float(winSize.x), float(winSize.y));
 }
 Viewport::Viewport(Viewport&& other) noexcept 
-    : m_Scene              { std::move(other.m_Scene) }
-    , m_Camera             { std::move(other.m_Camera) }
-    , m_Viewport_Dimensions{ std::move(other.m_Viewport_Dimensions) }
-    , m_BackgroundColor    { std::move(other.m_BackgroundColor) }
-    , m_StateFlags         { std::move(other.m_StateFlags) }
-    , m_DepthMaskValue     { std::move(other.m_DepthMaskValue) }
-    , m_ID                 { std::move(other.m_ID) }
-    , m_RenderFlags        { std::move(other.m_RenderFlags) }
-    , m_RenderFuncPointer  { std::move(other.m_RenderFuncPointer) }
-    , m_ResizeFuncPointer  { std::move(other.m_ResizeFuncPointer) }
+    : m_Viewport_Dimensions      { std::move(other.m_Viewport_Dimensions) }
+    , m_BackgroundColor          { std::move(other.m_BackgroundColor) }
+    , m_RenderFuncPointer        { std::exchange(other.m_RenderFuncPointer, nullptr) }
+    , m_ResizeFuncPointer        { std::exchange(other.m_ResizeFuncPointer, nullptr) }
+    , m_ResizeFuncPointerUserData{ std::exchange(other.m_ResizeFuncPointerUserData, nullptr) }
+    , m_Scene                    { std::exchange(other.m_Scene, nullptr) }
+    , m_Camera                   { std::exchange(other.m_Camera, nullptr) }
+    , m_DepthMaskValue           { std::move(other.m_DepthMaskValue) }
+    , m_ID                       { std::move(other.m_ID) }
+    , m_RenderFlags              { std::move(other.m_RenderFlags) }
+    , m_StateFlags               { std::move(other.m_StateFlags) }
 {}
 Viewport& Viewport::operator=(Viewport&& other) noexcept {
-    m_Scene               = std::move(other.m_Scene);
-    m_Camera              = std::move(other.m_Camera);
-    m_Viewport_Dimensions = std::move(other.m_Viewport_Dimensions);
-    m_BackgroundColor     = std::move(other.m_BackgroundColor);
-    m_StateFlags          = std::move(other.m_StateFlags);
-    m_DepthMaskValue      = std::move(other.m_DepthMaskValue);
-    m_ID                  = std::move(other.m_ID);
-    m_RenderFlags         = std::move(other.m_RenderFlags);
-    m_RenderFuncPointer   = std::move(other.m_RenderFuncPointer);
-    m_ResizeFuncPointer   = std::move(other.m_ResizeFuncPointer);
+    if (this != &other) {
+        m_Viewport_Dimensions       = std::move(other.m_Viewport_Dimensions);
+        m_BackgroundColor           = std::move(other.m_BackgroundColor);
+        m_RenderFuncPointer         = std::exchange(other.m_RenderFuncPointer, nullptr);
+        m_ResizeFuncPointer         = std::exchange(other.m_ResizeFuncPointer, nullptr);
+        m_ResizeFuncPointerUserData = std::exchange(other.m_ResizeFuncPointerUserData, nullptr);
+        m_Scene                     = std::exchange(other.m_Scene, nullptr);
+        m_Camera                    = std::exchange(other.m_Camera, nullptr);
+        m_DepthMaskValue            = std::move(other.m_DepthMaskValue);
+        m_ID                        = std::move(other.m_ID);
+        m_RenderFlags               = std::move(other.m_RenderFlags);
+        m_StateFlags                = std::move(other.m_StateFlags);
+    }
     return *this;
 }
 

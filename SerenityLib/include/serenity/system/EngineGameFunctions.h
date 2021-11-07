@@ -4,33 +4,34 @@
 
 class  Window;
 struct EngineOptions;
+class  GameCore;
 
 #include <serenity/system/TypeDefs.h>
 
 namespace Game {
-    void initResources(const EngineOptions& options);
-    void initLogic(const EngineOptions& options);
-    void update(const float dt);
-    void render();
+    void initResources(const EngineOptions&, GameCore&);
+    void initLogic(const EngineOptions&, GameCore&);
+    void update(const float dt, GameCore&);
+    void render(GameCore&);
     void cleanup();
 
-    void onResize(Window& window, uint32_t width, uint32_t height);
-    void onWindowRequestedToBeClosed(Window& window);
-    void onWindowClosed(Window& window);
+    void onResize(Window&, uint32_t width, uint32_t height, GameCore&);
+    void onWindowRequestedToBeClosed(Window&);
+    void onWindowClosed(Window&);
     void onGameEnded();
-    void onLostFocus(Window& window);
-    void onGainedFocus(Window& window);
-    void onTextEntered(Window& window, uint32_t unicode);
-    void onKeyPressed(Window& window, uint32_t key);
-    void onKeyReleased(Window& window, uint32_t key);
-    void onMouseWheelScrolled(Window& window, float delta, int x, int y);
-    void onMouseButtonPressed(Window& window, uint32_t button);
-    void onMouseButtonReleased(Window& window, uint32_t button);
-    void onMouseMoved(Window& window, float mouseX, float mouseY);
-    void onMouseEntered(Window& window);
-    void onMouseLeft(Window& window);
-    void onPreUpdate(const float dt);
-    void onPostUpdate(const float dt);
+    void onLostFocus(Window&, GameCore&);
+    void onGainedFocus(Window&, GameCore&);
+    void onTextEntered(Window&, uint32_t unicode);
+    void onKeyPressed(Window&, uint32_t key);
+    void onKeyReleased(Window&, uint32_t key);
+    void onMouseWheelScrolled(Window&, float delta, int x, int y);
+    void onMouseButtonPressed(Window&, uint32_t button);
+    void onMouseButtonReleased(Window&, uint32_t button);
+    void onMouseMoved(Window&, float mouseX, float mouseY, GameCore&);
+    void onMouseEntered(Window&, GameCore&);
+    void onMouseLeft(Window&, GameCore&);
+    void onPreUpdate(const float dt, GameCore&);
+    void onPostUpdate(const float dt, GameCore&);
     void onJoystickButtonPressed();
     void onJoystickButtonReleased();
     void onJoystickMoved();

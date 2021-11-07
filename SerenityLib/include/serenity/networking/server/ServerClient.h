@@ -61,7 +61,7 @@ namespace Engine::Networking {
             ServerClient(const ServerClient&)                 = delete;
             ServerClient& operator=(const ServerClient&)      = delete;
             ServerClient(ServerClient&&) noexcept             = default;
-            ServerClient& operator=(ServerClient&&) noexcept  = default;
+            ServerClient& operator=(ServerClient&&) noexcept  = delete;
 
             template<class T> inline void setOnUpdateFunction(T&& func) noexcept { m_Update_Function = std::forward<T>(func); }
             template<class T> inline void setOnTimedOutFunction(T&& func) noexcept { m_On_Timed_Out_Function = std::forward<T>(func); }

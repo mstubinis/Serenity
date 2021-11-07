@@ -4,6 +4,7 @@
 
 #include <serenity/discord/src/network_manager.h>
 #include <serenity/discord/src/core.h>
+#include <serenity/system/Macros.h>
 
 #include <cstring>
 #include <memory>

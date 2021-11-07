@@ -766,6 +766,10 @@
     <ClCompile Include="src\serenity\ecs\systems\SystemSyncTransformToRigid.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemTransformParentChild.cpp" />
     <ClCompile Include="src\serenity\editor\core\EditorCore.cpp" />
+    <ClCompile Include="src\serenity\editor\embeddedImages\PointLightImage.cpp" />
+    <ClCompile Include="src\serenity\editor\embeddedImages\RodLightImage.cpp" />
+    <ClCompile Include="src\serenity\editor\embeddedImages\SpotLightImage.cpp" />
+    <ClCompile Include="src\serenity\editor\embeddedImages\SunLightImage.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui-SFML.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui.cpp" />
     <ClCompile Include="src\serenity\editor\imgui\imgui_draw.cpp" />

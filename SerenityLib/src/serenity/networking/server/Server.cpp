@@ -197,7 +197,7 @@ void Server::onUpdateReceiveTCPPackets(const float dt) {
     if (!serverActive) {
         return;
     }
-    auto lambda_update_client_thread = [this, serverActive](ServerThread& thread, const float dt) {
+    auto lambda_update_client_thread = [serverActive](ServerThread& thread, const float dt) {
         for (auto& [hash, client] : thread.getClients()) {
             if (serverActive == false || thread.getNumClients() == 0) { //can be inactive if no clients are using the thread
                 return true;
