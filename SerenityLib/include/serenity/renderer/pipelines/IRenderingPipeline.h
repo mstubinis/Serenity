@@ -331,10 +331,11 @@ namespace Engine::priv {
 
 
 
-            virtual void renderFullscreenTriangle() = 0;
-            virtual void renderFullscreenQuad(float width, float height) = 0;
+            virtual void renderFullscreenTriangle(float depth = 0.0f) = 0;
+            virtual void renderFullscreenQuad(float width, float height, float depth = 0.0f) = 0;
 
             virtual void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) = 0;
+            virtual void render2DAPI(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) = 0;
     };
 };
 

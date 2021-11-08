@@ -1194,6 +1194,7 @@ Engine::priv::EShaders::depth_and_transparency_frag +=
     "           discard;\n"
     "    }\n"
     "    gl_FragColor = scene;\n"
+    "    gl_FragDepth = texture2D(gDepthMap, texcoords).r;\n"
     "}";
 #pragma endregion
 

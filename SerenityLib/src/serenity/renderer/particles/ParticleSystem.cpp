@@ -78,7 +78,7 @@ void Engine::priv::ParticleSystem::internal_update_particles(const float dt, Cam
     Engine::priv::threading::addJobSplitVectored(lamda_update_particle, m_Particles, true);
 }
 
-ParticleEmitter* Engine::priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
+Engine::view_ptr<ParticleEmitter> Engine::priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     while (m_ParticleEmitterFreelist.size() > 0) { //first, try to reuse an empty
         size_t freeindex = m_ParticleEmitterFreelist.back();
         m_ParticleEmitterFreelist.pop_back();

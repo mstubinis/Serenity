@@ -60,6 +60,7 @@ class Viewport final {
         Scene*                        m_Scene                      = nullptr;
         Camera*                       m_Camera                     = nullptr;
         float                         m_DepthMaskValue             = 50.0f;
+        float                         m_Depth                      = 0.0f;
         uint32_t                      m_ID                         = 0;
         Engine::Flag<uint16_t>        m_RenderFlags;
         Engine::Flag<uint8_t>         m_StateFlags;
@@ -73,6 +74,8 @@ class Viewport final {
         Viewport(Viewport&&) noexcept;
         Viewport& operator=(Viewport&&) noexcept;
 
+        [[nodiscard]] inline float getDepth() const noexcept { return m_Depth; }
+        inline void setDepth(float depth) noexcept { m_Depth = depth; }
         [[nodiscard]] inline constexpr uint32_t getId() const noexcept { return m_ID; }
         inline void setID(uint32_t id) noexcept { m_ID = id; }
 

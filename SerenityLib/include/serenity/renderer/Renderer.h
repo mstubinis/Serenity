@@ -39,7 +39,7 @@ extern "C" {
 */
 
 namespace Engine::priv {
-    class  RenderModule final {
+    class RenderModule final {
         public:
             std::unique_ptr<IRenderingPipeline>  m_Pipeline;
             AntiAliasingAlgorithm                m_AA_algorithm      = AntiAliasingAlgorithm::FXAA;
@@ -59,7 +59,9 @@ namespace Engine::priv {
             void _init();
             void _resize(uint32_t width, uint32_t height);
 
+
             static void render(RenderModule&, Viewport&, bool mainRenderFunc = true);
+            static void render2DAPI(RenderModule&, Viewport&, bool mainRenderFunc = true);
 
             bool setShadowCaster(SunLight&,         bool isShadowCaster);
             bool setShadowCaster(PointLight&,       bool isShadowCaster);
@@ -118,9 +120,9 @@ namespace Engine::Renderer {
     void restoreDefaultOpenGLState();
     void restoreCurrentOpenGLState();
 
-    void renderFullscreenQuad();
-    void renderFullscreenQuad(float width, float height);
-    void renderFullscreenTriangle();
+    void renderFullscreenQuad(float depth = 0.0f);
+    void renderFullscreenQuad(float width, float height, float depth = 0.0f);
+    void renderFullscreenTriangle(float depth = 0.0f);
 
     uint32_t getUniformLoc(const char* location);
     uint32_t getUniformLocUnsafe(const char* location);

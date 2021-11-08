@@ -246,10 +246,11 @@ namespace Engine::priv {
             void renderBackgroundTriangle(const glm::vec2& position, const glm::vec4& color, float angle, float width, float height, float depth, Alignment align, const glm::vec4& scissor) override;
 
 
-            void renderFullscreenTriangle() override;
-            void renderFullscreenQuad(float width, float height) override;
+            void renderFullscreenTriangle(float depth = 0.0f) override;
+            void renderFullscreenQuad(float width, float height, float depth = 0.0f) override;
 
             void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) override;
+            void render2DAPI(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) override;
     };
 };
 

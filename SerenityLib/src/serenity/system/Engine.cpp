@@ -187,6 +187,13 @@ void EngineCore::internal_render(GameCore& gameCore, Scene& scene, Window& windo
                 viewport.render(m_RenderModule, viewport, true);
             }
         }
+        /*
+        for (auto& viewport : scene_viewports) {
+            if (viewport.isActive() && (viewport.getRenderFlags() & ViewportRenderingFlag::API2D)) {
+                m_RenderModule.render2DAPI(m_RenderModule, viewport, true);
+            }
+        }
+        */
         m_Editor.render(window);
         window.display();
     }

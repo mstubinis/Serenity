@@ -487,10 +487,7 @@ void DeferredPipeline::clear(bool color, bool depth, bool stencil) {
     if (!color && !depth && !stencil) {
         return;
     }
-    GLuint clearBit = 0;
-    if (color)   clearBit |= GL_COLOR_BUFFER_BIT;
-    if (depth)   clearBit |= GL_DEPTH_BUFFER_BIT;
-    if (stencil) clearBit |= GL_STENCIL_BUFFER_BIT;
+    GLuint clearBit = (color * GL_COLOR_BUFFER_BIT) | (depth * GL_DEPTH_BUFFER_BIT) | (stencil * GL_STENCIL_BUFFER_BIT);
     glClear(clearBit);
 }
 bool DeferredPipeline::colorMask(bool r, bool g, bool b, bool alpha) {
@@ -1276,7 +1273,7 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
 }
 void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport, Camera& camera) {
     const auto& winSize    = Engine::Resources::getWindowSize();
-    const auto& dimensions = glm::vec4{ viewport.getViewportDimensions() };
+    const auto& dimensions = viewport.getViewportDimensions();
     if (viewport.isAspectRatioSynced()) {
         camera.setAspectRatio(dimensions.z / dimensions.w);
     }
@@ -1681,6 +1678,8 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_TRUE);
+    //glEnable(GL_DEPTH_TEST);
 
     //sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
     //sendUniform1Safe("TransparencyMaskActive", (int)viewport.isTransparencyMaskActive());
@@ -1751,10 +1750,16 @@ void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCo
     glDepthMask(GL_TRUE);
     if (mainRenderFunc) {
         if (viewport.getRenderFlags().has(ViewportRenderingFlag::API2D)) {
+
+            //yes this is stupid on opengl's part.. but to be able to write to the depth buffer you need depth testing enabled DESPITE there
+            //being a depthMask function that should be the only requirement... well whatever, to always pass depth test - use glDepthFunc(GL_ALWAYS)
+            Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+            Engine::Renderer::setDepthFunc(GL_ALWAYS);
+
+
             Engine::Renderer::Settings::clear(false, clearDepth, false); //clear depth only
             m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI].get<ShaderProgram>());
             Engine::Renderer::sendUniformMatrix4("VP", m_2DProjectionMatrix);
-
             if (commands.size() > 0) {
                 Engine::Renderer::GLEnable(GL_SCISSOR_TEST);
                 for (const auto& command : commands) {
@@ -1762,6 +1767,7 @@ void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCo
                 }
                 Engine::Renderer::GLDisable(GL_SCISSOR_TEST);
             }
+            Engine::Renderer::setDepthFunc(GL_LEQUAL); //restore back to normal
         }
     } 
     glDisablei(GL_BLEND, 0);
@@ -1801,7 +1807,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
             m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ camera.getPosition(), camera.getNear() };
             m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ camera.getViewVector(), camera.getFar() };
             m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ 0.0f, 0.0f, 0.0f, logDepthBufferFCoeff };
-            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
+            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ viewportDimensions.z, viewportDimensions.w, viewportDimensions.z, viewportDimensions.w };
             m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
             m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
             */
@@ -1884,7 +1890,23 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
     renderPhysicsAPI(mainRenderFunction, viewport, camera, scene);
 
     m_GBuffer.bindBackbuffer(viewport);
-    internal_render2DAPI(GBufferType::BackBuffer, m_2DAPICommands, mainRenderFunction, viewport);
+
+    internal_render2DAPI(GBufferType::BackBuffer, m_2DAPICommands, mainRenderFunction, viewport, true);
+}
+void DeferredPipeline::render2DAPI(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) {
+    auto& camera             = viewport.getCamera();
+    auto& scene              = viewport.getScene();
+    const auto& sceneAmbient = scene.getAmbientColor();
+    auto& viewportDimensions = viewport.getViewportDimensions();
+    auto winSize             = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
+
+    m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
+
+    internal_render_per_frame_preparation(viewport, camera);
+
+
+    m_GBuffer.bindBackbuffer(viewport);
+    internal_render2DAPI(GBufferType::BackBuffer, m_2DAPICommands, mainRenderFunction, viewport, true);
 }
 void DeferredPipeline::internal_renderTexture(std::vector<IRenderingPipeline::API2DCommand>& commands, Handle textureHandle, const glm::vec2& p, const glm::vec4& c, float a, const glm::vec2& s, float d, Alignment align, const glm::vec4& scissor) {
     commands.emplace_back([textureHandle, p, c, a, s, d, align, scissor, this]() { DeferredPipeline::render2DTexture(textureHandle, p, c, a, s, d, align, scissor); }, d);
@@ -1952,16 +1974,17 @@ void DeferredPipeline::renderBackgroundTriangle(const glm::vec2& position, const
     internal_renderTriangle(m_Background2DAPICommands, position, color, angle, width, height, depth, align, scissor);
 }
 
-void DeferredPipeline::renderFullscreenTriangle() {
-    const glm::vec2 winSize{ Engine::Resources::getWindowSize() };
+void DeferredPipeline::renderFullscreenTriangle(float depth) {
+    const glm::vec2 winSize = glm::vec2{ Engine::Resources::getWindowSize() };
     Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4{ 1.0f });
     Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y));
     m_FullscreenTriangle.render();
 }
-void DeferredPipeline::renderFullscreenQuad(float width, float height) {
-    const glm::vec2 winSize{ Engine::Resources::getWindowSize() };
-    auto modelMatrix = glm::mat4{ 1.0f };
-    modelMatrix      = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
+void DeferredPipeline::renderFullscreenQuad(float width, float height, float depth) {
+    const glm::vec2 winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    auto modelMatrix        = glm::mat4{ 1.0f };
+    modelMatrix             = glm::translate(modelMatrix, glm::vec3{ 0.0f, 0.0f, 0.0f - depth });
+    modelMatrix             = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     //Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(-winSize.x / 2.0f, winSize.x / 2.0f, -winSize.y / 2.0f, winSize.y / 2.0f));
     Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y));

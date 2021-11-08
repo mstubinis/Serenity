@@ -321,7 +321,7 @@ size_t Scene::getNumLights() const noexcept {
     }
     return count;
 }
-ParticleEmitter* Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
+Engine::view_ptr<ParticleEmitter> Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
     return m_ParticleSystem.add_emitter(properties, scene, lifetime, parent);
 }
 Viewport& Scene::addViewport(float x, float y, float width, float height, Camera& camera) {

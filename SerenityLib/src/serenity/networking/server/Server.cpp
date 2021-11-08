@@ -233,7 +233,7 @@ SocketStatus::Status Server::onUpdateProcessTCPListeners() {
             SocketTCP* tcpSocket = NEW SocketTCP();
             status = m_TCPListener->accept(*tcpSocket);
             if (status == SocketStatus::Done) {
-                auto client_ip = tcpSocket->ip();
+                auto client_ip   = tcpSocket->ip();
                 auto client_port = tcpSocket->remotePort();
                 auto client_hash = m_CustomClientHashFunction(client_ip, client_port);
                 internal_add_client(client_hash, addNewClient(client_hash, client_ip, client_port, tcpSocket));

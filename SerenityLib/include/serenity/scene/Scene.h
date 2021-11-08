@@ -136,9 +136,9 @@ class Scene: public Observer {
         [[nodiscard]] size_t getNumLights() const noexcept;
 
         [[nodiscard]] Viewport& getMainViewport();
-        Viewport& addViewport(float x, float y, float width, float height, Camera& camera);
+        Viewport& addViewport(float x, float y, float width, float height, Camera&);
 
-        [[nodiscard]] ParticleEmitter* addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent = Entity{});
+        [[nodiscard]] Engine::view_ptr<ParticleEmitter> addParticleEmitter(ParticleEmissionProperties&, Scene&, float lifetime, Entity parent = Entity{});
 
 
         [[nodiscard]] Camera* getActiveCamera() const;

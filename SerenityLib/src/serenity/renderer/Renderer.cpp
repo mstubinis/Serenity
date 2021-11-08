@@ -144,6 +144,10 @@ void RenderModule::_init(){
 void RenderModule::render(RenderModule& renderModule, Viewport& viewport, bool mainFunc){
     renderModule.m_Pipeline->render(renderModule, viewport, mainFunc);
 }
+void RenderModule::render2DAPI(RenderModule& renderModule, Viewport& viewport, bool mainFunc) {
+    renderModule.m_Pipeline->render2DAPI(renderModule, viewport, mainFunc);
+}
+
 void RenderModule::_resize(uint32_t w, uint32_t h){
     m_Pipeline->onResize(w, h);
 }
@@ -584,15 +588,15 @@ void Engine::Renderer::renderBackgroundBorder(float borderSize, const glm::vec2&
 
 
 
-void Engine::Renderer::renderFullscreenQuad() {
+void Engine::Renderer::renderFullscreenQuad(float depth) {
     const auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
-    RENDER_MODULE->m_Pipeline->renderFullscreenQuad(winSize.x, winSize.y);
+    RENDER_MODULE->m_Pipeline->renderFullscreenQuad(winSize.x, winSize.y, depth);
 }
-void Engine::Renderer::renderFullscreenQuad(float width, float height) {
-    RENDER_MODULE->m_Pipeline->renderFullscreenQuad(width, height);
+void Engine::Renderer::renderFullscreenQuad(float width, float height, float depth) {
+    RENDER_MODULE->m_Pipeline->renderFullscreenQuad(width, height, depth);
 }
-void Engine::Renderer::renderFullscreenTriangle() {
-    RENDER_MODULE->m_Pipeline->renderFullscreenTriangle();
+void Engine::Renderer::renderFullscreenTriangle(float depth) {
+    RENDER_MODULE->m_Pipeline->renderFullscreenTriangle(depth);
 }
 
 

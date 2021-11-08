@@ -109,7 +109,7 @@ namespace Engine::priv {
             ParticleSystem(ParticleSystem&&) noexcept            = delete;
             ParticleSystem& operator=(ParticleSystem&&) noexcept = delete;
 
-            ParticleEmitter* add_emitter(ParticleEmissionProperties&, Scene&, float lifetime, Entity parent);
+            Engine::view_ptr<ParticleEmitter> add_emitter(ParticleEmissionProperties&, Scene&, float lifetime, Entity parent);
 
             bool add_particle(ParticleEmitter&, const glm::vec3& emitterPosition, const glm::quat& emitterRotation);
             bool add_particle(ParticleEmitter&);
