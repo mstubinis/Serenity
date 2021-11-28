@@ -178,22 +178,16 @@ void EngineCore::internal_render(GameCore& gameCore, Scene& scene, Window& windo
 #endif
     Game::render(gameCore);
     if (!scene.m_SkipRenderThisFrame) {
+        m_RenderModule._sort2DAPICommands();
+        m_RenderModule.m_Pipeline->renderInitFrame(m_RenderModule);
         scene.render();
         m_Editor.renderLightIcons(scene);
-        m_RenderModule._sort2DAPICommands();
         auto& scene_viewports = Engine::priv::PublicScene::GetViewports(scene);
         for (auto& viewport : scene_viewports) {
             if (viewport.isActive()) {
                 viewport.render(m_RenderModule, viewport, true);
             }
         }
-        /*
-        for (auto& viewport : scene_viewports) {
-            if (viewport.isActive() && (viewport.getRenderFlags() & ViewportRenderingFlag::API2D)) {
-                m_RenderModule.render2DAPI(m_RenderModule, viewport, true);
-            }
-        }
-        */
         m_Editor.render(window);
         window.display();
     }

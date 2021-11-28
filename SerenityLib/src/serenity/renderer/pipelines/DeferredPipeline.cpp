@@ -226,7 +226,7 @@ void DeferredPipeline::init() {
     const auto window_size = Engine::Resources::getWindowSize();
     //const auto majorVersion = Engine::priv::OpenGLState::constants.MAJOR_VERSION;
     //const auto minorVersion = Engine::priv::OpenGLState::constants.MINOR_VERSION;
-    m_2DProjectionMatrix   = glm::ortho(0.0f, float(window_size.x), 0.0f, float(window_size.y), 0.005f, 99999999.0f);
+    m_2DProjectionMatrix   = glm::ortho(0.0f, float(window_size.x), 0.0f, float(window_size.y), 0.003f, 6000.0f);
 
     const float init_border_color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     m_InternalShaders.resize(ShaderEnum::_TOTAL);
@@ -1271,6 +1271,10 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
     renderMesh(triangle);
     m_Renderer.unbind(&triangle);
 }
+void DeferredPipeline::renderInitFrame(Engine::priv::RenderModule& renderer) {
+    m_GBuffer.bindBackbuffer();
+    Engine::Renderer::Settings::clear(true, true, true); // clear depth & stencil only
+}
 void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport, Camera& camera) {
     const auto& winSize    = Engine::Resources::getWindowSize();
     const auto& dimensions = viewport.getViewportDimensions();
@@ -1280,7 +1284,7 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
     Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w); //m_GBuffer.bindFramebuffers() already does this
     glScissor(0, 0, winSize.x, winSize.y);
 
-    m_2DProjectionMatrix = glm::ortho(0.0f, dimensions.z, 0.0f, dimensions.w, 0.005f, 3000.0f); //might have to recheck this
+    m_2DProjectionMatrix = glm::ortho(0.0f, dimensions.z, 0.0f, dimensions.w, 0.003f, 3000.0f); //might have to recheck this
     //this is god awful and ugly, but it's needed. find a way to refactor this properly
     for (uint32_t i = 0; i < 12; ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
@@ -1674,24 +1678,29 @@ void DeferredPipeline::internal_pass_final(GBufferType::Type sceneTexture) {
 void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency].get<ShaderProgram>());
 
-    //Engine::Renderer::GLEnable(GL_BLEND);
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
-    //glEnable(GL_DEPTH_TEST);
+    //Engine::Renderer::GLEnable(GL_DEPTH_TEST);
 
+    //glDepthFunc(GL_ALWAYS);
+    glDepthFunc(GL_LEQUAL);
+    // 
     //sendUniform4Safe("TransparencyMaskColor", viewport.getTransparencyMaskColor());
-    //sendUniform1Safe("TransparencyMaskActive", (int)viewport.isTransparencyMaskActive());
+    //sendUniform1Safe("TransparencyMaskActive", int(viewport.isTransparencyMaskActive()));
     Engine::Renderer::sendUniform1Safe("DepthMaskValue", viewport.getDepthMaskValue());
-    Engine::Renderer::sendUniform1Safe("DepthMaskActive", (int)viewport.isDepthMaskActive());
+    Engine::Renderer::sendUniform1Safe("DepthMaskActive", int(viewport.isDepthMaskActive()));
 
     Engine::priv::OpenGLBindTextureRAII SceneTexture{ "SceneTexture", m_GBuffer.getTexture(sceneTexture), 0, true };
     Engine::priv::OpenGLBindTextureRAII gDepthMap{ "gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), 1, true };
 
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(0.0f, 0.0f, viewport.getDepth(), 0.003f, 6000.0f);
 
-    //Engine::Renderer::GLDisable(GL_BLEND);
+    glDepthFunc(GL_LEQUAL);
+    glDisable(GL_DEPTH_TEST);
+    //Engine::Renderer::GLDisable(GL_DEPTH_TEST);
     Engine::Renderer::GLDisablei(GL_BLEND, 0);
 }
 void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type) {
@@ -1754,8 +1763,8 @@ void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCo
             //yes this is stupid on opengl's part.. but to be able to write to the depth buffer you need depth testing enabled DESPITE there
             //being a depthMask function that should be the only requirement... well whatever, to always pass depth test - use glDepthFunc(GL_ALWAYS)
             Engine::Renderer::GLEnable(GL_DEPTH_TEST);
+            //Engine::Renderer::setDepthFunc(GL_LEQUAL);
             Engine::Renderer::setDepthFunc(GL_ALWAYS);
-
 
             Engine::Renderer::Settings::clear(false, clearDepth, false); //clear depth only
             m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI].get<ShaderProgram>());
@@ -1974,19 +1983,23 @@ void DeferredPipeline::renderBackgroundTriangle(const glm::vec2& position, const
     internal_renderTriangle(m_Background2DAPICommands, position, color, angle, width, height, depth, align, scissor);
 }
 
-void DeferredPipeline::renderFullscreenTriangle(float depth) {
+void DeferredPipeline::renderFullscreenTriangle(float depth, float inNear, float inFar) {
     const glm::vec2 winSize = glm::vec2{ Engine::Resources::getWindowSize() };
-    Engine::Renderer::sendUniformMatrix4Safe("Model", glm::mat4{ 1.0f });
-    Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y));
+    auto modelMatrix        = glm::mat4{ 1.0f };
+    modelMatrix             = glm::translate(modelMatrix, glm::vec3{ 0.0f, 0.0f, 0.0f - depth });
+    Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    //TODO: put near and far in as parameters in the function call?
+    Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y, inNear, inFar));
     m_FullscreenTriangle.render();
 }
-void DeferredPipeline::renderFullscreenQuad(float width, float height, float depth) {
+void DeferredPipeline::renderFullscreenQuad(float width, float height, float depth, float inNear, float inFar) {
     const glm::vec2 winSize = glm::vec2{ Engine::Resources::getWindowSize() };
     auto modelMatrix        = glm::mat4{ 1.0f };
     modelMatrix             = glm::translate(modelMatrix, glm::vec3{ 0.0f, 0.0f, 0.0f - depth });
     modelMatrix             = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     //Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(-winSize.x / 2.0f, winSize.x / 2.0f, -winSize.y / 2.0f, winSize.y / 2.0f));
-    Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y));
+    //TODO: put near and far in as parameters in the function call?
+    Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y, inNear, inFar));
     m_FullscreenQuad.render();
 }

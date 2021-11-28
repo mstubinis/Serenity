@@ -733,6 +733,7 @@
     <ClCompile Include="src\serenity\discord\src\types.cpp" />
     <ClCompile Include="src\serenity\discord\src\user_manager.cpp" />
     <ClCompile Include="src\serenity\discord\src\voice_manager.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentScript.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentTransform.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentRigidBody.cpp" />
     <ClCompile Include="src\serenity\ecs\components\ComponentCamera.cpp" />
@@ -748,6 +749,7 @@
     <ClCompile Include="src\serenity\ecs\ECSSystemPool.cpp" />
     <ClCompile Include="src\serenity\ecs\entity\Entity.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentScript.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransform.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransformDebugDraw.cpp" />
     <ClCompile Include="src\serenity\ecs\systems\SystemComponentRigidBody.cpp" />
@@ -1289,6 +1291,7 @@
     <ClInclude Include="include\serenity\discord\src\user_manager.h" />
     <ClInclude Include="include\serenity\discord\src\voice_manager.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentBaseClass.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentScript.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentTransform.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentRigidBody.h" />
     <ClInclude Include="include\serenity\ecs\components\ComponentCamera.h" />
@@ -1308,6 +1311,7 @@
     <ClInclude Include="include\serenity\ecs\entity\Entity.h" />
     <ClInclude Include="include\serenity\ecs\entity\EntityRAII.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentScript.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransform.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransformDebugDraw.h" />
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentRigidBody.h" />

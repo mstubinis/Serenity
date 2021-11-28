@@ -1185,16 +1185,17 @@ Engine::priv::EShaders::depth_and_transparency_frag +=
     "\n"
     "void main(){\n"
     "    vec4 scene = texture2D(SceneTexture, texcoords);\n"
+    "    scene.a = 1.0;\n"
     "    float depth = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), texcoords, CameraNear, CameraFar), CameraPosition);\n"
-    //"    if(TransparencyMaskActive == 1 && scene.rgb == TransparencyMaskColor.rgb){\n"
+    //"    if (TransparencyMaskActive == 1 && scene.rgb == TransparencyMaskColor.rgb) {\n"
     //"        scene.a = 0.0;\n"
     //"    }\n"
-    "    if(DepthMaskActive == 1 && depth > DepthMaskValue){\n"
-    //"        scene.a = 0.0;\n" //"erase" the texture if the depth exceeds what the viewport wants
-    "           discard;\n"
+    "    if (DepthMaskActive == 1 && depth > DepthMaskValue) {\n"
+    //"        scene.a = 0.0;\n" //"erase" the pixel if the depth exceeds what the viewport wants
+    "        discard;\n"
     "    }\n"
     "    gl_FragColor = scene;\n"
-    "    gl_FragDepth = texture2D(gDepthMap, texcoords).r;\n"
+    //"    gl_FragDepth = 0.000001;\n"
     "}";
 #pragma endregion
 

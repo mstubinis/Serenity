@@ -27,6 +27,7 @@
 #include <serenity/ecs/systems/SystemComponentLogic2.h>
 #include <serenity/ecs/systems/SystemComponentLogic3.h>
 #include <serenity/ecs/systems/SystemComponentModel.h>
+#include <serenity/ecs/systems/SystemComponentScript.h>
 
 struct SceneImpl final {
     template<class FUNC> static void iterateMaterials(Scene& scene, FUNC&& func) {
@@ -38,6 +39,192 @@ struct SceneImpl final {
     }
 };
 
+#pragma region Scene
+
+Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options) 
+    : m_ParticleSystem{ options.maxAmountOfParticleEmitters, options.maxAmountOfParticles }
+    , m_ID{ id }
+{
+    m_ECS.init(options);
+
+    internal_register_lights();
+    internal_register_components();
+    internal_register_systems();
+
+    setName(name);
+
+    registerEvent(EventType::SceneChanged);
+}
+Scene::Scene(uint32_t id, std::string_view name)
+    : Scene{ id, name, SceneOptions::DEFAULT_OPTIONS }
+{}
+Scene::~Scene() {
+    SAFE_DELETE(m_Skybox);
+    SAFE_DELETE_VECTOR(m_Cameras);
+    m_ECS.destruct();
+    unregisterEvent(EventType::SceneChanged);
+}
+void Scene::internal_register_lights() {
+    m_LightsModule.registerLightType<SunLight>();
+    m_LightsModule.registerLightType<PointLight>();
+    m_LightsModule.registerLightType<DirectionalLight>();
+    m_LightsModule.registerLightType<SpotLight>();
+    m_LightsModule.registerLightType<RodLight>();
+    m_LightsModule.registerLightType<ProjectionLight>();
+}
+void Scene::internal_register_components() {
+    registerComponent<ComponentLogic>();
+    registerComponent<ComponentTransform>();
+    registerComponent<ComponentRigidBody>();
+    registerComponent<ComponentCollisionShape>();
+    registerComponent<ComponentLogic1>();
+    registerComponent<ComponentModel>();
+    registerComponent<ComponentLogic2>();
+    registerComponent<ComponentCamera>();
+    registerComponent<ComponentLogic3>();
+    registerComponent<ComponentName>();
+    registerComponent<ComponentScript>();
+
+    Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
+}
+void Scene::internal_register_systems() {
+    registerSystemOrdered<SystemComponentRigidBody, std::tuple<>, ComponentRigidBody>(20'000);
+
+    registerSystemOrdered<SystemGameUpdate, std::tuple<>>(30'000);
+    registerSystemOrdered<SystemSceneUpdate, std::tuple<>>(40'000);
+    registerSystemOrdered<SystemComponentScript, std::tuple<>, ComponentScript>(45'000);
+    registerSystemOrdered<SystemComponentLogic, std::tuple<>, ComponentLogic>(50'000);
+
+    registerSystemOrdered<SystemComponentTransform, std::tuple<>, ComponentTransform>(60'000);
+    registerSystemOrdered<SystemTransformParentChild, std::tuple<>, ComponentTransform>(80'000);
+    registerSystemOrdered<SystemSyncRigidToTransform, std::tuple<>, ComponentTransform, ComponentRigidBody>(81'000);
+    registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(85'000); //TODO: figure this out
+
+    //registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(100'000);
+    registerSystemOrdered<SystemSyncTransformToRigid, std::tuple<>, ComponentTransform, ComponentRigidBody>(110'000);
+
+    registerSystemOrdered<SystemCompoundChildTransforms, std::tuple<>, ComponentCollisionShape>(115'000);
+
+    registerSystemOrdered<SystemComponentLogic1, std::tuple<>, ComponentLogic1>(120'000);
+    registerSystemOrdered<SystemComponentModel, std::tuple<>, ComponentModel>(130'000);
+
+    registerSystemOrdered<SystemComponentLogic2, std::tuple<>, ComponentLogic2>(140'000);
+    registerSystemOrdered<SystemComponentCamera, std::tuple<>, ComponentCamera>(150'000);
+    registerSystemOrdered<SystemComponentLogic3, std::tuple<>, ComponentLogic3>(160'000);
+
+    registerSystemOrdered<SystemSceneChanging, std::tuple<>>(170'000);
+
+    registerSystemOrdered<SystemComponentTransformDebugDraw, std::tuple<>, ComponentTransform, ComponentModel>(1'000'000);
+}
+size_t Scene::getNumLights() const noexcept {
+    size_t count = 0;
+    for (const auto& lightContainer : m_LightsModule) {
+        count += lightContainer->size();
+    }
+    return count;
+}
+Engine::view_ptr<ParticleEmitter> Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
+    return m_ParticleSystem.add_emitter(properties, scene, lifetime, parent);
+}
+Viewport& Scene::addViewport(float x, float y, float width, float height, Camera& camera) {
+    Viewport& viewport  = m_Viewports.emplace_back(*this, camera);
+    viewport.setViewportDimensions(x, y, width, height);
+    return viewport;
+}
+Entity Scene::createEntity() { 
+    return m_ECS.createEntity(*this); 
+}
+std::vector<Entity> Scene::createEntity(uint32_t amount) {
+    return m_ECS.createEntity(*this, amount);
+}
+std::vector<Entity> Scene::createEntities(uint32_t amount) {
+    return m_ECS.createEntity(*this, amount);
+}
+void Scene::removeEntity(Entity entity) { 
+    m_ECS.removeEntity(entity);
+}
+Viewport& Scene::getMainViewport() {
+    return m_Viewports[0];
+}
+Camera* Scene::getActiveCamera() const {
+    return m_Viewports.size() > 0 ? &m_Viewports[0].getCamera() : nullptr;
+}
+void Scene::setActiveCamera(Camera& camera){
+    if (m_Viewports.size() == 0) {
+        auto& mainViewport = m_Viewports.emplace_back(*this, camera);
+        mainViewport.setResizeFunc([](float x, float y, float width, float height, Viewport& viewport, void* userPointer) {
+            viewport.setViewportDimensions(0.0f, 0.0f, width, height);
+        });
+        return;
+    }
+    m_Viewports[0].setCamera(camera);
+}
+void Scene::centerSceneToObject(Entity centerEntity) {
+    auto centerTransform = centerEntity.getComponent<ComponentTransform>();
+    ASSERT(centerTransform, __FUNCTION__ << "(): centerTransform was null!");
+    auto centerPos       = centerTransform->getWorldPosition();
+    auto centerPosFloat  = glm::vec3{ centerPos };
+    for (const Entity e : Engine::priv::PublicScene::GetEntities(*this)) {
+        if (e != centerEntity) {
+            auto eTransform = e.getComponent<ComponentTransform>();
+            if (eTransform && !eTransform->hasParent()) {
+                eTransform->translate(-centerPos, false);
+            }
+        }
+    }
+    for (auto& particle : m_ParticleSystem.getParticles()) {
+        if (particle.isActive()) {
+            particle.translate(-centerPosFloat);
+        }
+    }
+    for (auto& soundEffect : Engine::Sound::getAllSoundEffects()) {
+        if (soundEffect.isActive() && soundEffect.getAttenuation() > 0.0f) {
+            soundEffect.translate(-centerPosFloat);
+        }
+    }
+    centerTransform->setPosition(decimal(0.0));
+    Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(*this);
+    ComponentTransform::recalculateAllParentChildMatrices(*this); //hmm is this needed?
+}
+void Scene::update(const float dt) {
+    m_ECS.update(dt, *this);
+
+    Engine::priv::PublicScene::UpdateMaterials(*this, dt);
+
+    m_ParticleSystem.update(dt, *getActiveCamera());
+}
+void Scene::preUpdate(const float dt) {
+    m_ECS.preUpdate(*this, dt);
+}
+void Scene::postUpdate(const float dt) {
+    m_ECS.postUpdate(*this, dt);
+}
+const glm::vec4& Scene::getBackgroundColor() const {
+    return m_Viewports[0].m_BackgroundColor;
+}
+void Scene::setBackgroundColor(float r, float g, float b, float a) {
+    Engine::Math::setColor(m_Viewports[0].m_BackgroundColor, r, g, b, a);
+}
+void Scene::setBackgroundColor(const glm::vec4& backgroundColor) {
+    setBackgroundColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
+}
+void Scene::setGlobalIllumination(const glm::vec3& globalIllumination) {
+    setGlobalIllumination(globalIllumination.x, globalIllumination.y, globalIllumination.z);
+}
+void Scene::setGlobalIllumination(float global, float diffuse, float specular) {
+    m_GI = glm::vec3{ global, diffuse, specular };
+    Engine::Renderer::Settings::Lighting::setGIContribution(global, diffuse, specular);
+}
+void Scene::onEvent(const Event& e) {
+    if (e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this) {
+        Engine::Renderer::Settings::Lighting::setGIContribution(m_GI.x, m_GI.y, m_GI.z);
+    }
+}
+
+#pragma endregion
+
+
+#pragma region PublicScene
 std::vector<Particle>& Engine::priv::PublicScene::GetParticles(const Scene& scene) {
     return scene.m_ParticleSystem.getParticles();
 }
@@ -63,13 +250,13 @@ void Engine::priv::PublicScene::CleanECS(Scene& scene, Entity inEntity) {
 void Engine::priv::PublicScene::UpdateMaterials(Scene& scene, const float dt) {
     SceneImpl::iterateMaterials(scene, [](Material& material) {
         material.m_UpdatedThisFrame = false;
-    });
+        });
     SceneImpl::iterateMaterials(scene, [dt](Material& material) {
         if (!material.m_UpdatedThisFrame) {
             material.update(dt);
             material.m_UpdatedThisFrame = true;
         }
-    });
+        });
 }
 void Engine::priv::PublicScene::RenderGeometryOpaque(RenderModule& renderer, Scene& scene, Viewport* viewport, Camera* camera, bool useDefaultShaders) {
     for (size_t i = RenderStage::GeometryOpaque; i < RenderStage::GeometryOpaque_4; ++i) {
@@ -215,7 +402,7 @@ void Engine::priv::PublicScene::AddModelInstanceToPipeline(Scene& scene, ModelIn
     }
     renderGraph->internal_addModelInstanceToPipeline(modelInstance);
 }
-void Engine::priv::PublicScene::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage){
+void Engine::priv::PublicScene::RemoveModelInstanceFromPipeline(Scene& scene, ModelInstance& modelInstance, RenderStage stage) {
     auto& renderGraphs = scene.m_RenderGraphs[stage];
     Engine::priv::RenderGraph* renderGraph = nullptr;
     for (auto& graph : renderGraphs) {
@@ -237,184 +424,4 @@ bool Engine::priv::PublicScene::IsSkipRenderThisFrame(Scene& scene) {
 bool Engine::priv::PublicScene::HasItemsToRender(Scene& scene) {
     return scene.m_RenderGraphs.hasItemsToRender();
 }
-
-
-Scene::Scene(uint32_t id, std::string_view name, const SceneOptions& options) 
-    : m_ParticleSystem{ options.maxAmountOfParticleEmitters, options.maxAmountOfParticles }
-    , m_ID{ id }
-{
-    m_ECS.init(options);
-
-    internal_register_lights();
-    internal_register_components();
-    internal_register_systems();
-
-    setName(name);
-
-    registerEvent(EventType::SceneChanged);
-}
-Scene::Scene(uint32_t id, std::string_view name)
-    : Scene{ id, name, SceneOptions::DEFAULT_OPTIONS }
-{}
-Scene::~Scene() {
-    SAFE_DELETE(m_Skybox);
-    SAFE_DELETE_VECTOR(m_Cameras);
-    m_ECS.destruct();
-    unregisterEvent(EventType::SceneChanged);
-}
-void Scene::internal_register_lights() {
-    m_LightsModule.registerLightType<SunLight>();
-    m_LightsModule.registerLightType<PointLight>();
-    m_LightsModule.registerLightType<DirectionalLight>();
-    m_LightsModule.registerLightType<SpotLight>();
-    m_LightsModule.registerLightType<RodLight>();
-    m_LightsModule.registerLightType<ProjectionLight>();
-}
-void Scene::internal_register_components() {
-    registerComponent<ComponentLogic>();
-    registerComponent<ComponentTransform>();
-    registerComponent<ComponentRigidBody>();
-    registerComponent<ComponentCollisionShape>();
-    registerComponent<ComponentLogic1>();
-    registerComponent<ComponentModel>();
-    registerComponent<ComponentLogic2>();
-    registerComponent<ComponentCamera>();
-    registerComponent<ComponentLogic3>();
-    registerComponent<ComponentName>();
-
-    Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
-}
-void Scene::internal_register_systems() {
-    //registerSystemOrdered<SystemAddRigidBodies, std::tuple<>>(10'000);
-    registerSystemOrdered<SystemComponentRigidBody, std::tuple<>, ComponentRigidBody>(20'000);
-
-    registerSystemOrdered<SystemGameUpdate, std::tuple<>>(30'000);
-    registerSystemOrdered<SystemSceneUpdate, std::tuple<>>(40'000);
-    registerSystemOrdered<SystemComponentLogic, std::tuple<>, ComponentLogic>(50'000);
-
-    registerSystemOrdered<SystemComponentTransform, std::tuple<>, ComponentTransform>(60'000);
-    registerSystemOrdered<SystemTransformParentChild, std::tuple<>, ComponentTransform>(80'000);
-    registerSystemOrdered<SystemSyncRigidToTransform, std::tuple<>, ComponentTransform, ComponentRigidBody>(81'000);
-    registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(85'000); //TODO: figure this out
-
-    //registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(100'000);
-    registerSystemOrdered<SystemSyncTransformToRigid, std::tuple<>, ComponentTransform, ComponentRigidBody>(110'000);
-
-    registerSystemOrdered<SystemCompoundChildTransforms, std::tuple<>, ComponentCollisionShape>(115'000);
-
-    registerSystemOrdered<SystemComponentLogic1, std::tuple<>, ComponentLogic1>(120'000);
-    registerSystemOrdered<SystemComponentModel, std::tuple<>, ComponentModel>(130'000);
-
-    registerSystemOrdered<SystemComponentLogic2, std::tuple<>, ComponentLogic2>(140'000);
-    registerSystemOrdered<SystemComponentCamera, std::tuple<>, ComponentCamera>(150'000);
-    registerSystemOrdered<SystemComponentLogic3, std::tuple<>, ComponentLogic3>(160'000);
-
-    registerSystemOrdered<SystemSceneChanging, std::tuple<>>(170'000);
-    //registerSystemOrdered<SystemRemoveRigidBodies, std::tuple<>>(180'000);
-
-    registerSystemOrdered<SystemComponentTransformDebugDraw, std::tuple<>, ComponentTransform, ComponentModel>(1'000'000);
-}
-size_t Scene::getNumLights() const noexcept {
-    size_t count = 0;
-    for (const auto& lightContainer : m_LightsModule) {
-        count += lightContainer->size();
-    }
-    return count;
-}
-Engine::view_ptr<ParticleEmitter> Scene::addParticleEmitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
-    return m_ParticleSystem.add_emitter(properties, scene, lifetime, parent);
-}
-Viewport& Scene::addViewport(float x, float y, float width, float height, Camera& camera) {
-    Viewport& viewport  = m_Viewports.emplace_back(*this, camera);
-    viewport.setViewportDimensions(x, y, width, height);
-    return viewport;
-}
-Entity Scene::createEntity() { 
-    return m_ECS.createEntity(*this); 
-}
-std::vector<Entity> Scene::createEntity(uint32_t amount) {
-    return m_ECS.createEntity(*this, amount);
-}
-std::vector<Entity> Scene::createEntities(uint32_t amount) {
-    return m_ECS.createEntity(*this, amount);
-}
-void Scene::removeEntity(Entity entity) { 
-    m_ECS.removeEntity(entity);
-}
-Viewport& Scene::getMainViewport() {
-    return m_Viewports[0];
-}
-Camera* Scene::getActiveCamera() const {
-    return m_Viewports.size() > 0 ? &m_Viewports[0].getCamera() : nullptr;
-}
-void Scene::setActiveCamera(Camera& camera){
-    if (m_Viewports.size() == 0) {
-        auto& mainViewport = m_Viewports.emplace_back(*this, camera);
-        mainViewport.setResizeFunc([](float x, float y, float width, float height, Viewport& viewport, void* userPointer) {
-            viewport.setViewportDimensions(0.0f, 0.0f, width, height);
-        });
-        return;
-    }
-    m_Viewports[0].setCamera(camera);
-}
-void Scene::centerSceneToObject(Entity centerEntity) {
-    auto centerTransform = centerEntity.getComponent<ComponentTransform>();
-    ASSERT(centerTransform, __FUNCTION__ << "(): centerTransform was null!");
-    auto centerPos       = centerTransform->getWorldPosition();
-    auto centerPosFloat  = glm::vec3{ centerPos };
-    for (const Entity e : Engine::priv::PublicScene::GetEntities(*this)) {
-        if (e != centerEntity) {
-            auto eTransform = e.getComponent<ComponentTransform>();
-            if (eTransform && !eTransform->hasParent()) {
-                eTransform->translate(-centerPos, false);
-            }
-        }
-    }
-    for (auto& particle : m_ParticleSystem.getParticles()) {
-        if (particle.isActive()) {
-            particle.translate(-centerPosFloat);
-        }
-    }
-    for (auto& soundEffect : Engine::Sound::getAllSoundEffects()) {
-        if (soundEffect.isActive() && soundEffect.getAttenuation() > 0.0f) {
-            soundEffect.translate(-centerPosFloat);
-        }
-    }
-    centerTransform->setPosition(decimal(0.0));
-    Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(*this);
-    ComponentTransform::recalculateAllParentChildMatrices(*this); //hmm is this needed?
-}
-void Scene::update(const float dt) {
-    m_ECS.update(dt, *this);
-
-    Engine::priv::PublicScene::UpdateMaterials(*this, dt);
-
-    m_ParticleSystem.update(dt, *getActiveCamera());
-}
-void Scene::preUpdate(const float dt) {
-    m_ECS.preUpdate(*this, dt);
-}
-void Scene::postUpdate(const float dt) {
-    m_ECS.postUpdate(*this, dt);
-}
-const glm::vec4& Scene::getBackgroundColor() const {
-    return m_Viewports[0].m_BackgroundColor;
-}
-void Scene::setBackgroundColor(float r, float g, float b, float a) {
-    Engine::Math::setColor(m_Viewports[0].m_BackgroundColor, r, g, b, a);
-}
-void Scene::setBackgroundColor(const glm::vec4& backgroundColor) {
-    setBackgroundColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
-}
-void Scene::setGlobalIllumination(const glm::vec3& globalIllumination) {
-    setGlobalIllumination(globalIllumination.x, globalIllumination.y, globalIllumination.z);
-}
-void Scene::setGlobalIllumination(float global, float diffuse, float specular) {
-    m_GI = glm::vec3{ global, diffuse, specular };
-    Engine::Renderer::Settings::Lighting::setGIContribution(global, diffuse, specular);
-}
-void Scene::onEvent(const Event& e) {
-    if (e.type == EventType::SceneChanged && e.eventSceneChanged.newScene == this) {
-        Engine::Renderer::Settings::Lighting::setGIContribution(m_GI.x, m_GI.y, m_GI.z);
-    }
-}
+#pragma endregion

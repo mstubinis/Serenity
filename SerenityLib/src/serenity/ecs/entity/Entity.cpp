@@ -31,21 +31,27 @@ Entity& Entity::operator=(Entity&& other) noexcept {
     }
     return *this;
 }
-void Entity::destroy() noexcept {
+bool Entity::isValid() const noexcept {
+    Scene* scene_ptr = scene();
+    return !null() && (scene_ptr && !PublicScene::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this));
+}
+bool Entity::destroy() noexcept {
     if (!null()) {
         Scene* scene_ptr = scene();
         if (!scene_ptr || (scene_ptr && PublicScene::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this))) {
-            return;
+            return false;
         }
         PublicScene::CleanECS(*scene_ptr, *this);
         PublicScene::GetECS(*scene_ptr).removeEntity(*this);
+        return true;
     }
+    return false;
 }
 bool Entity::isDestroyed() const noexcept {
     if (!null()) {
-        Scene* s = scene();
-        if (s) {
-            return PublicScene::GetECS(*s).getEntityPool().isEntityVersionDifferent(*this);
+        Scene* scene_ptr = scene();
+        if (scene_ptr) {
+            return PublicScene::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this);
         }
     }
     return false;
@@ -166,7 +172,7 @@ bool Entity::removeComponent(std::string_view componentClassName) {
     return false;
 }
 luabridge::LuaRef Entity::getComponent(std::string_view componentClassName) {
-    lua_State* L            = Engine::priv::getLUABinder().getState()->getState();
+    lua_State* L            = &Engine::lua::getGlobalState();
     std::string global_name = toString() + ":" + std::string{ componentClassName };
     auto* global_name_cstr  = global_name.c_str();
     if (componentClassName == "ComponentTransform") {

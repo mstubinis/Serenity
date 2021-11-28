@@ -131,24 +131,24 @@ btCollisionShape* Engine::priv::PublicMesh::internal_build_collision(Handle mesh
     Engine::priv::MeshCollisionFactory* factory = nullptr;
     if (!meshHandle) {
         factory = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CPUData.m_CollisionFactory;
-    }else{
+    } else {
         factory = meshHandle.get<Mesh>()->m_CPUData.m_CollisionFactory;
     }
     if (factory) {
         switch (collisionType) {
             case CollisionType::BOX_SHAPE_PROXYTYPE: {
                 return factory->buildBoxShape(modelInstance, isCompoundChild);
-            }case CollisionType::CONVEX_HULL_SHAPE_PROXYTYPE: {
+            } case CollisionType::CONVEX_HULL_SHAPE_PROXYTYPE: {
                 return factory->buildConvexHull(modelInstance, isCompoundChild);
-            }case CollisionType::SPHERE_SHAPE_PROXYTYPE: {
+            } case CollisionType::SPHERE_SHAPE_PROXYTYPE: {
                 return factory->buildSphereShape(modelInstance, isCompoundChild);
-            }case CollisionType::MULTI_SPHERE_SHAPE_PROXYTYPE: {
+            } case CollisionType::MULTI_SPHERE_SHAPE_PROXYTYPE: {
                 return factory->buildMultiSphereShape(modelInstance, isCompoundChild);
-            }case CollisionType::TRIANGLE_MESH_SHAPE_PROXYTYPE: {
+            } case CollisionType::TRIANGLE_MESH_SHAPE_PROXYTYPE: {
                 return factory->buildTriangleShape(modelInstance, isCompoundChild);
-            }case CollisionType::SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE: {
+            } case CollisionType::SCALED_TRIANGLE_MESH_SHAPE_PROXYTYPE: {
                 return factory->buildTriangleShape(modelInstance, isCompoundChild);
-            }case CollisionType::GIMPACT_SHAPE_PROXYTYPE: {
+            } case CollisionType::GIMPACT_SHAPE_PROXYTYPE: {
                 return factory->buildTriangleShapeGImpact(modelInstance, isCompoundChild);
             }
         }

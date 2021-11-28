@@ -1583,6 +1583,12 @@
     <ClCompile Include="src\serenity\editor\embeddedImages\SunLightImage.cpp">
       <Filter>Source Files\Engine\Core\Editor\EmbeddedImages</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentScript.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\ecs\components\ComponentScript.cpp">
+      <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -3249,6 +3255,12 @@
     </ClInclude>
     <ClInclude Include="include\serenity\lua\LuaCallable.h">
       <Filter>Header Files\Engine\Core\LUA</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\components\ComponentScript.h">
+      <Filter>Header Files\Engine\Core\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentScript.h">
+      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

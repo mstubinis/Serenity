@@ -151,7 +151,7 @@ ComponentCollisionShape& ComponentCollisionShape::operator=(ComponentCollisionSh
 void ComponentCollisionShape::internal_free_memory() {
     if (m_BtCollisionShape){
         if (m_BtCollisionShape->isCompound()) {
-            auto btCompound = (btCompoundShape*)m_BtCollisionShape;
+            auto btCompound = static_cast<btCompoundShape*>(m_BtCollisionShape);
             for (int i = 0; i < btCompound->getNumChildShapes(); ++i) {
                 auto btChildShape = btCompound->getChildShape(i);
                 if (btChildShape->getUserIndex2() == std::numeric_limits<int>().min()) {
@@ -229,7 +229,7 @@ bool ComponentCollisionShape::addChildShape(ComponentCollisionShape& other) {
     if (getType() != CollisionType::COMPOUND_SHAPE_PROXYTYPE) {
         return false;
     }
-    auto btCompound = (btCompoundShape*)m_BtCollisionShape;
+    auto btCompound = static_cast<btCompoundShape*>(m_BtCollisionShape);
     for (int i = 0; i < btCompound->getNumChildShapes(); ++i) {
         if (btCompound->getChildShape(i) == other.m_BtCollisionShape) {
             return false;
@@ -386,7 +386,7 @@ void ComponentCollisionShape::setMass(float mass) {
     }
     if (m_BtCollisionShape->getShapeType() != EMPTY_SHAPE_PROXYTYPE) {
         if (m_BtCollisionShape->isCompound()) {
-            btCompoundShape* btCompound = (btCompoundShape*)m_BtCollisionShape;
+            btCompoundShape* btCompound = static_cast<btCompoundShape*>(m_BtCollisionShape);
             for (int i = 0; i < btCompound->getNumChildShapes(); ++i) {
                 btCollisionShape* btChildShape = btCompound->getChildShape(i);
                 if (btChildShape) {
@@ -423,7 +423,7 @@ void Engine::priv::ComponentCollisionShapeDeferredLoading::internal_load_multipl
     auto rigidBody  = collisionShape.m_Owner.getComponent<ComponentRigidBody>();
     auto model      = collisionShape.m_Owner.getComponent<ComponentModel>();
     auto scale      = transform->getScale();
-    auto btCompound = (btCompoundShape*)collisionShape.getBtShape();
+    auto btCompound = static_cast<btCompoundShape*>(collisionShape.getBtShape());
     for (auto& instance : instances) {
         ASSERT(instance, __FUNCTION__ << "(): instance in instances was null!");
         auto transformChild = instance->getOwner().getComponent<ComponentTransform>();

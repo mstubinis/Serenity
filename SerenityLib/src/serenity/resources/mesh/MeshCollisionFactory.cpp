@@ -3,6 +3,7 @@
 #include <serenity/utils/Utils.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/mesh/Mesh.h>
+#include <serenity/model/ModelInstance.h>
 
 #include <BulletCollision/Gimpact/btGImpactShape.h>
 #include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
@@ -89,8 +90,8 @@ void Engine::priv::MeshCollisionFactory::internal_init_triangle_data(VertexData&
 }
 btSphereShape* Engine::priv::MeshCollisionFactory::buildSphereShape(ModelInstance* modelInstance, bool isCompoundChild) {
     ASSERT(m_CPUData->m_Radius > 0.0f, __FUNCTION__ << "(): m_CPUData->m_Radius is zero!");
-    auto rad = (btScalar)m_CPUData->m_Radius;
-    btSphereShape* sphere = new btSphereShape{ rad };
+    auto radi             = btScalar(m_CPUData->m_Radius);
+    btSphereShape* sphere = new btSphereShape{ radi };
     sphere->setMargin(DEFAULT_MARGIN);
     if (isCompoundChild) {
         sphere->setUserPointer(modelInstance);
@@ -99,10 +100,13 @@ btSphereShape* Engine::priv::MeshCollisionFactory::buildSphereShape(ModelInstanc
 }
 btMultiSphereShape* Engine::priv::MeshCollisionFactory::buildMultiSphereShape(ModelInstance* modelInstance, bool isCompoundChild) {
     ASSERT(m_CPUData->m_Radius > 0.0f, __FUNCTION__ << "(): m_CPUData->m_Radius is zero!");
-    auto rad = (btScalar)m_CPUData->m_Radius;
-    auto v   = btVector3{ 0, 0, 0 };
-    btMultiSphereShape* multiSphere = new btMultiSphereShape{ &v, &rad, 1 };
+    auto radi = btScalar(m_CPUData->m_Radius);
+    auto position = btVector3{ 0, 0, 0 };
+    btMultiSphereShape* multiSphere = new btMultiSphereShape{ &position, &radi, 1 };
     multiSphere->setMargin(DEFAULT_MARGIN);
+    if (modelInstance) {
+        multiSphere->setLocalScaling(Engine::Math::toBT(modelInstance->getScale()));
+    }
     multiSphere->recalcLocalAabb();
     if (isCompoundChild) {
         multiSphere->setUserPointer(modelInstance);

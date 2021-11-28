@@ -1347,7 +1347,7 @@ void btCollisionWorld::debugDrawObject(const btTransform& worldTransform, const 
 				btTransform childTransform;
 				childTransform.setIdentity();
 
-				for (int i = multiSphereShape->getSphereCount() - 1; i >= 0; i--)
+				for (int i = 0; i < multiSphereShape->getSphereCount(); ++i)
 				{
 					childTransform.setOrigin(multiSphereShape->getSpherePosition(i));
 					getDebugDrawer()->drawSphere(multiSphereShape->getSphereRadius(i), worldTransform * childTransform, color);

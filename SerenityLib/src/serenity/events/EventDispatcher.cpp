@@ -30,7 +30,11 @@ namespace {
 }
 
 
+Engine::priv::EventDispatcher::~EventDispatcher() {
+    m_UnregisteredObservers.clear();
+}
 void Engine::priv::EventDispatcher::registerObject(Observer& observer, EventType eventType) noexcept {
+    ASSERT(eventType >= 0 && eventType < m_Observers.size(), "");
     std::lock_guard lock{ m_Mutex };
     auto& observers_with_event_type = m_Observers[eventType];
     if (internal_has_duplicate(observer, observers_with_event_type)) {
@@ -39,25 +43,18 @@ void Engine::priv::EventDispatcher::registerObject(Observer& observer, EventType
     observers_with_event_type.emplace_back(&observer);
 }
 void Engine::priv::EventDispatcher::unregisterObject(Observer& observer, EventType eventType) noexcept {
-    //ASSERT(m_Observers.size() > eventType, __FUNCTION__ << "(): eventType does not fit in m_Observers!");
     if (m_Observers.size() > eventType) {
         std::lock_guard lock{ m_Mutex };
         m_UnregisteredObservers.emplace_back(&observer, eventType);
     }
 }
 void Engine::priv::EventDispatcher::unregisterObjectImmediate(Observer& observer, EventType eventType) noexcept {
-    //ASSERT(m_Observers.size() > eventType, __FUNCTION__ << "(): eventType does not fit in m_Observers!");
     if (m_Observers.size() > eventType) {
         std::lock_guard lock{ m_Mutex };
         auto& observers_with_event = m_Observers[eventType];
-        auto it = observers_with_event.begin();
-        while (it != observers_with_event.end()) {
-            if (&observer == *it) {
-                it = observers_with_event.erase(it);
-            }else{
-                ++it;
-            }
-        }
+        Engine::swap_and_pop_single(observers_with_event, [](auto& item, Observer* inObserver) {
+            return inObserver == item;
+        }, &observer);
     }
 }
 bool Engine::priv::EventDispatcher::isObjectRegistered(const Observer& observer, EventType eventType) const noexcept {
@@ -90,7 +87,7 @@ void Engine::priv::EventDispatcher::addScriptOnEventFunction(lua_State* L, uint3
 }
 void Engine::priv::EventDispatcher::cleanupScript(uint32_t scriptID) {
     if (m_ScriptFunctions.size() > scriptID) {
-        m_ScriptFunctions[scriptID] = luabridge::LuaRef(Engine::priv::getLUABinder().getState()->getState());
+        m_ScriptFunctions[scriptID] = luabridge::LuaRef(&Engine::lua::getGlobalState());
     }
     for (auto& scriptIDs : m_ScriptObservers) {
         size_t idx = Engine::binary_search(scriptIDs, scriptID);
@@ -117,14 +114,14 @@ void Engine::priv::EventDispatcher::registerScriptEvent(uint32_t scriptID, uint3
 
 
 void Engine::lua::addOnEventFunction(luabridge::LuaRef eventFunction) {
-    lua_State* L       = Engine::priv::getLUABinder().getState()->getState();
+    lua_State* L       = &Engine::lua::getGlobalState();
     auto scriptIDRef   = luabridge::getGlobal(L, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
     uint32_t scriptID  = scriptIDRef.cast<uint32_t>();
     auto& dispatcher   = Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher;
     dispatcher.addScriptOnEventFunction(L, scriptID, eventFunction);
 }
 void Engine::lua::registerEvent(uint32_t eventID) {
-    lua_State* L      = Engine::priv::getLUABinder().getState()->getState();
+    lua_State* L      = &Engine::lua::getGlobalState();
     auto scriptIDRef  = luabridge::getGlobal(L, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
     uint32_t scriptID = scriptIDRef.cast<uint32_t>();
     auto& dispatcher  = Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher;

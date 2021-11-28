@@ -28,6 +28,7 @@ namespace Engine::priv {
             EventDispatcher& operator=(const EventDispatcher&)     = delete;
             EventDispatcher(EventDispatcher&&) noexcept            = delete;
             EventDispatcher& operator=(EventDispatcher&&) noexcept = delete;
+            ~EventDispatcher();
 
             void postUpdate();
             void addScriptOnEventFunction(lua_State*, uint32_t scriptID, luabridge::LuaRef eventFunction);

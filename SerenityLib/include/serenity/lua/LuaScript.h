@@ -9,14 +9,19 @@ class LUAState;
 
 class LuaScript final {
     private:
-        LUAState&     m_L;
         std::string   m_FileName;
-        uint32_t      m_ID        = std::numeric_limits<uint32_t>().max();
-
-        LuaScript() = delete;
+        LUAState*     m_L           = nullptr;
+        uint32_t      m_ID          = std::numeric_limits<uint32_t>().max();
+        bool          m_Executed    = false;
     public:
+        LuaScript();
         LuaScript(LUAState&, const std::string& fileName, bool run = true);
         LuaScript(const std::string& fileName, bool run = true);
+
+        LuaScript(const LuaScript&)                 = delete;
+        LuaScript& operator=(const LuaScript&)      = delete;
+        LuaScript(LuaScript&&) noexcept;
+        LuaScript& operator=(LuaScript&&) noexcept;
         ~LuaScript();
 
         bool runScript() noexcept;

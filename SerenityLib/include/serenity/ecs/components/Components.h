@@ -12,5 +12,6 @@
 #include <serenity/ecs/components/ComponentLogic3.h>
 #include <serenity/ecs/components/ComponentModel.h>
 #include <serenity/ecs/components/ComponentName.h>
+#include <serenity/ecs/components/ComponentScript.h>
 
 #endif

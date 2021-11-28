@@ -120,9 +120,10 @@ namespace Engine::Renderer {
     void restoreDefaultOpenGLState();
     void restoreCurrentOpenGLState();
 
-    void renderFullscreenQuad(float depth = 0.0f);
-    void renderFullscreenQuad(float width, float height, float depth = 0.0f);
-    void renderFullscreenTriangle(float depth = 0.0f);
+    //set width and height to be <= 0.0f to use the window's dimensions automatically
+    void renderFullscreenQuad(float width = 0.0f, float height = 0.0f, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f);
+
+    void renderFullscreenTriangle(float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f);
 
     uint32_t getUniformLoc(const char* location);
     uint32_t getUniformLocUnsafe(const char* location);

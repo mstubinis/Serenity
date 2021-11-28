@@ -37,8 +37,11 @@ class Entity {
         Entity(Entity&&) noexcept;
         Entity& operator=(Entity&&) noexcept;
 
+        //returns true if the entity has not been destroyed and is not null
+        [[nodiscard]] bool isValid() const noexcept;
+
         inline constexpr operator bool() const noexcept { return !null(); }
-        inline constexpr bool null() const noexcept { return (
+        [[nodiscard]] inline constexpr bool null() const noexcept { return (
             m_ID == getMaxEntityIDBits(ID_BIT_POSITIONS) && 
             m_SceneID == getMaxEntityIDBits(SCENE_BIT_POSITIONS) && 
             m_VersionID == getMaxEntityIDBits(VERSION_BIT_POSITIONS)); 
@@ -66,8 +69,10 @@ class Entity {
         }
         inline void fill(Entity other) noexcept { fill(other.m_ID, other.m_SceneID, other.m_VersionID); }
 
-        void destroy() noexcept;
-        bool isDestroyed() const noexcept;
+        //returns true if the entity was succesfully destroyed.
+        bool destroy() noexcept;
+
+        [[nodiscard]] bool isDestroyed() const noexcept;
 
         [[nodiscard]] inline constexpr uint32_t id() const noexcept { return m_ID; }
         [[nodiscard]] inline constexpr uint32_t sceneID() const noexcept { return m_SceneID; }

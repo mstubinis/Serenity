@@ -26,6 +26,7 @@ namespace Engine::priv {
 }
 
 namespace Engine::lua {
+    lua_State& getGlobalState() noexcept;
     void addOnUpdateFunction(luabridge::LuaRef updateFunction);
     void addOnEventFunction(luabridge::LuaRef eventFunction);
 }

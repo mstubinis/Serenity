@@ -10,8 +10,8 @@ class ComponentName : public ComponentBaseClass<ComponentName> {
 
         ComponentName() = delete;
     public:
-        ComponentName(Entity entity);
-        ComponentName(Entity entity, std::string_view name);
+        ComponentName(Entity);
+        ComponentName(Entity, std::string_view name);
         ComponentName(const ComponentName&)                = default;
         ComponentName& operator=(const ComponentName&)     = default;
         ComponentName(ComponentName&&) noexcept            = default;
