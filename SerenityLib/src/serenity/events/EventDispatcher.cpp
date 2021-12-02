@@ -13,9 +13,13 @@ namespace {
     }
     void internal_dispatch_script_event(const Event& e, std::vector<luabridge::LuaRef>& functions, const std::array<std::vector<uint32_t>, EventType::_TOTAL>& observers) {
         if (e.type < observers.size()) {
-            for (uint32_t scriptID : observers[e.type]) {
+            for (const uint32_t scriptID : observers[e.type]) {
                 if (!functions[scriptID].isNil()) {
-                    functions[scriptID](e);
+                    try {
+                        functions[scriptID](e);
+                    } catch (...) {
+
+                    }
                 }
             }
         }

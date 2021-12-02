@@ -32,7 +32,7 @@ void ComponentRigidBody::cleanup() {
     }
 }
 ComponentRigidBody::ComponentRigidBody(ComponentRigidBody&& other) noexcept {
-    m_CollisionFunctor  = std::move(other.m_CollisionFunctor);
+    m_CollisionFunctor  = std::exchange(other.m_CollisionFunctor, [](RigidCollisionCallbackData&) {});
     m_BulletRigidBody   = std::move(other.m_BulletRigidBody);
     m_BulletMotionState = std::move(other.m_BulletMotionState);
     m_UserPointer       = std::exchange(other.m_UserPointer, nullptr);
@@ -47,7 +47,7 @@ ComponentRigidBody::ComponentRigidBody(ComponentRigidBody&& other) noexcept {
 ComponentRigidBody& ComponentRigidBody::operator=(ComponentRigidBody&& other) noexcept {
     if (this != &other) {
         cleanup();
-        m_CollisionFunctor  = std::move(other.m_CollisionFunctor);
+        m_CollisionFunctor  = std::exchange(other.m_CollisionFunctor, [](RigidCollisionCallbackData&) {});
         m_BulletRigidBody   = std::move(other.m_BulletRigidBody);
         m_BulletMotionState = std::move(other.m_BulletMotionState);
         m_UserPointer       = std::exchange(other.m_UserPointer, nullptr);
@@ -141,20 +141,6 @@ bool ComponentRigidBody::addPhysicsToWorld() {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return Engine::Physics::addRigidBody(getBtBody(), m_Group, m_Mask);
 }
-/*
-bool ComponentRigidBody::removePhysicsFromWorld() {
-    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    auto& ecs          = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-    auto& systemRemove = ecs.getSystem<SystemRemoveRigidBodies>();
-    return systemRemove.enqueueBody(getBtBody());
-}
-bool ComponentRigidBody::addPhysicsToWorld() {
-    ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
-    auto& ecs       = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-    auto& systemAdd = ecs.getSystem<SystemAddRigidBodies>();
-    return systemAdd.enqueueBody(getBtBody(), m_Group, m_Mask);
-}
-*/
 decimal ComponentRigidBody::getLinearDamping() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return decimal(m_BulletRigidBody->getLinearDamping());
@@ -163,10 +149,10 @@ decimal ComponentRigidBody::getAngularDamping() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");
     return decimal(m_BulletRigidBody->getAngularDamping());
 }
-void ComponentRigidBody::collisionResponse(RigidCollisionCallbackEventData& data) const {
-    if (m_CollisionFunctor) { //TODO: find out why this is needed and possibly remove this if check
+void ComponentRigidBody::collisionResponse(RigidCollisionCallbackData& data) const {
+    //if (m_CollisionFunctor) { //TODO: find out why this is needed and possibly remove this if check
         m_CollisionFunctor(data);
-    }
+    //}
 }
 MaskType ComponentRigidBody::getCollisionFlags() const {
     ASSERT(m_BulletRigidBody, __FUNCTION__ << "(): m_BulletRigidBody was null!");

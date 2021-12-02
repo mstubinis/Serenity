@@ -9,14 +9,14 @@ class LUAState;
 
 class LuaScript final {
     private:
-        std::string   m_FileName;
+        std::string   m_FileNameOrData;
         LUAState*     m_L           = nullptr;
         uint32_t      m_ID          = std::numeric_limits<uint32_t>().max();
         bool          m_Executed    = false;
     public:
         LuaScript();
-        LuaScript(LUAState&, const std::string& fileName, bool run = true);
-        LuaScript(const std::string& fileName, bool run = true);
+        LuaScript(LUAState&, std::string_view fileNameOrData, bool run = true, bool file = true);
+        LuaScript(std::string_view fileNameOrData, bool run = true, bool file = true);
 
         LuaScript(const LuaScript&)                 = delete;
         LuaScript& operator=(const LuaScript&)      = delete;
@@ -24,7 +24,8 @@ class LuaScript final {
         LuaScript& operator=(LuaScript&&) noexcept;
         ~LuaScript();
 
-        bool runScript() noexcept;
+        bool runScript(bool file) noexcept;
+        bool runScript(std::string_view fileNameOrData, bool file = true) noexcept;
 
         void callFunction(const char* name) noexcept;
         void clean() noexcept;

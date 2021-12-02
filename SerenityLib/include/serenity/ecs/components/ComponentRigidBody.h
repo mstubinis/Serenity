@@ -34,7 +34,7 @@ using btRigidBodyType = btRigidBodyEnhanced;
 using btRigidBodyType = btRigidBody;
 #endif
 
-struct RigidCollisionCallbackEventData final {
+struct RigidCollisionCallbackData final {
     ComponentRigidBody&  ownerRigid;
     ComponentRigidBody&  otherRigid;
     glm::vec3&           ownerHit;
@@ -53,13 +53,13 @@ struct RigidCollisionCallbackEventData final {
     uint32_t             ownerModelInstanceIndex    = 0;
     uint32_t             otherModelInstanceIndex    = 0;
 
-    RigidCollisionCallbackEventData() = delete;
-    RigidCollisionCallbackEventData(const RigidCollisionCallbackEventData&) = delete;
-    RigidCollisionCallbackEventData& operator=(const RigidCollisionCallbackEventData&) = delete;
-    RigidCollisionCallbackEventData(RigidCollisionCallbackEventData&&) noexcept = delete;
-    RigidCollisionCallbackEventData& operator=(RigidCollisionCallbackEventData&&) noexcept = delete;
+    RigidCollisionCallbackData() = delete;
+    RigidCollisionCallbackData(const RigidCollisionCallbackData&) = delete;
+    RigidCollisionCallbackData& operator=(const RigidCollisionCallbackData&) = delete;
+    RigidCollisionCallbackData(RigidCollisionCallbackData&&) noexcept = delete;
+    RigidCollisionCallbackData& operator=(RigidCollisionCallbackData&&) noexcept = delete;
 
-    RigidCollisionCallbackEventData(ComponentRigidBody& ownerRigid_, ComponentRigidBody& otherRigid_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_,
+    RigidCollisionCallbackData(ComponentRigidBody& ownerRigid_, ComponentRigidBody& otherRigid_, glm::vec3& ownerHit_, glm::vec3& otherHit_, glm::vec3& normal_,
         glm::vec3& ownerLocalHit_, glm::vec3& otherLocalHit_, glm::vec3& normalFromA_, glm::vec3& normalFromB_
     )
         : ownerRigid{ ownerRigid_ }
@@ -81,7 +81,7 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
     friend class  SystemTransformParentChild;
     friend class  SystemSyncTransformToRigid;
     friend class  SystemSyncRigidToTransform;
-    using CollisionCallbackFPRigid = void(*)(RigidCollisionCallbackEventData&);
+    using CollisionCallbackFPRigid = void(*)(RigidCollisionCallbackData&);
     public:
         class Flags {
             public:
@@ -98,7 +98,7 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
                 BUILD_ENUM_CLASS_MEMBERS(Flags, Type)
         };
     private:
-        CollisionCallbackFPRigid              m_CollisionFunctor  = [](RigidCollisionCallbackEventData&) {};
+        CollisionCallbackFPRigid              m_CollisionFunctor  = [](RigidCollisionCallbackData&) {};
         std::unique_ptr<btRigidBodyType>      m_BulletRigidBody;
         btDefaultMotionState                  m_BulletMotionState = btDefaultMotionState{ btTransform{ btQuaternion{0, 0, 0, 1} } };
         void*                                 m_UserPointer       = nullptr;
@@ -123,8 +123,6 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
         btTransform internal_get_bt_transform_motion_state() const;
 
         void cleanup();
-        //bool removePhysicsFromWorldImmediate();
-        //bool addPhysicsToWorldImmediate();
     public:
         ComponentRigidBody(Entity, const std::string& name = {});
         ComponentRigidBody(Entity, CollisionFilter group, CollisionFilter mask, const std::string& name = {});
@@ -159,7 +157,7 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
         glm_mat4 getWorldMatrix() const;
         glm_mat4 getWorldMatrixMotionState() const;
 
-        void collisionResponse(RigidCollisionCallbackEventData&) const;
+        void collisionResponse(RigidCollisionCallbackData&) const;
 
         bool rebuildRigidBody(bool addBodyToPhysicsWorld = true);
         bool removePhysicsFromWorld();

@@ -123,14 +123,15 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                 auto shape     = e.getComponent<ComponentCollisionShape>();
                 auto model     = e.getComponent<ComponentModel>();
                 auto cam       = e.getComponent<ComponentCamera>();
+                auto script    = e.getComponent<ComponentScript>();
                 if (name && ImGui::TreeNode("ComponentName")) {
                     ImGui::Text(std::string("Name: " + name->name()).c_str());
                     ImGui::TreePop();
                 }
                 if (transform && ImGui::TreeNode("ComponentTransform")) {
-                    ImGui::InputDouble3("position", &transform->m_Position[0]);
-                    ImGui::InputFloat4("rotation", &transform->m_Rotation[0]);
-                    ImGui::InputFloat3("scale", &transform->m_Scale[0]);
+                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Position"); ImGui::SameLine(); ImGui::InputDouble3("##pos", &transform->m_Position[0]);
+                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Rotation"); ImGui::SameLine(); ImGui::InputFloat4("##rot", &transform->m_Rotation[0]);
+                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Scale   "); ImGui::SameLine(); ImGui::InputFloat3("##scl", &transform->m_Scale[0]);
 
                     //getChildren() is somewhat expensive, 0(N) N = num max entities in scene
                     const auto& children = e.getChildren();
@@ -159,9 +160,14 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                             float aGodRays[3]    = { GRColor.r(), GRColor.g(), GRColor.b() };
                             ImGui::ColorEdit4("Color", &aColor[0]);
                             ImGui::ColorEdit3("God Rays Color", &aGodRays[0]);
+
                             ImGui::Checkbox("Force Render", &instance.m_ForceRender);
+                            ImGui::SameLine();
                             ImGui::Checkbox("Cast Shadow", &instance.m_IsShadowCaster);
+                            ImGui::SameLine();
                             ImGui::Checkbox("Show", &instance.m_Visible);
+                            ImGui::SameLine();
+                            
                             ImGui::Separator();
                             ImGui::InputFloat3("position", &instance.m_Position[0]);
                             ImGui::InputFloat4("rotation", &instance.m_Orientation[0]);
@@ -202,6 +208,20 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                         ImGui::InputFloat("Far", &cam->m_FarPlane);
                     }
                     Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*cam);
+                    ImGui::TreePop();
+                }
+                if (script && ImGui::TreeNode("ComponentScript")) {
+                    auto& scriptData       = m_ComponentScriptContent.at(e.id());
+                    ImVec2 ImGUIWindowSize = ImGui::GetWindowContentRegionMax();
+                    ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Script");
+                    float textboxWidth     = ImGUIWindowSize.x - 120.0f;
+                    float textboxHeight    = float(std::max(300, int(ImGUIWindowSize.y)));
+                    if (ImGui::InputTextMultiline("##ScriptContent", scriptData.data.data(), 1024, ImVec2(textboxWidth, textboxHeight), ImGuiInputTextFlags_NoHorizontalScroll)) {
+
+                    }
+                    if (ImGui::Button("Update", ImVec2(50, 25))) {
+                        script->init(scriptData.data.data(), false);
+                    }
                     ImGui::TreePop();
                 }
                 ImGui::TreePop();

@@ -1,18 +1,24 @@
 #include <serenity/ecs/components/ComponentScript.h>
+#include <serenity/system/Engine.h>
 
 ComponentScript::ComponentScript(Entity entity) 
     : m_Owner{ entity }
 {
 
 }
-ComponentScript::ComponentScript(Entity entity, std::string_view scriptFilePath) 
+ComponentScript::ComponentScript(Entity entity, std::string_view scriptFilePathOrData, bool fromFile) 
     : ComponentScript{ entity }
 {
-    init(scriptFilePath);
+    init(scriptFilePathOrData, fromFile);
 }
 ComponentScript::~ComponentScript() {
 
 }
-void ComponentScript::init(std::string_view scriptFilePath) {
-
+void ComponentScript::init(std::string_view scriptFilePathOrData, bool fromFile) {
+    m_LUAScript.runScript(scriptFilePathOrData, fromFile);
+    auto& editor = Engine::priv::Core::m_Engine->m_Editor;
+    if (editor.isShown()) {
+        bool success = editor.addComponentScriptData(m_Owner, scriptFilePathOrData, fromFile);
+        assert(success);
+    }
 }

@@ -91,14 +91,14 @@ namespace {
             extractTriangleNormal(childShapeA, normalA);
             extractTriangleNormal(childShapeB, normalB);
 
-            RigidCollisionCallbackEventData dataA{ *aRigidBody, *bRigidBody, ptA, ptB, normalOnB, localPositionA, localPositionB, normalA, normalB };
+            RigidCollisionCallbackData dataA{ *aRigidBody, *bRigidBody, ptA, ptB, normalOnB, localPositionA, localPositionB, normalA, normalB };
             dataA.btOwnerCollisionObj       = collObjA;
             dataA.btOtherCollisionObj       = collObjB;
             dataA.btOwnerCollisionShape     = childShapeA;
             dataA.btOtherCollisionShape     = childShapeB;
             dataA.btOwnerCollisionShapeRoot = const_cast<btCollisionShape*>(shapeA);
             dataA.btOwnerCollisionShapeRoot = const_cast<btCollisionShape*>(shapeB);
-            RigidCollisionCallbackEventData dataB{ *bRigidBody, *aRigidBody, ptB, ptA, normalOnB, localPositionB, localPositionA, normalB, normalA };
+            RigidCollisionCallbackData dataB{ *bRigidBody, *aRigidBody, ptB, ptA, normalOnB, localPositionB, localPositionA, normalB, normalA };
             dataB.btOwnerCollisionObj       = collObjB;
             dataB.btOtherCollisionObj       = collObjA;
             dataB.btOwnerCollisionShape     = childShapeB;

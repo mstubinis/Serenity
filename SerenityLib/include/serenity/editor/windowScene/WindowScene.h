@@ -3,15 +3,19 @@
 #define ENGINE_EDITOR_WINDOW_SCENE_H
 
 class  Scene;
+class  ComponentScript;
 namespace Engine::priv {
-    class EditorWindowSceneFunctions;
+    class  EditorCore;
+    class  EditorWindowSceneFunctions;
 }
 
 #include <sstream>
+#include <unordered_map>
 
 namespace Engine::priv {
     class EditorWindowScene final {
-        friend class EditorWindowSceneFunctions;
+        friend class Engine::priv::EditorWindowSceneFunctions;
+        friend class Engine::priv::EditorCore;
         public:
             enum class TabType {
                 Entities = 0,
@@ -20,20 +24,25 @@ namespace Engine::priv {
                 Profiler,
                 Network,
             _TOTAL,};
+            struct ScriptContent {
+                std::string  data;
+                bool         fromFile = false;
+            };
          private:
-            std::stringstream  m_Strm;
-            int                m_Tab = 0;
+             std::unordered_map<uint32_t, ScriptContent>  m_ComponentScriptContent; //entity id => ScriptContent
+             std::stringstream  m_Strm;
+             int                m_Tab = 0;
 
 
-            void internal_render_entities(Scene& currentScene);
-            void internal_render_renderer(Scene& currentScene);
-            void internal_render_resources(Scene& currentScene);
-            void internal_render_profiler(Scene& currentScene);
-            void internal_render_network(Scene& currentScene);
+             void internal_render_entities(Scene& currentScene);
+             void internal_render_renderer(Scene& currentScene);
+             void internal_render_resources(Scene& currentScene);
+             void internal_render_profiler(Scene& currentScene);
+             void internal_render_network(Scene& currentScene);
         public:
-            EditorWindowScene() = default;
+             EditorWindowScene() = default;
 
-            void update();
+             void update();
     };
 }
 

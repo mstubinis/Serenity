@@ -37,13 +37,17 @@ namespace Engine::priv {
         friend class  ::Scene;
         friend class  ::SystemSceneChanging;
         public:
+            struct SceneSwapData {
+                Scene*  oldScene  = nullptr;
+                Scene*  newScene  = nullptr;
+            };
             static Engine::view_ptr<ResourceManager> RESOURCE_MANAGER;
         public:
             ResourceModule                         m_ResourceModule;
             std::vector<std::unique_ptr<Window>>   m_Windows;
             std::vector<Scene*>                    m_Scenes;
             std::vector<Scene*>                    m_ScenesToBeDeleted;
-            std::tuple<Scene*, Scene*, bool>       m_SceneSwap          = {nullptr, nullptr, false}; // { oldScene, newScene, isSwapOccuring }
+            SceneSwapData                          m_SceneSwap;
             Scene*                                 m_CurrentScene       = nullptr;
         public:
             ResourceManager(const EngineOptions&);

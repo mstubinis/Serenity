@@ -12,31 +12,31 @@ LuaScript::LuaScript()
     , m_ID{ ID_COUNTER++ }
 {
 }
-LuaScript::LuaScript(LUAState& state, const std::string& fileName, bool run)
-    : m_FileName{ fileName }
+LuaScript::LuaScript(LUAState& state, std::string_view fileNameOrData, bool run, bool isFile)
+    : m_FileNameOrData{ std::string{fileNameOrData} }
     , m_L{ &state }
     , m_ID { ID_COUNTER++ }
     , m_Executed { run }
 {
     if (run) {
-        runScript();
+        runScript(isFile);
     }
 }
-LuaScript::LuaScript(const std::string& fileName, bool run) 
-    : LuaScript{ *Engine::priv::getLUABinder().getState(), fileName, run }
+LuaScript::LuaScript(std::string_view fileNameOrData, bool run, bool isFile)
+    : LuaScript{ *Engine::priv::getLUABinder().getState(), fileNameOrData, run, isFile }
 {}
 LuaScript::LuaScript(LuaScript&& other) noexcept {
-    m_FileName = std::move(other.m_FileName);
-    m_L        = std::exchange(other.m_L, nullptr);
-    m_ID       = std::exchange(other.m_ID, std::numeric_limits<uint32_t>().max());
-    m_Executed = std::exchange(other.m_Executed, false);
+    m_FileNameOrData = std::move(other.m_FileNameOrData);
+    m_L              = std::exchange(other.m_L, nullptr);
+    m_ID             = std::exchange(other.m_ID, std::numeric_limits<uint32_t>().max());
+    m_Executed       = std::exchange(other.m_Executed, false);
 }
 LuaScript& LuaScript::operator=(LuaScript&& other) noexcept {
     if (this != &other) {
-        m_FileName = std::move(other.m_FileName);
-        m_L        = std::exchange(other.m_L, nullptr);
-        m_ID       = std::exchange(other.m_ID, std::numeric_limits<uint32_t>().max());
-        m_Executed = std::exchange(other.m_Executed, false);
+        m_FileNameOrData = std::move(other.m_FileNameOrData);
+        m_L              = std::exchange(other.m_L, nullptr);
+        m_ID             = std::exchange(other.m_ID, std::numeric_limits<uint32_t>().max());
+        m_Executed       = std::exchange(other.m_Executed, false);
     }
     return *this;
 }
@@ -44,15 +44,22 @@ LuaScript& LuaScript::operator=(LuaScript&& other) noexcept {
 LuaScript::~LuaScript() {
     clean();
 }
-bool LuaScript::runScript() noexcept {
-    assert(m_FileName.size() > 0);
+bool LuaScript::runScript(bool isFile) noexcept {
+    clean();
+
+    assert(m_FileNameOrData.size() > 0);
     assert(m_L != nullptr);
     assert(m_ID != std::numeric_limits<uint32_t>().max());
     assert(m_Executed == false);
 
-    int res = m_L->runFile(m_FileName, m_ID);
+    int res = isFile ? m_L->runFile(m_FileNameOrData, m_ID) : m_L->runCodeContent(m_FileNameOrData, m_ID);
     m_Executed = static_cast<bool>(res);
     return res;
+}
+bool LuaScript::runScript(std::string_view fileNameOrData, bool isFile) noexcept {
+    assert(fileNameOrData.size() > 0);
+    m_FileNameOrData = std::string{ fileNameOrData };
+    return runScript(isFile);
 }
 void LuaScript::clean() noexcept {
     assert(m_L != nullptr);
@@ -71,7 +78,7 @@ void LuaScript::callFunction(const char* funcName) noexcept {
     assert(m_ID != std::numeric_limits<uint32_t>().max());
     assert(m_Executed == true);
 
-    lua_getfield(*m_L, LUA_REGISTRYINDEX, m_FileName.c_str());
+    lua_getfield(*m_L, LUA_REGISTRYINDEX, m_FileNameOrData.c_str());
     lua_getfield(*m_L, -1, funcName);
     lua_call(*m_L, 0, 0);
 }

@@ -202,22 +202,17 @@ Handle Engine::Resources::loadMaterial(std::string_view name, Handle diffuse, Ha
 Handle Engine::Resources::addShader(std::string_view fileOrData, ShaderType type, bool fromFile){
     return Engine::Resources::addResource<Shader>(fileOrData, type, fromFile);
 }
-Handle Engine::Resources::addShaderProgram(std::string_view n, Handle v, Handle f){
-    //auto vertexShader   = Engine::Resources::getResource<Shader>(v);
-    //auto fragmentShader = Engine::Resources::getResource<Shader>(f);
-    return Engine::Resources::addResource<ShaderProgram>(n, v, f);
+Handle Engine::Resources::addShaderProgram(std::string_view name, Handle vertexHandle, Handle fragmentHandle){
+    return Engine::Resources::addResource<ShaderProgram>(name, vertexHandle, fragmentHandle);
 }
 bool Engine::Resources::setCurrentScene(Scene* newScene){
     auto& resourceMgr = *Engine::priv::ResourceManager::RESOURCE_MANAGER;
     Scene* oldScene   = resourceMgr.m_CurrentScene;
-    if (oldScene == newScene || std::get<2>(resourceMgr.m_SceneSwap) == true) {
+    if (resourceMgr.m_SceneSwap.newScene || oldScene == newScene || newScene == resourceMgr.m_SceneSwap.newScene) {
         return false;
     }
-    if (newScene == std::get<1>(resourceMgr.m_SceneSwap)) {
-        return false;
-    }   
     resourceMgr.m_CurrentScene = newScene;
-    resourceMgr.m_SceneSwap = { oldScene, newScene, true };
+    resourceMgr.m_SceneSwap    = { oldScene, newScene };
     return true;
 }
 bool Engine::Resources::setCurrentScene(std::string_view sceneName){

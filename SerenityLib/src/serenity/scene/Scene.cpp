@@ -240,6 +240,10 @@ std::vector<Entity>& Engine::priv::PublicScene::GetEntities(Scene& scene) {
 Engine::priv::ECS& Engine::priv::PublicScene::GetECS(Scene& scene) {
     return scene.m_ECS;
 }
+Engine::priv::ECS& Engine::priv::PublicScene::GetECS(Entity entity) {
+    assert(!entity.null() && entity.scene() != nullptr);
+    return Engine::priv::PublicScene::GetECS(*entity.scene());
+}
 void Engine::priv::PublicScene::CleanECS(Scene& scene, Entity inEntity) {
     for (auto& pipelines : scene.m_RenderGraphs) {
         for (auto& graph : pipelines) {

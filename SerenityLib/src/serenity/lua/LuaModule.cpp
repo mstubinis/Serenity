@@ -12,14 +12,12 @@ namespace {
         }
     }
 }
-
 Engine::priv::LUAModule::LUAModule() {
     LUA_MODULE = this;
 }
 Engine::priv::LUAModule::~LUAModule() {
 
 }
-
 void Engine::priv::LUAModule::init() {
 
 }
@@ -30,7 +28,12 @@ void Engine::priv::LUAModule::update(const float dt) {
     for (auto& LUAUpdateFunction : LUA_SCRIPT_ON_UPDATE_FUNCTIONS) {
         if (!LUAUpdateFunction.isNil()) {
             ASSERT(LUAUpdateFunction.isFunction(), "");
-            LUAUpdateFunction(dt);
+
+            try {
+                LUAUpdateFunction(dt);
+            } catch (...) {
+
+            }
         }
     }
 }
@@ -40,13 +43,9 @@ const Engine::priv::LUABinder& Engine::priv::LUAModule::getBinder() const {
 
 
 
-
-
 const Engine::priv::LUABinder& Engine::priv::getLUABinder() {
     return LUA_MODULE->getBinder();
 }
-
-
 lua_State& Engine::lua::getGlobalState() noexcept {
     return *Engine::priv::getLUABinder().getState()->getState();
 }

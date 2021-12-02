@@ -51,7 +51,11 @@ class ComponentLogic1 : public ComponentBaseClass<ComponentLogic1> {
         ComponentLogic1(ComponentLogic1&&) noexcept;
         ComponentLogic1& operator=(ComponentLogic1&&) noexcept;
 
-        [[nodiscard]] inline constexpr Entity getOwner() const noexcept { return m_Owner; }
+        [[nodiscard]] inline Entity getOwner() const noexcept { return m_Owner; }
+        [[nodiscard]] inline void* getUserPointer() const noexcept { return m_UserPointer; }
+        [[nodiscard]] inline void* getUserPointer1() const noexcept { return m_UserPointer1; }
+        [[nodiscard]] inline void* getUserPointer2() const noexcept { return m_UserPointer2; }
+
         void call(const float dt) const noexcept;
         
         inline void setFunctor(const CFunction& functor) noexcept { m_Functor.setFunctor(functor); }
@@ -63,9 +67,6 @@ class ComponentLogic1 : public ComponentBaseClass<ComponentLogic1> {
         inline void setUserPointer(void* UserPointer) noexcept { m_UserPointer = UserPointer; }
         inline void setUserPointer1(void* UserPointer1) noexcept { m_UserPointer1 = UserPointer1; }
         inline void setUserPointer2(void* UserPointer2) noexcept { m_UserPointer2 = UserPointer2; }
-        [[nodiscard]] inline constexpr void* getUserPointer() const noexcept { return m_UserPointer; }
-        [[nodiscard]] inline constexpr void* getUserPointer1() const noexcept { return m_UserPointer1; }
-        [[nodiscard]] inline constexpr void* getUserPointer2() const noexcept { return m_UserPointer2; }
 };
 
 #endif

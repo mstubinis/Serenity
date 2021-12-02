@@ -73,6 +73,20 @@ namespace Engine::Math {
     void setFinalModelMatrix(glm_mat4& modelMatrix, const glm_vec3& position, const glm::quat& rotation, const glm::vec3& scale) noexcept;
     void setFinalModelMatrix(glm::mat4& modelMatrix, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) noexcept;
 
+    template<class MATRIX, class VAL_TYPE>
+    void setMatrixPosition(MATRIX& matrix, VAL_TYPE x, VAL_TYPE y, VAL_TYPE z) {
+        matrix[3][0] = x;
+        matrix[3][1] = y;
+        matrix[3][2] = z;
+    }
+    template<class MATRIX, class VEC_TYPE>
+    void setMatrixPosition(MATRIX& matrix, const VEC_TYPE& position) {
+        matrix[3][0] = position[0];
+        matrix[3][1] = position[1];
+        matrix[3][2] = position[2];
+    }
+
+
     [[nodiscard]] glm::vec3 getMatrixPosition(const glm::mat4& matrix);
 #if defined(ENGINE_HIGH_PRECISION)
     [[nodiscard]] glm_vec3 getMatrixPosition(const glm_mat4& matrix);

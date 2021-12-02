@@ -221,7 +221,7 @@ std::string numToCommasImpl(std::string str, int start, int end) noexcept;
 
 template<class T> std::string convertNumToNumWithCommas(const T& number) noexcept {
     std::string res = std::to_string(number);
-    return numToCommasImpl(res, 0, (int)res.size() - 1);
+    return numToCommasImpl(res, 0, int(res.size()) - 1);
 }
 
 #endif

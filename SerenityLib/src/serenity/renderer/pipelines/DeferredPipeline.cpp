@@ -1825,9 +1825,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
             //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
                 
             glm::mat4 viewNoTranslation = camera.getView();
-            viewNoTranslation[3][0]     = 0.0001f;
-            viewNoTranslation[3][1]     = 0.0001f;
-            viewNoTranslation[3][2]     = 0.0001f;
+            Engine::Math::setMatrixPosition(viewNoTranslation, 0.0001f, 0.0001f, 0.0001f);
             m_CameraUBODataPtr->CameraView        = viewNoTranslation;
             m_CameraUBODataPtr->CameraProj        = camera.getProjection();
             m_CameraUBODataPtr->CameraViewProj    = m_CameraUBODataPtr->CameraProj * viewNoTranslation;

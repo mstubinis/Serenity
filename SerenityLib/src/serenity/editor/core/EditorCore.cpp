@@ -14,20 +14,41 @@
 #include <serenity/editor/embeddedImages/SpotLightImage.h>
 #include <serenity/editor/embeddedImages/RodLightImage.h>
 
+#include <serenity/ecs/components/ComponentScript.h>
+
+#include <fstream>
+#include <filesystem>
+
 Engine::view_ptr<Engine::priv::EditorCore> Engine::priv::EditorCore::EDITOR;
 
 Engine::priv::EditorCore::EditorCore(const EngineOptions& options) {
     m_Enabled = options.editor_enabled;
     if (m_Enabled) {
-
+        m_WindowScene = NEW Engine::priv::EditorWindowScene{};
     }
     EDITOR = this;
 }
 Engine::priv::EditorCore::~EditorCore() {
+    SAFE_DELETE(m_WindowScene);
     if (m_Enabled) {
         ImGui::SFML::Shutdown();
         m_RegisteredWindows.clear();
     }
+}
+bool Engine::priv::EditorCore::addComponentScriptData(Entity entity, std::string_view scriptFilePathOrData, bool isFile) {
+    if (isFile) {
+        if (std::filesystem::is_regular_file(scriptFilePathOrData)) {
+            std::ifstream t = std::ifstream(std::string{ scriptFilePathOrData });
+            std::stringstream buffer;
+            buffer << t.rdbuf();
+            m_WindowScene->m_ComponentScriptContent[entity.id()] = { buffer.str() , isFile };
+        } else {
+            return false;
+        }
+    } else {
+        m_WindowScene->m_ComponentScriptContent[entity.id()] = { std::string{scriptFilePathOrData} , isFile };
+    }
+    return true;
 }
 bool Engine::priv::EditorCore::isWindowRegistered(Window& window) const noexcept {
     return m_RegisteredWindows.contains(&window);
@@ -51,8 +72,11 @@ void Engine::priv::EditorCore::init(const EngineOptions& options, Engine::priv::
 }
 void Engine::priv::EditorCore::update(Window& window, const float dt) {
     if (m_Enabled && m_Shown && isWindowRegistered(window)) {
-        sf::Time t(sf::seconds(dt));
-        ImGui::SFML::Update(window.getSFMLHandle(), t);
+        ImGui::SFML::Update(window.getSFMLHandle(), sf::seconds(dt));
+
+        ImGui::NewFrame();
+        m_WindowScene->update();
+        ImGui::EndFrame();
     }
 }
 void Engine::priv::EditorCore::render(Window& window) {
@@ -60,13 +84,6 @@ void Engine::priv::EditorCore::render(Window& window) {
         //ImGui::SFML::Render(window.getSFMLHandle());
 
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui::NewFrame();
-
-        Engine::priv::EditorWindowScene windowScene;
-        windowScene.update();
-
-        ImGui::EndFrame();
-
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }

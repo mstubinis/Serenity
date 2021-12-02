@@ -6,8 +6,6 @@
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/Engine_Resources.h>
 
-#pragma region Component
-
 ComponentTransform::ComponentTransform(Entity entity) 
     : m_Owner{ entity }
 {}
@@ -18,7 +16,7 @@ ComponentTransform::ComponentTransform(Entity entity, const glm_vec3& pos, const
     , m_Owner{ entity }
 {
     Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
-    auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
+    auto& ecs         = Engine::priv::PublicScene::GetECS(m_Owner);
     auto& system      = ecs.getSystem<SystemTransformParentChild>();
     auto entityIndex  = entity.id();
     system.acquireMoreMemory(entityIndex);
@@ -39,8 +37,7 @@ ComponentTransform::ComponentTransform(ComponentTransform&& other) noexcept
     , m_UserPointer1     { std::exchange(other.m_UserPointer1, nullptr) }
     , m_UserPointer2     { std::exchange(other.m_UserPointer2, nullptr) }
     , m_Owner            { std::exchange(other.m_Owner, Entity{}) }
-{
-}
+{}
 ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) noexcept {
     if (this != &other) {
         m_Position       = std::move(other.m_Position);
@@ -58,9 +55,9 @@ ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) no
     return *this;
 }
 decimal ComponentTransform::getDistance(Entity other) const {
-    glm_vec3 my_position    = ComponentTransform::getPosition();
-    auto otherTransform     = other.getComponent<ComponentTransform>();
-    glm_vec3 other_position = otherTransform->getPosition();
+    const glm_vec3 my_position    = ComponentTransform::getPosition();
+    const auto otherTransform     = other.getComponent<ComponentTransform>();
+    const glm_vec3 other_position = otherTransform->getPosition();
     return glm::distance(my_position, other_position);
 }
 uint64_t ComponentTransform::getDistanceLL(Entity other) const {
@@ -71,7 +68,7 @@ void ComponentTransform::alignTo(float dirX, float dirY, float dirZ) {
     Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
 }
 void ComponentTransform::alignTo(const glm::vec3& direction) {
-    auto norm_dir = glm::normalize(direction);
+    const auto norm_dir = glm::normalize(direction);
     alignTo(norm_dir.x, norm_dir.y, norm_dir.z);
 }
 void ComponentTransform::translate(decimal x, decimal y, decimal z, bool local) {
@@ -101,40 +98,30 @@ void ComponentTransform::scale(float x, float y, float z) {
     m_Scale.x += x;
     m_Scale.y += y;
     m_Scale.z += z;
-    auto model = m_Owner.getComponent<ComponentModel>();
-    if (model) {
-        Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
+    auto modelComponent = m_Owner.getComponent<ComponentModel>();
+    if (modelComponent) {
+        Engine::priv::ComponentModel_Functions::CalculateRadius(*modelComponent);
     }
 }
 void ComponentTransform::setPosition(decimal x, decimal y, decimal z) {
-	m_Position.x      = x;
+    m_Position.x      = x;
     m_Position.y      = y;
     m_Position.z      = z;
     
-    auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
+    auto& ecs         = Engine::priv::PublicScene::GetECS(m_Owner);
     auto& system      = ecs.getSystem<SystemTransformParentChild>();
     auto entityIndex  = m_Owner.id();
-    auto& localMatrix = system.m_LocalTransforms[entityIndex];
-    localMatrix[3][0] = x;
-    localMatrix[3][1] = y;
-    localMatrix[3][2] = z;
-
-    auto& worldMatrix = system.m_WorldTransforms[entityIndex];
-    worldMatrix[3][0] = x;
-    worldMatrix[3][1] = y;
-    worldMatrix[3][2] = z;
+    Engine::Math::setMatrixPosition(system.m_LocalTransforms[entityIndex], x, y, z);
+    Engine::Math::setMatrixPosition(system.m_WorldTransforms[entityIndex], x, y, z);
 }
 void ComponentTransform::setLocalPosition(decimal x, decimal y, decimal z) {
     m_Position.x      = x;
     m_Position.y      = y;
     m_Position.z      = z;
 
-    auto& ecs         = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
+    auto& ecs         = Engine::priv::PublicScene::GetECS(m_Owner);
     auto& system      = ecs.getSystem<SystemTransformParentChild>();
-    auto& localMatrix = system.m_LocalTransforms[m_Owner.id()];
-    localMatrix[3][0] = x;
-    localMatrix[3][1] = y;
-    localMatrix[3][2] = z;
+    Engine::Math::setMatrixPosition(system.m_LocalTransforms[m_Owner.id()], x, y, z);
 }
 void ComponentTransform::setRotation(float x, float y, float z, float w) {
     m_Rotation = glm::normalize(glm::quat{ w, x, y, z });
@@ -144,13 +131,13 @@ void ComponentTransform::setScale(float x, float y, float z) {
     m_Scale.x = x;
     m_Scale.y = y;
     m_Scale.z = z;
-    auto model = m_Owner.getComponent<ComponentModel>();
-    if (model) {
-        Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
+    auto modelComponent = m_Owner.getComponent<ComponentModel>();
+    if (modelComponent) {
+        Engine::priv::ComponentModel_Functions::CalculateRadius(*modelComponent);
     }
 }
 glm_vec3 ComponentTransform::getPosition() const {
-    const auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
+    const auto& ecs    = Engine::priv::PublicScene::GetECS(m_Owner);
     const auto& system = ecs.getSystem<SystemTransformParentChild>();
     const auto& matrix = system.m_WorldTransforms[m_Owner.id()];
     return Engine::Math::getMatrixPosition(matrix);
@@ -159,7 +146,7 @@ glm_vec3 ComponentTransform::getWorldPosition() const {
     return getPosition();
 }
 glm::quat ComponentTransform::getWorldRotation() const {
-    auto& worldMatrix = getWorldMatrix();
+    const auto& worldMatrix = getWorldMatrix();
 #if defined(ENGINE_HIGH_PRECISION)
     return glm::quat_cast(glm::mat4{ worldMatrix });
 #else
@@ -204,13 +191,13 @@ ScreenBoxCoordinates ComponentTransform::getScreenBoxCoordinates(float minOffset
     return ret;
 }
 const glm_mat4& ComponentTransform::getWorldMatrix() const noexcept {
-    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-    auto& system = ecs.getSystem<SystemTransformParentChild>();
+    const auto& ecs    = Engine::priv::PublicScene::GetECS(m_Owner);
+    const auto& system = ecs.getSystem<SystemTransformParentChild>();
     return system.m_WorldTransforms[m_Owner.id()];
 }
 const glm_mat4& ComponentTransform::getLocalMatrix() const noexcept {
-    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-    auto& system = ecs.getSystem<SystemTransformParentChild>();
+    const auto& ecs    = Engine::priv::PublicScene::GetECS(m_Owner);
+    const auto& system = ecs.getSystem<SystemTransformParentChild>();
     return system.m_LocalTransforms[m_Owner.id()];
 }
 /*
@@ -224,26 +211,26 @@ void ComponentTransform::setLinearVelocity(decimal x, decimal y, decimal z, bool
 */
 void ComponentTransform::addChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
-        auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
+        auto& ecs    = Engine::priv::PublicScene::GetECS(m_Owner);
         auto& system = ecs.getSystem<SystemTransformParentChild>();
         system.addChild(m_Owner.id(), child.id());
     }
 }
 void ComponentTransform::removeChild(Entity child) const {
     if (child.sceneID() == m_Owner.sceneID()) {
-        auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
+        auto& ecs    = Engine::priv::PublicScene::GetECS(m_Owner);
         auto& system = ecs.getSystem<SystemTransformParentChild>();
         system.removeChild(m_Owner.id(), child.id());
     }
 }
 bool ComponentTransform::hasParent() const {
-    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-    auto& system = ecs.getSystem<SystemTransformParentChild>();
+    const auto& ecs    = Engine::priv::PublicScene::GetECS(m_Owner);
+    const auto& system = ecs.getSystem<SystemTransformParentChild>();
     return system.m_Parents[m_Owner.id()] != SystemTransformParentChild::NULL_IDX;
 }
 Entity ComponentTransform::getParent() const {
-    auto& ecs    = Engine::priv::PublicScene::GetECS(*m_Owner.scene());
-    auto& system = ecs.getSystem<SystemTransformParentChild>();
+    const auto& ecs    = Engine::priv::PublicScene::GetECS(m_Owner);
+    const auto& system = ecs.getSystem<SystemTransformParentChild>();
     return system.getParentEntity(m_Owner);
 }
 void ComponentTransform::recalculateAllParentChildMatrices(Scene& scene) {
@@ -251,5 +238,3 @@ void ComponentTransform::recalculateAllParentChildMatrices(Scene& scene) {
     auto& system = ecs.getSystem<SystemTransformParentChild>();
     system.computeAllParentChildWorldTransforms();
 }
-
-#pragma endregion
