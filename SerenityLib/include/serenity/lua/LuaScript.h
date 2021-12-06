@@ -4,8 +4,9 @@
 
 class LUAState;
 
-#include <serenity/lua/LuaIncludes.h>
-#include <serenity/lua/LuaState.h>
+//#include <serenity/lua/LuaIncludes.h>
+//#include <serenity/lua/LuaState.h>
+#include <serenity/ecs/entity/Entity.h>
 
 class LuaScript final {
     private:
@@ -24,8 +25,8 @@ class LuaScript final {
         LuaScript& operator=(LuaScript&&) noexcept;
         ~LuaScript();
 
-        bool runScript(bool file) noexcept;
-        bool runScript(std::string_view fileNameOrData, bool file = true) noexcept;
+        bool runScript(bool file, Entity = {}) noexcept;
+        bool runScript(std::string_view fileNameOrData, bool file = true, Entity = {}) noexcept;
 
         void callFunction(const char* name) noexcept;
         void clean() noexcept;

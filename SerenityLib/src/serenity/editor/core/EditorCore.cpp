@@ -41,12 +41,16 @@ bool Engine::priv::EditorCore::addComponentScriptData(Entity entity, std::string
             std::ifstream t = std::ifstream(std::string{ scriptFilePathOrData });
             std::stringstream buffer;
             buffer << t.rdbuf();
-            m_WindowScene->m_ComponentScriptContent[entity.id()] = { buffer.str() , isFile };
+
+            m_WindowScene->m_ComponentScriptContent[entity.id()].data     = buffer.str();
+            m_WindowScene->m_ComponentScriptContent[entity.id()].fromFile = isFile;
+
         } else {
             return false;
         }
     } else {
-        m_WindowScene->m_ComponentScriptContent[entity.id()] = { std::string{scriptFilePathOrData} , isFile };
+        m_WindowScene->m_ComponentScriptContent[entity.id()].data     = std::string{scriptFilePathOrData};
+        m_WindowScene->m_ComponentScriptContent[entity.id()].fromFile = isFile;
     }
     return true;
 }

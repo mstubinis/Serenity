@@ -97,9 +97,9 @@ class Entity {
             return Engine::priv::PublicEntity::GetECS(*this)->getComponents<TYPES...>(*this);
         }
 
-        bool addComponent(std::string_view componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8);
-        bool removeComponent(std::string_view componentClassName);
-        [[nodiscard]] luabridge::LuaRef getComponent(std::string_view componentClassName);
+        bool addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8);
+        bool removeComponent(const std::string& componentClassName);
+        [[nodiscard]] luabridge::LuaRef getComponent(luabridge::LuaRef componentClassName);
 };
 
 namespace std {
@@ -115,9 +115,9 @@ namespace std {
 namespace Engine::priv {
     class ECS;
     struct PublicEntity final {
-        static Engine::view_ptr<Engine::priv::ECS> GetECS(Entity entity);
+        static Engine::view_ptr<Engine::priv::ECS> GetECS(Entity);
 
-        template<class COMPONENT> [[nodiscard]] static luabridge::LuaRef GetComponent(lua_State* L, Entity entity, const char* globalName);
+        template<class COMPONENT_LUA_BINDER> [[nodiscard]] static luabridge::LuaRef GetComponent(lua_State*, Entity, const char* globalName);
     };
 };
 

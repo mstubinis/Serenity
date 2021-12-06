@@ -9,7 +9,8 @@ struct Event;
 #include <array>
 #include <utility>
 #include <mutex>
-#include <serenity/lua/LuaIncludes.h>
+//#include <serenity/lua/LuaIncludes.h>
+#include <serenity/ecs/entity/Entity.h>
 
 namespace Engine::priv {
     class EventDispatcher final {
@@ -17,7 +18,7 @@ namespace Engine::priv {
             std::array<std::vector<Observer*>, EventType::_TOTAL>           m_Observers;
 
             std::array<std::vector<uint32_t>, EventType::_TOTAL>            m_ScriptObservers;
-            std::vector<luabridge::LuaRef>                                  m_ScriptFunctions;
+            std::vector<std::pair<luabridge::LuaRef, Entity>>               m_ScriptFunctionsEntity;
 
             mutable std::mutex                                              m_Mutex;
             std::vector<std::pair<Observer*, size_t>>                       m_UnregisteredObservers;
@@ -31,7 +32,7 @@ namespace Engine::priv {
             ~EventDispatcher();
 
             void postUpdate();
-            void addScriptOnEventFunction(lua_State*, uint32_t scriptID, luabridge::LuaRef eventFunction);
+            void addScriptOnEventFunction(lua_State*, uint32_t scriptID, luabridge::LuaRef eventFunction, Entity);
             void registerScriptEvent(uint32_t scriptID, uint32_t eventID);
             void cleanupScript(uint32_t scriptID);
 

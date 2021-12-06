@@ -14,7 +14,7 @@ namespace Engine::priv::Culling {
 }
 
 #include <serenity/dependencies/glm.h>
-#include <serenity/ecs/components/ComponentBaseClass.h>
+#include <serenity/ecs/ECS.h>
 #include <array>
 
 namespace Engine::priv {
@@ -93,5 +93,18 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         [[nodiscard]] inline std::array<glm::vec4, 6>& getFrustrumPlanes() noexcept { return m_FrustumPlanes; }
         [[nodiscard]] inline glm::vec3 getRight() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][0], m_ViewMatrix[1][0], m_ViewMatrix[2][0])); }
 };
+
+namespace Engine::priv {
+    class ComponentCameraLUABinder {
+        private:
+            Entity m_Owner;
+
+            ComponentCameraLUABinder() = delete;
+        public:
+            ComponentCameraLUABinder(Entity owner)
+                : m_Owner{ owner }
+            {}
+    };
+}
 
 #endif

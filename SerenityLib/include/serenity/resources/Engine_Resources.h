@@ -201,7 +201,9 @@ namespace Engine::Resources {
     [[nodiscard]] Handle addShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader);
 };
 namespace Engine::priv::lua::resources {
-
+    Engine::priv::SceneLUABinder getCurrentSceneLUA();
+    void setCurrentSceneLUA(Engine::priv::SceneLUABinder);
+    void setCurrentSceneByNameLUA(const std::string& sceneName);
 }
 
 

@@ -69,4 +69,17 @@ class ComponentLogic1 : public ComponentBaseClass<ComponentLogic1> {
         inline void setUserPointer2(void* UserPointer2) noexcept { m_UserPointer2 = UserPointer2; }
 };
 
+namespace Engine::priv {
+    class ComponentLogic1LUABinder {
+        private:
+            Entity m_Owner;
+
+            ComponentLogic1LUABinder() = delete;
+        public:
+            ComponentLogic1LUABinder(Entity owner)
+                : m_Owner{ owner }
+            {}
+    };
+}
+
 #endif

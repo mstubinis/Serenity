@@ -1,6 +1,7 @@
 #include <serenity/lua/LuaState.h>
 #include <serenity/lua/LuaIncludes.h>
 #include <serenity/system/Macros.h>
+#include <serenity/ecs/entity/Entity.h>
 
 LUAState::LUAState() 
     : L{ luaL_newstate() }
@@ -12,12 +13,14 @@ LUAState::~LUAState() {
         lua_close(L);
     }
 }
-int LUAState::runFile(const std::string& filename, uint32_t scriptID) const noexcept {
+int LUAState::runFile(const std::string& filename, uint32_t scriptID, void* entity) const noexcept {
     int ret = -1;
     auto* filenameC = filename.c_str();
-    luabridge::setGlobal(L, scriptID, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
-    bool failedToLoaded = luaL_loadfile(L, filenameC) || lua_pcall(L, 0, 0, 0);
-    luabridge::setGlobal(L, -1, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
+    luabridge::setGlobal(L, scriptID, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID);
+    luabridge::setGlobal(L, entity ? *static_cast<Entity*>(entity) : Entity{}, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ENTITY);
+    bool failedToLoaded = luaL_dofile(L, filenameC);
+    luabridge::setGlobal(L, -1, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID);
+    luabridge::setGlobal(L, -1, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ENTITY);
     if (failedToLoaded) {
         ENGINE_PRODUCTION_LOG("LUA Error: script did not compile correctly (" << filename << ")")
         return 0;
@@ -43,13 +46,15 @@ int LUAState::runFile(const std::string& filename, uint32_t scriptID) const noex
     ret = lua_pcall(L, 0, LUA_MULTRET, 0);
     return 1;
 }
-int LUAState::runCodeContent(const std::string& inData, uint32_t scriptID) const noexcept {
+int LUAState::runCodeContent(const std::string& inData, uint32_t scriptID, void* entity) const noexcept {
     int ret = -1;
     auto* data = inData.c_str();
-    luabridge::setGlobal(L, scriptID, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
+    luabridge::setGlobal(L, scriptID, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID);
+    luabridge::setGlobal(L, entity ? *static_cast<Entity*>(entity) : Entity{}, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ENTITY);
     std::string scriptName = std::string{ "Script: " } + std::to_string(scriptID);
     bool failedToLoaded = luaL_loadbuffer(L, data, inData.size(), scriptName.c_str() ) || lua_pcall(L, 0, 0, 0);
-    luabridge::setGlobal(L, -1, ENGINE_LUA_CURRENT_SCRIPT_TOKEN);
+    luabridge::setGlobal(L, -1, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID);
+    luabridge::setGlobal(L, -1, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ENTITY);
     if (failedToLoaded) {
         ENGINE_PRODUCTION_LOG("LUA Error: script did not compile correctly (" << scriptName << ")")
         return 0;

@@ -71,4 +71,17 @@ class ComponentLogic : public ComponentBaseClass<ComponentLogic> {
         
 };
 
+namespace Engine::priv {
+    class ComponentLogicLUABinder {
+        private:
+            Entity m_Owner;
+
+            ComponentLogicLUABinder() = delete;
+        public:
+            ComponentLogicLUABinder(Entity owner)
+                : m_Owner{ owner }
+            {}
+    };
+}
+
 #endif

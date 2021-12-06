@@ -218,3 +218,16 @@ bool Engine::Resources::setCurrentScene(Scene* newScene){
 bool Engine::Resources::setCurrentScene(std::string_view sceneName){
     return Engine::Resources::setCurrentScene(Engine::Resources::getScene(sceneName));
 }
+
+
+
+
+Engine::priv::SceneLUABinder Engine::priv::lua::resources::getCurrentSceneLUA() {
+    return Engine::Resources::getCurrentScene() != nullptr ? Engine::priv::SceneLUABinder{ *Engine::Resources::getCurrentScene() } : Engine::priv::SceneLUABinder{};
+}
+void Engine::priv::lua::resources::setCurrentSceneLUA(Engine::priv::SceneLUABinder scene) {
+    Engine::Resources::setCurrentScene(&scene.getScene());
+}
+void Engine::priv::lua::resources::setCurrentSceneByNameLUA(const std::string& sceneName) {
+    Engine::Resources::setCurrentScene(sceneName);
+}

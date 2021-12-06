@@ -23,7 +23,6 @@ namespace Engine::priv {
 #include <serenity/physics/PhysicsIncludes.h>
 #include <LinearMath/btDefaultMotionState.h>
 #include <serenity/events/Observer.h>
-#include <serenity/ecs/components/ComponentBaseClass.h>
 #include <serenity/renderer/RendererIncludes.h>
 
 #ifdef ENGINE_RIGID_BODY_ENHANCED
@@ -233,5 +232,18 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
         void applyTorqueImpulse(decimal x, decimal y, decimal z, bool local = true);
         inline void applyTorqueImpulse(const glm_vec3& torqueImpulse, bool local = true) noexcept { applyTorqueImpulse(torqueImpulse.x, torqueImpulse.y, torqueImpulse.z, local); }
 };
+
+namespace Engine::priv {
+    class ComponentRigidBodyLUABinder {
+        private:
+            Entity m_Owner;
+
+            ComponentRigidBodyLUABinder() = delete;
+        public:
+            ComponentRigidBodyLUABinder(Entity owner)
+                : m_Owner{ owner }
+            {}
+    };
+}
 
 #endif

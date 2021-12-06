@@ -272,8 +272,9 @@ LUABinder::LUABinder()
         .addFunction("print", &print)
         .addFunction("getDeltaTime", &Engine::Resources::dt)
         .addFunction("dt", &Engine::Resources::dt)
-        .addFunction("addOnUpdateFunction", &Engine::lua::addOnUpdateFunction)
 
+        .addFunction("addOnInitFunction", &Engine::lua::addOnInitFunction)
+        .addFunction("addOnUpdateFunction", &Engine::lua::addOnUpdateFunction)
         .addFunction("addOnEventFunction", &Engine::lua::addOnEventFunction)
         .addFunction("registerEvent", &Engine::lua::registerEvent)
 
@@ -298,23 +299,19 @@ LUABinder::LUABinder()
 #pragma endregion
 
 #pragma region Vectors
-
-
-
-        //glm ivec2 TODO: add more to this
         .beginClass<glm::ivec2>("ivec2")
             .addConstructor<void(*)(int, int)>()
             .addData("x", &glm::ivec2::x)
             .addData("y", &glm::ivec2::y)
         .endClass()
-        //glm ivec3 TODO: add more to this
+
         .beginClass<glm::ivec3>("ivec3")
             .addConstructor<void(*)(int, int, int)>()
             .addData("x", &glm::ivec3::x)
             .addData("y", &glm::ivec3::y)
             .addData("z", &glm::ivec3::z)
         .endClass()
-        //glm ivec4 TODO: add more to this
+
         .beginClass<glm::ivec4>("ivec4")
             .addConstructor<void(*)(int, int, int, int)>()
             .addData("x", &glm::ivec4::x)
@@ -323,23 +320,19 @@ LUABinder::LUABinder()
             .addData("w", &glm::ivec4::w)
         .endClass()
 
-
-
-
-        //glm dvec2 TODO: add more to this
         .beginClass<glm::dvec2>("dvec2")
             .addConstructor<void(*)(double, double)>()
             .addData("x", &glm::dvec2::x)
             .addData("y", &glm::dvec2::y)
         .endClass()
-        //glm dvec3 TODO: add more to this
+
         .beginClass<glm::dvec3>("dvec3")
             .addConstructor<void(*)(double, double, double)>()
             .addData("x", &glm::dvec3::x)
             .addData("y", &glm::dvec3::y)
             .addData("z", &glm::dvec3::z)
         .endClass()
-        //glm dvec4 TODO: add more to this
+
         .beginClass<glm::dvec4>("dvec4")
             .addConstructor<void(*)(double, double, double, double)>()
             .addData("x", &glm::dvec4::x)
@@ -348,23 +341,19 @@ LUABinder::LUABinder()
             .addData("w", &glm::dvec4::w)
         .endClass()
 
-
-
-
-        //glm vec2 TODO: add more to this
         .beginClass<glm::vec2>("fvec2")
             .addConstructor<void(*)(float, float)>()
             .addData("x", &glm::vec2::x)
             .addData("y", &glm::vec2::y)
         .endClass()
-        //glm vec3 TODO: add more to this
+
         .beginClass<glm::vec3>("fvec3")
             .addConstructor<void(*)(float, float, float)>()
             .addData("x", &glm::vec3::x)
             .addData("y", &glm::vec3::y)
             .addData("z", &glm::vec3::z)
         .endClass()
-        //glm vec4 TODO: add more to this
+
         .beginClass<glm::vec4>("fvec4")
             .addConstructor<void(*)(float, float, float, float)>()
             .addData("x", &glm::vec4::x)
@@ -373,27 +362,6 @@ LUABinder::LUABinder()
             .addData("w", &glm::vec4::w)
         .endClass()
 
-        //glm vec2 TODO: add more to this
-        .beginClass<glm_vec2>("vec2")
-            .addConstructor<void(*)(decimal, decimal)>()
-            .addData("x", &glm_vec2::x)
-            .addData("y", &glm_vec2::y)
-        .endClass()
-        //glm vec3 TODO: add more to this
-        .beginClass<glm_vec3>("vec3")
-            .addConstructor<void(*)(decimal, decimal, decimal)>()
-            .addData("x", &glm_vec3::x)
-            .addData("y", &glm_vec3::y)
-            .addData("z", &glm_vec3::z)
-        .endClass()
-        //glm vec4 TODO: add more to this
-        .beginClass<glm_vec4>("vec4")
-            .addConstructor<void(*)(decimal, decimal, decimal, decimal)>()
-            .addData("x", &glm_vec4::x)
-            .addData("y", &glm_vec4::y)
-            .addData("z", &glm_vec4::z)
-            .addData("w", &glm_vec4::w)
-        .endClass()
         //bullet vector3 TODO: add more to this
         .beginClass<btVector3>("btVector3")
             .addConstructor<void(*)(const btScalar&, const btScalar&, const btScalar&)>()
@@ -512,19 +480,25 @@ LUABinder::LUABinder()
 
 #pragma region Camera
 //camera stuff
-        .beginClass<Camera>("Camera")
-            .addFunction("getAngle", &Camera::getAngle)
-            .addFunction("setAngle", &Camera::setAngle)
-            .addFunction("getAspectRatio", &Camera::getAspectRatio)
-            .addFunction("setAspectRatio", &Camera::setAspectRatio)
-            .addFunction("getNear", &Camera::getNear)
-            .addFunction("setNear", &Camera::setNear)
-            .addFunction("getFar", &Camera::getFar)
-            .addFunction("setFar", &Camera::setFar)
-            .addFunction("getView", &Camera::getView)
-            .addFunction("setView", &Camera::setViewMatrix)
-            .addFunction("getProjection", &Camera::getProjection)
-            .addFunction("setProjection", &Camera::setProjectionMatrix)
+        .beginClass<Engine::priv::CameraLUABinder>("Camera")
+            .addFunction("getAngle", &Engine::priv::CameraLUABinder::getAngle)
+            .addFunction("setAngle", &Engine::priv::CameraLUABinder::setAngle)
+            .addFunction("getAspectRatio", &Engine::priv::CameraLUABinder::getAspectRatio)
+            .addFunction("setAspectRatio", &Engine::priv::CameraLUABinder::setAspectRatio)
+            .addFunction("getNear", &Engine::priv::CameraLUABinder::getNear)
+            .addFunction("setNear", &Engine::priv::CameraLUABinder::setNear)
+            .addFunction("getFar", &Engine::priv::CameraLUABinder::getFar)
+            .addFunction("setFar", &Engine::priv::CameraLUABinder::setFar)
+            .addFunction("getPosition", &Engine::priv::CameraLUABinder::getPosition)
+            .addFunction("getLocalPosition", &Engine::priv::CameraLUABinder::getLocalPosition)
+            .addFunction("getRotation", &Engine::priv::CameraLUABinder::getRotation)
+            .addFunction("getRight", &Engine::priv::CameraLUABinder::getRight)
+            .addFunction("getUp", &Engine::priv::CameraLUABinder::getUp)
+            .addFunction("getForward", &Engine::priv::CameraLUABinder::getForward)
+            .addFunction("getView", &Engine::priv::CameraLUABinder::getView)
+            .addFunction("setView", &Engine::priv::CameraLUABinder::setViewMatrix)
+            .addFunction("getProjection", &Engine::priv::CameraLUABinder::getProjection)
+            .addFunction("setProjection", &Engine::priv::CameraLUABinder::setProjectionMatrix)
         .endClass()
 #pragma endregion
 
@@ -536,10 +510,14 @@ LUABinder::LUABinder()
         .endClass()
 #pragma endregion
 
+#pragma region Skybox
         //skybox stuff
         .beginClass<Skybox>("Skybox")
 
         .endClass()
+#pragma endregion
+
+#pragma region Viewport
         //viewport stuff
         .beginClass<Viewport>("Viewport")
             .addFunction("getId", &Viewport::getId)
@@ -558,24 +536,30 @@ LUABinder::LUABinder()
             .addFunction("setViewportDimensions", &Viewport::setViewportDimensions)
             .addFunction("getViewportDimensions", &Viewport::getViewportDimensions)
         .endClass()
+#pragma endregion
+
+#pragma region Scene
         //scene stuff
-        .beginClass<Scene>("Scene")
-            //.addProperty("name", &Scene::name, &Scene::setName)
-            .addFunction("setName", static_cast<void(Scene::*)(std::string_view)>(&Scene::setName))
-            .addFunction("createEntity", static_cast<Entity(Scene::*)(void)>(&Scene::createEntity))
-            .addFunction("createEntities", static_cast<std::vector<Entity>(Scene::*)(uint32_t)>(&Scene::createEntity))
-            .addFunction("id", &Scene::id)
-            .addFunction("setActiveCamera", &Scene::setActiveCamera)
-            .addFunction("getActiveCamera", &Scene::getActiveCamera)
-            .addFunction("centerSceneToObject", &Scene::centerSceneToObject)
-            .addFunction("getBackgroundColor", &Scene::getBackgroundColor)
-            .addFunction("setBackgroundColor", static_cast<void(Scene::*)(float, float, float, float)>(&Scene::setBackgroundColor))
-            .addFunction("setGlobalIllumination", static_cast<void(Scene::*)(float, float, float)>(&Scene::setGlobalIllumination))
-            .addFunction("getGlobalIllumination", &Scene::getGlobalIllumination)
+        .beginClass<Engine::priv::SceneLUABinder>("Scene")
+            .addFunction("setName", &Engine::priv::SceneLUABinder::setName)
+            .addFunction("createEntity", &Engine::priv::SceneLUABinder::createEntity)
+            .addFunction("createEntities", &Engine::priv::SceneLUABinder::createEntity)
+            .addFunction("id", &Engine::priv::SceneLUABinder::id)
+            .addFunction("setActiveCamera", &Engine::priv::SceneLUABinder::setActiveCamera)
+            .addFunction("getActiveCamera", &Engine::priv::SceneLUABinder::getActiveCamera)
+            //.addFunction("centerSceneToObject", &Engine::priv::SceneLUABinder::centerSceneToObject)
+            //.addFunction("getBackgroundColor", &Engine::priv::SceneLUABinder::getBackgroundColor)
+            //.addFunction("setBackgroundColor", &Engine::priv::SceneLUABinder::setBackgroundColor)
+            //.addFunction("setGlobalIllumination", &Engine::priv::SceneLUABinder::setGlobalIllumination)
+            //.addFunction("getGlobalIllumination", &Engine::priv::SceneLUABinder::getGlobalIllumination)
         .endClass()
-        .addFunction("getCurrentScene", &Engine::Resources::getCurrentScene)
-        .addFunction("setCurrentScene", static_cast<bool(*)(Scene*)>(&Engine::Resources::setCurrentScene))
-        .addFunction("setCurrentSceneByName", static_cast<bool(*)(std::string_view)>(&Engine::Resources::setCurrentScene))
+        .addFunction("getCurrentScene", &Engine::priv::lua::resources::getCurrentSceneLUA)
+        .addFunction("setCurrentScene", static_cast<void(*)(Engine::priv::SceneLUABinder)>(&Engine::priv::lua::resources::setCurrentSceneLUA))
+         //TODO: same name?
+        .addFunction("setCurrentSceneByName", static_cast<void(*)(const std::string&)>(&Engine::priv::lua::resources::setCurrentSceneByNameLUA))
+#pragma endregion
+
+#pragma region Entity
         //entity stuff
         .beginClass<Entity>("Entity")
             .addFunction("scene", &Entity::scene)
@@ -587,102 +571,139 @@ LUABinder::LUABinder()
             .addFunction("versionID", &Entity::versionID)
             .addFunction("addChild", &Entity::addChild)
             .addFunction("removeChild", &Entity::removeChild)
-            .addFunction("removeComponent", static_cast<bool(Entity::*)(std::string_view)>(&Entity::removeComponent))
-            .addFunction("getComponent", static_cast<luabridge::LuaRef(Entity::*)(std::string_view)>(&Entity::getComponent))
-            .addFunction("addComponent", static_cast<bool(Entity::*)(std::string_view, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef)>(&Entity::addComponent))
+            .addFunction("removeComponent", static_cast<bool(Entity::*)(const std::string&)>(&Entity::removeComponent))
+            .addFunction("getComponent", static_cast<luabridge::LuaRef(Entity::*)(luabridge::LuaRef)>(&Entity::getComponent))
+            .addFunction("addComponent", static_cast<bool(Entity::*)(const std::string&, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef, luabridge::LuaRef)>(&Entity::addComponent))
         .endClass()
-        //component name
-        .beginClass<ComponentName>("ComponentName")
-            .addFunction("name", &ComponentName::name)
-            .addFunction("size", &ComponentName::size)
-            .addFunction("empty", &ComponentName::empty)
+#pragma endregion
+
+#pragma region ComponentName
+        .beginClass<Engine::priv::ComponentNameLUABinder>("ComponentName")
+            .addFunction("name", &Engine::priv::ComponentNameLUABinder::name)
+            .addFunction("size", &Engine::priv::ComponentNameLUABinder::size)
+            .addFunction("empty", &Engine::priv::ComponentNameLUABinder::empty)
         .endClass()
-        //component body
-        //TODO: add component rigid body
-        .beginClass<ComponentTransform>("ComponentTransform")
-            .addFunction("addChild", static_cast<void(ComponentTransform::*)(Entity)const>(&ComponentTransform::addChild))
-            .addFunction("removeChild", static_cast<void(ComponentTransform::*)(Entity)const>(&ComponentTransform::removeChild))
-            .addFunction("hasParent", &ComponentTransform::hasParent)
+#pragma endregion
 
-            .addFunction("setPosition", static_cast<void(ComponentTransform::*)(decimal, decimal, decimal)>(&ComponentTransform::setPosition))
-            .addFunction("setScale",    static_cast<void(ComponentTransform::*)(float, float, float)>(&ComponentTransform::setScale))
-            .addFunction("setRotation", static_cast<void(ComponentTransform::*)(float, float, float, float)>(&ComponentTransform::setRotation))
-
-            .addFunction("translate", static_cast<void(ComponentTransform::*)(decimal, decimal, decimal, bool)>(&ComponentTransform::translate))
-            .addFunction("scale", static_cast<void(ComponentTransform::*)(float, float, float)>(&ComponentTransform::scale))
-            .addFunction("rotate", static_cast<void(ComponentTransform::*)(float, float, float, bool)>(&ComponentTransform::rotate))
-            .addFunction("getDistance", &ComponentTransform::getDistance)
-            .addFunction("getScreenCoordinates", &ComponentTransform::getScreenCoordinates)
-            .addFunction("alignTo", static_cast<void(ComponentTransform::*)(const glm::vec3&)>(&ComponentTransform::alignTo))
-            .addFunction("alignTo", static_cast<void(ComponentTransform::*)(float, float, float)>(&ComponentTransform::alignTo))
-
-            .addFunction("getRotation", &ComponentTransform::getRotation)
-            .addFunction("getPosition", &ComponentTransform::getPosition)
-            .addFunction("getScale", &ComponentTransform::getScale)
-            .addFunction("getLocalPosition", &ComponentTransform::getLocalPosition)
-            .addFunction("getForward", &ComponentTransform::getForward)
-            .addFunction("getRight", &ComponentTransform::getRight)
-            .addFunction("getUp", &ComponentTransform::getUp)
-            //.addFunction("getLinearVelocity", &ComponentTransform::getLinearVelocity)
-            .addFunction("getWorldMatrix", &ComponentTransform::getWorldMatrix)
-            .addFunction("getWorldMatrixRendering", &ComponentTransform::getWorldMatrixRendering)
-            .addFunction("getLocalMatrix", &ComponentTransform::getLocalMatrix)
-
-            //.addFunction("setLinearVelocity", static_cast<void(ComponentTransform::*)(decimal, decimal, decimal, bool)>(&ComponentTransform::setLinearVelocity))
+#pragma region ComponentRigidBody
+        .beginClass<Engine::priv::ComponentRigidBodyLUABinder>("ComponentRigidBody")
 
         .endClass()
-        //component camera
-        .beginClass<ComponentCamera>("ComponentCamera")
-            .addFunction("getRight", &ComponentCamera::getRight)
-            //.addFunction("getUp", &ComponentCamera::getUp)
+#pragma endregion
 
-            .addFunction("getAngle", &ComponentCamera::getAngle)
-            .addFunction("getAspectRatio", &ComponentCamera::getAspectRatio)
-            .addFunction("getNear", &ComponentCamera::getNear)
-            .addFunction("getFar", &ComponentCamera::getFar)
+#pragma region ComponentTransform
+        .beginClass<Engine::priv::ComponentTransformLUABinder>("ComponentTransform")
+            .addFunction("addChild", &Engine::priv::ComponentTransformLUABinder::addChild)
+            .addFunction("removeChild", &Engine::priv::ComponentTransformLUABinder::removeChild)
+            .addFunction("hasParent", &Engine::priv::ComponentTransformLUABinder::hasParent)
+
+            .addFunction("setPosition", &Engine::priv::ComponentTransformLUABinder::setPosition)
+            .addFunction("setScale",    &Engine::priv::ComponentTransformLUABinder::setScale)
+            .addFunction("setRotation", &Engine::priv::ComponentTransformLUABinder::setRotation)
+
+            .addFunction("setLocalPosition", &Engine::priv::ComponentTransformLUABinder::setLocalPosition)
+
+            .addFunction("translate", &Engine::priv::ComponentTransformLUABinder::translate)
+            .addFunction("scale", &Engine::priv::ComponentTransformLUABinder::scale)
+            .addFunction("rotate", &Engine::priv::ComponentTransformLUABinder::rotate)
+            .addFunction("getDistance", &Engine::priv::ComponentTransformLUABinder::getDistance)
+            //.addFunction("getScreenCoordinates", &Engine::priv::ComponentTransformLUABinder::getScreenCoordinates)
+            .addFunction("alignTo", static_cast<void(Engine::priv::ComponentTransformLUABinder::*)(const glm::vec3&)>(&Engine::priv::ComponentTransformLUABinder::alignTo))
+            .addFunction("alignTo", static_cast<void(Engine::priv::ComponentTransformLUABinder::*)(float, float, float)>(&Engine::priv::ComponentTransformLUABinder::alignTo))
+
+            .addFunction("getRotation", &Engine::priv::ComponentTransformLUABinder::getRotation)
+            .addFunction("getPosition", &Engine::priv::ComponentTransformLUABinder::getPosition)
+            .addFunction("getScale", &Engine::priv::ComponentTransformLUABinder::getScale)
+            .addFunction("getLocalPosition", &Engine::priv::ComponentTransformLUABinder::getLocalPosition)
+            .addFunction("getForward", &Engine::priv::ComponentTransformLUABinder::getForward)
+            .addFunction("getRight", &Engine::priv::ComponentTransformLUABinder::getRight)
+            .addFunction("getUp", &Engine::priv::ComponentTransformLUABinder::getUp)
+            //.addFunction("getLinearVelocity", &Engine::priv::ComponentTransformLUABinder::getLinearVelocity)
+            //.addFunction("getWorldMatrix", &Engine::priv::ComponentTransformLUABinder::getWorldMatrix)
+            //.addFunction("getWorldMatrixRendering", &Engine::priv::ComponentTransformLUABinder::getWorldMatrixRendering)
+            //.addFunction("getLocalMatrix", &Engine::priv::ComponentTransformLUABinder::getLocalMatrix)
+
+            //.addFunction("setLinearVelocity", &Engine::priv::ComponentTransformLUABinder::setLinearVelocity)
+
+        .endClass()
+#pragma endregion
+
+#pragma region ComponentCamera
+        .beginClass<Engine::priv::ComponentCameraLUABinder>("ComponentCamera")
+            //.addFunction("getRight", &Engine::priv::ComponentCameraLUABinder::getRight)
+            //.addFunction("getUp", &Engine::priv::ComponentCameraLUABinder::getUp)
+
+            //.addFunction("getAngle", &Engine::priv::ComponentCameraLUABinder::getAngle)
+            //.addFunction("getAspectRatio", &Engine::priv::ComponentCameraLUABinder::getAspectRatio)
+            //.addFunction("getNear", &Engine::priv::ComponentCameraLUABinder::getNear)
+            //.addFunction("getFar", &Engine::priv::ComponentCameraLUABinder::getFar)
 /*
-            .addFunction("getView", &ComponentCamera::getView)
-            .addFunction("getProjection", &ComponentCamera::getProjection)
-            .addFunction("getViewInverse", &ComponentCamera::getViewInverse)
-            .addFunction("getProjectionInverse", &ComponentCamera::getProjectionInverse)
+            .addFunction("getView", &Engine::priv::ComponentCameraLUABinder::getView)
+            .addFunction("getProjection", &Engine::priv::ComponentCameraLUABinder::getProjection)
+            .addFunction("getViewInverse", &Engine::priv::ComponentCameraLUABinder::getViewInverse)
+            .addFunction("getProjectionInverse", &Engine::priv::ComponentCameraLUABinder::getProjectionInverse)
 
-            .addFunction("getViewProjection", &ComponentCamera::getViewProjection)
-            .addFunction("getViewProjectionInverse", &ComponentCamera::getViewProjectionInverse)
-            .addFunction("getViewVector", &ComponentCamera::getViewVector)
+            .addFunction("getViewProjection", &Engine::priv::ComponentCameraLUABinder::getViewProjection)
+            .addFunction("getViewProjectionInverse", &Engine::priv::ComponentCameraLUABinder::getViewProjectionInverse)
+            .addFunction("getViewVector", &Engine::priv::ComponentCameraLUABinder::getViewVector)
 */
 
 
         .endClass()
+#pragma endregion
+
+#pragma region ComponentLogic
         //component logics
-        .beginClass<ComponentLogic>("ComponentLogic")
-            .addFunction("call", &ComponentLogic::call)
-            .addFunction("setFunctor", static_cast<void(ComponentLogic::*)(luabridge::LuaRef)>(&ComponentLogic::setFunctor))
+        .beginClass<Engine::priv::ComponentLogicLUABinder>("ComponentLogic")
+            //.addFunction("call", &Engine::priv::ComponentLogicLUABinder::call)
+            //.addFunction("setFunctor", static_cast<void(ComponentLogic::*)(luabridge::LuaRef)>(&Engine::priv::ComponentLogicLUABinder::setFunctor))
         .endClass()
-        .beginClass<ComponentLogic1>("ComponentLogic1")
-            .addFunction("call", &ComponentLogic1::call)
-            .addFunction("setFunctor", static_cast<void(ComponentLogic1::*)(luabridge::LuaRef)>(&ComponentLogic1::setFunctor))
+#pragma endregion
+
+#pragma region ComponentLogic1
+        .beginClass<Engine::priv::ComponentLogic1LUABinder>("ComponentLogic1")
+            //.addFunction("call", &Engine::priv::ComponentLogic1LUABinder::call)
+            //.addFunction("setFunctor", static_cast<void(ComponentLogic1::*)(luabridge::LuaRef)>(&Engine::priv::ComponentLogic1LUABinder::setFunctor))
         .endClass()
-        .beginClass<ComponentLogic2>("ComponentLogic2")
-            .addFunction("call", &ComponentLogic2::call)
-            .addFunction("setFunctor", static_cast<void(ComponentLogic2::*)(luabridge::LuaRef)>(&ComponentLogic2::setFunctor))
+#pragma endregion
+
+#pragma region ComponentLogic2
+        .beginClass<Engine::priv::ComponentLogic2LUABinder>("ComponentLogic2")
+            //.addFunction("call", &Engine::priv::ComponentLogic2LUABinder::call)
+            //.addFunction("setFunctor", static_cast<void(ComponentLogic2::*)(luabridge::LuaRef)>(&Engine::priv::ComponentLogic2LUABinder::setFunctor))
         .endClass()
-        .beginClass<ComponentLogic3>("ComponentLogic3")
-            .addFunction("call", &ComponentLogic3::call)
-            .addFunction("setFunctor", static_cast<void(ComponentLogic3::*)(luabridge::LuaRef)>(&ComponentLogic3::setFunctor))
+#pragma endregion
+
+#pragma region ComponentLogic3
+        .beginClass<Engine::priv::ComponentLogic3LUABinder>("ComponentLogic3")
+            //.addFunction("call", &Engine::priv::ComponentLogic3LUABinder::call)
+            //.addFunction("setFunctor", static_cast<void(ComponentLogic3::*)(luabridge::LuaRef)>(&Engine::priv::ComponentLogic3LUABinder::setFunctor))
         .endClass()
-        //component model TODO add more
-        .beginClass<ComponentModel>("ComponentModel")
-            .addFunction("getBoundingBox", &ComponentModel::getBoundingBox)
-            .addFunction("getRadius", &ComponentModel::getRadius)
-            .addFunction("getNumModels", &ComponentModel::getNumModels)
-            .addFunction("setStage", &ComponentModel::setStage)
-            .addFunction("getOwner", &ComponentModel::getOwner)
-            .addFunction("removeModel", &ComponentModel::removeModel)
-            .addFunction("hide", &ComponentModel::hide)
-            .addFunction("show", &ComponentModel::show)
-            .addFunction("getModel", &ComponentModel::getModel)
+#pragma endregion
+
+#pragma region ComponentModel
+        .beginClass<Engine::priv::ComponentModelLUABinder>("ComponentModel")
+            /*
+            .addFunction("getBoundingBox", &Engine::priv::ComponentModelLUABinder::getBoundingBox)
+            .addFunction("getRadius", &Engine::priv::ComponentModelLUABinder::getRadius)
+            .addFunction("getNumModels", &Engine::priv::ComponentModelLUABinder::getNumModels)
+            .addFunction("setStage", &Engine::priv::ComponentModelLUABinder::setStage)
+            .addFunction("getOwner", &Engine::priv::ComponentModelLUABinder::getOwner)
+            .addFunction("removeModel", &Engine::priv::ComponentModelLUABinder::removeModel)
+            .addFunction("hide", &Engine::priv::ComponentModelLUABinder::hide)
+            .addFunction("show", &Engine::priv::ComponentModelLUABinder::show)
+            .addFunction("getModel", &Engine::priv::ComponentModelLUABinder::getModel)
+            */
         .endClass()
-        //model instance
+#pragma endregion
+
+#pragma region ComponentScript
+        .beginClass<Engine::priv::ComponentScriptLUABinder>("ComponentScript")
+
+        .endClass()
+#pragma endregion
+
+#pragma region ModelInstance
         .beginClass<ModelInstance>("ModelInstance")
             .addFunction("getColor", &ModelInstance::getColor)
             .addFunction("setColor", static_cast<void(ModelInstance::*)(const float, const float, const float, const float)>(&ModelInstance::setColor))
@@ -706,5 +727,7 @@ LUABinder::LUABinder()
             .addFunction("playAnimation", static_cast<void(ModelInstance::*)(std::string_view, float, float, uint32_t)>(&ModelInstance::playAnimation))
             .addFunction("setOrientation", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::setOrientation))
         .endClass()
+#pragma endregion
+
     ;
 }

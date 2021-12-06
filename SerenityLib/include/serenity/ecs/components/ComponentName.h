@@ -2,7 +2,7 @@
 #ifndef ENGINE_ECS_COMPONENT_NAME_H
 #define ENGINE_ECS_COMPONENT_NAME_H
 
-#include <serenity/ecs/components/ComponentBaseClass.h>
+#include <serenity/ecs/ECS.h>
 
 class ComponentName : public ComponentBaseClass<ComponentName> {
     private:
@@ -22,5 +22,22 @@ class ComponentName : public ComponentBaseClass<ComponentName> {
         [[nodiscard]] inline size_t size() const noexcept { return m_Data.size(); }
         [[nodiscard]] inline bool empty() const noexcept { return m_Data.empty(); }
 };
+
+namespace Engine::priv {
+    class ComponentNameLUABinder {
+        private:
+            Entity m_Owner;
+
+            ComponentNameLUABinder() = delete;
+        public:
+            ComponentNameLUABinder(Entity owner)
+                : m_Owner{ owner }
+            {}
+
+            const std::string& name() const;
+            size_t size() const;
+            bool empty() const;
+    };
+}
 
 #endif

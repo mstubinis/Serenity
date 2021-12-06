@@ -44,7 +44,7 @@ LuaScript& LuaScript::operator=(LuaScript&& other) noexcept {
 LuaScript::~LuaScript() {
     clean();
 }
-bool LuaScript::runScript(bool isFile) noexcept {
+bool LuaScript::runScript(bool isFile, Entity entity) noexcept {
     clean();
 
     assert(m_FileNameOrData.size() > 0);
@@ -52,14 +52,14 @@ bool LuaScript::runScript(bool isFile) noexcept {
     assert(m_ID != std::numeric_limits<uint32_t>().max());
     assert(m_Executed == false);
 
-    int res = isFile ? m_L->runFile(m_FileNameOrData, m_ID) : m_L->runCodeContent(m_FileNameOrData, m_ID);
+    int res = isFile ? m_L->runFile(m_FileNameOrData, m_ID, entity.null() ? nullptr : &entity) : m_L->runCodeContent(m_FileNameOrData, m_ID, entity.null() ? nullptr : &entity);
     m_Executed = static_cast<bool>(res);
     return res;
 }
-bool LuaScript::runScript(std::string_view fileNameOrData, bool isFile) noexcept {
+bool LuaScript::runScript(std::string_view fileNameOrData, bool isFile, Entity entity) noexcept {
     assert(fileNameOrData.size() > 0);
     m_FileNameOrData = std::string{ fileNameOrData };
-    return runScript(isFile);
+    return runScript(isFile, entity);
 }
 void LuaScript::clean() noexcept {
     assert(m_L != nullptr);

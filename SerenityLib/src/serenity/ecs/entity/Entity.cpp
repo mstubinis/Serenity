@@ -95,7 +95,7 @@ bool Entity::hasParent() const noexcept {
 Engine::view_ptr<Scene> Entity::scene() const noexcept {
     return Core::m_Engine->m_ResourceManager.getSceneByID(sceneID());
 }
-bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
+bool Entity::addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
     if (componentClassName == "ComponentTransform") {
         return addComponent<ComponentTransform>();
     } else if ("ComponentRigidBody") {
@@ -119,7 +119,9 @@ bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef
             return addComponent<ComponentCamera>(a1.cast<float>(), a2.cast<float>(), a3.cast<float>(), a4.cast<float>());
         }
     } else if (componentClassName == "ComponentName") {
-        return addComponent<ComponentName>(a1.cast<const char*>());
+        if (!a1.isNil() && a1.isString()) {
+            return addComponent<ComponentName>(a1.cast<const char*>());
+        }
     } else if (componentClassName == "ComponentLogic") {
         if (!a1.isNil() && a1.isFunction()) {
             return addComponent<ComponentLogic>(a1);
@@ -144,64 +146,81 @@ bool Entity::addComponent(std::string_view componentClassName, luabridge::LuaRef
         } else {
             return addComponent<ComponentLogic3>();
         }
+    } else if (componentClassName == "ComponentScript") {
+        if (!a1.isNil() && a1.isString()) {
+            if (!a2.isNil() && a2.isBool()) {
+                return addComponent<ComponentScript>(a1.cast<const char*>(), a2.cast<bool>());
+            } else {
+                return addComponent<ComponentScript>(a1.cast<const char*>());
+            }
+        } else {
+            return addComponent<ComponentScript>();
+        }
     }
     return false;
 }
-bool Entity::removeComponent(std::string_view componentClassName) {
+bool Entity::removeComponent(const std::string& componentClassName) {
     if (componentClassName == "ComponentTransform") {
         return removeComponent<ComponentTransform>();
-    }else if (componentClassName == "ComponentRigidBody") {
+    } else if (componentClassName == "ComponentRigidBody") {
         return removeComponent<ComponentRigidBody>();
-    }else if (componentClassName == "ComponentCollisionShape") {
+    } else if (componentClassName == "ComponentCollisionShape") {
         return removeComponent<ComponentCollisionShape>();
-    }else if (componentClassName == "ComponentModel") {
+    } else if (componentClassName == "ComponentModel") {
         return removeComponent<ComponentModel>();
-    }else if (componentClassName == "ComponentCamera") {
+    } else if (componentClassName == "ComponentCamera") {
         return removeComponent<ComponentCamera>();
-    }else if (componentClassName == "ComponentName") {
+    } else if (componentClassName == "ComponentName") {
         return removeComponent<ComponentName>();
-    }else if (componentClassName == "ComponentLogic") {
+    } else if (componentClassName == "ComponentLogic") {
         return removeComponent<ComponentLogic>();
-    }else if (componentClassName == "ComponentLogic1") {
+    } else if (componentClassName == "ComponentLogic1") {
         return removeComponent<ComponentLogic1>();
-    }else if (componentClassName == "ComponentLogic2") {
+    } else if (componentClassName == "ComponentLogic2") {
         return removeComponent<ComponentLogic2>();
-    }else if (componentClassName == "ComponentLogic3") {
+    } else if (componentClassName == "ComponentLogic3") {
         return removeComponent<ComponentLogic3>();
+    } else if (componentClassName == "ComponentScript") {
+        return removeComponent<ComponentScript>();
     }
     return false;
 }
-luabridge::LuaRef Entity::getComponent(std::string_view componentClassName) {
-    lua_State* L            = &Engine::lua::getGlobalState();
-    std::string global_name = toString() + ":" + std::string{ componentClassName };
-    auto* global_name_cstr  = global_name.c_str();
-    if (componentClassName == "ComponentTransform") {
-        return PublicEntity::GetComponent<ComponentTransform>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentRigidBody") {
-        return PublicEntity::GetComponent<ComponentRigidBody>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentCollisionShape") {
-        return PublicEntity::GetComponent<ComponentCollisionShape>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentModel") {
-        return PublicEntity::GetComponent<ComponentModel>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentCamera") {
-        return PublicEntity::GetComponent<ComponentCamera>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentName") {
-        return PublicEntity::GetComponent<ComponentName>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentLogic") {
-        return PublicEntity::GetComponent<ComponentLogic>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentLogic1") {
-        return PublicEntity::GetComponent<ComponentLogic1>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentLogic2") {
-        return PublicEntity::GetComponent<ComponentLogic2>(L, *this, global_name_cstr);
-    }else if (componentClassName == "ComponentLogic3") {
-        return PublicEntity::GetComponent<ComponentLogic3>(L, *this, global_name_cstr);
-    }else{
-        luabridge::setGlobal(L, nullptr, global_name_cstr); // Prevents errors
-        //printError("Component: (" + componentClassName + ") not found.");
+luabridge::LuaRef Entity::getComponent(luabridge::LuaRef componentClassName) {
+    lua_State* L = &Engine::lua::getGlobalState();
+    if (!componentClassName.isNil() && componentClassName.isString()) {
+        std::string local_name = componentClassName.cast<std::string>();
+        std::string global_name = toString() + ":" + local_name;
+        auto* global_name_cstr = global_name.c_str();
+        if (local_name == "ComponentTransform") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentTransformLUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentRigidBody") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentRigidBodyLUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentCollisionShape") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentCollisionShapeLUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentModel") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentModelLUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentCamera") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentCameraLUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentName") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentNameLUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentLogic") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentLogicLUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentLogic1") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentLogic1LUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentLogic2") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentLogic2LUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentLogic3") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentLogic3LUABinder>(L, *this, global_name_cstr);
+        } else if (local_name == "ComponentScript") {
+            return PublicEntity::GetComponent<Engine::priv::ComponentScriptLUABinder>(L, *this, global_name_cstr);
+        } else {
+            luabridge::setGlobal(L, nullptr, global_name_cstr); // Prevents errors
+            //printError("Component: (" + local_name + ") not found.");
+        }
     }
-    return luabridge::getGlobal(L, global_name_cstr);
+    return luabridge::LuaRef{ L };
 }
 Engine::view_ptr<Engine::priv::ECS> Engine::priv::PublicEntity::GetECS(Entity entity) {
     Scene* scene_ptr = entity.scene();
-    return (scene_ptr) ? &Engine::priv::PublicScene::GetECS(*scene_ptr) : nullptr;
+    return scene_ptr ? &Engine::priv::PublicScene::GetECS(*scene_ptr) : nullptr;
 }

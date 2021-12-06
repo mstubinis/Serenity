@@ -96,6 +96,8 @@ namespace {
     };
 }
 
+#pragma region Camera
+
 Camera::Camera(Scene* scene, float angle, float aspectRatio, float Near, float Far)
     : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
 {
@@ -154,9 +156,26 @@ void Camera::lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3&
 glm_vec3 Camera::getPosition() const noexcept {
     return getComponent<ComponentTransform>()->getPosition();
 }
+glm_vec3 Camera::getLocalPosition() const noexcept {
+    return getComponent<ComponentTransform>()->getLocalPosition();
+}
 glm::quat Camera::getRotation() const noexcept {
     return glm::conjugate(glm::quat_cast(getComponent<ComponentCamera>()->getView())); 
 }
+
+void Camera::setPosition(decimal x, decimal y, decimal z) {
+    getComponent<ComponentTransform>()->setPosition(x, y, z);
+}
+void Camera::setLocalPosition(decimal x, decimal y, decimal z) {
+    getComponent<ComponentTransform>()->setLocalPosition(x, y, z);
+}
+void Camera::setPosition(const glm_vec3& position) {
+    getComponent<ComponentTransform>()->setPosition(position);
+}
+void Camera::setLocalPosition(const glm_vec3& position) {
+    getComponent<ComponentTransform>()->setLocalPosition(position);
+}
+
 float Camera::getAngle() const noexcept {
     return getComponent<ComponentCamera>()->m_Angle; 
 }
@@ -205,6 +224,12 @@ glm::vec3 Camera::getViewVector() const noexcept {
 glm::vec3 Camera::getRight() const noexcept {
     return getComponent<ComponentCamera>()->getRight(); 
 }
+glm::vec3 Camera::getUp() const noexcept {
+    return getComponent<ComponentTransform>()->getUp();
+}
+glm::vec3 Camera::getForward() const noexcept {
+    return getComponent<ComponentTransform>()->getForward();
+}
 decimal Camera::getDistance(Entity otherEntity) const noexcept {
     auto otherEntityBody = otherEntity.getComponent<ComponentTransform>();
     return glm::distance(otherEntityBody->getPosition(), getPosition());
@@ -238,3 +263,81 @@ bool Camera::rayIntersectSphere(Entity entity) const noexcept {
 bool Camera::rayIntersectSphere(const glm::vec3& position, float radius) const noexcept {
     return Engine::Math::rayIntersectSphere(position, radius, getPosition(), getViewVector());
 }
+
+#pragma endregion
+
+#pragma region CameraLUABinder
+
+Engine::priv::CameraLUABinder::CameraLUABinder(Camera& camera)
+    : m_Camera{ &camera }
+{}
+Camera& Engine::priv::CameraLUABinder::getCamera() {
+    return *m_Camera;
+}
+void Engine::priv::CameraLUABinder::setAngle(float angle) const {
+    m_Camera->setAngle(angle);
+}
+void Engine::priv::CameraLUABinder::setAspectRatio(float aspectRatio) const {
+    m_Camera->setAspectRatio(aspectRatio);
+}
+void Engine::priv::CameraLUABinder::setNear(float nearPlane) const {
+    m_Camera->setNear(nearPlane);
+}
+void Engine::priv::CameraLUABinder::setFar(float farPlane) const {
+    m_Camera->setFar(farPlane);
+}
+
+float Engine::priv::CameraLUABinder::getAngle() const {
+    return m_Camera->getAngle();
+}
+float Engine::priv::CameraLUABinder::getAspectRatio() const {
+    return m_Camera->getAspectRatio();
+}
+float Engine::priv::CameraLUABinder::getNear() const {
+    return m_Camera->getNear();
+}
+float Engine::priv::CameraLUABinder::getFar() const {
+    return m_Camera->getFar();
+}
+
+glm::mat4 Engine::priv::CameraLUABinder::getView() const {
+    return m_Camera->getView();
+}
+glm::mat4 Engine::priv::CameraLUABinder::getProjection() const {
+    return m_Camera->getProjection();
+}
+
+
+glm_vec3 Engine::priv::CameraLUABinder::getPosition() const {
+    return m_Camera->getPosition();
+}
+glm_vec3 Engine::priv::CameraLUABinder::getLocalPosition() const {
+    return m_Camera->getLocalPosition();
+}
+glm::quat Engine::priv::CameraLUABinder::getRotation() const {
+    return m_Camera->getRotation();
+}
+glm::vec3 Engine::priv::CameraLUABinder::getRight() const {
+    return m_Camera->getRight();
+}
+glm::vec3 Engine::priv::CameraLUABinder::getUp() const {
+    return m_Camera->getUp();
+}
+glm::vec3 Engine::priv::CameraLUABinder::getForward() const {
+    return m_Camera->getForward();
+}
+
+void Engine::priv::CameraLUABinder::setProjectionMatrix(const glm::mat4& projection) const {
+    m_Camera->setProjectionMatrix(projection);
+}
+void Engine::priv::CameraLUABinder::setViewMatrix(const glm::mat4& view) const {
+    m_Camera->setViewMatrix(view);
+}
+void Engine::priv::CameraLUABinder::setPosition(decimal x, decimal y, decimal z) const {
+    m_Camera->setPosition(x, y, z);
+}
+void Engine::priv::CameraLUABinder::setLocalPosition(decimal x, decimal y, decimal z) const {
+    m_Camera->setLocalPosition(x, y, z);
+}
+
+#pragma endregion

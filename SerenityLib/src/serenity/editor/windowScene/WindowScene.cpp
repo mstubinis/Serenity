@@ -122,7 +122,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                 auto rigid     = e.getComponent<ComponentRigidBody>();
                 auto shape     = e.getComponent<ComponentCollisionShape>();
                 auto model     = e.getComponent<ComponentModel>();
-                auto cam       = e.getComponent<ComponentCamera>();
+                auto camera    = e.getComponent<ComponentCamera>();
                 auto script    = e.getComponent<ComponentScript>();
                 if (name && ImGui::TreeNode("ComponentName")) {
                     ImGui::Text(std::string("Name: " + name->name()).c_str());
@@ -191,23 +191,23 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                     }
                     ImGui::TreePop();
                 }
-                if (cam && ImGui::TreeNode("ComponentCamera")) {
-                    if (cam->getType() == ComponentCamera::CameraType::Perspective) {
+                if (camera && ImGui::TreeNode("ComponentCamera")) {
+                    if (camera->getType() == ComponentCamera::CameraType::Perspective) {
                         ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Perspective Camera");
-                        ImGui::SliderFloat("Angle", &cam->m_Angle, 0.0f, glm::radians(180.0f));
-                        ImGui::InputFloat("AspectRatio", &cam->m_AspectRatio);
-                        ImGui::InputFloat("Near", &cam->m_NearPlane);
-                        ImGui::InputFloat("Far", &cam->m_FarPlane);
+                        ImGui::SliderFloat("Angle", &camera->m_Angle, 0.0f, glm::radians(180.0f));
+                        ImGui::InputFloat("AspectRatio", &camera->m_AspectRatio);
+                        ImGui::InputFloat("Near", &camera->m_NearPlane);
+                        ImGui::InputFloat("Far", &camera->m_FarPlane);
                     } else {
                         ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Orthographic Camera");
-                        ImGui::InputFloat("Left", &cam->m_Left);
-                        ImGui::InputFloat("Right", &cam->m_Right);
-                        ImGui::InputFloat("Top", &cam->m_Top);
-                        ImGui::InputFloat("Bottom", &cam->m_Bottom);
-                        ImGui::InputFloat("Near", &cam->m_NearPlane);
-                        ImGui::InputFloat("Far", &cam->m_FarPlane);
+                        ImGui::InputFloat("Left", &camera->m_Left);
+                        ImGui::InputFloat("Right", &camera->m_Right);
+                        ImGui::InputFloat("Top", &camera->m_Top);
+                        ImGui::InputFloat("Bottom", &camera->m_Bottom);
+                        ImGui::InputFloat("Near", &camera->m_NearPlane);
+                        ImGui::InputFloat("Far", &camera->m_FarPlane);
                     }
-                    Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*cam);
+                    Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*camera);
                     ImGui::TreePop();
                 }
                 if (script && ImGui::TreeNode("ComponentScript")) {

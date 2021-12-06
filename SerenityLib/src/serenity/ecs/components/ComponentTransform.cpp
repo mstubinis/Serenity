@@ -6,6 +6,8 @@
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/Engine_Resources.h>
 
+#pragma region Component
+
 ComponentTransform::ComponentTransform(Entity entity) 
     : m_Owner{ entity }
 {}
@@ -238,3 +240,78 @@ void ComponentTransform::recalculateAllParentChildMatrices(Scene& scene) {
     auto& system = ecs.getSystem<SystemTransformParentChild>();
     system.computeAllParentChildWorldTransforms();
 }
+
+#pragma endregion
+
+#pragma region ComponentTransformLUABinder
+
+void Engine::priv::ComponentTransformLUABinder::addChild(Entity child) const {
+    m_Owner.getComponent<ComponentTransform>()->addChild(child);
+}
+void Engine::priv::ComponentTransformLUABinder::removeChild(Entity child) const {
+    m_Owner.getComponent<ComponentTransform>()->removeChild(child);
+}
+bool Engine::priv::ComponentTransformLUABinder::hasParent() const {
+    return m_Owner.getComponent<ComponentTransform>()->hasParent();
+}
+
+void Engine::priv::ComponentTransformLUABinder::setPosition(decimal x, decimal y, decimal z) const {
+    m_Owner.getComponent<ComponentTransform>()->setPosition(x, y, z);
+}
+void Engine::priv::ComponentTransformLUABinder::setRotation(float x, float y, float z, float w) const {
+    m_Owner.getComponent<ComponentTransform>()->setRotation(x, y, z, w);
+}
+void Engine::priv::ComponentTransformLUABinder::setScale(float x, float y, float z) const {
+    m_Owner.getComponent<ComponentTransform>()->setScale(x, y, z);
+}
+
+void Engine::priv::ComponentTransformLUABinder::setLocalPosition(decimal x, decimal y, decimal z) const {
+    m_Owner.getComponent<ComponentTransform>()->setLocalPosition(x, y, z);
+}
+
+void Engine::priv::ComponentTransformLUABinder::translate(decimal x, decimal y, decimal z, bool local) const {
+    m_Owner.getComponent<ComponentTransform>()->translate(x, y, z, local);
+}
+void Engine::priv::ComponentTransformLUABinder::rotate(float x, float y, float z, bool local) const {
+    m_Owner.getComponent<ComponentTransform>()->rotate(x, y, z, local);
+}
+void Engine::priv::ComponentTransformLUABinder::scale(float x, float y, float z) const {
+    m_Owner.getComponent<ComponentTransform>()->scale(x, y, z);
+}
+decimal Engine::priv::ComponentTransformLUABinder::getDistance(Entity other) const {
+    return m_Owner.getComponent<ComponentTransform>()->getDistance(other);
+}
+
+glm_vec3 Engine::priv::ComponentTransformLUABinder::getPosition() const {
+    return m_Owner.getComponent<ComponentTransform>()->getPosition();
+}
+glm::quat Engine::priv::ComponentTransformLUABinder::getRotation() const {
+    return m_Owner.getComponent<ComponentTransform>()->getRotation();
+}
+glm::vec3 Engine::priv::ComponentTransformLUABinder::getScale() const {
+    return m_Owner.getComponent<ComponentTransform>()->getScale();
+}
+
+glm_vec3 Engine::priv::ComponentTransformLUABinder::getLocalPosition() const {
+    return m_Owner.getComponent<ComponentTransform>()->getLocalPosition();
+}
+
+//TODO: use const references?
+glm::vec3 Engine::priv::ComponentTransformLUABinder::getForward() const {
+    return m_Owner.getComponent<ComponentTransform>()->getForward();
+}
+glm::vec3 Engine::priv::ComponentTransformLUABinder::getRight() const {
+    return m_Owner.getComponent<ComponentTransform>()->getRight();
+}
+glm::vec3 Engine::priv::ComponentTransformLUABinder::getUp() const {
+    return m_Owner.getComponent<ComponentTransform>()->getUp();
+}
+
+void Engine::priv::ComponentTransformLUABinder::alignTo(float dirX, float dirY, float dirZ) {
+    m_Owner.getComponent<ComponentTransform>()->alignTo(dirX, dirY, dirZ);
+}
+void Engine::priv::ComponentTransformLUABinder::alignTo(const glm::vec3& direction) {
+    m_Owner.getComponent<ComponentTransform>()->alignTo(direction);
+}
+
+#pragma endregion

@@ -16,7 +16,7 @@ namespace Engine::priv {
 }
 
 #include <vector>
-#include <serenity/ecs/components/ComponentBaseClass.h>
+#include <serenity/ecs/ECS.h>
 #include <serenity/dependencies/glm.h>
 
 namespace Engine::priv {
@@ -105,5 +105,18 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
         inline ModelInstanceVector::const_iterator begin() const noexcept { return m_ModelInstances.begin(); }
         inline ModelInstanceVector::const_iterator end() const noexcept { return m_ModelInstances.end(); }
 };
+
+namespace Engine::priv {
+    class ComponentModelLUABinder {
+        private:
+            Entity m_Owner;
+
+            ComponentModelLUABinder() = delete;
+        public:
+            ComponentModelLUABinder(Entity owner)
+                : m_Owner{ owner }
+            {}
+    };
+}
 
 #endif

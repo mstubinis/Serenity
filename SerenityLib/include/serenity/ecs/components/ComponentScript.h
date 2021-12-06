@@ -21,4 +21,17 @@ class ComponentScript : public ComponentBaseClass<ComponentScript> {
         void init(std::string_view scriptFilePathOrData, bool fromFile = true);
 };
 
+namespace Engine::priv {
+    class ComponentScriptLUABinder {
+        private:
+            Entity m_Owner;
+
+            ComponentScriptLUABinder() = delete;
+        public:
+            ComponentScriptLUABinder(Entity owner)
+                : m_Owner{ owner }
+            {}
+    };
+}
+
 #endif

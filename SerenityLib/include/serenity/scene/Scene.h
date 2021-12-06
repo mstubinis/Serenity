@@ -44,6 +44,7 @@ namespace Engine::priv {
 #include <serenity/scene/LightsModule.h>
 #include <serenity/renderer/RenderGraph.h>
 #include <serenity/renderer/particles/ParticleSystem.h>
+#include <serenity/scene/Camera.h>
 
 class Scene: public Observer {
     friend struct ::SceneImpl;
@@ -226,5 +227,42 @@ namespace Engine::priv {
         [[nodiscard]] static bool         HasItemsToRender(Scene&);
     };
 };
+
+
+namespace Engine::priv {
+    class SceneLUABinder {
+        private:
+            Engine::view_ptr<Scene> m_Scene = nullptr;
+        public:
+            SceneLUABinder() = default;
+            SceneLUABinder(Scene&);
+
+            [[nodiscard]] Scene& getScene() noexcept;
+
+            void setName(const std::string& name);
+            Entity createEntity();
+
+            Engine::priv::CameraLUABinder getActiveCamera() const;
+            void setActiveCamera(Engine::priv::CameraLUABinder);
+
+            uint32_t id() const;
+    };
+}
+
+/*
+        //scene stuff
+        .beginClass<Engine::priv::SceneLUABinder>("Scene")
+            //.addProperty("name", &Scene::name, &Scene::setName)
+            .addFunction("createEntities", static_cast<std::vector<Entity>(Scene::*)(uint32_t)>(&Scene::createEntity))
+            .addFunction("centerSceneToObject", &Scene::centerSceneToObject)
+            .addFunction("getBackgroundColor", &Scene::getBackgroundColor)
+            .addFunction("setBackgroundColor", static_cast<void(Scene::*)(float, float, float, float)>(&Scene::setBackgroundColor))
+            .addFunction("setGlobalIllumination", static_cast<void(Scene::*)(float, float, float)>(&Scene::setGlobalIllumination))
+            .addFunction("getGlobalIllumination", &Scene::getGlobalIllumination)
+        .endClass()
+        .addFunction("getCurrentScene", &Engine::Resources::getCurrentScene)
+        .addFunction("setCurrentScene", static_cast<bool(*)(Scene*)>(&Engine::Resources::setCurrentScene))
+        .addFunction("setCurrentSceneByName", static_cast<bool(*)(std::string_view)>(&Engine::Resources::setCurrentScene))
+*/
 
 #endif

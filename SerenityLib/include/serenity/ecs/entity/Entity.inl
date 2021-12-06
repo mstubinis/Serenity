@@ -14,8 +14,8 @@ template<class COMPONENT>
 
 
 
-template<class COMPONENT> 
+template<class COMPONENT_LUA_BINDER> 
 [[nodiscard]] luabridge::LuaRef Engine::priv::PublicEntity::GetComponent(lua_State* L, Entity entity, const char* globalName) {
-    luabridge::setGlobal(L, entity.getComponent<COMPONENT>(), globalName);
+    luabridge::setGlobal(L, COMPONENT_LUA_BINDER( entity ), globalName);
     return luabridge::getGlobal(L, globalName);
 }

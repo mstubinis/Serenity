@@ -17,7 +17,6 @@ namespace Engine::priv {
 #include <serenity/dependencies/glm.h>
 #include <serenity/ecs/ECS.h>
 #include <serenity/events/Observer.h>
-#include <serenity/ecs/components/ComponentBaseClass.h>
 #include <serenity/renderer/RendererIncludes.h>
 
 class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
@@ -132,5 +131,61 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
         //void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
         //inline void setLinearVelocity(const glm_vec3& velocity, bool local = true) noexcept { setLinearVelocity(velocity.x, velocity.y, velocity.z, local); }
 };
+
+
+namespace Engine::priv {
+    class ComponentTransformLUABinder {
+        private:
+            Entity m_Owner;
+
+            ComponentTransformLUABinder() = delete;
+        public:
+            ComponentTransformLUABinder(Entity owner) 
+                : m_Owner{ owner }
+            {}
+
+            void addChild(Entity child) const;
+            void removeChild(Entity child) const;
+            bool hasParent() const;
+
+            void setPosition(decimal x, decimal y, decimal z) const;
+            void setRotation(float x, float y, float z, float w) const;
+            void setScale(float x, float y, float z) const;
+
+            void setLocalPosition(decimal x, decimal y, decimal z) const;
+
+            void translate(decimal x, decimal y, decimal z, bool local) const;
+            void rotate(float x, float y, float z, bool local) const;
+            void scale(float x, float y, float z) const;
+            decimal getDistance(Entity other) const;
+
+            glm_vec3 getPosition() const;
+            glm::quat getRotation() const;
+            glm::vec3 getScale() const;
+
+            glm_vec3 getLocalPosition() const;
+
+            //TODO: use const references?
+            glm::vec3 getForward() const;
+            glm::vec3 getRight() const;
+            glm::vec3 getUp() const;
+
+            void alignTo(float dirX, float dirY, float dirZ);
+            void alignTo(const glm::vec3& direction);
+
+            /*
+
+            .addFunction("getScreenCoordinates", &ComponentTransform::getScreenCoordinates)
+            .addFunction("alignTo", static_cast<void(ComponentTransform::*)(const glm::vec3&)>(&ComponentTransform::alignTo))
+            .addFunction("alignTo", static_cast<void(ComponentTransform::*)(float, float, float)>(&ComponentTransform::alignTo))
+
+            //.addFunction("getLinearVelocity", &ComponentTransform::getLinearVelocity)
+            .addFunction("getWorldMatrix", &ComponentTransform::getWorldMatrix)
+            .addFunction("getWorldMatrixRendering", &ComponentTransform::getWorldMatrixRendering)
+            .addFunction("getLocalMatrix", &ComponentTransform::getLocalMatrix)
+            */
+
+    };
+}
 
 #endif

@@ -35,8 +35,16 @@ class Camera: public Entity {
         void lookAt(const glm_vec3& eye, const glm_vec3& center, const glm_vec3& up) noexcept;
 
         [[nodiscard]] glm_vec3 getPosition() const noexcept;
-        [[nodiscard]] glm::vec3 getRight() const noexcept;
+        [[nodiscard]] glm_vec3 getLocalPosition() const noexcept;
         [[nodiscard]] glm::quat getRotation() const noexcept;
+        [[nodiscard]] glm::vec3 getRight() const noexcept;
+        [[nodiscard]] glm::vec3 getUp() const noexcept;
+        [[nodiscard]] glm::vec3 getForward() const noexcept;
+
+        void setPosition(decimal x, decimal y, decimal z);
+        void setLocalPosition(decimal x, decimal y, decimal z);
+        void setPosition(const glm_vec3&);
+        void setLocalPosition(const glm_vec3&);
 
         [[nodiscard]] decimal getDistance(Entity) const noexcept;
         [[nodiscard]] decimal getDistance(const glm_vec3&) const noexcept;
@@ -73,4 +81,45 @@ class Camera: public Entity {
         [[nodiscard]] bool rayIntersectSphere(Entity) const noexcept;
         [[nodiscard]] bool rayIntersectSphere(const glm::vec3& position, float radius) const noexcept;
 };
+
+namespace Engine::priv {
+    class CameraLUABinder {
+        private:
+            Camera* m_Camera = nullptr;
+        public:
+            CameraLUABinder() = default;
+
+            CameraLUABinder(Camera&);
+
+            Camera& getCamera();
+
+            void setAngle(float angle) const;
+            void setAspectRatio(float aspectRatio) const;
+            void setNear(float nearPlane) const;
+            void setFar(float farPlane) const;
+
+            void setProjectionMatrix(const glm::mat4&) const;
+            void setViewMatrix(const glm::mat4&) const;
+
+            void setPosition(decimal x, decimal y, decimal z) const;
+            void setLocalPosition(decimal x, decimal y, decimal z) const;
+
+            float getAngle() const;
+            float getAspectRatio() const;
+            float getNear() const;
+            float getFar() const;
+
+            glm::mat4 getView() const;
+            glm::mat4 getProjection() const;
+
+            glm_vec3 getPosition() const;
+            glm_vec3 getLocalPosition() const;
+
+            glm::quat getRotation() const;
+            glm::vec3 getRight() const;
+            glm::vec3 getUp() const;
+            glm::vec3 getForward() const;
+    };
+}
+
 #endif

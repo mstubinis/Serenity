@@ -8,7 +8,6 @@
 #include <serenity/resources/material/Material.h>
 #include <serenity/renderer/RenderGraph.h>
 #include <serenity/lights/Lights.h>
-#include <serenity/scene/Camera.h>
 
 #include <serenity/ecs/systems/SystemGameUpdate.h>
 #include <serenity/ecs/systems/SystemSceneUpdate.h>
@@ -428,4 +427,32 @@ bool Engine::priv::PublicScene::IsSkipRenderThisFrame(Scene& scene) {
 bool Engine::priv::PublicScene::HasItemsToRender(Scene& scene) {
     return scene.m_RenderGraphs.hasItemsToRender();
 }
+#pragma endregion
+
+#pragma region SceneLUABinder
+
+Engine::priv::SceneLUABinder::SceneLUABinder(Scene& scene) 
+    : m_Scene{ &scene }
+{}
+
+Scene& Engine::priv::SceneLUABinder::getScene() noexcept {
+    return *m_Scene;
+}
+
+void Engine::priv::SceneLUABinder::setName(const std::string& name) {
+    m_Scene->setName(name);
+}
+Entity Engine::priv::SceneLUABinder::createEntity() {
+    return m_Scene->createEntity();
+}
+Engine::priv::CameraLUABinder Engine::priv::SceneLUABinder::getActiveCamera() const {
+    return Engine::priv::CameraLUABinder{ *m_Scene->getActiveCamera() };
+}
+void Engine::priv::SceneLUABinder::setActiveCamera(Engine::priv::CameraLUABinder camera) {
+    m_Scene->setActiveCamera(camera.getCamera());
+}
+uint32_t Engine::priv::SceneLUABinder::id() const {
+    return m_Scene->id();
+}
+
 #pragma endregion

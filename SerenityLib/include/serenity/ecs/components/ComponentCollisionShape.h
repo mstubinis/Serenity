@@ -16,10 +16,10 @@ namespace Engine::priv {
 };
 
 #include <serenity/dependencies/glm.h>
+#include <serenity/ecs/ECS.h>
 #include <serenity/resources/Handle.h>
 #include <serenity/physics/PhysicsIncludes.h>
 #include <serenity/events/Observer.h>
-#include <serenity/ecs/components/ComponentBaseClass.h>
 
 class ComponentCollisionShape final : public ComponentBaseClass<ComponentCollisionShape> {
     friend class ::ComponentRigidBody;
@@ -103,5 +103,18 @@ namespace Engine::priv {
             void onEvent(const Event&) override;
     };
 };
+
+namespace Engine::priv {
+    class ComponentCollisionShapeLUABinder {
+        private:
+            Entity m_Owner;
+
+            ComponentCollisionShapeLUABinder() = delete;
+        public:
+            ComponentCollisionShapeLUABinder(Entity owner)
+                : m_Owner{ owner }
+            {}
+    };
+}
 
 #endif
