@@ -44,6 +44,7 @@ namespace Engine::priv {
 
             void init(const EngineOptions&, Engine::priv::ResourceManager&);
 
+            inline bool isEnabled() const noexcept { return m_Enabled; }
             inline bool isShown() const noexcept { return m_Shown; }
 
             inline void show(bool shown = true) noexcept { m_Shown = shown; }

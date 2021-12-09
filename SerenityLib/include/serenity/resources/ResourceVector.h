@@ -99,7 +99,7 @@ namespace Engine::priv {
             }
             //O(n) linear search
             [[nodiscard]] LoadedResource<RESOURCE> get(const std::string_view sv) noexcept {
-                for (uint32_t i = 0; i < (uint32_t)m_Resources.size(); ++i) {
+                for (uint32_t i = 0; i < uint32_t(m_Resources.size()); ++i) {
                     if (m_Resources[i].m_Resource->name() == sv) {
                         return { internal_get(i), Handle{i, m_Resources[i].m_Version, RESOURCE::TYPE_ID} };
                     }

@@ -3,6 +3,8 @@
 #include <serenity/ecs/components/ComponentCamera.h>
 
 #include <serenity/resources/Engine_Resources.h>
+#include <serenity/resources/shader/ShaderProgram.h>
+#include <serenity/resources/material/Material.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/model/ModelInstance.h>
 #include <serenity/scene/Camera.h>
@@ -112,6 +114,14 @@ void ComponentModel_Functions::RegisterDeferredMeshLoaded(ComponentModel& modelC
 ComponentModel::ComponentModel(Entity entity, Handle mesh, Handle material, Handle shaderProgram, RenderStage stage)
     : m_Owner{ entity }
 {
+    addModel(mesh, material, shaderProgram, stage);
+}
+ComponentModel::ComponentModel(Entity entity, const std::string& meshName, const std::string& materialName, const std::string& shaderProgramName, RenderStage stage)
+    : m_Owner{ entity }
+{
+    Handle mesh          = Engine::Resources::getResource<Mesh>(meshName);
+    Handle material      = !materialName.empty() ? Engine::Resources::getResource<Material>(materialName) : Material::Checkers;
+    Handle shaderProgram = !shaderProgramName.empty() ? Engine::Resources::getResource<ShaderProgram>(shaderProgramName) : ShaderProgram::Deferred;
     addModel(mesh, material, shaderProgram, stage);
 }
 ComponentModel::ComponentModel(ComponentModel&& other) noexcept 

@@ -31,6 +31,7 @@ namespace Engine::priv {
 
 #include <serenity/model/ModelInstance.h>
 #include <serenity/model/ModelInstanceHandle.h>
+#include <string>
 
 using ModelInstanceVector = std::vector<std::unique_ptr<ModelInstance>>;
 
@@ -47,7 +48,8 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
         ComponentModel() = delete;
     public:
         ComponentModel(Entity, Handle mesh, Handle material, Handle shaderProgram = {}, RenderStage = RenderStage::GeometryOpaque);
-       
+        ComponentModel(Entity, const std::string& meshName, const std::string& materialName, const std::string& shaderProgramName = {}, RenderStage = RenderStage::GeometryOpaque);
+
         ComponentModel(const ComponentModel&)                = delete;
         ComponentModel& operator=(const ComponentModel&)     = delete;
         ComponentModel(ComponentModel&&) noexcept;

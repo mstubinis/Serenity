@@ -231,3 +231,19 @@ void Engine::priv::lua::resources::setCurrentSceneLUA(Engine::priv::SceneLUABind
 void Engine::priv::lua::resources::setCurrentSceneByNameLUA(const std::string& sceneName) {
     Engine::Resources::setCurrentScene(sceneName);
 }
+
+Handle Engine::priv::lua::resources::getResourceLUA(const std::string& resourceType, const std::string& resourceName) {
+    if (resourceType == "Mesh") {
+        return Engine::Resources::getResource<Mesh>(resourceName);
+    } else if (resourceType == "Material") {
+        return Engine::Resources::getResource<Material>(resourceName);
+    } else if (resourceType == "Texture") {
+        return Engine::Resources::getResource<Texture>(resourceName);
+    } else if (resourceType == "TextureCubemap") {
+        return Engine::Resources::getResource<TextureCubemap>(resourceName);
+    } else if (resourceType == "Shader") {
+        return Engine::Resources::getResource<Shader>(resourceName);
+    } else if (resourceType == "ShaderProgram") {
+        return Engine::Resources::getResource<ShaderProgram>(resourceName);
+    }
+}

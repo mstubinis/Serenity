@@ -15,6 +15,8 @@
 #include <serenity/ecs/entity/Entity.h>
 #include <serenity/ecs/components/Components.h>
 
+#include <serenity/lua/bindings/InputBindings.h>
+
 using namespace Engine::priv;
 
 namespace {
@@ -267,6 +269,7 @@ LUABinder::LUABinder()
     lua_State* L{ m_LUA_STATE->getState() };
 
     internal_build_event_enum_globals(L);
+    Engine::priv::lua::bindings::createBindingsInput(L);
 
     luabridge::getGlobalNamespace(L)
         .addFunction("print", &print)
@@ -282,6 +285,18 @@ LUABinder::LUABinder()
         .addFunction("playSoundMusic", &Engine::Sound::playMusic)
         .addFunction("stopAllSoundEffects", &Engine::Sound::stop_all_effects)
         .addFunction("stopAllSoundMusic", &Engine::Sound::stop_all_music)
+
+#pragma region Handle
+        .beginClass<Handle>("Handle")
+            .addProperty("index", &Handle::index)
+            .addProperty("version", &Handle::version)
+            .addProperty("type", &Handle::type)
+        .endClass()
+#pragma endregion
+
+#pragma region Resources
+        .addFunction("getResource", &Engine::priv::lua::resources::getResourceLUA)
+#pragma endregion
 
 #pragma region Matrices
         //glm mat4 TODO: add more to this
@@ -499,14 +514,6 @@ LUABinder::LUABinder()
             .addFunction("setView", &Engine::priv::CameraLUABinder::setViewMatrix)
             .addFunction("getProjection", &Engine::priv::CameraLUABinder::getProjection)
             .addFunction("setProjection", &Engine::priv::CameraLUABinder::setProjectionMatrix)
-        .endClass()
-#pragma endregion
-
-#pragma region Resources
-        .beginClass<Handle>("Handle")
-            .addProperty("index", &Handle::index)
-            .addProperty("version", &Handle::version)
-            .addProperty("type", &Handle::type)
         .endClass()
 #pragma endregion
 

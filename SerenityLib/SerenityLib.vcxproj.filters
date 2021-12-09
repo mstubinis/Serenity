@@ -411,6 +411,12 @@
     <Filter Include="Source Files\Engine\Core\Editor\EmbeddedImages">
       <UniqueIdentifier>{1d99bc49-602e-4f97-adf2-7c529dddecdb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Engine\Core\LUA\Bindings">
+      <UniqueIdentifier>{1846fa80-52d2-4530-a26d-c9c0c328a967}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\LUA\Bindings">
+      <UniqueIdentifier>{fa87e4d4-f7a9-45cb-b0fa-d4713a3c1480}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp">
@@ -1588,6 +1594,9 @@
     </ClCompile>
     <ClCompile Include="src\serenity\ecs\components\ComponentScript.cpp">
       <Filter>Source Files\Engine\Core\ECS\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\lua\bindings\InputBindings.cpp">
+      <Filter>Source Files\Engine\Core\LUA\Bindings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3261,6 +3270,9 @@
     </ClInclude>
     <ClInclude Include="include\serenity\ecs\systems\SystemComponentScript.h">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\lua\bindings\InputBindings.h">
+      <Filter>Header Files\Engine\Core\LUA\Bindings</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

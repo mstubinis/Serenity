@@ -204,6 +204,8 @@ namespace Engine::priv::lua::resources {
     Engine::priv::SceneLUABinder getCurrentSceneLUA();
     void setCurrentSceneLUA(Engine::priv::SceneLUABinder);
     void setCurrentSceneByNameLUA(const std::string& sceneName);
+
+    Handle getResourceLUA(const std::string& resourceType, const std::string& resourceName);
 }
 
 
