@@ -246,4 +246,5 @@ Handle Engine::priv::lua::resources::getResourceLUA(const std::string& resourceT
     } else if (resourceType == "ShaderProgram") {
         return Engine::Resources::getResource<ShaderProgram>(resourceName);
     }
+    return Handle{};
 }

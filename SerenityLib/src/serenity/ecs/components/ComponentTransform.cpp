@@ -255,28 +255,68 @@ bool Engine::priv::ComponentTransformLUABinder::hasParent() const {
     return m_Owner.getComponent<ComponentTransform>()->hasParent();
 }
 
-void Engine::priv::ComponentTransformLUABinder::setPosition(decimal x, decimal y, decimal z) const {
-    m_Owner.getComponent<ComponentTransform>()->setPosition(x, y, z);
+void Engine::priv::ComponentTransformLUABinder::setPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->setPosition(x.cast<decimal>(), y.cast<decimal>(), z.cast<decimal>());
+        } else if(!x.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->setPosition(x.cast<glm_vec3>());
+        } else {
+            m_Owner.getComponent<ComponentTransform>()->setPosition(x.cast<decimal>());
+        }
+    }
 }
 void Engine::priv::ComponentTransformLUABinder::setRotation(float x, float y, float z, float w) const {
     m_Owner.getComponent<ComponentTransform>()->setRotation(x, y, z, w);
 }
-void Engine::priv::ComponentTransformLUABinder::setScale(float x, float y, float z) const {
-    m_Owner.getComponent<ComponentTransform>()->setScale(x, y, z);
+void Engine::priv::ComponentTransformLUABinder::setScale(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->setScale(x.cast<float>(), y.cast<float>(), z.cast<float>());
+        } else if (!x.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->setScale(x.cast<glm::vec3>());
+        } else {
+            m_Owner.getComponent<ComponentTransform>()->setScale(x.cast<float>());
+        }
+    }
 }
 
-void Engine::priv::ComponentTransformLUABinder::setLocalPosition(decimal x, decimal y, decimal z) const {
-    m_Owner.getComponent<ComponentTransform>()->setLocalPosition(x, y, z);
+void Engine::priv::ComponentTransformLUABinder::setLocalPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->setLocalPosition(x.cast<decimal>(), y.cast<decimal>(), z.cast<decimal>());
+        } else if(!x.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->setLocalPosition(x.cast<glm_vec3>());
+        } else {
+            m_Owner.getComponent<ComponentTransform>()->setLocalPosition(x.cast<decimal>());
+        }
+    }
 }
 
-void Engine::priv::ComponentTransformLUABinder::translate(decimal x, decimal y, decimal z, bool local) const {
-    m_Owner.getComponent<ComponentTransform>()->translate(x, y, z, local);
+void Engine::priv::ComponentTransformLUABinder::translate(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z, bool local) const {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->translate(x.cast<decimal>(), y.cast<decimal>(), z.cast<decimal>(), local);
+        } else if(!x.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->translate(x.cast<glm_vec3>(), local);
+        } else {
+            m_Owner.getComponent<ComponentTransform>()->translate(x.cast<decimal>(), local);
+        }
+    }
 }
 void Engine::priv::ComponentTransformLUABinder::rotate(float x, float y, float z, bool local) const {
     m_Owner.getComponent<ComponentTransform>()->rotate(x, y, z, local);
 }
-void Engine::priv::ComponentTransformLUABinder::scale(float x, float y, float z) const {
-    m_Owner.getComponent<ComponentTransform>()->scale(x, y, z);
+void Engine::priv::ComponentTransformLUABinder::scale(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->scale(x.cast<float>(), y.cast<float>(), z.cast<float>());
+        } else if (!x.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->scale(x.cast<glm::vec3>());
+        } else {
+            m_Owner.getComponent<ComponentTransform>()->scale(x.cast<float>());
+        }
+    }
 }
 decimal Engine::priv::ComponentTransformLUABinder::getDistance(Entity other) const {
     return m_Owner.getComponent<ComponentTransform>()->getDistance(other);
@@ -307,11 +347,15 @@ glm::vec3 Engine::priv::ComponentTransformLUABinder::getUp() const {
     return m_Owner.getComponent<ComponentTransform>()->getUp();
 }
 
-void Engine::priv::ComponentTransformLUABinder::alignTo(float dirX, float dirY, float dirZ) {
-    m_Owner.getComponent<ComponentTransform>()->alignTo(dirX, dirY, dirZ);
+void Engine::priv::ComponentTransformLUABinder::alignTo(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->alignTo(x.cast<float>(), y.cast<float>(), z.cast<float>());
+        } else {
+            m_Owner.getComponent<ComponentTransform>()->alignTo(x.cast<glm::vec3>());
+        }
+    }
 }
-void Engine::priv::ComponentTransformLUABinder::alignTo(const glm::vec3& direction) {
-    m_Owner.getComponent<ComponentTransform>()->alignTo(direction);
-}
+
 
 #pragma endregion

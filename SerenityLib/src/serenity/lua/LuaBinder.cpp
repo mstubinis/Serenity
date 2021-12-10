@@ -16,7 +16,7 @@
 #include <serenity/ecs/components/Components.h>
 
 #include <serenity/lua/bindings/InputBindings.h>
-
+#include <serenity/lua/bindings/MathBindings.h>
 using namespace Engine::priv;
 
 namespace {
@@ -270,6 +270,7 @@ LUABinder::LUABinder()
 
     internal_build_event_enum_globals(L);
     Engine::priv::lua::bindings::createBindingsInput(L);
+    Engine::priv::lua::bindings::createBindingsMath(L);
 
     luabridge::getGlobalNamespace(L)
         .addFunction("print", &print)
@@ -296,113 +297,6 @@ LUABinder::LUABinder()
 
 #pragma region Resources
         .addFunction("getResource", &Engine::priv::lua::resources::getResourceLUA)
-#pragma endregion
-
-#pragma region Matrices
-        //glm mat4 TODO: add more to this
-        .beginClass<glm::mat4>("mat4")
-
-        .endClass()
-        //glm mat3 TODO: add more to this
-        .beginClass<glm::mat3>("mat3")
-
-        .endClass()
-        //glm mat2 TODO: add more to this
-        .beginClass<glm::mat2>("mat2")
-
-        .endClass()
-#pragma endregion
-
-#pragma region Vectors
-        .beginClass<glm::ivec2>("ivec2")
-            .addConstructor<void(*)(int, int)>()
-            .addData("x", &glm::ivec2::x)
-            .addData("y", &glm::ivec2::y)
-        .endClass()
-
-        .beginClass<glm::ivec3>("ivec3")
-            .addConstructor<void(*)(int, int, int)>()
-            .addData("x", &glm::ivec3::x)
-            .addData("y", &glm::ivec3::y)
-            .addData("z", &glm::ivec3::z)
-        .endClass()
-
-        .beginClass<glm::ivec4>("ivec4")
-            .addConstructor<void(*)(int, int, int, int)>()
-            .addData("x", &glm::ivec4::x)
-            .addData("y", &glm::ivec4::y)
-            .addData("z", &glm::ivec4::z)
-            .addData("w", &glm::ivec4::w)
-        .endClass()
-
-        .beginClass<glm::dvec2>("dvec2")
-            .addConstructor<void(*)(double, double)>()
-            .addData("x", &glm::dvec2::x)
-            .addData("y", &glm::dvec2::y)
-        .endClass()
-
-        .beginClass<glm::dvec3>("dvec3")
-            .addConstructor<void(*)(double, double, double)>()
-            .addData("x", &glm::dvec3::x)
-            .addData("y", &glm::dvec3::y)
-            .addData("z", &glm::dvec3::z)
-        .endClass()
-
-        .beginClass<glm::dvec4>("dvec4")
-            .addConstructor<void(*)(double, double, double, double)>()
-            .addData("x", &glm::dvec4::x)
-            .addData("y", &glm::dvec4::y)
-            .addData("z", &glm::dvec4::z)
-            .addData("w", &glm::dvec4::w)
-        .endClass()
-
-        .beginClass<glm::vec2>("fvec2")
-            .addConstructor<void(*)(float, float)>()
-            .addData("x", &glm::vec2::x)
-            .addData("y", &glm::vec2::y)
-        .endClass()
-
-        .beginClass<glm::vec3>("fvec3")
-            .addConstructor<void(*)(float, float, float)>()
-            .addData("x", &glm::vec3::x)
-            .addData("y", &glm::vec3::y)
-            .addData("z", &glm::vec3::z)
-        .endClass()
-
-        .beginClass<glm::vec4>("fvec4")
-            .addConstructor<void(*)(float, float, float, float)>()
-            .addData("x", &glm::vec4::x)
-            .addData("y", &glm::vec4::y)
-            .addData("z", &glm::vec4::z)
-            .addData("w", &glm::vec4::w)
-        .endClass()
-
-        //bullet vector3 TODO: add more to this
-        .beginClass<btVector3>("btVector3")
-            .addConstructor<void(*)(const btScalar&, const btScalar&, const btScalar&)>()
-            .addProperty("x", &btVector3::x, &btVector3::setX)
-            .addProperty("y", &btVector3::y, &btVector3::setY)
-            .addProperty("z", &btVector3::z, &btVector3::setZ)
-            .addProperty("w", &btVector3::w, &btVector3::setW)
-            .addFunction("angle", &btVector3::angle)
-            .addFunction("cross", &btVector3::cross)
-            .addFunction("absolute", &btVector3::absolute)
-            .addFunction("closestAxis", &btVector3::closestAxis)
-            .addFunction("dot", &btVector3::dot)
-            .addFunction("distance", &btVector3::distance)
-            .addFunction("distance2", &btVector3::distance2)
-            .addFunction("isZero", &btVector3::isZero)
-            .addFunction("rotate", &btVector3::rotate)
-            .addFunction("triple", &btVector3::triple)
-            .addFunction("dot3", &btVector3::dot3)
-            .addFunction("lerp", &btVector3::lerp)
-            .addFunction("minAxis", &btVector3::minAxis)
-            .addFunction("maxAxis", &btVector3::maxAxis)
-            .addFunction("normalize",&btVector3::normalize)
-            .addFunction("norm", &btVector3::norm)
-            .addFunction("normalized", &btVector3::normalized)
-            .addFunction("furthestAxis",&btVector3::furthestAxis)
-        .endClass()
 #pragma endregion
 
 #pragma region Event
@@ -615,8 +509,7 @@ LUABinder::LUABinder()
             .addFunction("rotate", &Engine::priv::ComponentTransformLUABinder::rotate)
             .addFunction("getDistance", &Engine::priv::ComponentTransformLUABinder::getDistance)
             //.addFunction("getScreenCoordinates", &Engine::priv::ComponentTransformLUABinder::getScreenCoordinates)
-            .addFunction("alignTo", static_cast<void(Engine::priv::ComponentTransformLUABinder::*)(const glm::vec3&)>(&Engine::priv::ComponentTransformLUABinder::alignTo))
-            .addFunction("alignTo", static_cast<void(Engine::priv::ComponentTransformLUABinder::*)(float, float, float)>(&Engine::priv::ComponentTransformLUABinder::alignTo))
+            .addFunction("alignTo", &Engine::priv::ComponentTransformLUABinder::alignTo)
 
             .addFunction("getRotation", &Engine::priv::ComponentTransformLUABinder::getRotation)
             .addFunction("getPosition", &Engine::priv::ComponentTransformLUABinder::getPosition)

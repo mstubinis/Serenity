@@ -18,8 +18,8 @@ namespace {
                 if (!function.isNil()) {
                     try {
                         function(e, entity);
-                    } catch (...) {
-
+                    } catch (const luabridge::LuaException& e) {
+                        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): " << e.what())
                     }
                 }
             }

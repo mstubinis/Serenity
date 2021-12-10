@@ -148,15 +148,15 @@ namespace Engine::priv {
             void removeChild(Entity child) const;
             bool hasParent() const;
 
-            void setPosition(decimal x, decimal y, decimal z) const;
+            void setPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const;
             void setRotation(float x, float y, float z, float w) const;
-            void setScale(float x, float y, float z) const;
+            void setScale(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const;
 
-            void setLocalPosition(decimal x, decimal y, decimal z) const;
+            void setLocalPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const;
 
-            void translate(decimal x, decimal y, decimal z, bool local) const;
+            void translate(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z, bool local) const;
             void rotate(float x, float y, float z, bool local) const;
-            void scale(float x, float y, float z) const;
+            void scale(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const;
             decimal getDistance(Entity other) const;
 
             glm_vec3 getPosition() const;
@@ -170,8 +170,7 @@ namespace Engine::priv {
             glm::vec3 getRight() const;
             glm::vec3 getUp() const;
 
-            void alignTo(float dirX, float dirY, float dirZ);
-            void alignTo(const glm::vec3& direction);
+            void alignTo(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z);
 
             /*
 

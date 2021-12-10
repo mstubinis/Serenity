@@ -796,6 +796,7 @@
     <ClCompile Include="src\serenity\lights\SpotLight.cpp" />
     <ClCompile Include="src\serenity\lights\SunLight.cpp" />
     <ClCompile Include="src\serenity\lua\bindings\InputBindings.cpp" />
+    <ClCompile Include="src\serenity\lua\bindings\MathBindings.cpp" />
     <ClCompile Include="src\serenity\lua\LuaBinder.cpp" />
     <ClCompile Include="src\serenity\lua\LuaModule.cpp" />
     <ClCompile Include="src\serenity\lua\LuaScript.cpp" />
@@ -1367,6 +1368,7 @@
     <ClInclude Include="include\serenity\lights\SpotLight.h" />
     <ClInclude Include="include\serenity\lights\SunLight.h" />
     <ClInclude Include="include\serenity\lua\bindings\InputBindings.h" />
+    <ClInclude Include="include\serenity\lua\bindings\MathBindings.h" />
     <ClInclude Include="include\serenity\lua\Lua.h" />
     <ClInclude Include="include\serenity\lua\LuaBinder.h" />
     <ClInclude Include="include\serenity\lua\LuaCallable.h" />

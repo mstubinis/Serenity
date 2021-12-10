@@ -32,8 +32,8 @@ void Engine::priv::LUAModule::update(const float dt) {
             ASSERT(LUAUpdateFunction.isFunction(), "");
             try {
                 LUAUpdateFunction(dt, entity);
-            }
-            catch (...) {
+            } catch (const luabridge::LuaException& e) {
+                ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): " << e.what())
             }
         }
     }
