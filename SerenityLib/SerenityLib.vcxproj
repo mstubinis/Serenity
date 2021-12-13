@@ -795,6 +795,7 @@
     <ClCompile Include="src\serenity\lights\RodLight.cpp" />
     <ClCompile Include="src\serenity\lights\SpotLight.cpp" />
     <ClCompile Include="src\serenity\lights\SunLight.cpp" />
+    <ClCompile Include="src\serenity\lua\bindings\EventBindings.cpp" />
     <ClCompile Include="src\serenity\lua\bindings\InputBindings.cpp" />
     <ClCompile Include="src\serenity\lua\bindings\MathBindings.cpp" />
     <ClCompile Include="src\serenity\lua\LuaBinder.cpp" />
@@ -1367,6 +1368,7 @@
     <ClInclude Include="include\serenity\lights\RodLight.h" />
     <ClInclude Include="include\serenity\lights\SpotLight.h" />
     <ClInclude Include="include\serenity\lights\SunLight.h" />
+    <ClInclude Include="include\serenity\lua\bindings\EventBindings.h" />
     <ClInclude Include="include\serenity\lua\bindings\InputBindings.h" />
     <ClInclude Include="include\serenity\lua\bindings\MathBindings.h" />
     <ClInclude Include="include\serenity\lua\Lua.h" />
@@ -1542,7 +1544,6 @@
     <ClInclude Include="include\serenity\utils\Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\serenity\ecs\entity\Entity.inl" />
     <None Include="include\serenity\ecs\systems\SystemBaseClass.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

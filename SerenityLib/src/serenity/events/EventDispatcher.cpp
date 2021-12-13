@@ -11,20 +11,6 @@ namespace {
             return o == &observer;
         });
     }
-    void internal_dispatch_script_event(const Event& e, std::vector<std::pair<luabridge::LuaRef, Entity>>& functions, const std::array<std::vector<uint32_t>, EventType::_TOTAL>& observers) {
-        if (e.type < observers.size()) {
-            for (const uint32_t scriptID : observers[e.type]) {
-                auto& [function, entity] = functions[scriptID];
-                if (!function.isNil()) {
-                    try {
-                        function(e, entity);
-                    } catch (const luabridge::LuaException& e) {
-                        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): " << e.what())
-                    }
-                }
-            }
-        }
-    }
     void internal_dispatch_event(const Event& e, const std::array<std::vector<Observer*>, EventType::_TOTAL>& observers) {
         if (e.type < observers.size()) {
             for (auto& observerPtr : observers[e.type]) {
@@ -68,12 +54,10 @@ bool Engine::priv::EventDispatcher::isObjectRegistered(const Observer& observer,
 }
 void Engine::priv::EventDispatcher::dispatchEvent(const Event& e) noexcept {
     internal_dispatch_event(e, m_Observers);
-    internal_dispatch_script_event(e, m_ScriptFunctionsEntity, m_ScriptObservers);
+    Engine::priv::Core::m_Engine->m_LUAModule.onEvent(e);
 }
 void Engine::priv::EventDispatcher::dispatchEvent(EventType eventType) noexcept {
-    Event e = Event{ eventType };
-    internal_dispatch_event(e, m_Observers);
-    internal_dispatch_script_event(e, m_ScriptFunctionsEntity, m_ScriptObservers);
+    dispatchEvent(Event{ eventType });
 }
 void Engine::priv::EventDispatcher::postUpdate() {
     if (m_UnregisteredObservers.size() > 0) {
@@ -85,54 +69,4 @@ void Engine::priv::EventDispatcher::postUpdate() {
         }
         m_UnregisteredObservers.clear();
     }
-}
-void Engine::priv::EventDispatcher::addScriptOnEventFunction(lua_State* L, uint32_t scriptID, luabridge::LuaRef eventFunction, Entity entity) {
-    m_ScriptFunctionsEntity.resize(scriptID + 1, std::make_pair(luabridge::LuaRef{ L }, Entity{}));
-    m_ScriptFunctionsEntity[scriptID].first  = eventFunction;
-    m_ScriptFunctionsEntity[scriptID].second = entity;
-}
-void Engine::priv::EventDispatcher::cleanupScript(uint32_t scriptID) {
-    if (m_ScriptFunctionsEntity.size() > scriptID) {
-        m_ScriptFunctionsEntity[scriptID].first = luabridge::LuaRef(&Engine::lua::getGlobalState());
-        m_ScriptFunctionsEntity[scriptID].second = Entity{};
-    }
-    for (auto& scriptIDs : m_ScriptObservers) {
-        size_t idx = Engine::binary_search(scriptIDs, scriptID);
-        if (idx != std::numeric_limits<size_t>().max()) {
-            auto lastIdx = scriptIDs.size() - 1;
-            if (idx != lastIdx) {
-                scriptIDs[idx] = std::move(scriptIDs[lastIdx]);
-            }
-            scriptIDs.pop_back();
-            Engine::insertion_sort(scriptIDs);
-        }
-    }
-}
-void Engine::priv::EventDispatcher::registerScriptEvent(uint32_t scriptID, uint32_t eventID) {
-    ASSERT(eventID >= 0 && eventID < m_ScriptObservers.size(), "");
-    //binary search to see if scriptID is already in the container
-    size_t idx = Engine::binary_search(m_ScriptObservers[eventID], scriptID);
-    if (idx == std::numeric_limits<size_t>().max()) {
-        m_ScriptObservers[eventID].push_back(scriptID);
-        Engine::insertion_sort(m_ScriptObservers[eventID]);
-    }
-}
-
-
-
-void Engine::lua::addOnEventFunction(luabridge::LuaRef eventFunction) {
-    lua_State* L         = &Engine::lua::getGlobalState();
-    auto scriptIDRef     = luabridge::getGlobal(L, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID);
-    auto scriptEntityRef = luabridge::getGlobal(L, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ENTITY);
-    uint32_t scriptID    = scriptIDRef.cast<uint32_t>();
-    Entity entity        = scriptEntityRef.cast<Entity>();
-    auto& dispatcher     = Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher;
-    dispatcher.addScriptOnEventFunction(L, scriptID, eventFunction, entity);
-}
-void Engine::lua::registerEvent(uint32_t eventID) {
-    lua_State* L      = &Engine::lua::getGlobalState();
-    auto scriptIDRef  = luabridge::getGlobal(L, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID);
-    uint32_t scriptID = scriptIDRef.cast<uint32_t>();
-    auto& dispatcher  = Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher;
-    dispatcher.registerScriptEvent(scriptID, eventID);
 }

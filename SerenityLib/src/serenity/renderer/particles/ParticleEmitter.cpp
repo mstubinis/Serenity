@@ -33,7 +33,7 @@ void ParticleEmitter::init(ParticleEmissionProperties& properties, Scene& scene,
     setProperties(properties);
     //removeAllChildren();
     getComponent<ComponentTransform>()->setPosition(std::numeric_limits<float>().max());
-    if (!parent.null()) {
+    if (parent) {
         parent.addChild(*this);
     }
     m_Lifetime      = lifetime;

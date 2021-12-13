@@ -17,12 +17,13 @@
 
 #ifndef ENGINE_HIGH_PRECISION
     using decimal  = float;
-    using glm_vec2 = glm::vec2;
-    using glm_vec3 = glm::vec3;
-    using glm_vec4 = glm::vec4;
-    using glm_quat = glm::quat;
-    using glm_mat3 = glm::mat3;
-    using glm_mat4 = glm::mat4;
+    using glm_vec2 = glm::fvec2;
+    using glm_vec3 = glm::fvec3;
+    using glm_vec4 = glm::fvec4;
+    using glm_quat = glm::fquat;
+    using glm_mat4 = glm::fmat4;
+    using glm_mat3 = glm::fmat3;
+    using glm_mat2 = glm::fmat2;
 #else
     #ifndef BT_USE_DOUBLE_PRECISION
         #define BT_USE_DOUBLE_PRECISION
@@ -32,8 +33,9 @@
     using glm_vec3 = glm::dvec3;
     using glm_vec4 = glm::dvec4;
     using glm_quat = glm::dquat;
-    using glm_mat3 = glm::dmat3;
     using glm_mat4 = glm::dmat4;
+    using glm_mat3 = glm::dmat3;
+    using glm_mat2 = glm::dmat2;
 
     inline constexpr glm_vec3 operator* (const glm_vec3& lhs, const glm::vec3& rhs) noexcept { return lhs * glm_vec3{ rhs }; }
     inline constexpr glm_vec3 operator* (const glm::vec3& lhs, const glm_vec3& rhs) noexcept { return glm_vec3{ lhs } *rhs; }

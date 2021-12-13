@@ -184,7 +184,7 @@ CollisionType ComponentCollisionShape::getType() const noexcept {
     return m_BtCollisionShape->getShapeType(); 
 }
 void ComponentCollisionShape::internal_update_ptrs() {
-    if (m_Owner.null()) {
+    if (!m_Owner) {
         return;
     }
     auto rigidBody = m_Owner.getComponent<ComponentRigidBody>();

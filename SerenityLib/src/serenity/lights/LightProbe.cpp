@@ -16,7 +16,7 @@ LightProbe::~LightProbe() {
     Entity::destroy();
 }
 void LightProbe::addIgnoredEntity(Entity entity) {
-    if (!entity.null()) {
+    if (entity) {
         for (const Entity ignoredEntity : m_Ignored) {
             if (entity == ignoredEntity) {
                 return;

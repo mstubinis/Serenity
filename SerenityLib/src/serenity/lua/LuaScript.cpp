@@ -52,7 +52,7 @@ bool LuaScript::runScript(bool isFile, Entity entity) noexcept {
     assert(m_ID != std::numeric_limits<uint32_t>().max());
     assert(m_Executed == false);
 
-    int res = isFile ? m_L->runFile(m_FileNameOrData, m_ID, entity.null() ? nullptr : &entity) : m_L->runCodeContent(m_FileNameOrData, m_ID, entity.null() ? nullptr : &entity);
+    int res = isFile ? m_L->runFile(m_FileNameOrData, m_ID, entity.isNull() ? nullptr : &entity) : m_L->runCodeContent(m_FileNameOrData, m_ID, entity.isNull() ? nullptr : &entity);
     m_Executed = static_cast<bool>(res);
     return res;
 }
@@ -69,7 +69,6 @@ void LuaScript::clean() noexcept {
         int n = lua_gettop(*m_L);
         lua_pop(*m_L, n);
         Engine::priv::Core::m_Engine->m_LUAModule.cleanupScript(m_ID);
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.cleanupScript(m_ID);
         lua_gc(*m_L, LUA_GCCOLLECT, 0);
     }
 }

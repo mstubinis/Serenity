@@ -172,6 +172,11 @@ namespace Engine::priv {
 
             void alignTo(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z);
 
+            const glm_mat4& getWorldMatrix() const;
+            glm::mat4 getWorldMatrixRendering() const;
+            const glm_mat4& getLocalMatrix() const;
+
+
             /*
 
             .addFunction("getScreenCoordinates", &ComponentTransform::getScreenCoordinates)
@@ -179,9 +184,6 @@ namespace Engine::priv {
             .addFunction("alignTo", static_cast<void(ComponentTransform::*)(float, float, float)>(&ComponentTransform::alignTo))
 
             //.addFunction("getLinearVelocity", &ComponentTransform::getLinearVelocity)
-            .addFunction("getWorldMatrix", &ComponentTransform::getWorldMatrix)
-            .addFunction("getWorldMatrixRendering", &ComponentTransform::getWorldMatrixRendering)
-            .addFunction("getLocalMatrix", &ComponentTransform::getLocalMatrix)
             */
 
     };

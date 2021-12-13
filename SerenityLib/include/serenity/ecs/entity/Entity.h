@@ -40,8 +40,8 @@ class Entity {
         //returns true if the entity has not been destroyed and is not null
         [[nodiscard]] bool isValid() const noexcept;
 
-        inline constexpr operator bool() const noexcept { return !null(); }
-        [[nodiscard]] inline constexpr bool null() const noexcept { return (
+        inline constexpr operator bool() const noexcept { return !isNull(); }
+        [[nodiscard]] inline constexpr bool isNull() const noexcept { return (
             m_ID == getMaxEntityIDBits(ID_BIT_POSITIONS) && 
             m_SceneID == getMaxEntityIDBits(SCENE_BIT_POSITIONS) && 
             m_VersionID == getMaxEntityIDBits(VERSION_BIT_POSITIONS)); 
@@ -62,12 +62,6 @@ class Entity {
         inline constexpr bool operator!=(Entity other) const noexcept { return !Entity::operator==(other); }
 
         inline std::string toString() const { return std::to_string(m_ID) + ", " + std::to_string(m_SceneID) + ", " + std::to_string(m_VersionID); }
-        void fill(uint32_t entityID, uint32_t sceneID, uint32_t versionID) noexcept {
-            m_ID        = entityID;
-            m_SceneID   = sceneID;
-            m_VersionID = versionID;
-        }
-        inline void fill(Entity other) noexcept { fill(other.m_ID, other.m_SceneID, other.m_VersionID); }
 
         //returns true if the entity was succesfully destroyed.
         bool destroy() noexcept;
@@ -86,13 +80,15 @@ class Entity {
         void removeChild(Entity) const noexcept;
         //void removeAllChildren() const noexcept;
 
-        template<class COMPONENT, class ... ARGS>
-        bool addComponent(ARGS&&... args) noexcept {
+        template<class COMPONENT, class ... ARGS> bool addComponent(ARGS&&... args) noexcept {
             return Engine::priv::PublicEntity::GetECS(*this)->addComponent<COMPONENT>(*this, std::forward<ARGS>(args)...);
         }
-        template<class COMPONENT> bool removeComponent() noexcept;
-        template<class COMPONENT> [[nodiscard]] Engine::view_ptr<COMPONENT> getComponent() const noexcept;
-
+        template<class COMPONENT> bool removeComponent() noexcept {
+            return Engine::priv::PublicEntity::GetECS(*this)->removeComponent<COMPONENT>(*this);
+        }
+        template<class COMPONENT> [[nodiscard]] Engine::view_ptr<COMPONENT> getComponent() const noexcept {
+            return Engine::priv::PublicEntity::GetECS(*this)->getComponent<COMPONENT>(*this);
+        }
         template<class ... TYPES> [[nodiscard]] std::tuple<TYPES*...> getComponents() const noexcept {
             return Engine::priv::PublicEntity::GetECS(*this)->getComponents<TYPES...>(*this);
         }
@@ -116,11 +112,7 @@ namespace Engine::priv {
     class ECS;
     struct PublicEntity final {
         static Engine::view_ptr<Engine::priv::ECS> GetECS(Entity);
-
-        template<class COMPONENT_LUA_BINDER> [[nodiscard]] static luabridge::LuaRef GetComponent(lua_State*, Entity, const char* globalName);
     };
 };
-
-#include <serenity/ecs/entity/Entity.inl>
 
 #endif

@@ -1566,7 +1566,7 @@ void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera
     Engine::Renderer::Settings::clear(true, false, false); //godrays rgb channels cleared to black
     auto& godRaysPlatform = GodRays::STATIC_GOD_RAYS;
     auto sun = Engine::Renderer::godRays::getSun();
-    if (!sun.null() && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
+    if (sun && viewport.getRenderFlags().has(ViewportRenderingFlag::GodRays) && godRaysPlatform.godRays_active) {
         auto transform    = sun.getComponent<ComponentTransform>();
         if (!transform) {
             return;

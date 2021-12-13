@@ -357,5 +357,15 @@ void Engine::priv::ComponentTransformLUABinder::alignTo(luabridge::LuaRef x, lua
     }
 }
 
+const glm_mat4& Engine::priv::ComponentTransformLUABinder::getWorldMatrix() const {
+    return m_Owner.getComponent<ComponentTransform>()->getWorldMatrix();
+}
+glm::mat4 Engine::priv::ComponentTransformLUABinder::getWorldMatrixRendering() const {
+    return m_Owner.getComponent<ComponentTransform>()->getWorldMatrixRendering();
+}
+const glm_mat4& Engine::priv::ComponentTransformLUABinder::getLocalMatrix() const {
+    return m_Owner.getComponent<ComponentTransform>()->getLocalMatrix();
+}
+
 
 #pragma endregion

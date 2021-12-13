@@ -206,7 +206,7 @@ namespace Engine::priv {
         {}
     };
 };
-struct Event final{
+struct Event final {
     uint32_t type = EventType::Unknown;
     union {
         Engine::priv::EventEnum                       eventEnum{};

@@ -8,7 +8,7 @@
 using namespace Engine::priv;
 
 Entity::Entity(Scene& scene) {
-    fill(scene.createEntity());
+    *this = scene.createEntity();
 }
 Entity::Entity(Entity&& other) noexcept {
     if (&other != this) {
@@ -33,10 +33,10 @@ Entity& Entity::operator=(Entity&& other) noexcept {
 }
 bool Entity::isValid() const noexcept {
     Scene* scene_ptr = scene();
-    return !null() && (scene_ptr && !PublicScene::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this));
+    return !isNull() && (scene_ptr && !PublicScene::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this));
 }
 bool Entity::destroy() noexcept {
-    if (!null()) {
+    if (!isNull()) {
         Scene* scene_ptr = scene();
         if (!scene_ptr || (scene_ptr && PublicScene::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this))) {
             return false;
@@ -48,7 +48,7 @@ bool Entity::destroy() noexcept {
     return false;
 }
 bool Entity::isDestroyed() const noexcept {
-    if (!null()) {
+    if (!isNull()) {
         Scene* scene_ptr = scene();
         if (scene_ptr) {
             return PublicScene::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this);
@@ -97,7 +97,17 @@ Engine::view_ptr<Scene> Entity::scene() const noexcept {
 }
 bool Entity::addComponent(const std::string& componentClassName, luabridge::LuaRef a1, luabridge::LuaRef a2, luabridge::LuaRef a3, luabridge::LuaRef a4, luabridge::LuaRef a5, luabridge::LuaRef a6, luabridge::LuaRef a7, luabridge::LuaRef a8) {
     if (componentClassName == "ComponentTransform" || componentClassName == "Transform") {
-        return addComponent<ComponentTransform>();
+        if (!a1.isNil()) {
+            if (!a2.isNil() && !a3.isNil()) {
+                return addComponent<ComponentTransform>(a1.cast<glm_vec3>(), a2.cast<glm::quat>(), a3.cast<glm::vec3>());
+            } else if (!a2.isNil() && a3.isNil()) {
+                return addComponent<ComponentTransform>(a1.cast<glm_vec3>(), a2.cast<glm::quat>());
+            } else {
+                return addComponent<ComponentTransform>(a1.cast<glm_vec3>());
+            }
+        } else {
+            return addComponent<ComponentTransform>();
+        }
     } else if (componentClassName == "ComponentRigidBody"  || componentClassName == "RigidBody") {
         return addComponent<ComponentRigidBody>();
     } else if (componentClassName == "ComponentCollisionShape" || componentClassName == "CollisionShape") {
@@ -108,7 +118,7 @@ bool Entity::addComponent(const std::string& componentClassName, luabridge::LuaR
         if (!a1.isNil() && !a2.isNil()) {
             if (a1.isString() && a2.isString()) {
                 if (!a3.isNil() && !a4.isNil() && a3.isString()) {
-                    return addComponent<ComponentModel>(a1.cast<std::string>(), a2.cast<std::string>(), a3.cast<std::string>(), a4.cast<RenderStage>());
+                    return addComponent<ComponentModel>(a1.cast<std::string>(), a2.cast<std::string>(), a3.cast<std::string>(), RenderStage(a4.cast<uint32_t>()));
                 } else if (a4.isNil() && !a3.isNil()) {
                     return addComponent<ComponentModel>(a1.cast<std::string>(), a2.cast<std::string>(), a3.cast<std::string>());
                 } else {
@@ -116,7 +126,7 @@ bool Entity::addComponent(const std::string& componentClassName, luabridge::LuaR
                 }
             } else {
                 if (!a3.isNil() && !a4.isNil()) {
-                    return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), a4.cast<RenderStage>());
+                    return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>(), RenderStage(a4.cast<uint32_t>()));
                 } else if (a4.isNil() && !a3.isNil()) {
                     return addComponent<ComponentModel>(a1.cast<Handle>(), a2.cast<Handle>(), a3.cast<Handle>());
                 } else {
@@ -201,33 +211,30 @@ luabridge::LuaRef Entity::getComponent(luabridge::LuaRef componentClassName) {
     lua_State* L = &Engine::lua::getGlobalState();
     if (!componentClassName.isNil() && componentClassName.isString()) {
         std::string local_name = componentClassName.cast<std::string>();
-        std::string global_name = toString() + ":" + local_name;
-        auto* global_name_cstr = global_name.c_str();
         if (local_name == "ComponentTransform" || local_name == "Transform") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentTransformLUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentTransformLUABinder{*this} };
         } else if (local_name == "ComponentRigidBody" || local_name == "RigidBody") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentRigidBodyLUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentRigidBodyLUABinder{*this} };
         } else if (local_name == "ComponentCollisionShape" || local_name == "CollisionShape") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentCollisionShapeLUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentCollisionShapeLUABinder{*this} };
         } else if (local_name == "ComponentModel" || local_name == "Model") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentModelLUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentModelLUABinder{*this} };
         } else if (local_name == "ComponentCamera" || local_name == "Camera") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentCameraLUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentCameraLUABinder{*this} };
         } else if (local_name == "ComponentName" || local_name == "Name") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentNameLUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentNameLUABinder{*this} };
         } else if (local_name == "ComponentLogic" || local_name == "Logic") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentLogicLUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentLogicLUABinder{*this} };
         } else if (local_name == "ComponentLogic1" || local_name == "Logic1") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentLogic1LUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentLogic1LUABinder{*this} };
         } else if (local_name == "ComponentLogic2" || local_name == "Logic2") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentLogic2LUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentLogic2LUABinder{*this} };
         } else if (local_name == "ComponentLogic3" || local_name == "Logic3") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentLogic3LUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentLogic3LUABinder{*this} };
         } else if (local_name == "ComponentScript" || local_name == "Script") {
-            return PublicEntity::GetComponent<Engine::priv::ComponentScriptLUABinder>(L, *this, global_name_cstr);
+            return luabridge::LuaRef{ L, Engine::priv::ComponentScriptLUABinder{*this} };
         } else {
-            luabridge::setGlobal(L, nullptr, global_name_cstr); // Prevents errors
-            //printError("Component: (" + local_name + ") not found.");
+            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): Component: (" + local_name + ") not found.")
         }
     }
     return luabridge::LuaRef{ L };

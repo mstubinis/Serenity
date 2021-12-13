@@ -170,7 +170,7 @@ void Engine::priv::RenderGraph::sort_bruteforce(Camera* camera, SortingMode sort
     internal_sort_impl(camera, sortingMode, m_InstancesTotal);
 }
 void Engine::priv::RenderGraph::clean(Entity inEntity) {
-    if (inEntity.null()) {
+    if (!inEntity) {
         return;
     }
     KEPT_NODES_TOTAL_BUFFER.clear();

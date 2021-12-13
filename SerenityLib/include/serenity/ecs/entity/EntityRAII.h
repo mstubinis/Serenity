@@ -34,7 +34,7 @@ class EntityRAII final {
         inline std::string toString() const { return m_Entity.toString(); }
 
         //inline operator uint32_t() const noexcept { return m_Entity.m_Data; }
-        inline operator bool() const noexcept { return !m_Entity.null(); }
+        inline operator bool() const noexcept { return !m_Entity.isNull(); }
         inline operator Entity() const noexcept { return m_Entity; }
 
         inline bool operator==(const EntityRAII other) const noexcept { return m_Entity.operator==(other.m_Entity); }
@@ -42,7 +42,7 @@ class EntityRAII final {
         inline bool operator==(const Entity other) const noexcept { return m_Entity.operator==(other); }
         inline bool operator!=(const Entity other) const noexcept { return m_Entity.operator!=(other); }
 
-        [[nodiscard]] inline bool null() const noexcept { return m_Entity.null(); }
+        [[nodiscard]] inline bool null() const noexcept { return m_Entity.isNull(); }
 
         inline void destroy() noexcept { m_Entity.destroy(); }
         [[nodiscard]] inline bool isDestroyed() const noexcept { return m_Entity.isDestroyed(); }
@@ -77,7 +77,7 @@ class EntityRAII final {
         inline bool removeComponent(const std::string& componentClassName) {
             return m_Entity.removeComponent(componentClassName);
         }
-        [[nodiscard]] inline luabridge::LuaRef getComponent(const std::string& componentClassName) {
+        [[nodiscard]] inline luabridge::LuaRef getComponent(luabridge::LuaRef componentClassName) {
             return m_Entity.getComponent(componentClassName);
         }
 };

@@ -1601,6 +1601,9 @@
     <ClCompile Include="src\serenity\lua\bindings\MathBindings.cpp">
       <Filter>Source Files\Engine\Core\LUA\Bindings</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\lua\bindings\EventBindings.cpp">
+      <Filter>Source Files\Engine\Core\LUA\Bindings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -3280,13 +3283,13 @@
     <ClInclude Include="include\serenity\lua\bindings\MathBindings.h">
       <Filter>Header Files\Engine\Core\LUA\Bindings</Filter>
     </ClInclude>
+    <ClInclude Include="include\serenity\lua\bindings\EventBindings.h">
+      <Filter>Header Files\Engine\Core\LUA\Bindings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\serenity\ecs\systems\SystemBaseClass.inl">
       <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
-    </None>
-    <None Include="include\serenity\ecs\entity\Entity.inl">
-      <Filter>Header Files\Engine\Core\ECS\Entity</Filter>
     </None>
   </ItemGroup>
 </Project>

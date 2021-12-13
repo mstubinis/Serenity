@@ -11,33 +11,77 @@
 .addFunction("__sub", std::function<CLASS(CLASS*, const CLASS&)>([](CLASS* vec, const CLASS& v) {(*vec) -= v; return *vec; })) \
 .addStaticFunction("length", &CLASS::length)
 
+#define ADD_OPS_VEC(CLASS) ADD_OPS(CLASS) \
+
+#define ADD_OPS_MAT(CLASS) ADD_OPS(CLASS) \
+
 void Engine::priv::lua::bindings::createBindingsMath(lua_State* L) {
     luabridge::getGlobalNamespace(L)
 
 #pragma region Quaternions
         //glm mat4 TODO: add more to this
-        .beginClass<glm::quat>("fquat")
-
+        .beginClass<glm::fquat>("fquat")
+            .addConstructor<void(*)(float, float, float, float)>()
+            .addData("x", &glm::fquat::x)
+            .addData("y", &glm::fquat::y)
+            .addData("z", &glm::fquat::z)
+            .addData("w", &glm::fquat::w)
         .endClass()
 
         //glm mat4 TODO: add more to this
         .beginClass<glm::dquat>("dquat")
+            .addConstructor<void(*)(double, double, double, double)>()
+            .addData("x", &glm::dquat::x)
+            .addData("y", &glm::dquat::y)
+            .addData("z", &glm::dquat::z)
+            .addData("w", &glm::dquat::w)
+        .endClass()
 
+        .beginClass<glm_quat>("quat")
+            .addConstructor<void(*)(decimal, decimal, decimal, decimal)>()
+            .addData("x", &glm_quat::x)
+            .addData("y", &glm_quat::y)
+            .addData("z", &glm_quat::z)
+            .addData("w", &glm_quat::w)
         .endClass()
 #pragma endregion
 
 #pragma region Matrices
-        //glm mat4 TODO: add more to this
-        .beginClass<glm::mat4>("mat4")
-
+        .beginClass<glm::fmat4>("fmat4")
+            .addConstructor<void(*)(float)>()
+            ADD_OPS_MAT(glm::fmat4)
         .endClass()
-        //glm mat3 TODO: add more to this
-        .beginClass<glm::mat3>("mat3")
-
+        .beginClass<glm::fmat3>("fmat3")
+            .addConstructor<void(*)(float)>()
+            ADD_OPS_MAT(glm::fmat3)
         .endClass()
-        //glm mat2 TODO: add more to this
-        .beginClass<glm::mat2>("mat2")
-
+        .beginClass<glm::fmat2>("fmat2")
+            .addConstructor<void(*)(float)>()
+            ADD_OPS_MAT(glm::fmat2)
+        .endClass()
+        .beginClass<glm::dmat4>("dmat4")
+            .addConstructor<void(*)(float)>()
+            ADD_OPS_MAT(glm::dmat4)
+        .endClass()
+        .beginClass<glm::dmat3>("dmat3")
+            .addConstructor<void(*)(float)>()
+            ADD_OPS_MAT(glm::dmat3)
+        .endClass()
+        .beginClass<glm::dmat2>("dmat2")
+            .addConstructor<void(*)(float)>()
+            ADD_OPS_MAT(glm::dmat2)
+        .endClass()
+        .beginClass<glm_mat4>("mat4")
+            .addConstructor<void(*)(decimal)>()
+            ADD_OPS_MAT(glm_mat4)
+        .endClass()
+        .beginClass<glm_mat3>("mat3")
+            .addConstructor<void(*)(decimal)>()
+            ADD_OPS_MAT(glm_mat3)
+        .endClass()
+        .beginClass<glm_mat2>("mat2")
+            .addConstructor<void(*)(decimal)>()
+            ADD_OPS_MAT(glm_mat2)
         .endClass()
 #pragma endregion
 
@@ -46,7 +90,7 @@ void Engine::priv::lua::bindings::createBindingsMath(lua_State* L) {
             .addConstructor<void(*)(int, int)>()
             .addData("x", &glm::ivec2::x)
             .addData("y", &glm::ivec2::y)
-            ADD_OPS(glm::ivec2)
+            ADD_OPS_VEC(glm::ivec2)
         .endClass()
 
         .beginClass<glm::ivec3>("ivec3")
@@ -54,7 +98,7 @@ void Engine::priv::lua::bindings::createBindingsMath(lua_State* L) {
             .addData("x", &glm::ivec3::x)
             .addData("y", &glm::ivec3::y)
             .addData("z", &glm::ivec3::z)
-            ADD_OPS(glm::ivec3)
+            ADD_OPS_VEC(glm::ivec3)
         .endClass()
 
         .beginClass<glm::ivec4>("ivec4")
@@ -63,14 +107,14 @@ void Engine::priv::lua::bindings::createBindingsMath(lua_State* L) {
             .addData("y", &glm::ivec4::y)
             .addData("z", &glm::ivec4::z)
             .addData("w", &glm::ivec4::w)
-            ADD_OPS(glm::ivec4)
+            ADD_OPS_VEC(glm::ivec4)
         .endClass()
 
         .beginClass<glm::dvec2>("dvec2")
             .addConstructor<void(*)(double, double)>()
             .addData("x", &glm::dvec2::x)
             .addData("y", &glm::dvec2::y)
-            ADD_OPS(glm::dvec2)
+            ADD_OPS_VEC(glm::dvec2)
         .endClass()
 
         .beginClass<glm::dvec3>("dvec3")
@@ -78,7 +122,7 @@ void Engine::priv::lua::bindings::createBindingsMath(lua_State* L) {
             .addData("x", &glm::dvec3::x)
             .addData("y", &glm::dvec3::y)
             .addData("z", &glm::dvec3::z)
-            ADD_OPS(glm::dvec3)
+            ADD_OPS_VEC(glm::dvec3)
         .endClass()
 
         .beginClass<glm::dvec4>("dvec4")
@@ -87,31 +131,55 @@ void Engine::priv::lua::bindings::createBindingsMath(lua_State* L) {
             .addData("y", &glm::dvec4::y)
             .addData("z", &glm::dvec4::z)
             .addData("w", &glm::dvec4::w)
-            ADD_OPS(glm::dvec4)
+            ADD_OPS_VEC(glm::dvec4)
         .endClass()
 
-        .beginClass<glm::vec2>("fvec2")
+        .beginClass<glm::fvec2>("fvec2")
             .addConstructor<void(*)(float, float)>()
-            .addData("x", &glm::vec2::x)
-            .addData("y", &glm::vec2::y)
-            ADD_OPS(glm::vec2)
+            .addData("x", &glm::fvec2::x)
+            .addData("y", &glm::fvec2::y)
+            ADD_OPS_VEC(glm::fvec2)
         .endClass()
 
-        .beginClass<glm::vec3>("fvec3")
+        .beginClass<glm::fvec3>("fvec3")
             .addConstructor<void(*)(float, float, float)>()
-            .addData("x", &glm::vec3::x)
-            .addData("y", &glm::vec3::y)
-            .addData("z", &glm::vec3::z)
-            ADD_OPS(glm::vec3)
+            .addData("x", &glm::fvec3::x)
+            .addData("y", &glm::fvec3::y)
+            .addData("z", &glm::fvec3::z)
+            ADD_OPS_VEC(glm::fvec3)
         .endClass()
 
-        .beginClass<glm::vec4>("fvec4")
+        .beginClass<glm::fvec4>("fvec4")
             .addConstructor<void(*)(float, float, float, float)>()
-            .addData("x", &glm::vec4::x)
-            .addData("y", &glm::vec4::y)
-            .addData("z", &glm::vec4::z)
-            .addData("w", &glm::vec4::w)
-            ADD_OPS(glm::vec4)
+            .addData("x", &glm::fvec4::x)
+            .addData("y", &glm::fvec4::y)
+            .addData("z", &glm::fvec4::z)
+            .addData("w", &glm::fvec4::w)
+            ADD_OPS_VEC(glm::fvec4)
+        .endClass()
+
+        .beginClass<glm_vec2>("vec2")
+            .addConstructor<void(*)(decimal, decimal)>()
+            .addData("x", &glm_vec2::x)
+            .addData("y", &glm_vec2::y)
+            ADD_OPS_VEC(glm_vec2)
+        .endClass()
+
+        .beginClass<glm_vec3>("vec3")
+            .addConstructor<void(*)(decimal, decimal, decimal)>()
+            .addData("x", &glm_vec3::x)
+            .addData("y", &glm_vec3::y)
+            .addData("z", &glm_vec3::z)
+            ADD_OPS_VEC(glm_vec3)
+        .endClass()
+
+        .beginClass<glm_vec4>("vec4")
+            .addConstructor<void(*)(decimal, decimal, decimal, decimal)>()
+            .addData("x", &glm_vec4::x)
+            .addData("y", &glm_vec4::y)
+            .addData("z", &glm_vec4::z)
+            .addData("w", &glm_vec4::w)
+            ADD_OPS_VEC(glm_vec4)
         .endClass()
 
         //bullet vector3 TODO: add more to this
