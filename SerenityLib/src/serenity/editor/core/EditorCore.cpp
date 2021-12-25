@@ -93,23 +93,28 @@ void Engine::priv::EditorCore::render(Window& window) {
     }
 }
 Handle Engine::priv::EditorCore::internal_load_embedded_image(const uint8_t* data, int width, int height, const char* textureName) {
-    sf::Image sfimg;
-    sfimg.create(width, height);
-    for (int row = 0; row < height; ++row) {
-        for (int col = 0; col < width; ++col) {
-            const auto pixel = data[(row * width) + col];
+    std::vector<uint8_t> pixels(width * height * 4);
+    auto setPixel = [&pixels, width](uint32_t y, uint32_t x, const std::array<uint8_t, 4>& color) {
+        pixels[(y * width + x) * 4 + 0] = color[0];
+        pixels[(y * width + x) * 4 + 1] = color[1];
+        pixels[(y * width + x) * 4 + 2] = color[2];
+        pixels[(y * width + x) * 4 + 3] = color[3];
+    };
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            const auto pixel = data[(y * width) + x];
             if (pixel == 128) {
-                sfimg.setPixel(col, row, sf::Color(0, 0, 0, 0));
+                setPixel(height - y - 1, x, { 0, 0, 0, 0 });
             } else if (pixel == 0) {
-                sfimg.setPixel(col, row, sf::Color(0, 0, 0, 255));
+                setPixel(height - y - 1, x, { 0, 0, 0, 255 });
             } else if (pixel == 255) {
-                sfimg.setPixel(col, row, sf::Color(255, 255, 255, 255));
+                setPixel(height - y - 1, x, { 255, 255, 255, 255 });
             } else {
-                sfimg.setPixel(col, row, sf::Color(128, 128, 128, 255));
+                setPixel(height - y - 1, x, { 128, 128, 128, 255 });
             }
         }
     }
-    return Engine::Resources::loadTexture(sfimg, textureName);
+    return Engine::Resources::loadTexture(pixels.data(), width, height, textureName);
 }
 void Engine::priv::EditorCore::renderLightIcons(Scene& scene) {
     if (m_Enabled && m_Shown) {

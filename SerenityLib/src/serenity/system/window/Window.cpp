@@ -6,12 +6,14 @@
 #include <serenity/resources/texture/Texture.h>
 #include <serenity/system/cursor/Cursor.h>
 
-constexpr std::array<std::pair<uint32_t, uint32_t>, size_t(WindowMode::_TOTAL)> WINDOW_MODE_DATA {
-    std::make_pair(static_cast<uint32_t>(sf::Style::Default),     static_cast<uint32_t>(Window_Flags::Windowed)),
-    std::make_pair(static_cast<uint32_t>(sf::Style::None),        static_cast<uint32_t>(Window_Flags::WindowedFullscreen)),
-    std::make_pair(static_cast<uint32_t>(sf::Style::Fullscreen),  static_cast<uint32_t>(Window_Flags::Fullscreen)),
-};
+namespace {
+    constexpr std::array<std::pair<uint32_t, uint32_t>, size_t(WindowMode::_TOTAL)> WINDOW_MODE_DATA{
+        std::make_pair(static_cast<uint32_t>(sf::Style::Default),     static_cast<uint32_t>(Window_Flags::Windowed)),
+        std::make_pair(static_cast<uint32_t>(sf::Style::None),        static_cast<uint32_t>(Window_Flags::WindowedFullscreen)),
+        std::make_pair(static_cast<uint32_t>(sf::Style::Fullscreen),  static_cast<uint32_t>(Window_Flags::Fullscreen)),
+    };
 
+}
 Window::Window() {
     m_Data.m_SFContextSettings = sf::ContextSettings{ 24, 0, 0, 4, 6, 0, false };
 
@@ -67,7 +69,9 @@ WindowMode::Mode Window::getWindowMode() const noexcept {
     }
     return WindowMode::Windowed;
 }
-void Window::setMouseCursor(const Cursor& cursor) noexcept { m_Data.m_SFMLWindow.setMouseCursor(cursor.getSFMLCursor()); }
+void Window::setMouseCursor(const Cursor& cursor) noexcept { 
+    m_Data.m_SFMLWindow.setMouseCursor(cursor.getSFMLCursor());
+}
 void Window::updateMousePosition(float x, float y, bool resetDifference, bool resetPrevious) {
     m_Data.internal_update_mouse_position(*this, x, y, resetDifference, resetPrevious);
 }
@@ -81,7 +85,9 @@ bool Window::internal_execute_show_window(uint32_t cmd) noexcept {
     #endif
     return false;
 }
-void Window::internal_restore_state() { m_Data.internal_restore_state(*this); }
+void Window::internal_restore_state() { 
+    m_Data.internal_restore_state(*this); 
+}
 void Window::internal_update_dynamic_resize() {
     #ifdef _WIN32
         WINDOWINFO wiInfo;
@@ -116,7 +122,9 @@ bool Window::minimize() noexcept {
 #endif
     return result;
 }
-void Window::setPosition(uint32_t x, uint32_t y) { m_Data.m_SFMLWindow.setPosition(sf::Vector2i(x, y)); }
+void Window::setPosition(uint32_t x, uint32_t y) { 
+    m_Data.m_SFMLWindow.setPosition(sf::Vector2i(x, y));
+}
 glm::uvec2 Window::getPosition() {
     const auto position = m_Data.m_SFMLWindow.getPosition();
     return glm::uvec2{ position.x, position.y };
@@ -136,7 +144,15 @@ void Window::setIcon(std::string_view inFile) {
             texture.m_Handle = Engine::Resources::loadTexture(inFile, ImageInternalFormat::SRGB8_ALPHA8, false);
             texture.m_Resource = texture.m_Handle.get<Texture>();
         }
-        m_Data.m_SFMLWindow.setIcon(texture.m_Resource->width(), texture.m_Resource->height(), texture.m_Resource->pixels());
+        uint32_t width  = texture.m_Resource->width();
+        uint32_t height = texture.m_Resource->height();
+
+        std::vector<uint8_t> pixels(width * height * 4);
+        std::copy(texture.m_Resource->pixels(), texture.m_Resource->pixels() + (width * height * 4), pixels.data());
+
+        Engine::priv::TextureLoader::MirrorPixelsVertically(pixels.data(), width, height);
+
+        m_Data.m_SFMLWindow.setIcon(width, height, pixels.data());
         m_Data.m_IconFile = inFile;
     }
 }
@@ -152,7 +168,9 @@ void Window::setVerticalSyncEnabled(bool isToBeEnabled) {
     m_Data.m_SFMLWindow.setVerticalSyncEnabled(isToBeEnabled);
     (isToBeEnabled) ? m_Data.m_Flags.add(Window_Flags::Vsync) : m_Data.m_Flags.remove(Window_Flags::Vsync);
 }
-bool Window::isVsyncEnabled() const { return m_Data.m_Flags.has(Window_Flags::Vsync); }
+bool Window::isVsyncEnabled() const { 
+    return m_Data.m_Flags.has(Window_Flags::Vsync); 
+}
 void Window::setKeyRepeatEnabled(bool isToBeEnabled) {
     m_Data.m_SFMLWindow.setKeyRepeatEnabled(isToBeEnabled);
     (isToBeEnabled) ? m_Data.m_Flags.add(Window_Flags::KeyRepeat) : m_Data.m_Flags.remove(Window_Flags::KeyRepeat);
@@ -160,18 +178,32 @@ void Window::setKeyRepeatEnabled(bool isToBeEnabled) {
 void Window::setMouseCursorVisible(bool isToBeVisible) {
     (isToBeVisible) ? m_Data.internal_push(WindowEventThreadOnlyCommands::ShowMouse) : m_Data.internal_push(WindowEventThreadOnlyCommands::HideMouse);
 }
-void Window::requestFocus() { m_Data.internal_push(WindowEventThreadOnlyCommands::RequestFocus); }
+void Window::requestFocus() { 
+    m_Data.internal_push(WindowEventThreadOnlyCommands::RequestFocus);
+}
 void Window::close() {
     Engine::priv::Core::m_Engine->m_EngineEventHandler.internal_on_event_window_closed(*this);
     m_Data.m_SFMLWindow.close();
 }
-bool Window::isWindowOnSeparateThread() const { return m_Data.m_EventThread != nullptr; }
-bool Window::hasFocus() const { return m_Data.m_SFMLWindow.hasFocus(); }
-bool Window::isOpen() const { return m_Data.m_SFMLWindow.isOpen(); }
-bool Window::isActive() const { return m_Data.m_Flags.has(Window_Flags::Active); }
+bool Window::isWindowOnSeparateThread() const { 
+    return m_Data.m_EventThread != nullptr;
+}
+bool Window::hasFocus() const {
+    return m_Data.m_SFMLWindow.hasFocus(); 
+}
+bool Window::isOpen() const { 
+    return m_Data.m_SFMLWindow.isOpen();
+}
+bool Window::isActive() const {
+    return m_Data.m_Flags.has(Window_Flags::Active); 
+}
 
-bool Window::isMouseKeptInWindow() const { return m_Data.m_Flags.has(Window_Flags::MouseGrabbed); }
-void Window::display() { m_Data.m_SFMLWindow.display(); }
+bool Window::isMouseKeptInWindow() const { 
+    return m_Data.m_Flags.has(Window_Flags::MouseGrabbed); 
+}
+void Window::display() { 
+    m_Data.m_SFMLWindow.display(); 
+}
 bool Window::internal_return_window_placement_cmd(uint32_t cmd) const noexcept {
     #ifdef _WIN32
         WINDOWPLACEMENT info;
@@ -226,6 +258,12 @@ void Window::setFramerateLimit(uint32_t limit){
     m_Data.m_SFMLWindow.setFramerateLimit(limit);
     m_Data.m_FramerateLimit = limit;
 }
-void Window::setVisible(bool isVisible) { m_Data.m_SFMLWindow.setVisible(isVisible); }
-void Window::hide() { setVisible(false); }
-void Window::show() { setVisible(true); }
+void Window::setVisible(bool isVisible) { 
+    m_Data.m_SFMLWindow.setVisible(isVisible);
+}
+void Window::hide() { 
+    setVisible(false); 
+}
+void Window::show() {
+    setVisible(true); 
+}

@@ -10,6 +10,8 @@
 using namespace Engine;
 using namespace Engine::priv;
 
+#pragma region SoundMusic
+
 SoundMusic::SoundMusic() 
     : m_Loops{ 1 }
 {}
@@ -21,12 +23,12 @@ void SoundMusic::update(const float dt) {
             if (loopsLeft >= 2) {
                 m_CurrentLoop++;
                 play(m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
-            }else{
+            } else {
                 stop();
             }
-        }else if (m_Loops == 1) {//only once
+        } else if (m_Loops == 1) {//only once
             stop();
-        }else {//endless loop (sound will have to be stoped manually by the user to end an endless loop)
+        } else {//endless loop (sound will have to be stoped manually by the user to end an endless loop)
             play(m_Loops); //apparently playing the sound when it is stopped restarts it (sfml internally)
         }
     }
@@ -38,13 +40,13 @@ bool SoundMusic::play(unsigned int numLoops) {
         case sf::SoundSource::Status::Stopped: {//it starts
             m_Loops != 1 ? m_Status = SoundStatus::PlayingLooped : m_Status = SoundStatus::Playing;
             break;
-        }case sf::SoundSource::Status::Paused: {//it resumes
+        } case sf::SoundSource::Status::Paused: {//it resumes
             m_Loops != 1 ? m_Status = SoundStatus::PlayingLooped : m_Status = SoundStatus::Playing;
             break;
-        }case sf::SoundSource::Status::Playing: {//it restarts
+        } case sf::SoundSource::Status::Playing: {//it restarts
             m_Loops != 1 ? m_Status = SoundStatus::PlayingLooped : m_Status = SoundStatus::Playing; 
             break;
-        }default: {
+        } default: {
             return false;
         }
     }
@@ -62,13 +64,13 @@ bool SoundMusic::pause() {
         case sf::SoundSource::Status::Stopped: {
             m_Status = SoundStatus::Stopped;
             return false;
-        }case sf::SoundSource::Status::Paused: {
+        } case sf::SoundSource::Status::Paused: {
             m_Status = SoundStatus::Paused;
             return false;
-        }case sf::SoundSource::Status::Playing: {
+        } case sf::SoundSource::Status::Playing: {
             m_Status = SoundStatus::Paused;
             break;
-        }default: {
+        } default: {
             return false;
         }
     }
@@ -88,10 +90,10 @@ bool SoundMusic::stop(bool stopAllLoops) {
                 break;
             }
             return false;
-        }case sf::SoundSource::Status::Paused: {
+        } case sf::SoundSource::Status::Paused: {
             m_Status = SoundStatus::Stopped;
             break;
-        }case sf::SoundSource::Status::Playing: {
+        } case sf::SoundSource::Status::Playing: {
             if (m_Sound.getPlayingOffset().asSeconds() <= 0.01f) {
                 m_Sound.stop();
                 m_Status = SoundStatus::Stopped;
@@ -99,7 +101,7 @@ bool SoundMusic::stop(bool stopAllLoops) {
             }
             m_Status = SoundStatus::Stopped;
             break;
-        }default: {
+        } default: {
             return false;
         }
     }
@@ -119,17 +121,17 @@ bool SoundMusic::restart() {
     switch (sfStatus) {
         case sf::SoundSource::Status::Stopped: {
             return false;
-        }case sf::SoundSource::Status::Paused: {
+        } case sf::SoundSource::Status::Paused: {
             m_Status = SoundStatus::Paused;
             break;
-        }case sf::SoundSource::Status::Playing: {
+        } case sf::SoundSource::Status::Playing: {
             m_Status = SoundStatus::Playing;
             break;
-        }default: {
+        } default: {
             return false;
         }
     }
-    if (status() == SoundStatus::Fresh || m_Sound.getPlayingOffset() == sf::Time::Zero) {
+    if (getStatus() == SoundStatus::Fresh || m_Sound.getPlayingOffset() == sf::Time::Zero) {
         return false;
     }
     m_Sound.setPlayingOffset(sf::Time::Zero); //only if paused or playing. if stopped, has no effect
@@ -143,7 +145,7 @@ float SoundMusic::getAttenuation() const {
     return m_Sound.getAttenuation();
 }
 glm::vec3 SoundMusic::getPosition() const {
-    const sf::Vector3f pos = m_Sound.getPosition();
+    const auto pos = m_Sound.getPosition();
     return glm::vec3{ pos.x, pos.y, pos.z };
 }
 uint SoundMusic::getChannelCount() const {
@@ -189,3 +191,91 @@ float SoundMusic::getPitch() const {
 void SoundMusic::setPitch(float pitch) {
     m_Sound.setPitch(pitch);
 }
+
+#pragma endregion
+
+#pragma region SoundMusicLUABinder
+
+SoundMusicLUABinder::SoundMusicLUABinder(SoundMusic& soundMusic)
+    : m_SoundMusic{ &soundMusic }
+{}
+SoundStatus SoundMusicLUABinder::getStatus() const {
+    return m_SoundMusic->getStatus();
+}
+uint32_t SoundMusicLUABinder::getLoopsLeft() const {
+    return m_SoundMusic->getLoopsLeft();
+}
+bool SoundMusicLUABinder::isActive() const {
+    return m_SoundMusic->isActive();
+}
+bool SoundMusicLUABinder::play(luabridge::LuaRef numLoops) {
+    return m_SoundMusic->play(numLoops.isNil() ? 1U : numLoops.cast<uint32_t>());
+}
+bool SoundMusicLUABinder::pause() {
+    return m_SoundMusic->pause();
+}
+bool SoundMusicLUABinder::stop(luabridge::LuaRef stopAllLoops) {
+    return m_SoundMusic->stop(stopAllLoops.isNil() ? false : stopAllLoops.cast<bool>());
+}
+bool SoundMusicLUABinder::restart() {
+    return m_SoundMusic->restart();
+}
+float SoundMusicLUABinder::getDuration() const {
+    return m_SoundMusic->getDuration();
+}
+unsigned int SoundMusicLUABinder::getChannelCount() const {
+    return m_SoundMusic->getChannelCount();
+}
+float SoundMusicLUABinder::getMinDistance() const {
+    return m_SoundMusic->getMinDistance();
+}
+void SoundMusicLUABinder::setMinDistance(float minDistance) {
+    m_SoundMusic->setMinDistance(minDistance);
+}
+bool SoundMusicLUABinder::isRelativeToListener() const {
+    return m_SoundMusic->isRelativeToListener();
+}
+void SoundMusicLUABinder::setRelativeToListener(luabridge::LuaRef relative) {
+    m_SoundMusic->setRelativeToListener(relative.isNil() ? true : relative.cast<bool>());
+}
+float SoundMusicLUABinder::getAttenuation() const {
+    return m_SoundMusic->getAttenuation();
+}
+void SoundMusicLUABinder::setAttenuation(float attenuation) {
+    m_SoundMusic->setAttenuation(attenuation);
+}
+glm::vec3 SoundMusicLUABinder::getPosition() const {
+    return m_SoundMusic->getPosition();
+}
+void SoundMusicLUABinder::setPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_SoundMusic->setPosition(x.cast<float>(), y.cast<float>(), z.cast<float>());
+        } else if (!x.isNumber()) {
+            m_SoundMusic->setPosition(x.cast<glm::vec3>());
+        }
+    }
+}
+void SoundMusicLUABinder::translate(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_SoundMusic->translate(x.cast<float>(), y.cast<float>(), z.cast<float>());
+        } else if (!x.isNumber()) {
+            m_SoundMusic->translate(x.cast<glm::vec3>());
+        }
+    }
+}
+float SoundMusicLUABinder::getVolume() const {
+    return m_SoundMusic->getVolume();
+}
+void SoundMusicLUABinder::setVolume(float volume) {
+    m_SoundMusic->setVolume(volume);
+}
+float SoundMusicLUABinder::getPitch() const {
+    return m_SoundMusic->getPitch();
+}
+void SoundMusicLUABinder::setPitch(float pitch) {
+    m_SoundMusic->setPitch(pitch);
+}
+
+#pragma endregion

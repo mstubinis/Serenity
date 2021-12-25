@@ -148,10 +148,12 @@ namespace Engine::Resources {
         bool mipmaps        = false
     );
     [[nodiscard]] Handle loadTexture(
-        sf::Image& sfImage,
+        uint8_t* pixels,
+        uint32_t width,
+        uint32_t height,
         std::string_view texture_name,
         ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
-        bool mipmaps        = false
+        bool mipmaps = false
     );
     [[nodiscard]] Handle loadTextureAsync(
         std::string_view file,
@@ -160,10 +162,12 @@ namespace Engine::Resources {
         Engine::ResourceCallback callback = [](Handle) {}
     );
     [[nodiscard]] Handle loadTextureAsync(
-        sf::Image& sfImage,
+        uint8_t* pixels,
+        uint32_t width,
+        uint32_t height,
         std::string_view texture_name,
         ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
-        bool mipmaps        = false,
+        bool mipmaps = false,
         Engine::ResourceCallback callback = [](Handle) {}
     );
     [[nodiscard]] Handle loadMaterial(

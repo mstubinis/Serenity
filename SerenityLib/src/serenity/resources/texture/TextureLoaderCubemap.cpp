@@ -37,7 +37,7 @@ bool TextureLoaderCubemap::LoadDDSFile(TextureCubemapCPUData& cpuData, ImageData
 
     auto file_data = Engine::create_and_reserve<std::vector<uint8_t>>(fileSize);
 
-    file_data.insert(std::begin(file_data), std::istream_iterator<uint8_t>(stream), std::istream_iterator<uint8_t>());
+    file_data.insert(std::begin(file_data), std::istream_iterator<uint8_t>{stream}, std::istream_iterator<uint8_t>{});
     stream.close();
 
     std::array<uint8_t, 128> header_buffer;
@@ -291,9 +291,8 @@ void TextureLoaderCubemap::LoadCPU(TextureCubemapCPUData& cpuData, Handle inHand
                 if (extension == ".dds") {
                     TextureLoaderCubemap::LoadDDSFile(cpuData, imageData);
                 } else {
-                    sf::Image sfImage;
-                    sfImage.loadFromFile(imageData.m_Filename);
-                    imageData.load(sfImage, imageData.m_Filename);
+                    sfImageLoader sfImage(imageData.m_Filename.c_str());
+                    imageData.load(sfImage.getPixels(), sfImage.getWidth(), sfImage.getHeight(), imageData.m_Filename);
                 }
             }
         }

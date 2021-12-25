@@ -26,7 +26,8 @@ namespace Engine::priv {
         bool                                   m_Mipmapped       = false;
         bool                                   m_IsToBeMipmapped = false;
 
-        void initFromMemory(const sf::Image& sfImage);
+        //void initFromMemory(const sf::Image& sfImage);
+        void initFromMemory(const uint8_t* pixels, int inWidth, int inHeight);
         void initFromFile();
     };
 };
@@ -47,8 +48,9 @@ class Texture final : public Resource<Texture>, public Engine::priv::TextureBase
         Texture(uint32_t renderTgtWidth, uint32_t renderTgtHeight, ImagePixelType, ImagePixelFormat, ImageInternalFormat, float divisor = 1.0f);
         //Single File
         Texture(std::string_view filename, bool generateMipmaps, ImageInternalFormat, TextureType);
-        //Pixels From SFML Image Memory
-        Texture(const sf::Image&, std::string_view textureName, bool generateMipmaps, ImageInternalFormat, TextureType);
+        //Pixels From Memory
+        //Texture(const sf::Image&, std::string_view textureName, bool generateMipmaps, ImageInternalFormat, TextureType);
+        Texture(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view textureName, bool generateMipmaps, ImageInternalFormat, TextureType);
 
         Texture(const Texture&)                = delete;
         Texture& operator=(const Texture&)     = delete;

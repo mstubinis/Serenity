@@ -9,10 +9,17 @@ Handle Texture::Black    = Handle{};
 Handle Texture::Checkers = Handle{};
 Handle Texture::BRDF     = Handle{};
 
+/*
 void Engine::priv::TextureCPUData::initFromMemory(const sf::Image& sfImage) {
     auto& image = m_ImagesDatas[0];
     image.setInternalFormat(image.m_InternalFormat);
     image.load(sfImage, image.m_Filename);
+}
+*/
+void Engine::priv::TextureCPUData::initFromMemory(const uint8_t* pixels, int inWidth, int inHeight) {
+    auto& image = m_ImagesDatas[0];
+    image.setInternalFormat(image.m_InternalFormat);
+    image.load(pixels, inWidth, inHeight, image.m_Filename);
 }
 void Engine::priv::TextureCPUData::initFromFile() {
     auto& image           = m_ImagesDatas[0];
@@ -41,13 +48,28 @@ Texture::Texture(uint32_t w, uint32_t h, ImagePixelType pxlType, ImagePixelForma
     image.load(width, height, pxlType, pxlFmt, intFmt);
     Engine::priv::TextureLoader::LoadGPU(*this); //nothing to load cpu side for frame buffers
 }
+/*
 Texture::Texture(const sf::Image& sfImage, std::string_view name, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType)
     : Texture{ name, textureType, genMipMaps }
 {
     m_CPUData.m_ImagesDatas[0].setInternalFormat(intFmt);
-    m_CPUData.initFromMemory(sfImage);
+
+    const auto imgData = sfImage.getPixelsPtr();
+    const auto imgSize = sfImage.getSize();
+
+    m_CPUData.initFromMemory(imgData, imgSize.x, imgSize.y);
     Engine::priv::TextureLoader::Load(*this);
 }
+*/
+Texture::Texture(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view name, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType)
+    : Texture{ name, textureType, genMipMaps }
+{
+    m_CPUData.m_ImagesDatas[0].setInternalFormat(intFmt);
+    m_CPUData.initFromMemory(pixels, width, height);
+    Engine::priv::TextureLoader::Load(*this);
+}
+
+
 Texture::Texture(std::string_view filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType)
     : Texture{ filename, textureType, genMipMaps }
 {

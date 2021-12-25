@@ -51,11 +51,17 @@ namespace Engine::Sound {
     SoundEffect* playEffect(Handle soundHandle, uint32_t numLoops = 1);
     SoundMusic*  playMusic(Handle soundHandle, uint32_t numLoops = 1);
 
-    std::array<SoundEffect, MAX_SOUND_EFFECTS>& getAllSoundEffects();
-    std::array<SoundMusic, MAX_SOUND_MUSIC>& getAllSoundMusics();
-
     void stop_all_music();
     void stop_all_effects();
+
+    std::array<SoundEffect, MAX_SOUND_EFFECTS>& getAllSoundEffects();
+    std::array<SoundMusic, MAX_SOUND_MUSIC>& getAllSoundMusics();
 };
+namespace Engine::lua::sound {
+
+    Engine::priv::SoundEffectLUABinder playEffect(Handle soundHandle, luabridge::LuaRef numLoops); //uint32_t numLoops = 1
+    Engine::priv::SoundMusicLUABinder playMusic(Handle soundHandle, luabridge::LuaRef numLoops); //uint32_t numLoops = 1
+
+}
 
 #endif

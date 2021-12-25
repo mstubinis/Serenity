@@ -6,19 +6,19 @@
 
 namespace {
     void internal_play(int type, void* sound) {
-        type == 0 ? ((SoundEffect*)sound)->play () : ((SoundMusic*)sound)->play();
+        type == 0 ? static_cast<SoundEffect*>(sound)->play() : static_cast<SoundMusic*>(sound)->play();
     }
     SoundStatus internal_get_status(int type, void* sound) {
-        return type == 0 ? ((SoundEffect*)sound)->status() : ((SoundMusic*)sound)->status();
+        return type == 0 ? static_cast<SoundEffect*>(sound)->getStatus() : static_cast<SoundMusic*>(sound)->getStatus();
     }
     uint32_t internal_get_loops(int type, void* sound) {
-        return type == 0 ? ((SoundEffect*)sound)->getLoopsLeft() : ((SoundMusic*)sound)->getLoopsLeft();
+        return type == 0 ? static_cast<SoundEffect*>(sound)->getLoopsLeft() : static_cast<SoundMusic*>(sound)->getLoopsLeft();
     }
     void internal_update(int type, void* sound, float dt) {
-        type == 0 ? ((SoundEffect*)sound)->update(dt) : ((SoundMusic*)sound)->update(dt);
+        type == 0 ? static_cast<SoundEffect*>(sound)->update(dt) : static_cast<SoundMusic*>(sound)->update(dt);
     }
     void internal_stop(int type, void* sound) {
-        type == 0 ? ((SoundEffect*)sound)->stop() : ((SoundMusic*)sound)->stop();
+        type == 0 ? static_cast<SoundEffect*>(sound)->stop() : static_cast<SoundMusic*>(sound)->stop();
     }
 }
 

@@ -20,6 +20,8 @@
 
 #include <iomanip>
 
+#include <serenity/resources/mesh/smsh.h>
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <stdio.h>
@@ -151,6 +153,11 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                     ImGui::TreePop();
                 }
                 if (model && ImGui::TreeNode("ComponentModel")) {
+                    ImGui::Text(std::string("Radius: " + std::to_string(model->getRadius())).c_str());
+                    const std::string bbX = std::to_string(model->getBoundingBox().x);
+                    const std::string bbY = std::to_string(model->getBoundingBox().y);
+                    const std::string bbZ = std::to_string(model->getBoundingBox().z);
+                    ImGui::Text(std::string("BoundingBox: " + bbX + ", " + bbY + ", " + bbZ).c_str());
                     for (size_t i = 0; i < model->getNumModels(); ++i) {
                         ModelInstance& instance = model->getModel(i);
                         if (ImGui::TreeNode(("ModelInstance " + std::to_string(i)).c_str())) {
@@ -184,7 +191,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                             ImGui::Separator();
                             instance.setColor(aColor[0], aColor[1], aColor[2], aColor[3]);
                             instance.setGodRaysColor(aGodRays[0], aGodRays[1], aGodRays[2]);
-                            instance.internal_update_model_matrix(false);
+                            instance.internal_update_model_matrix(true);
 
                             ImGui::TreePop();
                         }
@@ -216,7 +223,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                     ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Script");
                     float textboxWidth     = ImGUIWindowSize.x - 120.0f;
                     float textboxHeight    = float(std::max(300, int(ImGUIWindowSize.y)));
-                    if (ImGui::InputTextMultiline("##ScriptContent", scriptData.data.data(), 1024, ImVec2(textboxWidth, textboxHeight), ImGuiInputTextFlags_NoHorizontalScroll)) {
+                    if (ImGui::InputTextMultiline("##ScriptContent", scriptData.data.data(), scriptData.data.size() + 1024, ImVec2(textboxWidth, textboxHeight), ImGuiInputTextFlags_NoHorizontalScroll)) {
 
                     }
                     if (ImGui::Button("Update", ImVec2(50, 25))) {
@@ -537,6 +544,36 @@ void Engine::priv::EditorWindowScene::internal_render_resources(Scene& currentSc
         ImGui::TreePop();
         ImGui::Separator();
     }
+
+
+    if (ImGui::TreeNode("Meshes")) {
+        auto meshes = Engine::Resources::GetAllResourcesOfType<Mesh>(); //doing this every frame is slow
+        for (auto& mesh : meshes) {
+            if (ImGui::TreeNode(mesh->name().c_str())) {
+
+                if (ImGui::Button("Save", ImVec2{100, 50})) {
+
+                    VertexData& vertexInfo = const_cast<VertexData&>(mesh->getVertexData());
+                    
+                    auto uvs = vertexInfo.getData<glm::vec2>(1);
+                    for (auto& uv : uvs) {
+                        uv.y = 1.0f - uv.y;
+                    }
+                    vertexInfo.setData(1, uvs.data(), uvs.size(), MeshModifyFlags::UploadToGPU);
+
+                    SMSH_File::SaveFile(std::string{ mesh->name() + "MIRRORED"}.c_str(), mesh->m_CPUData);
+                }
+
+                ImGui::TreePop();
+                ImGui::Separator();
+            }
+        }
+        ImGui::TreePop();
+        ImGui::Separator();
+    }
+
+
+
     ImGui::EndChild();
 }
 void Engine::priv::EditorWindowScene::update() {

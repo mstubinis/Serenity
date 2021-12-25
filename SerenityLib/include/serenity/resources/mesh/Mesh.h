@@ -23,6 +23,7 @@ namespace Engine::priv {
     class  ModelInstanceAnimationContainer;
     class  RenderModule;
     class  BuiltInMeshses;
+    class  EditorWindowScene;
 };
 
 #include <serenity/resources/mesh/VertexData.h>
@@ -95,6 +96,7 @@ class Mesh final: public Resource<Mesh>, public Observer {
     friend class  Engine::priv::ModelInstanceAnimation;
     friend class  Engine::priv::ModelInstanceAnimationContainer;
     friend class  Engine::priv::RenderModule;
+    friend class  Engine::priv::EditorWindowScene;
     friend class  Terrain;
     friend class  SMSH_File;
 

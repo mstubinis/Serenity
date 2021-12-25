@@ -4,7 +4,6 @@
 #include <serenity/lua/LuaBinder.h>
 
 #include <serenity/resources/Engine_Resources.h>
-#include <serenity/resources/sound/SoundModule.h>
 
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/SceneOptions.h>
@@ -18,6 +17,7 @@
 #include <serenity/lua/bindings/InputBindings.h>
 #include <serenity/lua/bindings/MathBindings.h>
 #include <serenity/lua/bindings/EventBindings.h>
+#include <serenity/lua/bindings/SoundBindings.h>
 
 using namespace Engine::priv;
 
@@ -32,6 +32,7 @@ LUABinder::LUABinder()
     Engine::priv::lua::bindings::createBindingsEvents(L);
     Engine::priv::lua::bindings::createBindingsInput(L);
     Engine::priv::lua::bindings::createBindingsMath(L);
+    Engine::priv::lua::bindings::createBindingsSounds(L);
 
     luabridge::getGlobalNamespace(L)
         .addFunction("print", &print)
@@ -40,11 +41,6 @@ LUABinder::LUABinder()
 
         .addFunction("getDeltaTime", &Engine::Resources::dt)
         .addFunction("dt", &Engine::Resources::dt)
-
-        .addFunction("playSoundEffect", &Engine::Sound::playEffect)
-        .addFunction("playSoundMusic", &Engine::Sound::playMusic)
-        .addFunction("stopAllSoundEffects", &Engine::Sound::stop_all_effects)
-        .addFunction("stopAllSoundMusic", &Engine::Sound::stop_all_music)
 
 #pragma region LUAScriptInstance
         .beginClass<LUAScriptInstance>("LUAScriptInstance")

@@ -35,15 +35,20 @@ struct TextureRequest final {
 
     //either one or the other, using both at once won't happen
     TextureRequest::FileData  m_FileData;
-    sf::Image                 m_SFMLImage;
+
+    std::vector<uint8_t>      m_Pixels;
+    uint32_t                  m_Height         = 0;
+    uint32_t                  m_Width          = 0;
+    uint32_t                  m_ColorsPerPixel = 4;
+    //sf::Image                 m_SFMLImage;
 
     TextureRequest() = delete;
     TextureRequest(std::string_view filenameOrData, bool genMipMaps, ImageInternalFormat, TextureType, Engine::ResourceCallback&& callback);
     TextureRequest(std::string_view filenameOrData, bool genMipMaps, ImageInternalFormat, TextureType);
-    TextureRequest(const sf::Image&, std::string_view textureName, bool genMipMaps, ImageInternalFormat, TextureType, Engine::ResourceCallback&& callback);
+    TextureRequest(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view textureName, bool genMipMaps, ImageInternalFormat, TextureType, Engine::ResourceCallback&& callback);
 
     [[nodiscard]] inline constexpr bool isFromFile() const noexcept { return (!m_FromMemory && m_FileData.m_FileExists); }
-    [[nodiscard]] inline constexpr bool isFromMemory() const noexcept { return (m_FromMemory && m_SFMLImage.getSize().x > 0 && m_SFMLImage.getSize().y > 0); }
+    [[nodiscard]] inline constexpr bool isFromMemory() const noexcept { return (m_FromMemory && m_Width > 0 && m_Height > 0); }
 
     void request(bool async = false);
 };

@@ -11,38 +11,55 @@ namespace Engine::priv {
 
 #include <serenity/utils/Utils.h>
 #include <serenity/resources/mesh/VertexData.h>
+#include <serenity/system/Macros.h>
 
-enum class SMSH_AttributeDataType : uint32_t {
-    Float                        = GL_FLOAT,
-    Byte                         = GL_BYTE,
-    Unsigned_Byte                = GL_UNSIGNED_BYTE,
-    Short                        = GL_SHORT,
-    Unsigned_Short               = GL_UNSIGNED_SHORT,
-    Int                          = GL_INT,
-    Unsigned_Int                 = GL_UNSIGNED_INT,
-    Half_Float                   = GL_HALF_FLOAT,
-    Double                       = GL_DOUBLE,
-    Fixed                        = GL_FIXED,
-    UNSIGNED_INT_2_10_10_10_REV  = GL_UNSIGNED_INT_2_10_10_10_REV,
-    UNSIGNED_INT_10F_11F_11F_REV = GL_UNSIGNED_INT_10F_11F_11F_REV,
-    INT_2_10_10_10_REV           = GL_INT_2_10_10_10_REV,
+class SMSH_AttributeDataType {
+    public :
+        enum Type : uint32_t {
+            Float                        = GL_FLOAT,
+            Byte                         = GL_BYTE,
+            Unsigned_Byte                = GL_UNSIGNED_BYTE,
+            Short                        = GL_SHORT,
+            Unsigned_Short               = GL_UNSIGNED_SHORT,
+            Int                          = GL_INT,
+            Unsigned_Int                 = GL_UNSIGNED_INT,
+            Half_Float                   = GL_HALF_FLOAT,
+            Double                       = GL_DOUBLE,
+            Fixed                        = GL_FIXED,
+            UNSIGNED_INT_2_10_10_10_REV  = GL_UNSIGNED_INT_2_10_10_10_REV,
+            UNSIGNED_INT_10F_11F_11F_REV = GL_UNSIGNED_INT_10F_11F_11F_REV,
+            INT_2_10_10_10_REV           = GL_INT_2_10_10_10_REV,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(SMSH_AttributeDataType, Type)
 };
-enum class SMSH_IndiceDataType : uint32_t {
-    Unsigned_Byte   = GL_UNSIGNED_BYTE,
-    Unsigned_Short  = GL_UNSIGNED_SHORT,
-    Unsigned_Int    = GL_UNSIGNED_INT,
+class SMSH_IndiceDataType {
+    public:
+        enum Type : uint32_t {
+            Unsigned_Byte  = GL_UNSIGNED_BYTE,
+            Unsigned_Short = GL_UNSIGNED_SHORT,
+            Unsigned_Int   = GL_UNSIGNED_INT,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(SMSH_IndiceDataType, Type)
 };
-enum class SMSH_AttributeComponentSize : uint32_t {
-    Unknown = 0,
-    _1      = 1,
-    _2      = 2,
-    _3      = 3,
-    _4      = 4,
-    BGRA    = GL_BGRA,
+class SMSH_AttributeComponentSize {
+    public:
+        enum Type : uint32_t {
+            Unknown = 0,
+            _1      = 1,
+            _2      = 2,
+            _3      = 3,
+            _4      = 4,
+            BGRA    = GL_BGRA,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(SMSH_AttributeComponentSize, Type)
 };
-enum class SMSH_InterleavingType : uint8_t {
-    Interleaved    = (uint8_t)VertexAttributeLayout::Interleaved,
-    NonInterleaved = (uint8_t)VertexAttributeLayout::NonInterleaved,
+class SMSH_InterleavingType {
+    public:
+        enum Type : uint8_t {
+            Interleaved    = (uint8_t)VertexAttributeLayout::Interleaved,
+            NonInterleaved = (uint8_t)VertexAttributeLayout::NonInterleaved,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(SMSH_InterleavingType, Type)
 };
 
 /*

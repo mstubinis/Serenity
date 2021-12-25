@@ -4,34 +4,65 @@
 
 using namespace Engine::priv;
 
-void ImageData::load(int width, int height, ImagePixelType pixelType, ImagePixelFormat pixelFormat, ImageInternalFormat internalFormat) {
-    m_PixelFormat              = pixelFormat;
-    m_PixelType                = pixelType;
-    m_InternalFormat           = internalFormat;
-    for (auto& mip : m_Mipmaps) {
-        if (mip.isNull()) {
-            mip.compressedSize = 0;
-            mip.width          = width;
-            mip.height         = height;
-            break;
+namespace {
+    void do_flags(sf::Image& sfImage, sfImageLoaderFlags flags) {
+        if (!(flags & sfImageLoaderFlags::FlipVertically)) { //by default, sfml will flip images vertically. kind of annoying
+            sfImage.flipVertically();
+        }
+        if (flags & sfImageLoaderFlags::FlipHorizontally) {
+            sfImage.flipHorizontally();
         }
     }
-}
-void ImageData::load(const sf::Image& sfImage, const std::string& filename) {
-    m_Filename                 = filename;
-    const auto imgSize         = sfImage.getSize();
-    for (auto& mip : m_Mipmaps) {
-        if (mip.isNull()) {
-            mip.compressedSize = 0;
-            mip.width          = imgSize.x;
-            mip.height         = imgSize.y;
-            auto* pxls         = sfImage.getPixelsPtr();
-            mip.pixels.assign(pxls, pxls + mip.width * mip.height * 4);
-            break;
+    Engine::priv::ImageMipmap* get_next_mipmap(std::vector<Engine::priv::ImageMipmap>& mipmaps) {
+        for (auto& mipmap : mipmaps) {
+            if (mipmap.isNull()) {
+                return &mipmap;
+            }
         }
+        return nullptr;
+    }
+}
+
+void ImageData::load(int width, int height, ImagePixelType pixelType, ImagePixelFormat pixelFormat, ImageInternalFormat internalFormat) {
+    m_PixelFormat     = pixelFormat;
+    m_PixelType       = pixelType;
+    m_InternalFormat  = internalFormat;
+    auto mipmap       = get_next_mipmap(m_Mipmaps);
+    if (mipmap) {
+        mipmap->compressedSize = 0;
+        mipmap->width          = width;
+        mipmap->height         = height;
+    }
+}
+/*
+void ImageData::load(const sf::Image& sfImage, const std::string& filename) {
+    load(sfImage.getPixelsPtr(), sfImage.getSize().x, sfImage.getSize().y, filename);
+}
+*/
+void ImageData::load(const uint8_t* inPixels, int inWidth, int inHeight, const std::string& filename) {
+    m_Filename  = filename;
+    auto mipmap = get_next_mipmap(m_Mipmaps);
+    if (mipmap) {
+        mipmap->compressedSize = 0;
+        mipmap->assignPixels(inPixels, inWidth, inHeight);
     }
 }
 void ImageData::setInternalFormat(ImageInternalFormat intFmt) {
     m_InternalFormat = intFmt;
     m_PixelFormat    = m_InternalFormat;
+}
+
+
+
+sfImageLoader::sfImageLoader(const char* filename, sfImageLoaderFlags flags) {
+    loadFromFile(filename, flags);
+}
+
+void sfImageLoader::loadFromFile(const char* filename, sfImageLoaderFlags flags) {
+    m_SFImage.loadFromFile(filename);
+    do_flags(m_SFImage, flags);
+}
+void sfImageLoader::loadFromMemory(const void* data, size_t size, sfImageLoaderFlags flags) {
+    m_SFImage.loadFromMemory(data, size);
+    do_flags(m_SFImage, flags);
 }

@@ -87,8 +87,8 @@ void Font::init_simple(const std::string& filename, int height, int width) {
     float textureHeight = float(texture.height());
     float textureWidth  = float(texture.width());
 
-    boost::iostreams::stream<boost::iostreams::mapped_file_source> str(filename);
-    for (std::string line; std::getline(str, line, '\n');) {
+    boost::iostreams::stream<boost::iostreams::mapped_file_source> source(filename);
+    for (std::string line; std::getline(source, line, '\n');) {
         if (line[0] == 'c' && line[1] == 'h' && line[2] == 'a' && line[3] == 'r' && line[4] == ' ') {
             auto charGlyph = CharGlyph();
             std::string token;
@@ -100,7 +100,7 @@ void Font::init_simple(const std::string& filename, int height, int width) {
 
                 if (key == "id") {
                     charGlyph.char_id = std::stoi(value);
-                    if (m_CharGlyphs.size() < charGlyph.char_id) {
+                    if (m_CharGlyphs.size() <= charGlyph.char_id) {
                         m_CharGlyphs.resize(charGlyph.char_id + 1);
                     }
                 } else if (key == "x") {
@@ -130,10 +130,10 @@ void Font::init_simple(const std::string& filename, int height, int width) {
             charGlyph.pts.emplace_back(0.0f, charGlyph.height, 0.0f);
             charGlyph.pts.emplace_back(charGlyph.width, 0.0f, 0.0f);
 
-            float uvW1 = (float)charGlyph.x / textureWidth;
-            float uvW2 = uvW1 + ((float)charGlyph.width / textureWidth);
-            float uvH1 = (float)charGlyph.y / textureHeight;
-            float uvH2 = uvH1 + ((float)charGlyph.height / textureHeight);
+            float uvW1 = float(charGlyph.x) / textureWidth;
+            float uvW2 = uvW1 + (float(charGlyph.width) / textureWidth);
+            float uvH1 = float(charGlyph.y) / textureHeight;
+            float uvH2 = uvH1 + (float(charGlyph.height) / textureHeight);
 
             charGlyph.uvs.emplace_back(uvW1, uvH2);
             charGlyph.uvs.emplace_back(uvW2, uvH1);
@@ -193,17 +193,25 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
         }
         m_CharGlyphs[char_id] = std::move(charGlyph);
     }
-    uint32_t final_count  = (uint32_t)glm::ceil(glm::sqrt((float)requested_char_count));
+    uint32_t final_count  = (uint32_t)glm::ceil(glm::sqrt(float(requested_char_count)));
     uint32_t final_width  = final_count * max_width;
     uint32_t final_height = final_count * max_height;
 
-    sf::Image atlas_image;
-    atlas_image.create(final_width, final_height, sf::Color::Transparent);
+    std::vector<uint8_t> pixels(final_width * final_height * 4, 0);
+
+    auto setPixel = [&pixels, final_width](uint32_t x, uint32_t y, const std::array<uint8_t, 4>& colors) {
+        auto getIdx = [final_width](uint32_t x, uint32_t y) {
+            return ((x * final_width) + y) * 4;
+        };
+        for (size_t i = 0; i < colors.size(); ++i) {
+            pixels[getIdx(x, y) + i] = colors[i];
+        }
+    };
 
     int char_id         = 0;
     bool done           = false;
-    float textureHeight = (float)final_height;
-    float textureWidth  = (float)final_width;
+    float textureHeight = float(final_height);
+    float textureWidth  = float(final_width);
     for (uint32_t i = 0; i < final_count; ++i) {
         for (uint32_t j = 0; j < final_count; ++j) {
             if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
@@ -227,10 +235,10 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
             for (uint32_t y = startY; y < startY + glyph_y_size; ++y) {
                 uint32_t cy           = 0;
                 uint32_t glyph_xEnd   = (startX + glyph_x_size);
-                //uint32_t glyph_yEnd   = (startY + glyph_y_size);
+                //uint32_t glyph_yEnd = (startY + glyph_y_size);
                 for (uint32_t x = startX; x < glyph_xEnd; ++x) {
                     auto gray = getFromRowCol(face->glyph->bitmap.buffer, cx, cy, glyph_x_size);
-                    atlas_image.setPixel(x, y, sf::Color(gray, gray, gray, gray));
+                    setPixel(final_height - y - 1, x, { gray, gray, gray, gray });
                     ++cy;
                 }
                 ++cx;
@@ -240,15 +248,15 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
             charGlyph.pts.emplace_back(0.0f,            charGlyph.height, 0.0f);
             charGlyph.pts.emplace_back(charGlyph.width, 0.0f,             0.0f);
 
-            float uvW1 =         (float)charGlyph.x      / textureWidth;
-            float uvW2 = uvW1 + ((float)charGlyph.width  / textureWidth);
-            float uvH1 =         (float)charGlyph.y      / textureHeight;
-            float uvH2 = uvH1 + ((float)charGlyph.height / textureHeight);
+            float uvW1 =         float(charGlyph.x)      / textureWidth;
+            float uvW2 = uvW1 + (float(charGlyph.width)  / textureWidth);
+            float uvH1 =         float(charGlyph.y)      / textureHeight;
+            float uvH2 = uvH1 + (float(charGlyph.height) / textureHeight);
 
-            charGlyph.uvs.emplace_back(uvW1, uvH2);
-            charGlyph.uvs.emplace_back(uvW2, uvH1);
-            charGlyph.uvs.emplace_back(uvW1, uvH1);
-            charGlyph.uvs.emplace_back(uvW2, uvH2);
+            charGlyph.uvs.emplace_back(uvW1, 1.0f - uvH2);
+            charGlyph.uvs.emplace_back(uvW2, 1.0f - uvH1);
+            charGlyph.uvs.emplace_back(uvW1, 1.0f - uvH1);
+            charGlyph.uvs.emplace_back(uvW2, 1.0f - uvH2);
 
             ++char_id;
         }
@@ -259,7 +267,7 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    m_FontTexture = Engine::Resources::addResource<Texture>(atlas_image, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
+    m_FontTexture = Engine::Resources::addResource<Texture>(pixels.data(), final_width, final_height, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
 
     m_MaxHeight = max_y_offset - min_y_offset;
 }

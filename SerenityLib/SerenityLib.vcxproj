@@ -798,6 +798,7 @@
     <ClCompile Include="src\serenity\lua\bindings\EventBindings.cpp" />
     <ClCompile Include="src\serenity\lua\bindings\InputBindings.cpp" />
     <ClCompile Include="src\serenity\lua\bindings\MathBindings.cpp" />
+    <ClCompile Include="src\serenity\lua\bindings\SoundBindings.cpp" />
     <ClCompile Include="src\serenity\lua\LuaBinder.cpp" />
     <ClCompile Include="src\serenity\lua\LuaModule.cpp" />
     <ClCompile Include="src\serenity\lua\LuaScript.cpp" />
@@ -1371,6 +1372,7 @@
     <ClInclude Include="include\serenity\lua\bindings\EventBindings.h" />
     <ClInclude Include="include\serenity\lua\bindings\InputBindings.h" />
     <ClInclude Include="include\serenity\lua\bindings\MathBindings.h" />
+    <ClInclude Include="include\serenity\lua\bindings\SoundBindings.h" />
     <ClInclude Include="include\serenity\lua\Lua.h" />
     <ClInclude Include="include\serenity\lua\LuaBinder.h" />
     <ClInclude Include="include\serenity\lua\LuaCallable.h" />

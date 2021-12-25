@@ -331,28 +331,35 @@ void DeferredPipeline::init() {
     m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGIBasic] = Engine::Resources::addResource<ShaderProgram>("Deferred_Light_GI_Basic", m_InternalShaders[ShaderEnum::FullscreenVertex], m_InternalShaders[ShaderEnum::LightingGIFragBasic]);
     m_InternalShaderPrograms[ShaderProgramEnum::ShadowDepth] = Engine::Resources::addResource<ShaderProgram>("Shadow_Depth", m_InternalShaders[ShaderEnum::ShadowDepthVertex], m_InternalShaders[ShaderEnum::ShadowDepthFrag]);
 
-    sf::Image sfImageWhite;
-    sfImageWhite.create(2, 2, sf::Color::White);
-    sf::Image sfImageBlack;
-    sfImageBlack.create(2, 2, sf::Color::Black);
 
-    sf::Image sfImageCheckers;
-    sfImageCheckers.create(8, 8, sf::Color::White);
+    std::vector<uint8_t> ImageWhite(2 * 2 * 4, 255);
+    std::vector<uint8_t> ImageBlack(2 * 2 * 4, 0);
+    std::vector<uint8_t> ImageCheckers(8 * 8 * 4, 255);
+
+    auto getIdx = [](uint32_t width, uint32_t x, uint32_t y) {
+        return ((x * width) + y) * 4;
+    };
 
     uint32_t count = 0;
-    for (uint32_t i = 0; i < sfImageCheckers.getSize().x; ++i) {
-        for (uint32_t j = 0; j < sfImageCheckers.getSize().y; ++j) {
+    const uint32_t checkersWidth  = 8;
+    const uint32_t checkersHeight = 8;
+    for (uint32_t i = 0; i < checkersHeight; ++i) {
+        for (uint32_t j = 0; j < checkersWidth; ++j) {
             if ((count % 2 == 0 && i % 2 == 0) || (count % 2 != 0 && i % 2 == 1)) {
-                sfImageCheckers.setPixel(i, j, sf::Color::Red);
+                //red color
+                ImageCheckers[getIdx(checkersWidth, i, j) + 0] = 255;
+                ImageCheckers[getIdx(checkersWidth, i, j) + 1] = 0;
+                ImageCheckers[getIdx(checkersWidth, i, j) + 2] = 0;
+                ImageCheckers[getIdx(checkersWidth, i, j) + 3] = 255;
             }
             ++count;
         }
     }
     //"D" = default
-    Texture::White     = Engine::Resources::addResource<Texture>(sfImageWhite, "DWhiteTexture", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
-    Texture::Black     = Engine::Resources::addResource<Texture>(sfImageBlack, "DBlackTexture", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
+    Texture::White     = Engine::Resources::addResource<Texture>(ImageWhite.data(), 2, 2, "DWhiteTexture", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
+    Texture::Black     = Engine::Resources::addResource<Texture>(ImageBlack.data(), 2, 2, "DBlackTexture", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
 
-    Texture::Checkers  = Engine::Resources::addResource<Texture>(sfImageCheckers, "DCheckersTexture", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
+    Texture::Checkers  = Engine::Resources::addResource<Texture>(ImageCheckers.data(), 8, 8, "DCheckersTexture", false, ImageInternalFormat::RGBA8, TextureType::Texture2D);
     Texture::Checkers.get<Texture>()->setFilter(TextureFilter::Nearest);
     Material::Checkers = Engine::Resources::addResource<Material>("DCheckers", Texture::Checkers);
     Material::Checkers.get<Material>()->setSpecularModel(SpecularModel::None);

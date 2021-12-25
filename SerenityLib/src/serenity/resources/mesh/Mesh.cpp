@@ -463,10 +463,10 @@ Mesh::Mesh(std::string_view name, float width, float height, float threshold, co
     auto colors    = Engine::create_and_resize<std::vector<glm::u8vec4>>(4, glm::u8vec4{255_uc});
     auto indices   = Engine::create_and_reserve<std::vector<uint32_t>>(6);
 
-    uvs.emplace_back( 0.0f, height);
-    uvs.emplace_back(width, 0.0f );
-    uvs.emplace_back(0.0f, 0.0f );
-    uvs.emplace_back(width, height);
+    uvs.emplace_back(0.0f, 0.0f);
+    uvs.emplace_back(1.0f, 1.0f);
+    uvs.emplace_back(0.0f, 1.0f);
+    uvs.emplace_back(1.0f, 0.0f);
 
     positions.emplace_back(-width / 2.0f, -height / 2.0f, 0.0f);
     positions.emplace_back(width / 2.0f,  height / 2.0f, 0.0f );
@@ -528,7 +528,7 @@ Mesh::Mesh(std::string_view fileOrData, float threshold)
             if (flags & Engine::priv::MeshLoadingFlags::UVs) {
                 auto& uv = data.m_FileUVs.emplace_back();
                 std::sscanf(line.substr(2, line.size()).c_str(), "%f %f", &uv.x, &uv.y);
-                uv.y = 1.0f - uv.y;
+                //uv.y = 1.0f - uv.y;
             }
         } else if (line[0] == 'v' && line[1] == 'n') {
             if (flags & Engine::priv::MeshLoadingFlags::Normals) {

@@ -27,6 +27,8 @@ namespace Engine::priv {
 
             static void LoadCPU(TextureCPUData&, Handle);
 
+            static void MirrorPixelsVertically(uint8_t* pixels, uint32_t width, uint32_t height, uint32_t colorsPerPixel = 4);
+
             static void LoadGPU(Handle);
             static void LoadGPU(Texture&);
             static void UnloadGPU(Texture&);

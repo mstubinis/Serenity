@@ -26,15 +26,12 @@ bool Cursor::internal_load_from_pixels(const uint8_t* pixels, uint32_t width, ui
     m_ColorMultiplier = colorMultiplier;
     m_PixelsColored.resize(numBytes);
     for (size_t i = 0; i < numBytes; i += 4) {
-        uint8_t r = static_cast<uint8_t>((float)pixels[i + 0] * colorMultiplier.r);
-        uint8_t g = static_cast<uint8_t>((float)pixels[i + 1] * colorMultiplier.g);
-        uint8_t b = static_cast<uint8_t>((float)pixels[i + 2] * colorMultiplier.b);
-        uint8_t a = static_cast<uint8_t>((float)pixels[i + 3] * colorMultiplier.a);
-        m_PixelsColored[i + 0] = r;
-        m_PixelsColored[i + 1] = g;
-        m_PixelsColored[i + 2] = b;
-        m_PixelsColored[i + 3] = a;
+        for (size_t j = 0; j < 4; ++j) {
+            m_PixelsColored[i + j] = uint8_t(float(pixels[i + j] * colorMultiplier[j]));
+        }
     }
+    Engine::priv::TextureLoader::MirrorPixelsVertically(m_PixelsColored.data(), width, height);
+
     return m_SFMLCursor.loadFromPixels(m_PixelsColored.data(), sf::Vector2u(width, height), sf::Vector2u(hotspotX, hotspotY));
 }
 bool Cursor::internal_rotate(int64_t startIndex, int64_t increment1, int64_t increment2, bool left) noexcept {
@@ -48,14 +45,9 @@ bool Cursor::internal_rotate(int64_t startIndex, int64_t increment1, int64_t inc
 
     auto newPixels = Engine::create_and_reserve<std::vector<uint8_t>>(numBytes);
     for (size_t i = 0; i < numBytes; i += 4) {
-        uint8_t r = static_cast<uint8_t>((float)m_Pixels[(pixel * 4) + 0]);
-        uint8_t g = static_cast<uint8_t>((float)m_Pixels[(pixel * 4) + 1]);
-        uint8_t b = static_cast<uint8_t>((float)m_Pixels[(pixel * 4) + 2]);
-        uint8_t a = static_cast<uint8_t>((float)m_Pixels[(pixel * 4) + 3]);
-        newPixels.emplace_back(r);
-        newPixels.emplace_back(g);
-        newPixels.emplace_back(b);
-        newPixels.emplace_back(a);
+        for (size_t j = 0; j < 4; ++j) {
+            newPixels.emplace_back(uint8_t(float(m_Pixels[(pixel * 4) + j])));
+        }
         pixel += increment1;
         if ((left && pixel < 0) || (!left && pixel >= (long long)(oldWidth * oldHeight))) {
             pixel += increment2;
@@ -66,14 +58,9 @@ bool Cursor::internal_rotate(int64_t startIndex, int64_t increment1, int64_t inc
     m_PixelsColored.clear();
     m_PixelsColored.reserve(numBytes);
     for (size_t i = 0; i < m_Pixels.size(); i += 4) {
-        uint8_t r = static_cast<uint8_t>((float)m_Pixels[i + 0] * m_ColorMultiplier.r);
-        uint8_t g = static_cast<uint8_t>((float)m_Pixels[i + 1] * m_ColorMultiplier.g);
-        uint8_t b = static_cast<uint8_t>((float)m_Pixels[i + 2] * m_ColorMultiplier.b);
-        uint8_t a = static_cast<uint8_t>((float)m_Pixels[i + 3] * m_ColorMultiplier.a);
-        m_PixelsColored.emplace_back(r);
-        m_PixelsColored.emplace_back(g);
-        m_PixelsColored.emplace_back(b);
-        m_PixelsColored.emplace_back(a);
+        for (size_t j = 0; j < 4; ++j) {
+            m_PixelsColored.emplace_back(uint8_t(float(m_Pixels[i + j] * m_ColorMultiplier[j])));
+        }
     }
     const bool result = m_SFMLCursor.loadFromPixels(m_PixelsColored.data(), sf::Vector2u(m_Width, m_Height), sf::Vector2u(m_Hotspot.x, m_Hotspot.y));
     return result;

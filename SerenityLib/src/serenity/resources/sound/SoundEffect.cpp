@@ -11,6 +11,8 @@
 using namespace Engine;
 using namespace Engine::priv;
 
+#pragma region SoundEffect
+
 SoundEffect::SoundEffect() 
     : m_Loops { 1 }
 {}
@@ -130,7 +132,7 @@ bool SoundEffect::restart() {
             return false;
         }
     }
-    if (status() == SoundStatus::Fresh || m_Sound.getPlayingOffset() == sf::Time::Zero) {
+    if (getStatus() == SoundStatus::Fresh || m_Sound.getPlayingOffset() == sf::Time::Zero) {
         return false;
     }
     m_Sound.setPlayingOffset(sf::Time::Zero); //only if paused or playing. if stopped, has no effect
@@ -194,3 +196,93 @@ float SoundEffect::getPitch() const {
 void SoundEffect::setPitch(float pitch) {
     m_Sound.setPitch(pitch);
 }
+
+#pragma endregion
+
+#pragma region SoundEffectLUABinder
+
+SoundEffectLUABinder::SoundEffectLUABinder(SoundEffect& soundEffect)
+    : m_SoundEffect{ &soundEffect }
+{}
+
+SoundStatus SoundEffectLUABinder::getStatus() const {
+    return m_SoundEffect->getStatus();
+}
+uint32_t SoundEffectLUABinder::getLoopsLeft() const {
+    return m_SoundEffect->getLoopsLeft();
+}
+bool SoundEffectLUABinder::isActive() const {
+    return m_SoundEffect->isActive();
+}
+bool SoundEffectLUABinder::play(luabridge::LuaRef numLoops) {
+    return m_SoundEffect->play(numLoops.isNil() ? 1U : numLoops.cast<uint32_t>());
+}
+bool SoundEffectLUABinder::pause() {
+    return m_SoundEffect->pause();
+}
+bool SoundEffectLUABinder::stop(luabridge::LuaRef stopAllLoops) {
+    return m_SoundEffect->stop(stopAllLoops.isNil() ? false : stopAllLoops.cast<bool>());
+}
+bool SoundEffectLUABinder::restart() {
+    return m_SoundEffect->restart();
+}
+float SoundEffectLUABinder::getDuration() const {
+    return m_SoundEffect->getDuration();
+}
+unsigned int SoundEffectLUABinder::getChannelCount() const {
+    return m_SoundEffect->getChannelCount();
+}
+float SoundEffectLUABinder::getMinDistance() const {
+    return m_SoundEffect->getMinDistance();
+}
+void SoundEffectLUABinder::setMinDistance(float minDistance) {
+    m_SoundEffect->setMinDistance(minDistance);
+}
+bool SoundEffectLUABinder::isRelativeToListener() const {
+    return m_SoundEffect->isRelativeToListener();
+}
+void SoundEffectLUABinder::setRelativeToListener(luabridge::LuaRef relative) {
+    m_SoundEffect->setRelativeToListener(relative.isNil() ? true : relative.cast<bool>());
+}
+float SoundEffectLUABinder::getAttenuation() const {
+    return m_SoundEffect->getAttenuation();
+}
+
+glm::vec3 SoundEffectLUABinder::getPosition() const {
+    return m_SoundEffect->getPosition();
+}
+void SoundEffectLUABinder::setPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_SoundEffect->setPosition(x.cast<float>(), y.cast<float>(), z.cast<float>());
+        } else if (!x.isNumber()) {
+            m_SoundEffect->setPosition(x.cast<glm::vec3>());
+        }
+    }
+}
+void SoundEffectLUABinder::translate(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_SoundEffect->translate(x.cast<float>(), y.cast<float>(), z.cast<float>());
+        } else if (!x.isNumber()) {
+            m_SoundEffect->translate(x.cast<glm::vec3>());
+        }
+    }
+}
+void SoundEffectLUABinder::setAttenuation(float attenuation) {
+    m_SoundEffect->setAttenuation(attenuation);
+}
+float SoundEffectLUABinder::getVolume() const {
+    return m_SoundEffect->getVolume();
+}
+void SoundEffectLUABinder::setVolume(float volume) const {
+    m_SoundEffect->setVolume(volume);
+}
+float SoundEffectLUABinder::getPitch() const {
+    return m_SoundEffect->getPitch();
+}
+void SoundEffectLUABinder::setPitch(float pitch) const {
+    m_SoundEffect->setPitch(pitch);
+}
+
+#pragma endregion

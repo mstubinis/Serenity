@@ -444,11 +444,20 @@ sf::Color Math::PaintersAlgorithm(const sf::Color& paint_color, const sf::Color&
     glm::vec4 calculations(0.0f);
     calculations = (pC * pC.a + cC * cC.a * (1.0f - pC.a) / alpha);
     calculations.a = alpha;
-    sf::Uint8 finalR = (sf::Uint8)(calculations.r * 255.0f);
-    sf::Uint8 finalG = (sf::Uint8)(calculations.g * 255.0f);
-    sf::Uint8 finalB = (sf::Uint8)(calculations.b * 255.0f);
-    sf::Uint8 finalA = (sf::Uint8)(calculations.a * 255.0f);
+    sf::Uint8 finalR = sf::Uint8(calculations.r * 255.0f);
+    sf::Uint8 finalG = sf::Uint8(calculations.g * 255.0f);
+    sf::Uint8 finalB = sf::Uint8(calculations.b * 255.0f);
+    sf::Uint8 finalA = sf::Uint8(calculations.a * 255.0f);
     return sf::Color{ finalR, finalG, finalB, finalA };
+}
+std::array<uint8_t, 4> Math::PaintersAlgorithm(const std::array<uint8_t, 4>& paint_color, const std::array<uint8_t, 4>& canvas_color) {
+    glm::vec4 cC{ (float)canvas_color[0] / 255.0f, (float)canvas_color[1] / 255.0f, (float)canvas_color[2] / 255.0f, (float)canvas_color[3] / 255.0f };
+    glm::vec4 pC{ (float)paint_color[0] / 255.0f, (float)paint_color[1] / 255.0f, (float)paint_color[2] / 255.0f, (float)paint_color[3] / 255.0f };
+    float alpha = pC.a + cC.a * (1.0f - pC.a);
+    glm::vec4 calculations(0.0f);
+    calculations = (pC * pC.a + cC * cC.a * (1.0f - pC.a) / alpha);
+    calculations.a = alpha;
+    return { uint8_t(calculations.r * 255.0f), uint8_t(calculations.g * 255.0f), uint8_t(calculations.b * 255.0f), uint8_t(calculations.a * 255.0f) };
 }
 bool Math::rayIntersectSphere(const glm::vec3& C, float r, const glm::vec3& A, const glm::vec3& rayVector){
     glm::vec3 B = A + rayVector;

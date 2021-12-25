@@ -16,6 +16,7 @@ namespace Engine::priv {
 #include <vector>
 #include <serenity/system/Macros.h>
 #include <serenity/system/TypeDefs.h>
+#include <SFML/Graphics/Image.hpp>
 
 class TextureWrap final {
     public: 
@@ -117,6 +118,14 @@ namespace Engine::priv {
         int                    level          = 0;
 
         [[nodiscard]] inline bool isNull() const noexcept { return pixels.size() == 0; }
+        void assignPixels(const uint8_t* inData, int inWidth, int inHeight) {
+            width = inWidth;
+            height = inHeight;
+            pixels.assign(inData, inData + inWidth * inHeight * 4);
+        }
+        void assignPixels(const uint8_t* inData) {
+            pixels.assign(inData, inData + width * height * 4);
+        }
     };
     struct ImageData final {
         std::vector<ImageMipmap>     m_Mipmaps         = { ImageMipmap{} };
@@ -127,7 +136,8 @@ namespace Engine::priv {
 
         void setInternalFormat(ImageInternalFormat);
         void load(int width, int height, ImagePixelType, ImagePixelFormat, ImageInternalFormat);
-        void load(const sf::Image& sfImage, const std::string& filename = {});
+        //void load(const sf::Image& sfImage, const std::string& filename = {});
+        void load(const uint8_t* inPixels, int inWidth, int inHeight, const std::string& filename = {});
 
         [[nodiscard]] bool hasBlankMipmap() const noexcept {
             bool res = m_Mipmaps.size() == 0;
@@ -141,6 +151,33 @@ namespace Engine::priv {
             return res;
         }
     };
+};
+
+class sfImageLoaderFlags {
+    public:
+        enum Type : uint32_t {
+            None             = 0,
+            FlipHorizontally = 1 << 0,
+            FlipVertically   = 1 << 1,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(sfImageLoaderFlags, Type)
+};
+
+class sfImageLoader {
+    private:
+        sf::Image m_SFImage;
+    public:
+        sfImageLoader() = default;
+        sfImageLoader(const char* filename, sfImageLoaderFlags = sfImageLoaderFlags::None);
+
+        void loadFromFile(const char* filename, sfImageLoaderFlags = sfImageLoaderFlags::None);
+        void loadFromMemory(const void* data, size_t size, sfImageLoaderFlags = sfImageLoaderFlags::None);
+
+        [[nodiscard]] inline operator sf::Image&() noexcept { return m_SFImage; }
+        [[nodiscard]] inline operator const sf::Image&() const noexcept { return m_SFImage; }
+        [[nodiscard]] inline const uint8_t* getPixels() const noexcept { return m_SFImage.getPixelsPtr(); }
+        [[nodiscard]] inline uint32_t getWidth() const noexcept { return m_SFImage.getSize().x; }
+        [[nodiscard]] inline uint32_t getHeight() const noexcept { return m_SFImage.getSize().y; }
 };
 
 #endif

@@ -1604,6 +1604,9 @@
     <ClCompile Include="src\serenity\lua\bindings\EventBindings.cpp">
       <Filter>Source Files\Engine\Core\LUA\Bindings</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\lua\bindings\SoundBindings.cpp">
+      <Filter>Source Files\Engine\Core\LUA\Bindings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -3284,6 +3287,9 @@
       <Filter>Header Files\Engine\Core\LUA\Bindings</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\lua\bindings\EventBindings.h">
+      <Filter>Header Files\Engine\Core\LUA\Bindings</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\lua\bindings\SoundBindings.h">
       <Filter>Header Files\Engine\Core\LUA\Bindings</Filter>
     </ClInclude>
   </ItemGroup>

@@ -11,6 +11,8 @@ namespace Engine::priv {
 #include <serenity/resources/sound/SoundIncludes.h>
 #include <SFML/Audio.hpp>
 
+#include <serenity/lua/LuaIncludes.h>
+
 class SoundMusic {
     friend class Engine::priv::SoundModule;
     friend class SoundQueue;
@@ -29,7 +31,7 @@ class SoundMusic {
         SoundMusic& operator=(SoundMusic&& other) noexcept = delete;
         virtual ~SoundMusic()                              = default;
 
-        [[nodiscard]] inline constexpr SoundStatus status() const noexcept { return m_Status; }
+        [[nodiscard]] inline constexpr SoundStatus getStatus() const noexcept { return m_Status; }
         [[nodiscard]] inline constexpr uint32_t getLoopsLeft() const noexcept { return m_Loops - m_CurrentLoop; }
         [[nodiscard]] inline constexpr bool isActive() const noexcept { return m_Active; }
         bool play(unsigned int numLoops = 1);
@@ -56,4 +58,39 @@ class SoundMusic {
 
         void update(const float dt);
 };
+
+namespace Engine::priv {
+    class SoundMusicLUABinder {
+        private:
+            SoundMusic* m_SoundMusic = nullptr;
+        public:
+            SoundMusicLUABinder() = default;
+            SoundMusicLUABinder(SoundMusic&);
+
+
+            SoundStatus getStatus() const;
+            uint32_t getLoopsLeft() const;
+            bool isActive() const;
+            bool play(luabridge::LuaRef numLoops); //uint32_t = 1
+            bool pause();
+            bool stop(luabridge::LuaRef stopAllLoops); //bool = false
+            bool restart();
+            float getDuration() const;
+            unsigned int getChannelCount() const;
+            float getMinDistance() const;
+            void setMinDistance(float minDistance);
+            bool isRelativeToListener() const;
+            void setRelativeToListener(luabridge::LuaRef relative); //bool = true
+            float getAttenuation() const;
+            void setAttenuation(float attenuation);
+            glm::vec3 getPosition() const;
+            void setPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z);
+            void translate(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z);
+            float getVolume() const;
+            void setVolume(float volume);
+            float getPitch() const;
+            void setPitch(float pitch);
+    };
+}
+
 #endif

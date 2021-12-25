@@ -145,12 +145,10 @@ Handle Engine::Resources::loadTexture(std::string_view file, ImageInternalFormat
     }
     return Handle{};
 }
-Handle Engine::Resources::loadTexture(sf::Image& sfImage, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
+Handle Engine::Resources::loadTexture(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
     auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.m_Resource) {
-        TextureRequest request{ sfImage, texture_name, mipmaps, internalFormat, TextureType::Texture2D, [](Handle) {} };
-        request.request();
-        return request.m_Part.m_Handle;
+        return Engine::Resources::addResource<Texture>(pixels, width, height, texture_name, mipmaps, internalFormat, TextureType::Texture2D);
     }
     return Handle{};
 }
@@ -163,10 +161,10 @@ Handle Engine::Resources::loadTextureAsync(std::string_view file, ImageInternalF
     }
     return Handle{};
 }
-Handle Engine::Resources::loadTextureAsync(sf::Image& sfImage, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
+Handle Engine::Resources::loadTextureAsync(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
     auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.m_Resource) {
-        TextureRequest request{ sfImage, texture_name, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
+        TextureRequest request{ pixels, width, height, texture_name, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
         request.request(true);
         return request.m_Part.m_Handle;
     }
@@ -245,6 +243,10 @@ Handle Engine::priv::lua::resources::getResourceLUA(const std::string& resourceT
         return Engine::Resources::getResource<Shader>(resourceName);
     } else if (resourceType == "ShaderProgram") {
         return Engine::Resources::getResource<ShaderProgram>(resourceName);
+    } else if (resourceType == "SoundData") {
+        return Engine::Resources::getResource<SoundData>(resourceName);
+    } else if (resourceType == "Font") {
+        return Engine::Resources::getResource<Font>(resourceName);
     }
     return Handle{};
 }

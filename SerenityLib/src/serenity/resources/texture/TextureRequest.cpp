@@ -21,17 +21,21 @@ TextureRequest::TextureRequest(std::string_view filename, bool genMipMaps, Image
 {
     m_Part.m_Callback = std::move(callback);
 }
-TextureRequest::TextureRequest(const sf::Image& sfImage, std::string_view filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, Engine::ResourceCallback&& callback)
+TextureRequest::TextureRequest(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, Engine::ResourceCallback&& callback)
     : m_Part{ filename, intFmt, genMipMaps, textureType }
-    , m_SFMLImage{ sfImage }
 {
-    m_FromMemory      = true;
+    m_Width  = width;
+    m_Height = height;
+    m_ColorsPerPixel = 4;
+    m_Pixels = std::vector<uint8_t>(m_Width * m_Height * 4);
+    std::copy(pixels, pixels + (m_Width * m_Height * 4), m_Pixels.data());
+    m_FromMemory = true;
     m_Part.m_Callback = std::move(callback);
 }
 
 void TextureRequest::request(bool inAsync) {
     if (m_Part.m_CPUData.m_Name.empty() || (!isFromFile() && !isFromMemory())) {
-        ENGINE_PRODUCTION_LOG("TextureRequest::request(): request was invalid!")
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): request was invalid!")
         return;
     }
     m_Part.m_Async = inAsync && Engine::hardware_concurrency() > 1;
@@ -46,10 +50,11 @@ void TextureRequest::request(bool inAsync) {
     auto l_cpu = [textureRequest{ *this }]() mutable {
         //6 file cubemaps and framebuffers are not loaded this way
         if (textureRequest.m_Part.m_CPUData.m_TextureType == TextureType::Texture2D) {
-            if (textureRequest.m_FromMemory)
-                textureRequest.m_Part.m_CPUData.initFromMemory(textureRequest.m_SFMLImage);
-            else
+            if (textureRequest.m_FromMemory) {
+                textureRequest.m_Part.m_CPUData.initFromMemory(textureRequest.m_Pixels.data(), textureRequest.m_Width, textureRequest.m_Height);
+            } else {
                 textureRequest.m_Part.m_CPUData.initFromFile();
+            }
         }
         Engine::priv::TextureLoader::LoadCPU(textureRequest.m_Part.m_CPUData, textureRequest.m_Part.m_Handle);
     };

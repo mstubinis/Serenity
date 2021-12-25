@@ -12,6 +12,8 @@ namespace Engine::priv {
 #include <serenity/resources/sound/SoundIncludes.h>
 #include <SFML/Audio.hpp>
 
+#include <serenity/lua/LuaIncludes.h>
+
 class SoundEffect {
     friend class Engine::priv::SoundModule;
     friend class SoundQueue;
@@ -30,7 +32,7 @@ class SoundEffect {
         SoundEffect& operator=(SoundEffect&& other) noexcept = default;
         virtual ~SoundEffect()                               = default;
 
-        [[nodiscard]] inline constexpr SoundStatus status() const noexcept { return m_Status; }
+        [[nodiscard]] inline constexpr SoundStatus getStatus() const noexcept { return m_Status; }
         [[nodiscard]] inline constexpr uint32_t getLoopsLeft() const noexcept { return m_Loops - m_CurrentLoop; }
         [[nodiscard]] inline constexpr bool isActive() const noexcept { return m_Active; }
         bool play(unsigned int numLoops = 1);
@@ -69,4 +71,43 @@ class SoundEffect {
 
         void update(const float dt);
 };
+
+namespace Engine::priv {
+    class SoundEffectLUABinder {
+        private:
+            SoundEffect* m_SoundEffect = nullptr;
+        public:
+            SoundEffectLUABinder() = default;
+            SoundEffectLUABinder(SoundEffect&);
+
+
+            SoundStatus getStatus() const;
+            uint32_t getLoopsLeft() const;
+            bool isActive() const;
+            bool play(luabridge::LuaRef numLoops); // be aware of default parameter value
+            bool pause();
+            bool stop(luabridge::LuaRef stopAllLoops); // be aware of default parameter value
+            bool restart();
+            float getDuration() const;
+            unsigned int getChannelCount() const;
+            float getMinDistance() const;
+            void setMinDistance(float minDistance);
+            bool isRelativeToListener() const;
+            void setRelativeToListener(luabridge::LuaRef relative); // be aware of default parameter value
+            float getAttenuation() const;
+
+            glm::vec3 getPosition() const;
+            void setPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const;
+            void translate(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) const;
+
+            void setAttenuation(float attenuation);
+
+            float getVolume() const;
+            void setVolume(float volume) const;
+            float getPitch() const;
+            void setPitch(float pitch) const;
+    };
+}
+
+
 #endif

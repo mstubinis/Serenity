@@ -107,7 +107,7 @@ void MeshRequest::request(bool inAsync) {
 
 bool MeshRequest::populate() {
     if (m_FileExtension != ".smsh") {
-        m_Importer.m_AIScene = const_cast<aiScene*>(m_Importer.m_Importer_ptr->ReadFile(m_FileOrData, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace));
+        m_Importer.m_AIScene = const_cast<aiScene*>(m_Importer.m_Importer_ptr->ReadFile(m_FileOrData, aiProcess_Triangulate /* | aiProcess_FlipUVs*/ | aiProcess_CalcTangentSpace));
         m_Importer.m_AIRoot  = m_Importer.m_AIScene->mRootNode;
         auto& aiscene        = *m_Importer.m_AIScene;
         auto& aiRootNode     = *m_Importer.m_AIRoot;

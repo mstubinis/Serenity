@@ -176,6 +176,7 @@ namespace Engine::Math {
 
     [[nodiscard]] glm::vec4 PaintersAlgorithm(const glm::vec4& paintColor, const glm::vec4& canvasColor);
     [[nodiscard]] sf::Color PaintersAlgorithm(const sf::Color& paintColor, const sf::Color& canvasColor);
+    [[nodiscard]] std::array<uint8_t, 4> PaintersAlgorithm(const std::array<uint8_t, 4>& paintColor, const std::array<uint8_t, 4>& canvasColor);
 
     [[nodiscard]] bool rayIntersectSphere(const glm::vec3& position, float radius, const glm::vec3& A, const glm::vec3& rayVector);
 };
