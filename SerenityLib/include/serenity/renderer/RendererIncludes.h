@@ -18,43 +18,63 @@ struct ScreenBoxCoordinates {
     glm::vec2 bottomRight = glm::vec2{ 0.0f, 0.0f };
 };
 
-enum class SortingMode : uint32_t {
-    None = 0,
-    FrontToBack,
-    BackToFront,
+class SortingMode {
+    public:
+        enum Type : uint32_t {
+            None = 0,
+            FrontToBack,
+            BackToFront,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(SortingMode, Type)
 };
-enum class DepthFunc : uint32_t {
-    Never    = GL_NEVER,
-    Less     = GL_LESS,
-    Equal    = GL_EQUAL,
-    LEqual   = GL_LEQUAL,
-    Greater  = GL_GREATER,
-    NotEqual = GL_NOTEQUAL,
-    GEqual   = GL_GEQUAL,
-    Always   = GL_ALWAYS,
+class DepthFunc {
+    public:
+        enum Type : uint32_t {
+            Never = GL_NEVER,
+            Less = GL_LESS,
+            Equal = GL_EQUAL,
+            LEqual = GL_LEQUAL,
+            Greater = GL_GREATER,
+            NotEqual = GL_NOTEQUAL,
+            GEqual = GL_GEQUAL,
+            Always = GL_ALWAYS,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(DepthFunc, Type)
 };
-enum class AntiAliasingAlgorithm : uint32_t {
-    None = 0, 
-    FXAA, 
-    SMAA_LOW,
-    SMAA_MED,
-    SMAA_HIGH,
-    SMAA_ULTRA,
+class AntiAliasingAlgorithm {
+    public:
+        enum Type : uint32_t {
+            None = 0,
+            FXAA,
+            SMAA_LOW,
+            SMAA_MED,
+            SMAA_HIGH,
+            SMAA_ULTRA,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(AntiAliasingAlgorithm, Type)
 };
-enum class LightingAlgorithm : uint32_t {
-    Basic = 0,
-    PBR,
+class LightingAlgorithm {
+    public:
+        enum Type : uint32_t {
+            Basic = 0,
+            PBR,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(LightingAlgorithm, Type)
 };
-enum class Alignment : uint32_t {
-    TopLeft = 0,
-    TopCenter,
-    TopRight,
-    Left,
-    Center,
-    Right,
-    BottomLeft,
-    BottomCenter,
-    BottomRight,
+class Alignment {
+    public:
+        enum Type : uint32_t {
+            TopLeft = 0,
+            TopCenter,
+            TopRight,
+            Left,
+            Center,
+            Right,
+            BottomLeft,
+            BottomCenter,
+            BottomRight,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(Alignment, Type)
 };
 class RenderStage { 
     public: 

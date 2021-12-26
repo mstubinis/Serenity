@@ -18,9 +18,9 @@ SMSH_Fileheader::SMSH_Fileheader(MeshCPUData& cpuData) {
 
     if (m_IndiceCount <= 255) {
         m_IndiceDataTypeSize = SMSH_IndiceDataType::Unsigned_Byte;
-    }else if (m_IndiceCount >= 256 && m_IndiceCount <= 65535) {
+    } else if (m_IndiceCount >= 256 && m_IndiceCount <= 65535) {
         m_IndiceDataTypeSize = SMSH_IndiceDataType::Unsigned_Short;
-    }else {
+    } else {
         m_IndiceDataTypeSize = SMSH_IndiceDataType::Unsigned_Int;
     }
     m_UserDataCount    = 2U;
@@ -50,7 +50,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
         readBigEndian(attr.m_AttributeType,           streamDataBuffer, 4, blockStart);
         readBigEndian(attr.m_SizeOfAttribute,         streamDataBuffer, 4, blockStart);         //(example, 96 for 3 float vector, 32 for 2 half float vector, 32 for 1 packed unsigned int normal, etc)
         readBigEndian(attr.m_AttributeComponentCount, streamDataBuffer, 4, blockStart); //(3 for x,y,z | 4 for rgba, 2 for uv, etc)
-        readBigEndian(attr.m_AttributeBufferSize,     streamDataBuffer, 4, blockStart);     //size of the whole data buffer
+        readBigEndian(attr.m_AttributeBufferSize,     streamDataBuffer, 4, blockStart);     //size of the whole data buffer in bytes
         readBigEndian(attr.m_Offset,                  streamDataBuffer, 4, blockStart);
 
         buff = NEW uint8_t[attr.m_AttributeBufferSize];
@@ -251,7 +251,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
 
 #pragma region Normals
     SMSH_Attribute normals_attr{ 
-        SMSH_AttributeDataType::INT_2_10_10_10_REV, SMSH_AttributeComponentSize::BGRA, uvs_attr.m_SizeOfAttribute + uvs_attr.m_Offset, true, 0, sizeof(uint32_t), 0
+        SMSH_AttributeDataType::INT_2_10_10_10_REV, SMSH_AttributeComponentSize::_4, uvs_attr.m_SizeOfAttribute + uvs_attr.m_Offset, true, 0, sizeof(uint32_t), 0
     };
     auto normals = vertexData.getData<uint32_t>(2);
     normals_attr.setBuffer(reinterpret_cast<const uint8_t*>(normals.data()), (uint32_t)(normals.size() * normals_attr.m_SizeOfAttribute));
@@ -259,7 +259,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
 
 #pragma region Binormals
     SMSH_Attribute binormals_attr{ 
-        SMSH_AttributeDataType::INT_2_10_10_10_REV, SMSH_AttributeComponentSize::BGRA, normals_attr.m_Offset + normals_attr.m_SizeOfAttribute, true, 0, sizeof(uint32_t), 0
+        SMSH_AttributeDataType::INT_2_10_10_10_REV, SMSH_AttributeComponentSize::_4, normals_attr.m_Offset + normals_attr.m_SizeOfAttribute, true, 0, sizeof(uint32_t), 0
     };
     auto binormals = vertexData.getData<uint32_t>(3);
     binormals_attr.setBuffer(reinterpret_cast<const uint8_t*>(binormals.data()), (uint32_t)(binormals.size() * binormals_attr.m_SizeOfAttribute));
@@ -267,7 +267,7 @@ void SMSH_File::SaveFile(const char* filename, MeshCPUData& cpuData) {
 
 #pragma region Tangents
     SMSH_Attribute tangents_attr{ 
-        SMSH_AttributeDataType::INT_2_10_10_10_REV, SMSH_AttributeComponentSize::BGRA, binormals_attr.m_Offset + binormals_attr.m_SizeOfAttribute, true, 0, sizeof(uint32_t), 0
+        SMSH_AttributeDataType::INT_2_10_10_10_REV, SMSH_AttributeComponentSize::_4, binormals_attr.m_Offset + binormals_attr.m_SizeOfAttribute, true, 0, sizeof(uint32_t), 0
     };
     auto tangents = vertexData.getData<uint32_t>(4);
     tangents_attr.setBuffer(reinterpret_cast<const uint8_t*>(tangents.data()), (uint32_t)(tangents.size() * tangents_attr.m_SizeOfAttribute));

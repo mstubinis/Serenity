@@ -123,9 +123,9 @@ void EngineCore::init(const EngineOptions& options, GameCore* gameCore) {
         /*auto default_camera = */defaultScene.addCamera<Camera>(60.0f, (float)options.width / (float)options.height, 0.01f, 1000.0f);
         Engine::Resources::setCurrentScene(&defaultScene);
     }
-    Engine::Renderer::ssao::setLevel((SSAOLevel::Level)options.ssao_level);
+    Engine::Renderer::ssao::setLevel(options.ssao_level);
     Engine::Renderer::godRays::enable(options.god_rays_enabled);
-    Engine::Renderer::hdr::setAlgorithm((HDRAlgorithm::Algorithm)options.hdr);
+    Engine::Renderer::hdr::setAlgorithm(options.hdr);
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }

@@ -41,7 +41,7 @@ class TextureCubemap final : public Resource<TextureCubemap>, public Engine::pri
         Handle                                      m_PreEnvTextureHandle      = {};
     public:
         //Empty Texture
-        TextureCubemap(std::string_view textureName = "", bool mipMap = false);
+        TextureCubemap(std::string_view textureName = {}, bool mipMap = false);
         //Single File
         TextureCubemap(std::string_view filename, bool generateMipmaps, ImageInternalFormat);
         //Cubemap from 6 files

@@ -27,7 +27,6 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     auto* camera                       = scene.getActiveCamera();
     const Entity parent                = i->getOwner();
     const auto transform               = parent.getComponent<ComponentTransform>();
-    const glm::mat4 parentWorldMatrix  = transform->getWorldMatrixRendering();
     const auto& animationContainer     = i->getRunningAnimations();
 
     Engine::Renderer::sendUniform1Safe("Object_Color", i->getColor().toPackedInt());
@@ -43,7 +42,7 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     } else {
         Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
     }
-    const glm::mat4 renderingMatrix = parentWorldMatrix * i->getModelMatrix();
+    const glm::mat4 renderingMatrix = transform->getWorldMatrixRendering() * i->getModelMatrix();
 
     //world space normals
     const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ renderingMatrix }));

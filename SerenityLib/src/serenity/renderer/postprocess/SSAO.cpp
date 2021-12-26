@@ -164,12 +164,12 @@ void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, st
     Engine::Renderer::renderFullscreenQuad();
 }
 
-void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
+void Engine::Renderer::ssao::setLevel(const SSAOLevel level) {
     Engine::priv::SSAO::STATIC_SSAO.m_SSAOLevel = level;
     switch (level) {
         case SSAOLevel::Off: {
             break;
-        }case SSAOLevel::Low: {
+        } case SSAOLevel::Low: {
             setSamples(4);
             setIntensity(1.8f);
             setBias(0.048f);
@@ -179,7 +179,7 @@ void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
             setBlurRadius(0.66f);
             setBlurStrength(0.48f);       
             break;
-        }case SSAOLevel::Medium: {
+        } case SSAOLevel::Medium: {
             setSamples(8);
             setIntensity(1.8f);
             setBias(0.048f);
@@ -189,7 +189,7 @@ void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
             setBlurRadius(0.66f);
             setBlurStrength(0.48f);
             break;
-        }case SSAOLevel::High: {
+        } case SSAOLevel::High: {
             setSamples(12);
             setIntensity(1.8f);
             setBias(0.048f);
@@ -199,7 +199,7 @@ void Engine::Renderer::ssao::setLevel(const SSAOLevel::Level level) {
             setBlurRadius(0.66f);
             setBlurStrength(0.48f);
             break;
-        }case SSAOLevel::Ultra: {
+        } case SSAOLevel::Ultra: {
             setSamples(16);
             setIntensity(1.8f);
             setBias(0.048f);

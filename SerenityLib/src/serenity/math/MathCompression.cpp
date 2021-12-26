@@ -29,41 +29,37 @@ glm::vec2 Engine::Compression::unpack2NibblesFromCharBasic(float compressedValue
 }
 
 uint32_t Engine::Compression::pack3NormalsInto32Int(float x, float y, float z) {
-    uint32_t xsign = x < 0; //if x < 0, this = 1, else this = 0
-    uint32_t ysign = y < 0; //if y < 0, this = 1, else this = 0
-    uint32_t zsign = z < 0; //if z < 0, this = 1, else this = 0
-    float w = 0.0f;         //2 bits left for w, should i ever want to use it
-    uint32_t wsign = w < 0; //if w < 0, this = 1, else this = 0
-    uint32_t intW = ((uint32_t)(w + (wsign << 1)) & 1);
-    uint32_t intZ = ((uint32_t)(z * 511 + (zsign << 9)) & 511);
-    uint32_t intY = ((uint32_t)(y * 511 + (ysign << 9)) & 511);
-    uint32_t intX = ((uint32_t)(x * 511 + (xsign << 9)) & 511);
-    uint32_t data =
-        (wsign << 31 | intW << 30) |
-        (zsign << 29 | intZ << 20) |
-        (ysign << 19 | intY << 10) |
-        (xsign << 9 | intX);
-    return data;
+    const uint32_t xs = x < 0.0f;
+    const uint32_t ys = y < 0.0f;
+    const uint32_t zs = z < 0.0f;
+    constexpr float w = 1.0f;
+    const uint32_t ws = w < 0.0f;
+    uint32_t packedVal =
+        ws << 31 | ((uint32_t)(w + (ws << 1)) & 1) << 30 |
+        zs << 29 | ((uint32_t)(z * 0b01'1111'1111 + (zs << 9)) & 0b01'1111'1111) << 20 |
+        ys << 19 | ((uint32_t)(y * 0b01'1111'1111 + (ys << 9)) & 0b01'1111'1111) << 10 |
+        xs <<  9 | ((uint32_t)(x * 0b01'1111'1111 + (xs << 9)) & 0b01'1111'1111);
+    return packedVal;
 }
 glm::vec3 Engine::Compression::unpack3NormalsFrom32Int(uint32_t compressedValue) {
     glm::vec3 conversions;
-    glm::vec3 negatives = glm::vec3(1.0f);
+    glm::vec3 negatives = glm::vec3{ 1.0f };
     //X
-    conversions.x = static_cast<float>(compressedValue & 1023 << 0);
+    conversions.x = static_cast<float>(compressedValue & 0b11'1111'1111 << 0);
     if (conversions.x >= 512.0f) { //2^9
         conversions.x = 1023 - conversions.x; //2^10
         negatives.x *= -1.0f;
     }
     conversions.x /= 511.0f * negatives.x; //(2^9) - 1
     //Y 
-    conversions.y = static_cast<float>(compressedValue & 1023 << 10);
+    conversions.y = static_cast<float>(compressedValue & 0b11'1111'1111 << 10);
     if (conversions.y >= 524289.0f) { //2^19
         conversions.y = 1048575.0f - conversions.y; //2^20
         negatives.y *= -1.0f;
     }
     conversions.y /= 524288.0f * negatives.y; //(2^19) - 1
     //Z
-    conversions.z = static_cast<float>(compressedValue & 1023 << 20);
+    conversions.z = static_cast<float>(compressedValue & 0b11'1111'1111 << 20);
     if (conversions.z >= 536870912.0f) { //2^29
         conversions.z = 1073741824.0f - conversions.z; //2^30
         negatives.z *= -1.0f;

@@ -11,19 +11,25 @@ namespace Engine::priv {
 
 #include <sstream>
 #include <unordered_map>
+#include <serenity/system/Macros.h>
 
 namespace Engine::priv {
     class EditorWindowScene final {
         friend class Engine::priv::EditorWindowSceneFunctions;
         friend class Engine::priv::EditorCore;
         public:
-            enum class TabType {
-                Entities = 0,
-                Renderer,
-                Resources,
-                Profiler,
-                Network,
-            _TOTAL,};
+            class TabType {
+                public: 
+                    enum Type : uint32_t {
+                        Entities = 0,
+                        Renderer,
+                        Resources,
+                        Profiler,
+                        Network,
+                        _TOTAL,
+                    };
+                    BUILD_ENUM_CLASS_MEMBERS(TabType, Type)
+            };
             struct ScriptContent {
                 std::string  data;
                 bool         fromFile = false;

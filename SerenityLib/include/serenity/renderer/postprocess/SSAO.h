@@ -3,6 +3,7 @@
 #define ENGINE_RENDERER_POSTPROCESS_SSAO_H
 
 #include <serenity/system/TypeDefs.h>
+#include <serenity/system/Macros.h>
 
 constexpr uint32_t SSAO_MAX_KERNEL_SIZE = 16U;
 constexpr uint32_t SSAO_NORMALMAP_SIZE  = 16U;
@@ -12,13 +13,17 @@ class  ShaderProgram;
 class  Shader;
 class  Viewport;
 
-struct SSAOLevel { enum Level : uint8_t {
-    Off = 0_uc,
-    Low,
-    Medium,
-    High,
-    Ultra,
-};};
+class SSAOLevel { 
+    public:
+        enum Type : uint8_t {
+            Off = 0_uc,
+            Low,
+            Medium,
+            High,
+            Ultra,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(SSAOLevel, Type)
+};
 
 #include <serenity/resources/Handle.h>
 #include <serenity/dependencies/glm.h>
@@ -50,7 +55,7 @@ namespace Engine::priv {
             SSAO() = default;
             ~SSAO();
         public:
-            SSAOLevel::Level  m_SSAOLevel             = SSAOLevel::Medium;
+            SSAOLevel         m_SSAOLevel             = SSAOLevel::Medium;
             uint32_t          m_ssao_samples          = 8;
             uint32_t          m_ssao_blur_num_passes  = 2;
             uint32_t          m_ssao_noise_texture    = 0;
@@ -72,7 +77,7 @@ namespace Engine::priv {
     };
 };
 namespace Engine::Renderer::ssao {
-    void setLevel(SSAOLevel::Level);
+    void setLevel(const SSAOLevel);
 
     inline void enableBlur(bool blurEnabled = true) noexcept { Engine::priv::SSAO::STATIC_SSAO.m_ssao_do_blur = blurEnabled; }
     inline void disableBlur() noexcept { Engine::priv::SSAO::STATIC_SSAO.m_ssao_do_blur = false; }

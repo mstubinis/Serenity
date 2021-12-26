@@ -57,9 +57,9 @@ VertexDataFormat VertexDataFormat::VertexDataBasic = []() {
     data.m_InterleavingType = VertexAttributeLayout::Interleaved;
     data.add(3,       GL_FLOAT,              false, stride,  0, sizeof(glm::vec3)); //positions
     data.add(2,       GL_FLOAT,              false, stride, 12, sizeof(glm::vec2)); //uvs
-    data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true,  stride, 20, sizeof(GLuint));    //normals
-    data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true,  stride, 24, sizeof(GLuint));    //binormals
-    data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true,  stride, 28, sizeof(GLuint));    //tangents
+    data.add(4, GL_INT_2_10_10_10_REV, true,  stride, 20, sizeof(GLuint));    //normals
+    data.add(4, GL_INT_2_10_10_10_REV, true,  stride, 24, sizeof(GLuint));    //binormals
+    data.add(4, GL_INT_2_10_10_10_REV, true,  stride, 28, sizeof(GLuint));    //tangents
     return data;
 }();
 VertexDataFormat VertexDataFormat::VertexDataAnimated = []() {
@@ -68,9 +68,9 @@ VertexDataFormat VertexDataFormat::VertexDataAnimated = []() {
     data.m_InterleavingType = VertexAttributeLayout::Interleaved;
     data.add(3,       GL_FLOAT,              false, stride,  0, sizeof(glm::vec3)); //positions
     data.add(2,       GL_FLOAT,              false, stride, 12, sizeof(glm::vec2)); //uvs
-    data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true,  stride, 20, sizeof(GLuint));    //normals
-    data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true,  stride, 24, sizeof(GLuint));    //binormals
-    data.add(GL_BGRA, GL_INT_2_10_10_10_REV, true,  stride, 28, sizeof(GLuint));    //tangents
+    data.add(4, GL_INT_2_10_10_10_REV, true,  stride, 20, sizeof(GLuint));    //normals
+    data.add(4, GL_INT_2_10_10_10_REV, true,  stride, 24, sizeof(GLuint));    //binormals
+    data.add(4, GL_INT_2_10_10_10_REV, true,  stride, 28, sizeof(GLuint));    //tangents
     data.add(4,       GL_FLOAT,              false, stride, 32, sizeof(glm::vec4)); //boneIDs
     data.add(4,       GL_FLOAT,              false, stride, 48, sizeof(glm::vec4)); //boneWeights
     return data;

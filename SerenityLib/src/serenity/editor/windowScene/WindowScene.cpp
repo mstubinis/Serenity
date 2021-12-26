@@ -32,7 +32,7 @@ using InternalFunc = void(Engine::priv::EditorWindowScene::*)(Scene&);
 namespace Engine::priv {
     class EditorWindowSceneFunctions {
         public: 
-            constexpr static std::array<std::tuple<const char*, InternalFunc>, (size_t)Engine::priv::EditorWindowScene::TabType::_TOTAL> TAB_TYPES_DATA{ {
+            constexpr static std::array<std::tuple<const char*, InternalFunc>, Engine::priv::EditorWindowScene::TabType::_TOTAL> TAB_TYPES_DATA{ {
                 { "Entities", &Engine::priv::EditorWindowScene::internal_render_entities },
                 { "Renderer", &Engine::priv::EditorWindowScene::internal_render_renderer },
                 { "Resources", &Engine::priv::EditorWindowScene::internal_render_resources },
@@ -439,7 +439,7 @@ void Engine::priv::EditorWindowScene::internal_render_renderer(Scene& currentSce
         static int hdr_algo_current   = int(Engine::priv::HDR::STATIC_HDR.m_Algorithm);
         ImGui::ListBox("HDR Algorithm", &hdr_algo_current, HDRAlgos, IM_ARRAYSIZE(HDRAlgos));
         ImGui::SliderFloat("HDR Exposure", &Engine::priv::HDR::STATIC_HDR.m_Exposure, -15.0f, 15.0f);
-        Engine::Renderer::hdr::setAlgorithm(static_cast<HDRAlgorithm::Algorithm>(hdr_algo_current));
+        Engine::Renderer::hdr::setAlgorithm(hdr_algo_current);
         ImGui::Separator();
     }
     //bloom
@@ -462,10 +462,10 @@ void Engine::priv::EditorWindowScene::internal_render_renderer(Scene& currentSce
     //ssao
     {
         static const char* SSAOLevels[] = { "Off", "Low", "Medium", "High", "Ultra" };
-        static int ssao_algo_current    = int(Engine::priv::SSAO::STATIC_SSAO.m_SSAOLevel);
+        static int ssao_algo_current    = Engine::priv::SSAO::STATIC_SSAO.m_SSAOLevel;
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Screen Space Ambient Occlusion");
         ImGui::ListBox("SSAO Level", &ssao_algo_current, SSAOLevels, IM_ARRAYSIZE(SSAOLevels));
-        Engine::Renderer::ssao::setLevel((SSAOLevel::Level)ssao_algo_current);
+        Engine::Renderer::ssao::setLevel(ssao_algo_current);
         ImGui::SliderFloat("SSAO Bias", &Engine::priv::SSAO::STATIC_SSAO.m_ssao_bias, -3.0f, 3.0f);
         ImGui::SliderFloat("SSAO Scale", &Engine::priv::SSAO::STATIC_SSAO.m_ssao_scale, 0.0f, 3.0f);
         ImGui::SliderFloat("SSAO Radius", &Engine::priv::SSAO::STATIC_SSAO.m_ssao_radius, 0.0f, 10.0f);
@@ -481,7 +481,7 @@ void Engine::priv::EditorWindowScene::internal_render_renderer(Scene& currentSce
         static int aa_algo_current   = int(renderer.m_AA_algorithm);
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Anti-Aliasing");
         ImGui::ListBox("Anti-Aliasing Algorithm", &aa_algo_current, AAAlgos, IM_ARRAYSIZE(AAAlgos));
-        Engine::Renderer::Settings::setAntiAliasingAlgorithm((AntiAliasingAlgorithm)aa_algo_current);
+        Engine::Renderer::Settings::setAntiAliasingAlgorithm(aa_algo_current);
         ImGui::Separator();
     }
     //debugging
@@ -551,18 +551,7 @@ void Engine::priv::EditorWindowScene::internal_render_resources(Scene& currentSc
         for (auto& mesh : meshes) {
             if (ImGui::TreeNode(mesh->name().c_str())) {
 
-                if (ImGui::Button("Save", ImVec2{100, 50})) {
 
-                    VertexData& vertexInfo = const_cast<VertexData&>(mesh->getVertexData());
-                    
-                    auto uvs = vertexInfo.getData<glm::vec2>(1);
-                    for (auto& uv : uvs) {
-                        uv.y = 1.0f - uv.y;
-                    }
-                    vertexInfo.setData(1, uvs.data(), uvs.size(), MeshModifyFlags::UploadToGPU);
-
-                    SMSH_File::SaveFile(std::string{ mesh->name() + "MIRRORED"}.c_str(), mesh->m_CPUData);
-                }
 
                 ImGui::TreePop();
                 ImGui::Separator();

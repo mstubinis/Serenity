@@ -72,6 +72,7 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
         inline void hide() noexcept { show(false); }
 
         [[nodiscard]] inline ModelInstance& getModel(size_t index = 0) noexcept { return *m_ModelInstances[index].get(); }
+        [[nodiscard]] inline const ModelInstance& getModel(size_t index = 0) const noexcept { return *m_ModelInstances[index].get(); }
         ModelInstanceHandle addModel(Handle mesh, Handle material, Handle shaderProgram = {}, RenderStage = RenderStage::GeometryOpaque);
         inline void removeModel(size_t index) noexcept { m_ModelInstances.erase(m_ModelInstances.begin() + index); }
 

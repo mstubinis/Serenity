@@ -222,9 +222,9 @@ void main(){
     VertexPositionsViewSpace = CameraView * worldPos;
     VertexPositionsClipSpace = gl_Position;
 
-    vec3 NormalTrans   = vec4(normal.zyx,   0.0).xyz;
-    vec3 BinormalTrans = vec4(binormal.zyx, 0.0).xyz;
-    vec3 TangentTrans  = vec4(tangent.zyx,  0.0).xyz;
+    vec3 NormalTrans   = vec4(normal.xyz,   0.0).xyz;
+    vec3 BinormalTrans = vec4(binormal.xyz, 0.0).xyz;
+    vec3 TangentTrans  = vec4(tangent.xyz,  0.0).xyz;
 
             Normals = NormalMatrix * NormalTrans;
     vec3 Binormals = NormalMatrix * BinormalTrans;
@@ -455,9 +455,9 @@ void main(){
         BoneTransform += gBones[int(BoneIDs[3])] * Weights[3];
     }
     vec4 PosTrans      =  (BoneTransform * vec4(position,     1.0));
-    vec3 NormalTrans   =  (BoneTransform * vec4(normal.zyx,   0.0)).xyz;
-    vec3 BinormalTrans =  (BoneTransform * vec4(binormal.zyx, 0.0)).xyz;
-    vec3 TangentTrans  =  (BoneTransform * vec4(tangent.zyx,  0.0)).xyz;
+    vec3 NormalTrans   =  (BoneTransform * vec4(normal.xyz,   0.0)).xyz;
+    vec3 BinormalTrans =  (BoneTransform * vec4(binormal.xyz, 0.0)).xyz;
+    vec3 TangentTrans  =  (BoneTransform * vec4(tangent.xyz,  0.0)).xyz;
 
          Normals       = (NormalMatrix * NormalTrans).xyz;
     vec3 Binormals     = (NormalMatrix * BinormalTrans).xyz;
