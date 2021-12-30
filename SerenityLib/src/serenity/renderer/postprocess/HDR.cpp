@@ -70,8 +70,8 @@ bool Engine::priv::HDR::init() {
     STATIC_HDR.internal_init_fragment_code();
 
     auto lambda_part_a = []() {
-        STATIC_HDR.m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        STATIC_HDR.m_Fragment_Shader = Engine::Resources::addResource<Shader>(STATIC_HDR.m_GLSL_frag_code, ShaderType::Fragment, false);
+        STATIC_HDR.m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex);
+        STATIC_HDR.m_Fragment_Shader = Engine::Resources::addResource<Shader>(STATIC_HDR.m_GLSL_frag_code, ShaderType::Fragment);
     };
     auto lambda_part_b = []() {
         STATIC_HDR.m_Shader_Program  = Engine::Resources::addResource<ShaderProgram>("HDR", STATIC_HDR.m_Vertex_Shader, STATIC_HDR.m_Fragment_Shader);

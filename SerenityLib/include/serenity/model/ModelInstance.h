@@ -14,7 +14,7 @@ namespace Engine::priv {
     struct ComponentModel_UpdateFunction;
     class  ModelInstanceAnimation;
     class  RenderModule;
-    class  EditorWindowScene;
+    class  EditorWindowSceneFunctions;
     struct PublicModelInstance final {
         [[nodiscard]] static bool IsViewportValid(const ModelInstance&, const Viewport&);
     };
@@ -36,7 +36,7 @@ namespace Engine::priv {
 class ModelInstance final : public Observer {
     friend struct Engine::priv::ComponentModel_UpdateFunction;
     friend class  Engine::priv::RenderModule;
-    friend class  Engine::priv::EditorWindowScene;
+    friend class  Engine::priv::EditorWindowSceneFunctions;
     friend class  ComponentModel;
     friend class  SystemComponentModel;
 

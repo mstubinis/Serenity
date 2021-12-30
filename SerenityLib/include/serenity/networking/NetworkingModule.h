@@ -18,6 +18,8 @@ namespace Engine::priv {
             SocketManager m_SocketManager;
         public:
             void update(const float dt);
+
+            [[nodiscard]] inline const SocketManager& getSocketManager() const noexcept { return m_SocketManager; }
     };
 };
 

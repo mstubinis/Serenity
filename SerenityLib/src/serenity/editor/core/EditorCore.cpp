@@ -16,9 +16,6 @@
 
 #include <serenity/ecs/components/ComponentScript.h>
 
-#include <fstream>
-#include <filesystem>
-
 Engine::view_ptr<Engine::priv::EditorCore> Engine::priv::EditorCore::EDITOR;
 
 Engine::priv::EditorCore::EditorCore(const EngineOptions& options) {
@@ -36,24 +33,12 @@ Engine::priv::EditorCore::~EditorCore() {
     }
 }
 bool Engine::priv::EditorCore::addComponentScriptData(Entity entity, std::string_view scriptFilePathOrData, bool isFile) {
-    if (isFile) {
-        if (std::filesystem::is_regular_file(scriptFilePathOrData)) {
-            std::ifstream t = std::ifstream(std::string{ scriptFilePathOrData });
-            std::stringstream buffer;
-            buffer << t.rdbuf();
-
-            m_WindowScene->m_ComponentScriptContent[entity.id()].data     = buffer.str();
-            m_WindowScene->m_ComponentScriptContent[entity.id()].fromFile = isFile;
-
-        } else {
-            return false;
-        }
-    } else {
-        m_WindowScene->m_ComponentScriptContent[entity.id()].data     = std::string{scriptFilePathOrData};
-        m_WindowScene->m_ComponentScriptContent[entity.id()].fromFile = isFile;
-    }
-    return true;
+    return m_WindowScene->addComponentScriptData(entity.id(), scriptFilePathOrData, isFile);
 }
+void Engine::priv::EditorCore::addShaderData(Shader& shader, std::string_view shaderCode) {
+    m_WindowScene->addShaderData(shader, shaderCode);
+}
+
 bool Engine::priv::EditorCore::isWindowRegistered(Window& window) const noexcept {
     return m_RegisteredWindows.contains(&window);
 }

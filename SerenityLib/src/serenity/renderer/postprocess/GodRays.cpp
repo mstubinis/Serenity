@@ -50,8 +50,8 @@ bool Engine::priv::GodRays::init() {
     STATIC_GOD_RAYS.internal_init_fragment_code();
 
     auto lambda_part_a = []() {
-        STATIC_GOD_RAYS.m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        STATIC_GOD_RAYS.m_Fragment_Shader = Engine::Resources::addResource<Shader>(STATIC_GOD_RAYS.m_GLSL_frag_code, ShaderType::Fragment, false);
+        STATIC_GOD_RAYS.m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex);
+        STATIC_GOD_RAYS.m_Fragment_Shader = Engine::Resources::addResource<Shader>(STATIC_GOD_RAYS.m_GLSL_frag_code, ShaderType::Fragment);
     };
     auto lambda_part_b = []() {
         STATIC_GOD_RAYS.m_Shader_Program  = Engine::Resources::addResource<ShaderProgram>("GodRays", STATIC_GOD_RAYS.m_Vertex_Shader, STATIC_GOD_RAYS.m_Fragment_Shader);

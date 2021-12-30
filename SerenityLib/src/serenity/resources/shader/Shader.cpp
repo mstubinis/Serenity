@@ -1,7 +1,7 @@
-
 #include <serenity/resources/shader/Shader.h>
 #include <serenity/resources/shader/ShaderHelper.h>
-#include <serenity/renderer/Renderer.h>
+
+#include <serenity/renderer/opengl/State.h>
 
 #include <serenity/renderer/opengl/glsl/Common.h>
 #include <serenity/renderer/opengl/glsl/Compression.h>
@@ -13,84 +13,144 @@
 #include <serenity/renderer/opengl/glsl/SSAOCode.h>
 #include <serenity/renderer/opengl/glsl/DepthOfFieldCode.h>
 
-#include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/iostreams/stream.hpp>
+#include <serenity/system/Engine.h>
+#include <serenity/editor/core/EditorCore.h>
+
+#include <fstream>
 #include <regex>
+#include <filesystem>
 
-using boost_stream_mapped_file = boost::iostreams::stream<boost::iostreams::mapped_file_source>;
+namespace {
+    uint32_t CREATED_SHADER_COUNT = 0;
 
-Shader::Shader(std::string_view filenameOrCode, ShaderType shaderType, bool fromFile)
+    void load_code_from_file(const std::string& filename, std::string& code) {
+        ASSERT(std::filesystem::is_regular_file(filename), "");
+        std::ifstream filestream(filename);
+        filestream.seekg(0, std::ios::end);
+        size_t size = filestream.tellg();
+        code.resize(size, ' ');
+        filestream.seekg(0);
+        filestream.read(code.data(), size);
+    }
+    std::string get_version_line(const std::string& code) {
+        std::string versionLine;
+        std::istringstream strstream{ code };
+        if (Engine::priv::ShaderHelper::sfind(code, "#version ")) {
+            //use the found one
+            while (std::getline(strstream, versionLine)) {
+                if (Engine::priv::ShaderHelper::sfind(versionLine, "#version ")) {
+                    break;
+                }
+            }
+        } else {
+            //generate one
+            std::string core;
+            if (Engine::priv::OpenGLState::constants.GLSL_VERSION >= 330 && Engine::priv::OpenGLState::constants.GLSL_VERSION < 440) {
+                core = " core";
+            }
+            versionLine = "#version " + std::to_string(Engine::priv::OpenGLState::constants.GLSL_VERSION) + core + "\n";
+        }
+        return versionLine;
+    }
+    void convert_code(std::string& shaderCode, Shader& shader) {
+        //get / generate a version line
+        const std::string versionLine = get_version_line(shaderCode);
+
+        const uint32_t versionNumber = uint32_t(std::stoi(std::regex_replace(versionLine, std::regex("([^0-9])"), "")));
+
+        Engine::priv::opengl::glsl::Materials::convert(shaderCode, versionNumber, shader.getType());
+        Engine::priv::opengl::glsl::Lighting::convert(shaderCode, versionNumber, shader.getType());
+        Engine::priv::opengl::glsl::Shadows::convert(shaderCode, versionNumber, shader.getType());
+        Engine::priv::opengl::glsl::SSAOCode::convert(shaderCode, versionNumber, shader.getType());
+        Engine::priv::opengl::glsl::Compression::convert(shaderCode, versionNumber, shader.getType());
+        Engine::priv::opengl::glsl::DepthOfFieldCode::convert(shaderCode, versionNumber, shader.getType());
+        Engine::priv::opengl::glsl::DeferredFunctions::convert(shaderCode, versionNumber, shader.getType());
+        Engine::priv::opengl::glsl::Common::convert(shaderCode, versionNumber, shader.getType());
+        Engine::priv::opengl::glsl::VersionConversion::convert(shaderCode, versionNumber, shader.getType());
+
+        //put the version on top as the last step
+        shaderCode = versionLine + shaderCode;
+    }
+    void internal_unload(bool isLoaded, GLuint& GLShaderID, Shader& shader) {
+        if (isLoaded) {
+            if (GLShaderID) {
+                glDeleteShader(GLShaderID);
+                GLShaderID = 0;
+            }
+            shader.Resource::unload();
+        }
+    }
+    void send_code_to_editor(std::string& shaderCode, Shader& shader) {
+        if (Engine::priv::Core::m_Engine->m_Editor.isEnabled()) {
+            Engine::priv::Core::m_Engine->m_Editor.addShaderData(shader, shaderCode);
+        }
+    }
+}
+
+Shader::Shader(std::string_view filenameOrCode, ShaderType shaderType)
     : Resource    { ResourceType::Shader }
     , m_FileName  { filenameOrCode }
     , m_ShaderType{ shaderType }
-    , m_FromFile  { fromFile }
 {
-    if (fromFile) {
-        setName(filenameOrCode);
-        m_FileName = filenameOrCode;
+    if (std::filesystem::is_regular_file(m_FileName)) {
+        setName(m_FileName);
     } else {
-        setName("N/A");
-        m_Code     = filenameOrCode;
+        setName("Shader " + std::to_string(CREATED_SHADER_COUNT++));
     }
-    Engine::priv::PublicShader::ConvertCode(*this);
+    load();
 }
 Shader::Shader(Shader&& other) noexcept 
     : Resource{ std::move(other) }
+    , m_FileName  { std::exchange(other.m_FileName, std::string{}) }
+    , m_Code      { std::exchange(other.m_Code, std::string{}) }
     , m_ShaderType{ std::move(other.m_ShaderType) }
-    , m_FromFile  { std::move(other.m_FromFile) }
-    , m_FileName  { std::move(other.m_FileName) }
-    , m_Code      { std::move(other.m_Code) }
+    , m_GLShaderID{ std::exchange(other.m_GLShaderID, 0) }
 {}
 Shader& Shader::operator=(Shader&& other) noexcept {
-    Resource::operator=(std::move(other));
-    m_ShaderType = std::move(other.m_ShaderType);
-    m_FromFile   = std::move(other.m_FromFile);
-    m_FileName   = std::move(other.m_FileName);
-    m_Code       = std::move(other.m_Code);
+    if (this != &other) {
+        Resource::operator=(std::move(other));
+        m_FileName   = std::exchange(other.m_FileName, std::string{});
+        m_Code       = std::exchange(other.m_Code, std::string{});
+        m_ShaderType = std::move(other.m_ShaderType);
+        m_GLShaderID = std::exchange(other.m_GLShaderID, 0);
+    }
     return *this;
 }
+Shader::~Shader() {
+    unload();
+}
 
-void Engine::priv::PublicShader::ConvertCode(Shader& shader) {
-    //load initial code
-    if (shader.m_FromFile) {
-        std::string code;
-        boost_stream_mapped_file strm(shader.m_FileName);
-        std::string line;
-        for (; std::getline(strm, line, '\n');) {
-            code += "\n" + line;
-        }
-        shader.m_Code = code;
+void Shader::load(const std::string& code) {
+    unload();
+    if (!m_IsLoaded && !code.empty()) {
+        m_Code = code;
+        Resource::load();
     }
-    //see if we actually have a version line
-    std::string versionLine;
-    std::istringstream strstream{ shader.m_Code };
-    if (ShaderHelper::sfind(shader.m_Code, "#version ")) {
-        //use the found one
-        while (std::getline(strstream, versionLine)) {
-            if (ShaderHelper::sfind(versionLine, "#version ")) {
-                break;
-            }
+}
+void Shader::load() {
+    if (!m_IsLoaded || m_Code.empty()) {
+        if (std::filesystem::is_regular_file(m_FileName)) {
+            //load initial code from file
+            load_code_from_file(m_FileName, m_Code);
+        } else {
+            ASSERT(!m_FileName.empty(), "");
+            m_Code = std::move(m_FileName);
+            m_FileName.clear();
         }
-    } else {
-        //generate one
-        std::string core;
-        if (Engine::priv::OpenGLState::constants.GLSL_VERSION >= 330 && Engine::priv::OpenGLState::constants.GLSL_VERSION < 440) {
-            core = " core";
-        }
-        versionLine = "#version " + std::to_string(Engine::priv::OpenGLState::constants.GLSL_VERSION) + core + "\n";
+        convert_code(m_Code, *this);
+        send_code_to_editor(m_Code, *this);
+        Resource::load();
     }
-    const auto versionNumber = static_cast<uint32_t>(std::stoi(std::regex_replace(versionLine, std::regex("([^0-9])"), "")));
-
-    Engine::priv::opengl::glsl::Materials::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
-    Engine::priv::opengl::glsl::Lighting::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
-    Engine::priv::opengl::glsl::Shadows::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
-    Engine::priv::opengl::glsl::SSAOCode::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
-    Engine::priv::opengl::glsl::Compression::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
-    Engine::priv::opengl::glsl::DepthOfFieldCode::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
-    Engine::priv::opengl::glsl::DeferredFunctions::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
-    Engine::priv::opengl::glsl::Common::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
-    Engine::priv::opengl::glsl::VersionConversion::convert(shader.m_Code, versionNumber, shader.m_ShaderType);
-
-    //put the version on top as the last step :)
-    shader.m_Code = versionLine + shader.m_Code;
+}
+void Shader::unload() {
+    Shader::orphan();
+    internal_unload(m_IsLoaded, m_GLShaderID, *this);
+}
+void Shader::orphan(bool force) {
+    if (!m_FileName.empty()) {
+        m_Code.clear();
+    } else if (force) {
+        m_Code.clear();
+        internal_unload(true, m_GLShaderID, *this);
+    }
 }

@@ -1305,10 +1305,10 @@ uniform vec4 materials[MATERIAL_COUNT_LIMIT];
 varying vec2 texcoords;
 flat varying vec3 CamRealPosition;
 
-vec3 SchlickFrenselRoughness(float inTheta, vec3 inF0, float inRoughness){
+vec3 SchlickFrenselRoughness(float inTheta, vec3 inF0, float inRoughness) {
     return inF0 + (max(vec3(1.0 - inRoughness), inF0) - inF0) * pow(1.0 - inTheta, 5.0);
 }
-void main(){
+void main() {
     vec2 uv               = gl_FragCoord.xy / ScreenInfo.xy;
 
     float inSSAO          = 1.0 - texture2D(USE_SAMPLER_2D(gSSAOMap), uv).a;
@@ -1324,8 +1324,7 @@ void main(){
     vec3 inMatF0          = Unpack3FloatsInto1FloatUnsigned(materials[index].r);
     vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(RendererInfo1.x);
     vec4 GILight          = CalcGILight(inSSAO, inNormals, inAlbedo, inWorldPosition, inAO, inMetalSmooth.x, inMetalSmooth.y, inGlow, inMatF0, materials[index].g, inGIContribution);
-    gl_FragColor          += GILight;
-    gl_FragColor.rgb = max(gl_FragColor.rgb, inGlow * inAlbedo);
+    gl_FragColor.rgb = max(GILight.rgb, inGlow * inAlbedo);
 }
 )";
 #pragma endregion
@@ -1391,6 +1390,7 @@ void main(){
 #pragma endregion
 
 #pragma region LightingFragGIBasic
+//gl_FragColor.rgb = inAlbedo * inGlow; frambuffer blending is enabled, so color is not overwritten just blended on
 Engine::priv::EShaders::lighting_frag_gi_basic = R"(
 #define MATERIAL_COUNT_LIMIT 255
 
@@ -1401,10 +1401,11 @@ varying vec2 texcoords;
 flat varying vec3 CamRealPosition;
 
 void main(){
+    vec4 PrevCanvas  = gl_FragColor;
     vec2 uv          = gl_FragCoord.xy / ScreenInfo.xy;
     vec3 inAlbedo    = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;
     float inGlow     = texture2D(USE_SAMPLER_2D(gNormalMap), uv).a;
-    gl_FragColor.rgb = max(gl_FragColor.rgb, inAlbedo * inGlow);
+    gl_FragColor.rgb = inAlbedo * inGlow;
 }
 )";
 #pragma endregion

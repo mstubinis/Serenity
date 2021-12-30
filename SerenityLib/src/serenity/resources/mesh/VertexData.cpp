@@ -19,12 +19,14 @@ VertexData::VertexData(VertexData&& other) noexcept
     , m_VAO       { std::exchange(other.m_VAO, 0)  }
 {}
 VertexData& VertexData::operator=(VertexData&& other) noexcept {
-    m_Format    = std::move(other.m_Format);
-    m_Data      = std::move(other.m_Data);
-    m_Indices   = std::move(other.m_Indices);
-    m_Triangles = std::move(other.m_Triangles);
-    m_Buffers   = std::move(other.m_Buffers);
-    m_VAO       = std::exchange(other.m_VAO, 0);
+    if (this != &other) {
+        m_Format    = std::move(other.m_Format);
+        m_Data      = std::move(other.m_Data);
+        m_Indices   = std::move(other.m_Indices);
+        m_Triangles = std::move(other.m_Triangles);
+        m_Buffers   = std::move(other.m_Buffers);
+        m_VAO       = std::exchange(other.m_VAO, 0);
+    }
     return *this;
 }
 VertexData::~VertexData() {
@@ -45,7 +47,7 @@ void VertexData::finalize() {
         sendDataToGPU(false, -1);
         m_Format.bind(*this);
         Engine::Renderer::bindVAO(0);
-    }else{
+    } else {
         sendDataToGPU(false, -1);
         m_Format.bind(*this);
     }
@@ -53,7 +55,7 @@ void VertexData::finalize() {
 void VertexData::bind() const {
     if (m_VAO) {
         Engine::Renderer::bindVAO(m_VAO);
-    }else{
+    } else {
         std::for_each(std::cbegin(m_Buffers), std::cend(m_Buffers), [](const auto& buffer) {
             buffer.bind();
         });
@@ -63,7 +65,7 @@ void VertexData::bind() const {
 void VertexData::unbind() const {
     if (m_VAO) {
         Engine::Renderer::bindVAO(0);
-    }else{
+    } else {
         m_Format.unbind();
     }
 }
@@ -79,7 +81,7 @@ std::vector<glm::vec3> VertexData::getPositions() const {
         for (const auto& half : pts_half) {
             points.emplace_back(Engine::Math::Float32From16(half.x), Engine::Math::Float32From16(half.y), Engine::Math::Float32From16(half.z));
         }
-    }else{
+    } else {
         points = getData<glm::vec3>(0);
     }
     return points;
@@ -109,10 +111,10 @@ void VertexData::setIndices(const uint32_t* data, size_t bufferCount, MeshModify
                 if (j == 1) {
                     tri.position1 = positions[index];
                     tri.index1    = index;
-                }else if (j == 2) {
+                } else if (j == 2) {
                     tri.position2 = positions[index];
                     tri.index2    = index;
-                }else if (j == 3) {
+                } else if (j == 3) {
                     tri.position3 = positions[index];
                     tri.index3    = index;
                     tri.midpoint  = tri.position1 + tri.position2 + tri.position3;
@@ -158,7 +160,7 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
             }
         }
         (!orphan) ? vertexBuffer.setData(size, gpu_data_buffer.data(), BufferDataDrawType::Dynamic) : vertexBuffer.setDataOrphan(gpu_data_buffer.data());
-    }else{
+    } else {
         if (attributeIndex == -1) {
             for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index) {
                 size += m_Format.m_Attributes[attribute_index].typeSize * m_Data[attribute_index].m_Size;
@@ -173,13 +175,13 @@ void VertexData::sendDataToGPU(bool orphan, int attributeIndex) {
                 accumulator          += blockSize;
             }
             (!orphan) ? vertexBuffer.setData(size, gpu_data_buffer.data(), BufferDataDrawType::Dynamic) : vertexBuffer.setDataOrphan(gpu_data_buffer.data());
-        }else{
+        } else {
             size += (m_Format.m_Attributes[attributeIndex].typeSize * m_Data[attributeIndex].m_Size);
             gpu_data_buffer.reserve(size);
             for (size_t attribute_index = 0; attribute_index < m_Data.size(); ++attribute_index) {
                 if (attribute_index != attributeIndex) {
                     accumulator += m_Data[attribute_index].m_Size * m_Format.m_Attributes[attribute_index].typeSize;
-                }else{
+                } else {
                     auto* gpu_destination     = &(gpu_data_buffer.data())[0];
                     auto& src_data            = m_Data[attribute_index];
                     auto* cpu_source          = &(src_data.m_Buffer.data())[0];

@@ -69,8 +69,8 @@ bool Engine::priv::FXAA::init() {
     STATIC_FXAA.internal_init_fragment_code();
 
     auto lambda_part_a = []() {
-        STATIC_FXAA.m_Vertex_shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        STATIC_FXAA.m_Fragment_shader = Engine::Resources::addResource<Shader>(STATIC_FXAA.m_GLSL_frag_code, ShaderType::Fragment, false);
+        STATIC_FXAA.m_Vertex_shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex);
+        STATIC_FXAA.m_Fragment_shader = Engine::Resources::addResource<Shader>(STATIC_FXAA.m_GLSL_frag_code, ShaderType::Fragment);
     };
     auto lambda_part_b = []() {
         STATIC_FXAA.m_Shader_program  = Engine::Resources::addResource<ShaderProgram>("FXAA", STATIC_FXAA.m_Vertex_shader, STATIC_FXAA.m_Fragment_shader);

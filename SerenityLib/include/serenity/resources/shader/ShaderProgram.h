@@ -14,10 +14,6 @@ namespace Engine::priv {
     class RenderModule;
     class IRenderingPipeline;
     class PublicShaderProgram final {
-        private:
-            static uint32_t CompileShader(Shader&, const char* sourceCode, uint32_t GLShaderType);
-            static bool     LinkShadersToProgram(ShaderProgram&, const std::vector<uint32_t>& shaderIDs, std::vector<char>& errors, const char* fragmentSourceCode = "");
-            static void     PopulateUniformTable(ShaderProgram&);
         public:
             static void LoadCPU(ShaderProgram&);
             static void LoadGPU(ShaderProgram&);
@@ -59,7 +55,7 @@ class ShaderProgram final : public Resource<ShaderProgram> {
         BindFunc                                   m_CustomBindFunctor  = [](ShaderProgram*) {};
         UniformsContainer                          m_UniformLocations;
         std::unordered_set<GLuint>                 m_AttachedUBOs;
-        std::vector<std::pair<Handle, ShaderType>> m_Shaders; //0 = vertex, 1 = fragment, 2 = geometry
+        std::vector<std::pair<Handle, ShaderType>> m_Shaders;
         GLuint                                     m_ShaderProgram      = 0;
 		bool                                       m_LoadedCPU          = false;
 		bool                                       m_LoadedGPU          = false;
@@ -67,9 +63,11 @@ class ShaderProgram final : public Resource<ShaderProgram> {
         void internal_init(std::string_view inName, const ShaderProgramParameters&);
     public:
         ShaderProgram() = default;
-        ShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader);
-        ShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader, Handle geometryShader);
-        ShaderProgram(std::string_view name, const ShaderProgramParameters&);
+        ShaderProgram(std::string_view shaderProgramName, Handle vertexShader, Handle fragmentShader);
+        ShaderProgram(std::string_view shaderProgramName, Handle vertexShader, Handle fragmentShader, Handle geometryShader);
+        ShaderProgram(std::string_view shaderProgramName, const ShaderProgramParameters&);
+        ShaderProgram(std::string_view shaderProgramName, std::string_view vertexShaderFileOrContent, std::string_view fragmentShaderFileOrContent);
+
         ShaderProgram(const ShaderProgram&)            = delete;
         ShaderProgram& operator=(const ShaderProgram&) = delete;
         ShaderProgram(ShaderProgram&&) noexcept;
@@ -79,11 +77,10 @@ class ShaderProgram final : public Resource<ShaderProgram> {
         inline void setCustomBindFunctor(const BindFunc& function) noexcept { m_CustomBindFunctor = function; }
         inline void setCustomBindFunctor(BindFunc&& function) noexcept { m_CustomBindFunctor = std::move(function); }
 
-        //inline constexpr operator GLuint() const noexcept { return m_ShaderProgram; }
-
         void load();
         void unload();
 
+        [[nodiscard]] inline const std::vector<std::pair<Handle, ShaderType>>& getShaders() const noexcept { return m_Shaders; }
         [[nodiscard]] inline constexpr GLuint program() const noexcept { return m_ShaderProgram; }
         [[nodiscard]] inline const UniformsContainer& uniforms() const noexcept { return m_UniformLocations; }
 };

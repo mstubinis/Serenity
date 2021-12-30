@@ -275,6 +275,8 @@ LUABinder::LUABinder()
             .addFunction("getDistance", &Engine::priv::ComponentTransformLUABinder::getDistance)
             //.addFunction("getScreenCoordinates", &Engine::priv::ComponentTransformLUABinder::getScreenCoordinates)
             .addFunction("alignTo", &Engine::priv::ComponentTransformLUABinder::alignTo)
+            .addFunction("alignToDirection", &Engine::priv::ComponentTransformLUABinder::alignToDirection)
+            .addFunction("alignToPosition", &Engine::priv::ComponentTransformLUABinder::alignToPosition)
 
             .addFunction("getRotation", &Engine::priv::ComponentTransformLUABinder::getRotation)
             .addFunction("getPosition", &Engine::priv::ComponentTransformLUABinder::getPosition)

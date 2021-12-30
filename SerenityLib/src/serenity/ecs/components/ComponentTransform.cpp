@@ -66,13 +66,26 @@ uint64_t ComponentTransform::getDistanceLL(Entity other) const {
     return uint64_t(getDistance(other));
 }
 void ComponentTransform::alignTo(float dirX, float dirY, float dirZ) {
+    alignToDirection(dirX, dirY, dirZ);
+}
+void ComponentTransform::alignTo(const glm::vec3& direction) {
+    alignToDirection(direction);
+}
+void ComponentTransform::alignToDirection(float dirX, float dirY, float dirZ) {
     m_Rotation = Engine::Math::alignTo(dirX, dirY, dirZ);
     Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
 }
-void ComponentTransform::alignTo(const glm::vec3& direction) {
-    const auto norm_dir = glm::normalize(direction);
-    alignTo(norm_dir.x, norm_dir.y, norm_dir.z);
+void ComponentTransform::alignToDirection(const glm::vec3& direction) {
+    alignToDirection(direction.x, direction.y, direction.z);
 }
+void ComponentTransform::alignToPosition(decimal x, decimal y, decimal z) {
+    const glm_vec3 wPos = getWorldPosition();
+    alignToDirection(static_cast<float>(x - wPos.x), static_cast<float>(y - wPos.y), static_cast<float>(z - wPos.z));
+}
+void ComponentTransform::alignToPosition(const glm_vec3& position) {
+    alignToPosition(position.x, position.y, position.z);
+}
+
 void ComponentTransform::translate(decimal x, decimal y, decimal z, bool local) {
     glm_vec3 offset{ x, y, z };
     if (local) {
@@ -356,7 +369,24 @@ void Engine::priv::ComponentTransformLUABinder::alignTo(luabridge::LuaRef x, lua
         }
     }
 }
-
+void Engine::priv::ComponentTransformLUABinder::alignToDirection(luabridge::LuaRef dirX, luabridge::LuaRef dirY, luabridge::LuaRef dirZ) {
+    if (!dirX.isNil()) {
+        if (dirX.isNumber() && dirY.isNumber() && dirZ.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->alignToDirection(dirX.cast<float>(), dirY.cast<float>(), dirZ.cast<float>());
+        } else {
+            m_Owner.getComponent<ComponentTransform>()->alignToDirection(dirX.cast<glm::vec3>());
+        }
+    }
+}
+void Engine::priv::ComponentTransformLUABinder::alignToPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z) {
+    if (!x.isNil()) {
+        if (x.isNumber() && y.isNumber() && z.isNumber()) {
+            m_Owner.getComponent<ComponentTransform>()->alignToPosition(x.cast<decimal>(), y.cast<decimal>(), z.cast<decimal>());
+        } else {
+            m_Owner.getComponent<ComponentTransform>()->alignToPosition(x.cast<glm_vec3>());
+        }
+    }
+}
 const glm_mat4& Engine::priv::ComponentTransformLUABinder::getWorldMatrix() const {
     return m_Owner.getComponent<ComponentTransform>()->getWorldMatrix();
 }

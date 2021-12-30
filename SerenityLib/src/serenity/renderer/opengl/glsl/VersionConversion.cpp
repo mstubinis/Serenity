@@ -6,6 +6,8 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <array>
 
+#include <serenity/renderer/opengl/State.h>
+
 //TODO: change from [const char* const] to [string] in c++20?
 namespace {
     constexpr std::array<const char*, 30> TYPES { {
@@ -44,42 +46,48 @@ namespace {
 void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
     //deal with MRT binding points
     if (versionNumber >= 130) {
-        for (uint32_t i = 0; i < 100; ++i) {
+        if (shaderType == ShaderType::Fragment) {
+            boost::replace_all(code, "gl_FragColor", "gl_FragData[0]");
+        }
+    }
+    if (versionNumber >= 130) {
+        for (GLint i = 0; i < Engine::priv::OpenGLState::constants.MAX_DRAW_BUFFERS; ++i) {
             const std::string fragDataStr = "gl_FragData[" + std::to_string(i) + "]";
             if (ShaderHelper::sfind(code, fragDataStr)) {
                 const std::string outFragData = "FRAG_COL_" + std::to_string(i);
                 if (versionNumber >= 130 && versionNumber < 330) {
                     ShaderHelper::insertStringAtLine(code, "out vec4 " + outFragData + ";", 1);
-                }else if (versionNumber >= 330) {
-                    ShaderHelper::insertStringAtLine(code, "layout (location = " + std::to_string(i) + ") out vec4 " + outFragData + ";", 1);
+                } else if (versionNumber >= 330) {
+                    ShaderHelper::insertStringAtLine(code, "layout (location = " + std::to_string(i) + ") out vec4 " + outFragData + ";\n", 1);
                 }
                 boost::replace_all(code, fragDataStr, outFragData);
             }
         }
     }
     if (versionNumber >= 110) {
+        //TODO: are these needed?
+        /*
         if (shaderType == ShaderType::Vertex) {
             boost::replace_all(code, "highp ", "");
             boost::replace_all(code, "mediump ", "");
             boost::replace_all(code, "lowp ", "");
-        }else if (shaderType == ShaderType::Fragment) {
+        } else if (shaderType == ShaderType::Fragment) {
             boost::replace_all(code, "highp ", "");
             boost::replace_all(code, "mediump ", "");
             boost::replace_all(code, "lowp ", "");
         }
+        */
     }
     if (versionNumber >= 130) {
         if (shaderType == ShaderType::Vertex) {
             boost::replace_all(code, "varying ", "out ");
-        }else if (shaderType == ShaderType::Fragment) {
+        } else if (shaderType == ShaderType::Fragment) {
             boost::replace_all(code, "varying ", "in ");
-            boost::replace_all(code, "gl_FragColor", "FRAG_COL");
-            code = "out vec4 FRAG_COL;\n" + code;
         }
     }
     if (versionNumber >= 140) {
         if (shaderType == ShaderType::Vertex) {
-        }else if (shaderType == ShaderType::Fragment) {
+        } else if (shaderType == ShaderType::Fragment) {
             boost::replace_all(code, "textureCube(", "texture(");
             boost::replace_all(code, "textureCubeLod(", "textureLod(");
             boost::replace_all(code, "texture2DLod(", "textureLod(");
@@ -88,7 +96,7 @@ void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, u
     }
     if (versionNumber >= 150) {
         if (shaderType == ShaderType::Vertex) {
-        }else if (shaderType == ShaderType::Fragment) {
+        } else if (shaderType == ShaderType::Fragment) {
         }
     }
     if (versionNumber >= 330) {
@@ -117,7 +125,7 @@ void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, u
                 }
                 ++count;
             }
-        }else if (shaderType == ShaderType::Fragment) {
+        } else if (shaderType == ShaderType::Fragment) {
         }
     }
     //deal with layout (location = X) in
@@ -127,14 +135,14 @@ void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, u
                 if (versionNumber > 130) {
                     if (OpenGLExtensions::supported(OpenGLExtensions::EXT_separate_shader_objects)) {
                         code = "#extension GL_EXT_separate_shader_objects : enable\n" + code;
-                    }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_separate_shader_objects)) {
+                    } else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_separate_shader_objects)) {
                         code = "#extension GL_ARB_separate_shader_objects : enable\n" + code;
                     }if (OpenGLExtensions::supported(OpenGLExtensions::EXT_explicit_attrib_location)) {
                         code = "#extension GL_EXT_explicit_attrib_location : enable\n" + code;
-                    }else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_explicit_attrib_location)) {
+                    } else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_explicit_attrib_location)) {
                         code = "#extension GL_ARB_explicit_attrib_location : enable\n" + code;
                     }
-                }else{
+                } else {
                     //replace with attribute
                     std::istringstream str(code);
                     std::string line;
@@ -166,13 +174,13 @@ void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, u
 
             if (OpenGLExtensions::supported(OpenGLExtensions::ARB_bindless_texture)) {
                 code = "#extension GL_ARB_bindless_texture : require\n" + code; //yes this is very much needed
-            }else if (OpenGLExtensions::supported(OpenGLExtensions::NV_bindless_texture)) {
+            } else if (OpenGLExtensions::supported(OpenGLExtensions::NV_bindless_texture)) {
                 code = "#extension GL_NV_bindless_texture : require\n" + code; //yes this is very much needed
             }
 
             if (OpenGLExtensions::supported(OpenGLExtensions::ARB_gpu_shader_int64)) {
                 code = "#extension GL_ARB_gpu_shader_int64 : require\n" + code; // for uint64_t
-            }else if (OpenGLExtensions::supported(OpenGLExtensions::NV_gpu_shader5)) {
+            } else if (OpenGLExtensions::supported(OpenGLExtensions::NV_gpu_shader5)) {
                 code = "#extension GL_NV_gpu_shader5 : require\n" + code; // for uint64_t
             }
         }

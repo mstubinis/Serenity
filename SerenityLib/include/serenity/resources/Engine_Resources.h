@@ -200,9 +200,10 @@ namespace Engine::Resources {
         Handle smoothness = {}
     );
 
-    [[nodiscard]] Handle addShader(std::string_view shaderFileOrData, ShaderType shaderType, bool fromFile = true);
+    [[nodiscard]] Handle loadShader(std::string_view shaderFileOrData, ShaderType shaderType);
 
     [[nodiscard]] Handle addShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader);
+    [[nodiscard]] Handle addShaderProgram(std::string_view name, std::string_view vertexShaderFileOrData, std::string_view fragmentShaderFileOrData);
 };
 namespace Engine::priv::lua::resources {
     Engine::priv::SceneLUABinder getCurrentSceneLUA();

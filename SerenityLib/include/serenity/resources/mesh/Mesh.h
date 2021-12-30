@@ -108,8 +108,8 @@ class Mesh final: public Resource<Mesh>, public Observer {
         BindFunc       m_CustomBindFunctor   = [](Mesh*, const Engine::priv::RenderModule*) {};
         UnbindFunc     m_CustomUnbindFunctor = [](Mesh*, const Engine::priv::RenderModule*) {};
 
-        void internal_recalc_indices_from_terrain(const Terrain& terrain);
-        void internal_build_from_terrain(const Terrain& terrain);
+        void internal_recalc_indices_from_terrain(const Terrain&);
+        void internal_build_from_terrain(const Terrain&);
     public:
         Mesh();
         Mesh(VertexData&, std::string_view name, float threshold = MESH_DEFAULT_THRESHOLD);

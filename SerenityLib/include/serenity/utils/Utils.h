@@ -97,7 +97,11 @@ namespace Engine {
                         std::swap(container[i], container[last]);
                     }
                 }
-                container.pop_back();
+                if (container.size() > 1) {
+                    container.pop_back();
+                } else {
+                    container.clear();
+                }
                 return true;
             }
             ++i;
@@ -122,7 +126,11 @@ namespace Engine {
                         --i;
                     }
                 }
-                container.pop_back();
+                if (container.size() > 1) {
+                    container.pop_back();
+                } else {
+                    container.clear();
+                }
                 ++totalRemoved;
             }
             ++i;
@@ -143,7 +151,11 @@ namespace Engine {
                     std::swap(container[index], container[last]);
                 }
             }
-            container.pop_back();
+            if (container.size() > 1) {
+                container.pop_back();
+            } else {
+                container.clear();
+            }
             return true;
         }
         return false;

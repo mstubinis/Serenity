@@ -71,8 +71,8 @@ bool Engine::priv::DepthOfField::init() {
     STATIC_DOF.internal_init_fragment_code();
 
     Engine::priv::threading::addJobWithPostCallback([]() {
-        STATIC_DOF.m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex, false);
-        STATIC_DOF.m_Fragment_Shader = Engine::Resources::addResource<Shader>(STATIC_DOF.m_GLSL_frag_code, ShaderType::Fragment, false);
+        STATIC_DOF.m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex);
+        STATIC_DOF.m_Fragment_Shader = Engine::Resources::addResource<Shader>(STATIC_DOF.m_GLSL_frag_code, ShaderType::Fragment);
     }, 
     []() {
         STATIC_DOF.m_Shader_Program  = Engine::Resources::addResource<ShaderProgram>("DepthOfField", STATIC_DOF.m_Vertex_Shader, STATIC_DOF.m_Fragment_Shader);

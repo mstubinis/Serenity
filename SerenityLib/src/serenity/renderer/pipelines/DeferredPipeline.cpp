@@ -267,7 +267,7 @@ void DeferredPipeline::init() {
     SMAA::init();
 
     auto emplaceShader = [](uint32_t index, const std::string& str, std::vector<Handle>& collection, ShaderType type) {
-        collection[index] = Engine::Resources::addResource<Shader>(str, type, false);
+        collection[index] = Engine::Resources::addResource<Shader>(str, type);
     };
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(0, EShaders::decal_vertex, m_InternalShaders, ShaderType::Vertex); });
     priv::threading::addJob([this, &emplaceShader]() {emplaceShader(1, EShaders::decal_frag, m_InternalShaders, ShaderType::Fragment); });
@@ -488,7 +488,7 @@ bool DeferredPipeline::setDepthFunction(uint32_t depthFunction) {
     return m_OpenGLStateMachine.GL_glDepthFunc(depthFunction);
 }
 bool DeferredPipeline::setViewport(float x, float y, float width, float height) {
-    return m_OpenGLStateMachine.GL_glViewport((GLint)x, (GLint)y, (GLsizei)width, (GLsizei)height);
+    return m_OpenGLStateMachine.GL_glViewport(GLint(x), GLint(y), GLsizei(width), GLsizei(height));
 }
 void DeferredPipeline::clear(bool color, bool depth, bool stencil) {
     if (!color && !depth && !stencil) {
@@ -1280,18 +1280,18 @@ void DeferredPipeline::render2DTriangle(const glm::vec2& position, const glm::ve
 }
 void DeferredPipeline::renderInitFrame(Engine::priv::RenderModule& renderer) {
     m_GBuffer.bindBackbuffer();
-    Engine::Renderer::Settings::clear(true, true, true); // clear depth & stencil only
+    Engine::Renderer::Settings::clear(true, true, true); // clear all
 }
 void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport, Camera& camera) {
-    const auto& winSize    = Engine::Resources::getWindowSize();
-    const auto& dimensions = viewport.getViewportDimensions();
+    const auto& winSize            = Engine::Resources::getWindowSize();
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     if (viewport.isAspectRatioSynced()) {
-        camera.setAspectRatio(dimensions.z / dimensions.w);
+        camera.setAspectRatio(viewportDimensions.z / viewportDimensions.w);
     }
-    Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w); //m_GBuffer.bindFramebuffers() already does this
+    Engine::Renderer::setViewport(viewportDimensions); //m_GBuffer.bindFramebuffers() already does this
     glScissor(0, 0, winSize.x, winSize.y);
+    m_2DProjectionMatrix = glm::ortho(0.0f, viewportDimensions.z, 0.0f, viewportDimensions.w, 0.003f, 3000.0f); //might have to recheck this
 
-    m_2DProjectionMatrix = glm::ortho(0.0f, dimensions.z, 0.0f, dimensions.w, 0.003f, 3000.0f); //might have to recheck this
     //this is god awful and ugly, but it's needed. find a way to refactor this properly
     for (uint32_t i = 0; i < 12; ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
@@ -1316,14 +1316,13 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
 
     glDisable(GL_CULL_FACE);
     //glPolygonOffset(1.0, 1.0);
-    for (auto& dir : m_ShadowCasters.m_ShadowCastersDirectional) {
-        auto& data = *std::get<1>(dir);
-        if (data.m_Enabled) {
-            data.calculateOrthographicProjections(camera, *std::get<0>(dir));
-            Engine::Renderer::setViewport(0.0f, 0.0f, data.m_ShadowWidth, data.m_ShadowHeight);
+    for (const auto& [directionalLight, data] : m_ShadowCasters.m_ShadowCastersDirectional) {
+        if (data->m_Enabled) {
+            data->calculateOrthographicProjections(camera, *directionalLight);
+            Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
             for (int i = 0; i < int(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS); ++i) {
-                data.bindUniformsWriting(i);
-                const glm::mat4 viewProj = data.m_LightOrthoProjection[i] * data.m_LightViewMatrix;
+                data->bindUniformsWriting(i);
+                const glm::mat4 viewProj = data->m_LightOrthoProjection[i] * data->m_LightViewMatrix;
 
                 PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
                 PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
@@ -1336,8 +1335,8 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     }
     glEnable(GL_CULL_FACE);
     //glPolygonOffset(0, 0);
-    const auto& dimensions = glm::vec4{ viewport.getViewportDimensions() };
-    Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+    const auto& viewportDimensions = glm::vec4{ viewport.getViewportDimensions() };
+    Engine::Renderer::setViewport(viewportDimensions);
     Engine::Renderer::colorMask(true, true, true, true);
 }
 bool DeferredPipeline::internal_pass_depth_prepass(Viewport& viewport, Camera& camera) {
@@ -1799,6 +1798,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
     auto& viewportDimensions = viewport.getViewportDimensions();
     auto winSize             = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
 
+    //TODO: work on this...
     m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
 
     internal_render_per_frame_preparation(viewport, camera);
@@ -1993,7 +1993,6 @@ void DeferredPipeline::renderFullscreenTriangle(float depth, float inNear, float
     auto modelMatrix        = glm::mat4{ 1.0f };
     modelMatrix             = glm::translate(modelMatrix, glm::vec3{ 0.0f, 0.0f, 0.0f - depth });
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-    //TODO: put near and far in as parameters in the function call?
     Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y, inNear, inFar));
     m_FullscreenTriangle.render();
 }
@@ -2003,8 +2002,6 @@ void DeferredPipeline::renderFullscreenQuad(float width, float height, float dep
     modelMatrix             = glm::translate(modelMatrix, glm::vec3{ 0.0f, 0.0f, 0.0f - depth });
     modelMatrix             = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-    //Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(-winSize.x / 2.0f, winSize.x / 2.0f, -winSize.y / 2.0f, winSize.y / 2.0f));
-    //TODO: put near and far in as parameters in the function call?
     Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y, inNear, inFar));
     m_FullscreenQuad.render();
 }

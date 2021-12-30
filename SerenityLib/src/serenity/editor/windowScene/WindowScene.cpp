@@ -15,10 +15,12 @@
 
 #include <serenity/resources/material/Material.h>
 #include <serenity/resources/shader/ShaderProgram.h>
+#include <serenity/resources/shader/Shader.h>
 
 #include <serenity/networking/Networking.h>
 
 #include <iomanip>
+#include <fstream>
 
 #include <serenity/resources/mesh/smsh.h>
 
@@ -28,26 +30,46 @@
 #include <Psapi.h>
 #endif
 
-using InternalFunc = void(Engine::priv::EditorWindowScene::*)(Scene&);
+struct EditorWindowSceneFunction {
+    using FunctionType = void(*)(Scene&);
+
+    const char*   title;
+    FunctionType  function;
+};
+struct ScriptContent {
+    std::string  data;
+    bool         fromFile = false;
+};
+namespace {
+    std::stringstream                               STR_STREAM;
+    std::unordered_map<uint32_t, ScriptContent>     COMPONENT_SCRIPT_CONTENT; //entity id => ScriptContent(string, bool)
+    std::unordered_map<std::string, ScriptContent>  SHADER_CONTENT; //shader name => ScriptContent(string, bool)
+}
 namespace Engine::priv {
     class EditorWindowSceneFunctions {
         public: 
-            constexpr static std::array<std::tuple<const char*, InternalFunc>, Engine::priv::EditorWindowScene::TabType::_TOTAL> TAB_TYPES_DATA{ {
-                { "Entities", &Engine::priv::EditorWindowScene::internal_render_entities },
-                { "Renderer", &Engine::priv::EditorWindowScene::internal_render_renderer },
-                { "Resources", &Engine::priv::EditorWindowScene::internal_render_resources },
-                { "Profiler", &Engine::priv::EditorWindowScene::internal_render_profiler },
-                { "Network", &Engine::priv::EditorWindowScene::internal_render_network },
+            static void internal_render_entities(Scene& currentScene);
+            static void internal_render_renderer(Scene& currentScene);
+            static void internal_render_resources(Scene& currentScene);
+            static void internal_render_profiler(Scene& currentScene);
+            static void internal_render_network(Scene& currentScene);
+
+            constexpr static std::array<EditorWindowSceneFunction, Engine::priv::EditorWindowScene::TabType::_TOTAL> TAB_TYPES_DATA { {
+                { "Entities", &internal_render_entities },
+                { "Renderer", &internal_render_renderer },
+                { "Resources", &internal_render_resources },
+                { "Profiler", &internal_render_profiler },
+                { "Network", &internal_render_network },
             } };
     };
 }
 
 
-void Engine::priv::EditorWindowScene::internal_render_network(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneFunctions::internal_render_network(Scene& currentScene) {
     const ImVec4 yellow      = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-    const auto& tcpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_TCPSockets;
-    const auto& tcpListeners = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_TCPListeners;
-    const auto& udpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.m_SocketManager.m_UDPSockets;
+    const auto& tcpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.getSocketManager().getTCPSockets();
+    const auto& tcpListeners = Engine::priv::Core::m_Engine->m_NetworkingModule.getSocketManager().getTCPListeners();
+    const auto& udpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.getSocketManager().getUDPSockets();
     ImGui::TextColored(yellow, std::string("Number of TCP sockets:   " + std::to_string(tcpSockets.size())).c_str());
     ImGui::TextColored(yellow, std::string("Number of TCP listeners: " + std::to_string(tcpListeners.size())).c_str());
     ImGui::TextColored(yellow, std::string("Number of UDP sockets:   " + std::to_string(udpSockets.size())).c_str());
@@ -112,7 +134,7 @@ void Engine::priv::EditorWindowScene::internal_render_network(Scene& currentScen
     }
     ImGui::EndChild();
 }
-void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& currentScene) {
     ImGui::BeginChild("SceneEntities");
     const auto& entities = Engine::priv::PublicScene::GetEntities(currentScene);
     if (ImGui::TreeNode("Entities")) {
@@ -131,9 +153,9 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                     ImGui::TreePop();
                 }
                 if (transform && ImGui::TreeNode("ComponentTransform")) {
-                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Position"); ImGui::SameLine(); ImGui::InputDouble3("##pos", &transform->m_Position[0]);
-                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Rotation"); ImGui::SameLine(); ImGui::InputFloat4("##rot", &transform->m_Rotation[0]);
-                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Scale   "); ImGui::SameLine(); ImGui::InputFloat3("##scl", &transform->m_Scale[0]);
+                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Position"); ImGui::SameLine(); ImGui::InputDouble3("##trans_pos", &transform->m_Position[0]);
+                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Rotation"); ImGui::SameLine(); ImGui::InputFloat4("##trans_rot", &transform->m_Rotation[0]);
+                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Scale   "); ImGui::SameLine(); ImGui::InputFloat3("##trans_scl", &transform->m_Scale[0]);
 
                     //getChildren() is somewhat expensive, 0(N) N = num max entities in scene
                     const auto& children = e.getChildren();
@@ -218,7 +240,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
                     ImGui::TreePop();
                 }
                 if (script && ImGui::TreeNode("ComponentScript")) {
-                    auto& scriptData       = m_ComponentScriptContent.at(e.id());
+                    auto& scriptData       = COMPONENT_SCRIPT_CONTENT.at(e.id());
                     ImVec2 ImGUIWindowSize = ImGui::GetWindowContentRegionMax();
                     ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Script");
                     float textboxWidth     = ImGUIWindowSize.x - 120.0f;
@@ -227,7 +249,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
 
                     }
                     if (ImGui::Button("Update", ImVec2(50, 25))) {
-                        script->init(scriptData.data.data(), false);
+                        script->init(scriptData.data.data());
                     }
                     ImGui::TreePop();
                 }
@@ -338,7 +360,7 @@ void Engine::priv::EditorWindowScene::internal_render_entities(Scene& currentSce
     }
     ImGui::EndChild();
 }
-void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneFunctions::internal_render_profiler(Scene& currentScene) {
     auto& debugging = Engine::priv::Core::m_Engine->m_DebugManager;
     const ImVec4 yellow   = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     ImGui::TextColored(yellow, std::string("Update Time:  " + debugging.getTimeInMs(DebugTimerTypes::Logic) + " ms").c_str());
@@ -350,9 +372,9 @@ void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentSce
 
 #ifdef _WIN32
 
-    m_Strm.str({});
-    m_Strm.clear();
-    m_Strm << std::fixed << std::setprecision(4);
+    STR_STREAM.str({});
+    STR_STREAM.clear();
+    STR_STREAM << std::fixed << std::setprecision(4);
 
     auto byte_format = [](DWORDLONG input, std::stringstream& strm) {
         strm.str({});
@@ -380,22 +402,22 @@ void Engine::priv::EditorWindowScene::internal_render_profiler(Scene& currentSce
     DWORDLONG totalPhysMem    = memInfo.ullTotalPhys; //Total Physical Memory (RAM)
     DWORDLONG physMemUsed     = memInfo.ullTotalPhys - memInfo.ullAvailPhys; //Physical Memory currently used
 
-    ImGui::TextColored(yellow, std::string("Total Virtual Memory: " + byte_format(totalVirtualMem, m_Strm)).c_str());
-    ImGui::TextColored(yellow, std::string("Virtual Memory Used: " + byte_format(virtualMemUsed, m_Strm)).c_str());
-    ImGui::TextColored(yellow, std::string("Total Physical Memory (RAM): " + byte_format(totalPhysMem, m_Strm)).c_str());
-    ImGui::TextColored(yellow, std::string("Physical Memory Used: " + byte_format(physMemUsed, m_Strm)).c_str());
+    ImGui::TextColored(yellow, std::string("Total Virtual Memory: " + byte_format(totalVirtualMem, STR_STREAM)).c_str());
+    ImGui::TextColored(yellow, std::string("Virtual Memory Used: " + byte_format(virtualMemUsed, STR_STREAM)).c_str());
+    ImGui::TextColored(yellow, std::string("Total Physical Memory (RAM): " + byte_format(totalPhysMem, STR_STREAM)).c_str());
+    ImGui::TextColored(yellow, std::string("Physical Memory Used: " + byte_format(physMemUsed, STR_STREAM)).c_str());
 
     PROCESS_MEMORY_COUNTERS_EX pmc;
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
 
     SIZE_T virtualMemUsedByMe = pmc.PrivateUsage; //Virtual Memory currently used by current process
     SIZE_T physMemUsedByMe    = pmc.WorkingSetSize; //Physical Memory currently used by current process
-    ImGui::TextColored(yellow, std::string("Virtual Memory used by current process: " + byte_format(virtualMemUsedByMe, m_Strm)).c_str());
-    ImGui::TextColored(yellow, std::string("Physical Memory used by current process: " + byte_format(physMemUsedByMe, m_Strm)).c_str());
+    ImGui::TextColored(yellow, std::string("Virtual Memory used by current process: " + byte_format(virtualMemUsedByMe, STR_STREAM)).c_str());
+    ImGui::TextColored(yellow, std::string("Physical Memory used by current process: " + byte_format(physMemUsedByMe, STR_STREAM)).c_str());
 #endif
 
 }
-void Engine::priv::EditorWindowScene::internal_render_renderer(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& currentScene) {
     auto& renderer = Engine::priv::Core::m_Engine->m_RenderModule;
     //general
     {
@@ -491,7 +513,7 @@ void Engine::priv::EditorWindowScene::internal_render_renderer(Scene& currentSce
         ImGui::Separator();
     }
 }
-void Engine::priv::EditorWindowScene::internal_render_resources(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& currentScene) {
     ImGui::BeginChild("ChildResources");
     if (ImGui::TreeNode("Materials")) {
         auto materials = Engine::Resources::GetAllResourcesOfType<Material>(); //doing this every frame is slow
@@ -544,8 +566,6 @@ void Engine::priv::EditorWindowScene::internal_render_resources(Scene& currentSc
         ImGui::TreePop();
         ImGui::Separator();
     }
-
-
     if (ImGui::TreeNode("Meshes")) {
         auto meshes = Engine::Resources::GetAllResourcesOfType<Mesh>(); //doing this every frame is slow
         for (auto& mesh : meshes) {
@@ -560,7 +580,37 @@ void Engine::priv::EditorWindowScene::internal_render_resources(Scene& currentSc
         ImGui::TreePop();
         ImGui::Separator();
     }
+    if (ImGui::TreeNode("Shader Programs")) {
+        auto shaderPrograms = Engine::Resources::GetAllResourcesOfType<ShaderProgram>(); //doing this every frame is slow
+        for (auto& shaderProgram : shaderPrograms) {
+            if (ImGui::TreeNode(shaderProgram->name().c_str())) {
 
+                for (const auto& [shaderHandle, shaderType] : shaderProgram->getShaders()) {
+                    Shader* shader = shaderHandle.get<Shader>();
+                    if (ImGui::TreeNode(shader->name().c_str())) {
+                        auto& scriptData = SHADER_CONTENT.at(shader->name());
+                        ImVec2 ImGUIWindowSize = ImGui::GetWindowContentRegionMax();
+                        ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Shader Code");
+                        float textboxWidth = ImGUIWindowSize.x - 120.0f;
+                        float textboxHeight = float(std::max(300, int(ImGUIWindowSize.y)));
+                        if (ImGui::InputTextMultiline("##ShaderContent", scriptData.data.data(), scriptData.data.size() + 1024, ImVec2(textboxWidth, textboxHeight), ImGuiInputTextFlags_NoHorizontalScroll)) {
+
+                        }
+                        if (ImGui::Button("Update", ImVec2(50, 25))) {
+                            shader->load(scriptData.data.data());
+                            shaderProgram->unload();
+                            shaderProgram->load();
+                        }
+                        ImGui::TreePop();
+                    }
+                }
+                ImGui::TreePop();
+                ImGui::Separator();
+            }
+        }
+        ImGui::TreePop();
+        ImGui::Separator();
+    }
 
 
     ImGui::EndChild();
@@ -572,7 +622,7 @@ void Engine::priv::EditorWindowScene::update() {
     ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
     if (ImGui::BeginTabBar("TabBar")) {
         for (int i = 0; i < EditorWindowSceneFunctions::TAB_TYPES_DATA.size(); ++i) {
-            if (ImGui::BeginTabItem(std::get<0>(EditorWindowSceneFunctions::TAB_TYPES_DATA[i]))) {
+            if (ImGui::BeginTabItem(EditorWindowSceneFunctions::TAB_TYPES_DATA[i].title)) {
                 m_Tab = i;
                 ImGui::EndTabItem();
             }
@@ -580,11 +630,24 @@ void Engine::priv::EditorWindowScene::update() {
         ImGui::EndTabBar();
     }
     ImGui::PopStyleColor();
-    (this->*std::get<1>(EditorWindowSceneFunctions::TAB_TYPES_DATA[m_Tab]))(*currScene);
-
-    // Plot some values
-    //const float my_values[] = { 0.2f, 0.1f, 1.0f, 0.5f, 0.9f, 2.2f };
-    //ImGui::PlotLines("Frame Times", my_values, IM_ARRAYSIZE(my_values));
+    EditorWindowSceneFunctions::TAB_TYPES_DATA[m_Tab].function(*currScene);
 
     ImGui::End();
+}
+bool Engine::priv::EditorWindowScene::addComponentScriptData(uint32_t entityID, std::string_view scriptFilePathOrData, bool isFile) {
+    if (isFile) {
+        std::ifstream fileStream = std::ifstream(std::string{ scriptFilePathOrData });
+        std::stringstream buffer;
+        buffer << fileStream.rdbuf();
+        COMPONENT_SCRIPT_CONTENT[entityID].data = buffer.str();
+        COMPONENT_SCRIPT_CONTENT[entityID].fromFile = isFile;
+    } else {
+        COMPONENT_SCRIPT_CONTENT[entityID].data = std::string{ scriptFilePathOrData };
+        COMPONENT_SCRIPT_CONTENT[entityID].fromFile = isFile;
+    }
+    return true;
+}
+void Engine::priv::EditorWindowScene::addShaderData(Shader& shader, std::string_view shaderCode) {
+    SHADER_CONTENT[shader.name()].data     = shader.getData();
+    SHADER_CONTENT[shader.name()].fromFile = shader.isFromFile();
 }

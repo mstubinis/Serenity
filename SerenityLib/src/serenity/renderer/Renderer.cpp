@@ -397,6 +397,9 @@ bool Engine::Renderer::setDepthFunc(GLenum func){
 bool Engine::Renderer::setViewport(float x, float y, float w, float h){
     return RENDER_MODULE->m_Pipeline->setViewport(x, y, w, h);
 }
+bool Engine::Renderer::setViewport(const glm::vec4& dimensions) {
+    return Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+}
 bool Engine::Renderer::stencilFunc(GLenum func, GLint ref, GLuint mask) {
     return RENDER_MODULE->m_Pipeline->stencilFunction(func, ref, mask);
 }

@@ -382,7 +382,7 @@ float Math::getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bo
 }
 glm::quat Math::alignTo(float x, float y, float z) noexcept {
     auto eye    = glm::vec3{ 0.0f };
-    auto center = glm::vec3{ x, y, z };
+    auto center = glm::normalize(glm::vec3{ x, y, z });
     auto up     = glm::vec3{ 0.0f, 1.0f, 0.0f };
     auto CdotU  = glm::dot(center, up);
     if (CdotU == 1.0f || CdotU == -1.0f) {

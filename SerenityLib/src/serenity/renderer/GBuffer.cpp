@@ -92,7 +92,7 @@ void Engine::priv::GBuffer::internal_Start(const std::vector<uint32_t>& types, s
         const bool b = channels.find("B") != std::string::npos;
         const bool a = channels.find("A") != std::string::npos;
 
-        glDrawBuffers(types[0] != 0 ? (GLsizei)types.size() : (GLsizei)0, types.data());
+        glDrawBuffers(types[0] != 0 ? GLsizei(types.size()) : GLsizei(0), types.data());
         Engine::Renderer::colorMask(r, g, b, a);
     } else {
         GBuffer::bindBackbuffer(0, 0);
@@ -142,8 +142,8 @@ void Engine::priv::GBuffer::bindBackbuffer(GLuint final_fbo, GLuint final_rbo) {
 }
 void Engine::priv::GBuffer::bindBackbuffer(const Viewport& viewport, GLuint final_fbo, GLuint final_rbo) {
     GBuffer::bindBackbuffer(final_fbo, final_rbo);
-    const auto& dimensions = viewport.getViewportDimensions();
-    Engine::Renderer::setViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+    const auto& viewportDimensions = viewport.getViewportDimensions();
+    Engine::Renderer::setViewport(viewportDimensions);
 }
 Texture& Engine::priv::GBuffer::getTexture(const uint32_t index) const noexcept {
     return m_FramebufferTextures[index]->texture();

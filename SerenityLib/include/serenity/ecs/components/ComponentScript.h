@@ -11,14 +11,14 @@ class ComponentScript : public ComponentBaseClass<ComponentScript> {
         Entity     m_Owner;
     public:
         ComponentScript(Entity);
-        ComponentScript(Entity, std::string_view scriptFilePathOrData, bool fromFile = true);
+        ComponentScript(Entity, std::string_view scriptFilePathOrData);
         ComponentScript(const ComponentScript&)                   = default;
         ComponentScript& operator=(const ComponentScript&)        = default;
         ComponentScript(ComponentScript&&) noexcept               = default;
         ComponentScript& operator=(ComponentScript&&) noexcept    = default;
         ~ComponentScript();
 
-        void init(std::string_view scriptFilePathOrData, bool fromFile = true);
+        void init(std::string_view scriptFilePathOrData);
 };
 
 namespace Engine::priv {

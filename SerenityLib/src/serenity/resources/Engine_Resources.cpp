@@ -141,67 +141,74 @@ Handle Engine::Resources::loadTexture(std::string_view file, ImageInternalFormat
     if (!texture.m_Resource) {
         TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D, [](Handle) {} };
         request.request();
-        return request.m_Part.m_Handle;
+        texture.m_Handle = request.m_Part.m_Handle;
     }
-    return Handle{};
+    return texture.m_Handle;
 }
 Handle Engine::Resources::loadTexture(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps) {
     auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.m_Resource) {
-        return Engine::Resources::addResource<Texture>(pixels, width, height, texture_name, mipmaps, internalFormat, TextureType::Texture2D);
+        texture.m_Handle = Engine::Resources::addResource<Texture>(pixels, width, height, texture_name, mipmaps, internalFormat, TextureType::Texture2D);
     }
-    return Handle{};
+    return texture.m_Handle;
 }
 Handle Engine::Resources::loadTextureAsync(std::string_view file, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
     auto texture = Engine::Resources::getResource<Texture>(file);
     if (!texture.m_Resource) {
         TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
         request.request(true);
-        return request.m_Part.m_Handle;
+        texture.m_Handle = request.m_Part.m_Handle;
     }
-    return Handle{};
+    return texture.m_Handle;
 }
 Handle Engine::Resources::loadTextureAsync(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
     auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.m_Resource) {
         TextureRequest request{ pixels, width, height, texture_name, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
         request.request(true);
-        return request.m_Part.m_Handle;
+        texture.m_Handle = request.m_Part.m_Handle;
     }
-    return Handle{};
+    return texture.m_Handle;
 }
 Handle Engine::Resources::loadMaterial(std::string_view name, std::string_view diffuse, std::string_view normal, std::string_view glow, std::string_view specular, std::string_view ao, std::string_view metalness, std::string_view smoothness) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.m_Resource) {
         MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, [](Handle) {} };
         request.request();
-        return request.m_Part.m_Handle;
+        material.m_Handle = request.m_Part.m_Handle;
     }
-    return Handle{};
+    return material.m_Handle;
 }
 Handle Engine::Resources::loadMaterialAsync(std::string_view name, std::string_view diffuse, std::string_view normal, std::string_view glow, std::string_view specular, std::string_view ao, std::string_view metalness, std::string_view smoothness, Engine::ResourceCallback callback) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.m_Resource) {
         MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, std::move(callback) };
         request.request(true);
-        return request.m_Part.m_Handle;
+        material.m_Handle = request.m_Part.m_Handle;
     }
-    return Handle{};
+    return material.m_Handle;
 }
 Handle Engine::Resources::loadMaterial(std::string_view name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.m_Resource) {
         MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, [](Handle) {} };
         //request.request(); //the above creates the material and is immediately available for use, no need to request
-        return request.m_Part.m_Handle;
+        material.m_Handle = request.m_Part.m_Handle;
     }
-    return Handle{};
+    return material.m_Handle;
 }
-Handle Engine::Resources::addShader(std::string_view fileOrData, ShaderType type, bool fromFile){
-    return Engine::Resources::addResource<Shader>(fileOrData, type, fromFile);
+Handle Engine::Resources::loadShader(std::string_view fileOrData, ShaderType type) {
+    auto shader = Engine::Resources::getResource<Shader>(fileOrData);
+    if (!shader.m_Resource) {
+        shader.m_Handle = Engine::Resources::addResource<Shader>(fileOrData, type);;
+    }
+    return shader.m_Handle;
 }
 Handle Engine::Resources::addShaderProgram(std::string_view name, Handle vertexHandle, Handle fragmentHandle){
     return Engine::Resources::addResource<ShaderProgram>(name, vertexHandle, fragmentHandle);
+}
+Handle Engine::Resources::addShaderProgram(std::string_view name, std::string_view vertexFileOrData, std::string_view fragmentFileOrData) {
+    return Engine::Resources::addResource<ShaderProgram>(name, vertexFileOrData, fragmentFileOrData);
 }
 bool Engine::Resources::setCurrentScene(Scene* newScene){
     auto& resourceMgr = *Engine::priv::ResourceManager::RESOURCE_MANAGER;

@@ -8,20 +8,20 @@ namespace Engine::Networking {
     class  ListenerTCP;
 }
 namespace Engine::priv {
-    class  EditorWindowScene;
+    class  EditorWindowSceneFunctions;
 }
 
 #include <vector>
 
 namespace Engine::priv {
     class SocketManager final {
-        friend class Engine::priv::EditorWindowScene;
+        friend class Engine::priv::EditorWindowSceneFunctions;
         private:
             std::vector<Engine::Networking::SocketTCP*>    m_TCPSockets;
             std::vector<Engine::Networking::SocketUDP*>    m_UDPSockets;
             std::vector<Engine::Networking::ListenerTCP*>  m_TCPListeners;
 
-            template<typename TVECTOR, typename TSOCKET>
+            template<class TVECTOR, class TSOCKET>
             void internal_add_socket(TVECTOR& vec, TSOCKET* socket) noexcept {
                 for (size_t i = 0; i < vec.size(); ++i) {
                     if (vec[i] == socket) {
@@ -30,7 +30,7 @@ namespace Engine::priv {
                 }
                 vec.push_back(socket);
             }
-            template<typename TVECTOR, typename TSOCKET>
+            template<class TVECTOR, class TSOCKET>
             void internal_remove_socket(TVECTOR& vec, TSOCKET* socket) noexcept {
                 for (size_t i = 0; i < vec.size(); ++i) {
                     if (vec[i] == socket) {
@@ -42,13 +42,17 @@ namespace Engine::priv {
         public:
             void update(const float dt);
 
-            void add_tcp_socket(Engine::Networking::SocketTCP* tcpSocketPtr);
-            void add_udp_socket(Engine::Networking::SocketUDP* udpSocketPtr);
-            void add_tcp_listener(Engine::Networking::ListenerTCP* tcpListenerPtr);
+            void add_tcp_socket(Engine::Networking::SocketTCP*);
+            void add_udp_socket(Engine::Networking::SocketUDP*);
+            void add_tcp_listener(Engine::Networking::ListenerTCP*);
 
-            void remove_tcp_socket(Engine::Networking::SocketTCP* tcpSocketPtr);
-            void remove_udp_socket(Engine::Networking::SocketUDP* udpSocketPtr);
-            void remove_tcp_listener(Engine::Networking::ListenerTCP* tcpListenerPtr);
+            void remove_tcp_socket(Engine::Networking::SocketTCP*);
+            void remove_udp_socket(Engine::Networking::SocketUDP*);
+            void remove_tcp_listener(Engine::Networking::ListenerTCP*);
+
+            [[nodiscard]] inline const std::vector<Engine::Networking::SocketTCP*>& getTCPSockets() const noexcept { return m_TCPSockets; };
+            [[nodiscard]] inline const std::vector<Engine::Networking::SocketUDP*>& getUDPSockets() const noexcept { return m_UDPSockets; };
+            [[nodiscard]] inline const std::vector<Engine::Networking::ListenerTCP*>& getTCPListeners() const noexcept { return m_TCPListeners; };
     };
 }
 #endif

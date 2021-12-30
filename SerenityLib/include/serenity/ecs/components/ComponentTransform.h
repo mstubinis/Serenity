@@ -11,7 +11,7 @@ class  SystemSyncRigidToTransform;
 class  SystemSyncTransformToRigid;
 namespace Engine::priv {
     class  sparse_set_base;
-    class  EditorWindowScene;
+    class  EditorWindowSceneFunctions;
 };
 
 #include <serenity/dependencies/glm.h>
@@ -25,7 +25,7 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
     friend class  SystemTransformParentChild;
     friend class  SystemSyncRigidToTransform;
     friend class  SystemSyncTransformToRigid;
-    friend class  Engine::priv::EditorWindowScene;
+    friend class  Engine::priv::EditorWindowSceneFunctions;
     private:
         glm_vec3    m_Position          = glm_vec3{ 0.0 };
         //glm_vec3    m_LinearVelocity    = glm_vec3{ 0.0 };
@@ -71,6 +71,10 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
 
         void alignTo(float dirX, float dirY, float dirZ);
         void alignTo(const glm::vec3& direction);
+        void alignToDirection(float dirX, float dirY, float dirZ);
+        void alignToDirection(const glm::vec3& direction);
+        void alignToPosition(decimal x, decimal y, decimal z);
+        void alignToPosition(const glm_vec3& position);
 
         inline void translate(const glm_vec3& translation, bool local = true) noexcept { translate(translation.x, translation.y, translation.z, local); }
         inline void translate(decimal translation, bool local = true) noexcept { translate(translation, translation, translation, local); }
@@ -171,6 +175,8 @@ namespace Engine::priv {
             glm::vec3 getUp() const;
 
             void alignTo(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z);
+            void alignToDirection(luabridge::LuaRef dirX, luabridge::LuaRef dirY, luabridge::LuaRef dirZ);
+            void alignToPosition(luabridge::LuaRef x, luabridge::LuaRef y, luabridge::LuaRef z);
 
             const glm_mat4& getWorldMatrix() const;
             glm::mat4 getWorldMatrixRendering() const;

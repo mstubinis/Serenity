@@ -6,7 +6,7 @@ class Camera;
 class ComponentModel;
 class ComponentCamera;
 namespace Engine::priv {
-    class  EditorWindowScene;
+    class  EditorWindowSceneFunctions;
 };
 namespace Engine::priv::Culling {
     class  SphereIntersectTest;
@@ -26,7 +26,7 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
     friend class  Camera;
     friend class  ComponentModel;
     friend struct Engine::priv::ComponentCamera_Functions;
-    friend class  Engine::priv::EditorWindowScene;
+    friend class  Engine::priv::EditorWindowSceneFunctions;
     friend class  Engine::priv::Culling::SphereIntersectTest;
     friend class  Engine::priv::Culling::PointIntersectTest;
     public:

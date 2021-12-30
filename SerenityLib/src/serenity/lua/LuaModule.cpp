@@ -4,14 +4,10 @@
 #include <serenity/utils/Utils.h>
 
 namespace {
-    Engine::priv::LUAModule* LUA_MODULE = nullptr;
-
-    std::array<std::vector<uint32_t>, EventType::_TOTAL>            LUA_SCRIPT_OBSERVERS; //[eventType] => list of script IDs registered to this event
-
-    std::vector<std::pair<luabridge::LuaRef, Entity>>               LUA_SCRIPT_ON_EVENT_FUNCTIONS;
-
-    std::vector<std::pair<luabridge::LuaRef, Entity>>               LUA_SCRIPT_ON_UPDATE_FUNCTIONS;
-
+    Engine::priv::LUAModule*                               LUA_MODULE = nullptr;
+    std::array<std::vector<uint32_t>, EventType::_TOTAL>   LUA_SCRIPT_OBSERVERS; //[eventType] => list of script IDs registered to this event
+    std::vector<std::pair<luabridge::LuaRef, Entity>>      LUA_SCRIPT_ON_EVENT_FUNCTIONS;
+    std::vector<std::pair<luabridge::LuaRef, Entity>>      LUA_SCRIPT_ON_UPDATE_FUNCTIONS;
 
     void cleanup_on_update_function(uint32_t scriptID) {
         if (LUA_SCRIPT_ON_UPDATE_FUNCTIONS.size() > scriptID) {
@@ -29,7 +25,11 @@ namespace {
                 if (idx != lastIdx) {
                     scriptIDs[idx] = std::move(scriptIDs[lastIdx]);
                 }
-                scriptIDs.pop_back();
+                if (scriptIDs.size() > 1) {
+                    scriptIDs.pop_back();
+                } else {
+                    scriptIDs.clear();
+                }
                 Engine::insertion_sort(scriptIDs);
             }
         }
@@ -60,7 +60,11 @@ void Engine::priv::LUAScriptInstance::unregisterEvent(uint32_t eventID) {
         if (idx != lastIdx) {
             LUA_SCRIPT_OBSERVERS[eventID][idx] = std::move(LUA_SCRIPT_OBSERVERS[eventID][lastIdx]);
         }
-        LUA_SCRIPT_OBSERVERS[eventID].pop_back();
+        if (LUA_SCRIPT_OBSERVERS[eventID].size() > 1) {
+            LUA_SCRIPT_OBSERVERS[eventID].pop_back();
+        } else {
+            LUA_SCRIPT_OBSERVERS[eventID].clear();
+        }
         Engine::insertion_sort(LUA_SCRIPT_OBSERVERS[eventID]);
     }
 }

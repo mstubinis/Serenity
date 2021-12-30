@@ -4,7 +4,7 @@
 
 namespace Engine::priv {
     class  SocketManager;
-    class  EditorWindowScene;
+    class  EditorWindowSceneFunctions;
 };
 
 #include <serenity/networking/ISocket.h>
@@ -15,7 +15,7 @@ namespace Engine::priv {
 namespace Engine::Networking {
     class SocketUDP : public ISocket {
         friend class Engine::priv::SocketManager;
-        friend class Engine::priv::EditorWindowScene;
+        friend class Engine::priv::EditorWindowSceneFunctions;
         public:
             struct UDPPacketInfo final {
                 Engine::Networking::Packet  packet;

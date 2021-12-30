@@ -170,11 +170,7 @@ bool Entity::addComponent(const std::string& componentClassName, luabridge::LuaR
         }
     } else if (componentClassName == "ComponentScript" || componentClassName == "Script") {
         if (!a1.isNil() && a1.isString()) {
-            if (!a2.isNil() && a2.isBool()) {
-                return addComponent<ComponentScript>(a1.cast<const char*>(), a2.cast<bool>());
-            } else {
-                return addComponent<ComponentScript>(a1.cast<const char*>());
-            }
+            return addComponent<ComponentScript>(a1.cast<const char*>());
         } else {
             return addComponent<ComponentScript>();
         }

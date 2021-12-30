@@ -247,7 +247,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
             auto& pixels                   = mipmap->pixels;
             pixels.resize(compressed_size);
 
-            std::copy(&file_data[offset], &file_data[offset + compressed_size - 1], pixels.data());
+            std::copy(&file_data[offset], &file_data[offset] + compressed_size, pixels.data());
 
             //mirror pixels vertically
             std::vector<uint8_t> temp = pixels;
@@ -259,7 +259,7 @@ bool TextureLoader::LoadDDSFile(TextureCPUData& cpuData, ImageData& image_loaded
                 }
             };
             for (size_t j = 0; j < (height_ + 3) / 4; j++) {
-                std::copy(s, s + widBytes - 1, d);
+                std::copy(s, s + widBytes, d);
                 if (head.format.fourCC == FourCC_ATI1) {
                     flip_pixels_vertically(d, flip_blocks_ati1_aka_bc4);
                 } else if(head.format.fourCC == FourCC_DXT1){

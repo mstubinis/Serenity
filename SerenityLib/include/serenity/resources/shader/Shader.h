@@ -6,10 +6,6 @@ class ShaderProgram;
 class Shader;
 namespace Engine::priv {
     class PublicShaderProgram;
-    class PublicShader final {
-        public:
-            static void ConvertCode(Shader&);
-    };
 };
 
 #include <serenity/resources/Resource.h>
@@ -17,24 +13,33 @@ namespace Engine::priv {
 
 class Shader final : public Resource<Shader> {
     friend class ShaderProgram;
-    friend class Engine::priv::PublicShader;
     friend class Engine::priv::PublicShaderProgram;
     private:
         std::string  m_FileName;
         std::string  m_Code;
         ShaderType   m_ShaderType = ShaderType::Vertex;
-        bool         m_FromFile   = false;
+        uint32_t     m_GLShaderID = 0;
     public:
         Shader() = default;
-        Shader(std::string_view shaderFileOrData, ShaderType, bool fromFile = true);
+        Shader(std::string_view shaderFileOrData, ShaderType);
 
         Shader(const Shader&)                  = delete;
         Shader& operator=(const Shader&)       = delete;
         Shader(Shader&&) noexcept;
         Shader& operator=(Shader&&) noexcept;
+        ~Shader();
 
-        [[nodiscard]] inline constexpr ShaderType type() const noexcept { return m_ShaderType; }
-        [[nodiscard]] inline constexpr const std::string& data() const noexcept { return m_Code; }
-        [[nodiscard]] inline constexpr bool fromFile() const noexcept { return m_FromFile; }
+        void load() override;
+        void load(const std::string& code);
+        void unload() override;
+
+        //orphans the m_Code content if loaded from file unless force = true, in which case m_Code is cleared.
+        void orphan(bool force = false);
+
+        [[nodiscard]] inline uint32_t getGLShaderID() const noexcept { return m_GLShaderID; }
+        [[nodiscard]] inline const std::string& getFilename() const noexcept { return m_FileName; }
+        [[nodiscard]] inline ShaderType getType() const noexcept { return m_ShaderType; }
+        [[nodiscard]] inline const std::string& getData() const noexcept { return m_Code; }
+        [[nodiscard]] inline bool isFromFile() const noexcept { return !m_FileName.empty(); }
 };
 #endif

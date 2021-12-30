@@ -6,6 +6,7 @@ struct EngineOptions;
 class  Window;
 class  Scene;
 class  Camera;
+class  Shader;
 namespace Engine::priv {
     class  ResourceManager;
     class  EditorWindowScene;
@@ -39,6 +40,7 @@ namespace Engine::priv {
             ~EditorCore();
 
             bool addComponentScriptData(Entity, std::string_view scriptFilePathOrData, bool isFile);
+            void addShaderData(Shader&, std::string_view shaderCode);
 
             bool isWindowRegistered(Window&) const noexcept;
 

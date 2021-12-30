@@ -132,6 +132,7 @@ namespace Engine::Renderer {
     bool cullFace(GLenum state);
     bool setDepthFunc(GLenum func);
     bool setViewport(float x, float y, float width, float height);
+    bool setViewport(const glm::vec4& dimensions);
 
     template<class X, class Y, class W, class H>
     inline bool setViewport(X&& x, Y&& y, W&& width, H&& height) noexcept { 

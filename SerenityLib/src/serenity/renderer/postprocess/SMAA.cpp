@@ -558,8 +558,8 @@ void main() {
 
     for (uint32_t i = 0; i < PassStage::_TOTAL; ++i) {
         auto lambda_part_a = [i]() {
-            STATIC_SMAA.m_Vertex_Shaders[i]   = Engine::Resources::addResource<Shader>(STATIC_SMAA.m_Vertex_Shaders_Code[i], ShaderType::Vertex, false);
-            STATIC_SMAA.m_Fragment_Shaders[i] = Engine::Resources::addResource<Shader>(STATIC_SMAA.m_Fragment_Shaders_Code[i], ShaderType::Fragment, false);
+            STATIC_SMAA.m_Vertex_Shaders[i]   = Engine::Resources::addResource<Shader>(STATIC_SMAA.m_Vertex_Shaders_Code[i], ShaderType::Vertex);
+            STATIC_SMAA.m_Fragment_Shaders[i] = Engine::Resources::addResource<Shader>(STATIC_SMAA.m_Fragment_Shaders_Code[i], ShaderType::Fragment);
         };
         auto lambda_part_b = [i]() {
             STATIC_SMAA.m_Shader_Programs[i]  = Engine::Resources::addResource<ShaderProgram>("SMAA_" + std::to_string(i), STATIC_SMAA.m_Vertex_Shaders[i], STATIC_SMAA.m_Fragment_Shaders[i]);
