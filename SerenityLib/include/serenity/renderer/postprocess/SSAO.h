@@ -10,7 +10,7 @@ class  Viewport;
 #include <serenity/system/TypeDefs.h>
 #include <serenity/system/Macros.h>
 
-constexpr uint32_t SSAO_MAX_KERNEL_SIZE = 16U;
+constexpr int SSAO_MAX_KERNEL_SIZE = 16;
 
 class SSAOLevel { 
     public:
@@ -39,8 +39,8 @@ namespace Engine::priv {
             ~SSAO();
         public:
             SSAOLevel         m_SSAOLevel             = SSAOLevel::Medium;
-            uint32_t          m_ssao_samples          = 8;
-            uint32_t          m_ssao_blur_num_passes  = 2;
+            int               m_ssao_samples          = 8;
+            int               m_ssao_blur_num_passes  = 2;
             float             m_ssao_blur_radius      = 0.66f;
             float             m_ssao_blur_strength    = 0.48f;
             float             m_ssao_scale            = 1.0;
@@ -65,6 +65,8 @@ namespace Engine::Renderer::ssao {
     void setBlurRadius(float blurRadius) noexcept;
     [[nodiscard]] float getBlurStrength() noexcept;
     void setBlurStrength(float blurStrength) noexcept;
+    [[nodiscard]] int getBlurNumPasses() noexcept;
+    void setBlurNumPasses(int numPasses) noexcept;
     [[nodiscard]] float getIntensity() noexcept;
     void setIntensity(float intensity) noexcept;
     [[nodiscard]] float getRadius() noexcept;
@@ -73,7 +75,7 @@ namespace Engine::Renderer::ssao {
     void setScale(float scale) noexcept;
     [[nodiscard]] float getBias() noexcept;
     void setBias(float bias) noexcept;
-    [[nodiscard]] uint32_t getSamples() noexcept;
-    void setSamples(uint32_t numSamples) noexcept;
+    [[nodiscard]] int getSamples() noexcept;
+    void setSamples(int numSamples) noexcept;
 };
 #endif

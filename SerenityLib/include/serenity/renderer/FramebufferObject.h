@@ -6,7 +6,6 @@ class Texture;
 namespace Engine::priv {
     class FramebufferObject;
     class FramebufferObjectAttatchment;
-    struct FramebufferObjectPublicInterface;
     class FramebufferTexture;
     class RenderbufferObject;
 };
@@ -38,8 +37,8 @@ namespace Engine::priv {
 
             virtual void resize(FramebufferObject&, uint32_t width, uint32_t height) {}
             virtual GLuint address() const { return 0; }
-            virtual void bind() {}
-            virtual void unbind() {}
+            virtual void bind() {};
+            virtual void unbind() {};
     };
     class FramebufferTexture final: public FramebufferObjectAttatchment {
         friend class  Engine::priv::FramebufferObject;
@@ -73,14 +72,8 @@ namespace Engine::priv {
     class FramebufferObject final {
         friend class  Engine::priv::FramebufferTexture;
         friend class  Engine::priv::RenderbufferObject;
-        friend struct Engine::priv::FramebufferObjectPublicInterface;
-        using BindFP         = void(*)(const FramebufferObject*);
-        using UnbindFP       = void(*)(const FramebufferObject*);
         using AttatchmentMap = std::unordered_map<uint32_t, std::unique_ptr<FramebufferObjectAttatchment>>;
         private:
-            BindFP                    m_CustomBindFunctor   = [](const FramebufferObject*) {};
-            UnbindFP                  m_CustomUnbindFunctor = [](const FramebufferObject*) {};
-
             std::vector<GLuint>       m_FBOs;
             mutable AttatchmentMap    m_Attatchments;
             mutable size_t            m_CurrentFBOIndex   = 0U;
@@ -97,13 +90,8 @@ namespace Engine::priv {
             void init(uint32_t width, uint32_t height, ImageInternalFormat, float divisor = 1.0f, uint32_t swapBufferCount = 1);
             void cleanup();
 
-            inline void setCustomBindFunctor(const BindFP& functor) noexcept { m_CustomBindFunctor = functor; }
-            inline void setCustomUnbindFunctor(const UnbindFP& functor) noexcept { m_CustomUnbindFunctor = functor; }
-            inline void setCustomBindFunctor(BindFP&& functor) noexcept { m_CustomBindFunctor = std::move(functor); }
-            inline void setCustomUnbindFunctor(UnbindFP&& functor) noexcept { m_CustomUnbindFunctor = std::move(functor); }
-
-            inline void bind() const noexcept { m_CustomBindFunctor(this); }
-            inline void unbind() const noexcept { m_CustomUnbindFunctor(this); }
+            void bind();
+            void unbind();
             inline FramebufferObjectAttatchment* getAttatchement(const uint32_t index) const noexcept { return m_Attatchments.at(index).get(); }
 
             void resize(const uint32_t width, const uint32_t height);

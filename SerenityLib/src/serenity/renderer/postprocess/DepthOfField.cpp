@@ -22,42 +22,44 @@ uniform SAMPLER_TYPE_2D depthTexture;
 uniform vec4 Data; //x = blurClamp, y = bias, z = focus, w = UNUSED
 
 varying vec2 texcoords;
-void main(){
+
+void main() {
     vec2 aspectcorrect = vec2(1.0, ScreenInfo.z / ScreenInfo.w);
-    float depth = texture2D(depthTexture, texcoords).r;
+    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    float depth = texture2D(USE_SAMPLER_2D(depthTexture), uvs).r;
     float factor = (depth - Data.z);
     vec2 dofblur = vec2(clamp(factor * Data.y, -Data.x, Data.x));
-//   vec4 col = DOFExecute(inTexture, texcoords, aspectcorrect, dofblur);
+//   vec4 col = DOFExecute(USE_SAMPLER_2D(inTexture), uvs, aspectcorrect, dofblur);
 //TODO: use the above commented function only and test if it works.
     vec4 col = vec4(0.0);
-    col += texture2D(inTexture, texcoords);
-    col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur);
-    col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur);
-    col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur);
-    col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur);
-    col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur);
-    col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur);
-    col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur);
-    col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur);
+    col += texture2D(USE_SAMPLER_2D(inTexture), uvs);
+    col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur);
+    col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur);
+    col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur);
+    col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur);
+    col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur);
+    col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur);
+    col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur);
+    col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur);
     for (int i = 0; i < 2; ++i) {
         int k = i+2;
-        col += texture2D(inTexture, texcoords + (vec2(0.15, 0.37) * aspectcorrect)   * dofblur * DOFWeight[i]);
-        col += texture2D(inTexture, texcoords + (vec2(-0.15, -0.37) * aspectcorrect) * dofblur * DOFWeight[i]);
-        col += texture2D(inTexture, texcoords + (vec2(-0.15, 0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);
-        col += texture2D(inTexture, texcoords + (vec2(0.15, -0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);
-        col += texture2D(inTexture, texcoords + (vec2(-0.37, 0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);
-        col += texture2D(inTexture, texcoords + (vec2(0.37, -0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);
-        col += texture2D(inTexture, texcoords + (vec2(0.37, 0.15) * aspectcorrect)   * dofblur * DOFWeight[i]);
-        col += texture2D(inTexture, texcoords + (vec2(-0.37, -0.15) * aspectcorrect) * dofblur * DOFWeight[i]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.15, 0.37) * aspectcorrect)   * dofblur * DOFWeight[i]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.15, -0.37) * aspectcorrect) * dofblur * DOFWeight[i]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.15, 0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.15, -0.37) * aspectcorrect)  * dofblur * DOFWeight[i]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.37, 0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.37, -0.15) * aspectcorrect)  * dofblur * DOFWeight[i]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.37, 0.15) * aspectcorrect)   * dofblur * DOFWeight[i]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.37, -0.15) * aspectcorrect) * dofblur * DOFWeight[i]);
 
-        col += texture2D(inTexture, texcoords + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur * DOFWeight[k]);
-        col += texture2D(inTexture, texcoords + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur * DOFWeight[k]);
-        col += texture2D(inTexture, texcoords + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);
-        col += texture2D(inTexture, texcoords + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur * DOFWeight[k]);
-        col += texture2D(inTexture, texcoords + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);
-        col += texture2D(inTexture, texcoords + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur * DOFWeight[k]);
-        col += texture2D(inTexture, texcoords + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur * DOFWeight[k]);
-        col += texture2D(inTexture, texcoords + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur * DOFWeight[k]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.29, 0.29) * aspectcorrect)   * dofblur * DOFWeight[k]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.4, 0.0) * aspectcorrect)     * dofblur * DOFWeight[k]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.29, -0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.0, -0.4) * aspectcorrect)    * dofblur * DOFWeight[k]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.29, 0.29) * aspectcorrect)  * dofblur * DOFWeight[k]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.4, 0.0) * aspectcorrect)    * dofblur * DOFWeight[k]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(-0.29, -0.29) * aspectcorrect) * dofblur * DOFWeight[k]);
+        col += texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(0.0, 0.4) * aspectcorrect)     * dofblur * DOFWeight[k]);
     }
     gl_FragColor.rgb = col.rgb * 0.02439; //0.02439 = 1.0 / 41.0
 }
@@ -81,6 +83,7 @@ bool Engine::priv::DepthOfField::init() {
     return true;
 }
 void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer) {
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4Safe("Data", blur_radius, bias, focus, 0.0f);
@@ -88,5 +91,5 @@ void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport
     Engine::priv::OpenGLBindTextureRAII inTexture{ "inTexture", gbuffer.getTexture(sceneTexture), 0, true };
     Engine::priv::OpenGLBindTextureRAII textureDepth{ "textureDepth", gbuffer.getTexture(GBufferType::Depth), 1, true };
 
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }

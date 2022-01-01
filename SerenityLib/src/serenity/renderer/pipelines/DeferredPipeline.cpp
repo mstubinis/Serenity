@@ -717,6 +717,7 @@ void DeferredPipeline::generatePBRData(TextureCubemap& cubemap, Handle convoluti
 
         Engine::priv::OpenGLBindTextureRAII cube{ "cubemap", cubemap, 0, false };
 
+        Engine::Renderer::setViewport(0.0f, 0.0f, size, size);
         Engine::Renderer::sendUniform1("PiFourDividedByResSquaredTimesSix", 12.56637f / float((cubemap.width() * cubemap.width()) * 6));
         Engine::Renderer::sendUniform1("NUM_SAMPLES", 32);
         const uint32_t maxMipLevels = 5;
@@ -989,8 +990,8 @@ void DeferredPipeline::renderDirectionalLight(Camera& camera, DirectionalLight& 
     }
     std::string start = "light.";
     sendGPUDataLight(camera, directionalLight, start);
-    auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
-    renderFullscreenQuad(winSize.x, winSize.y);
+    const auto viewportDimensions = viewport.getViewportDimensions();
+    renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) {
     if (!sunLight.isActive()) {
@@ -998,8 +999,8 @@ void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewpo
     }
     std::string start = "light.";
     sendGPUDataLight(camera, sunLight, start);
-    auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
-    renderFullscreenQuad(winSize.x, winSize.y);
+    const auto viewportDimensions = viewport.getViewportDimensions();
+    renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) {
     if (!pointLight.isActive()) {
@@ -1360,11 +1361,14 @@ bool DeferredPipeline::internal_pass_depth_prepass(Viewport& viewport, Camera& c
 }
 void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera) {
     Scene& scene           = viewport.getScene();
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     //const glm::vec4& clear = viewport.getBackgroundColor();
 
     m_GBuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
     Engine::Renderer::Settings::clear(true, false, false); // clear color only
     
+
+    Engine::Renderer::setViewport(0.0f, 0.0f, viewportDimensions.z, viewportDimensions.w);
     PublicScene::RenderGeometryOpaque(m_Renderer, scene, &viewport, &camera);
     
     if (m_Renderer.m_DrawSkybox && viewport.getRenderFlags().has(ViewportRenderingFlag::Skybox)) {
@@ -1425,7 +1429,8 @@ void DeferredPipeline::internal_pass_ssao(Viewport& viewport, Camera& camera) {
         }  
     }
 }
-void DeferredPipeline::internal_pass_stencil() {
+void DeferredPipeline::internal_pass_stencil(Viewport& viewport) {
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     Engine::Renderer::colorMask(false, false, false, false);
 
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::StencilPass].get<ShaderProgram>());
@@ -1444,7 +1449,7 @@ void DeferredPipeline::internal_pass_stencil() {
     //this sneaky shader discards pixels that are "shadeless" based on their normal being (1,1,1). the discarding allows the stencil to not be written and thus disabling these pixels
     //from the lighting calculations
     Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0);
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 
     Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
 
@@ -1457,11 +1462,14 @@ void DeferredPipeline::internal_pass_stencil() {
     Engine::Renderer::colorMask(true, true, true, true);
 }
 void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera, bool mainRenderFunction) {
-    const Scene& scene = viewport.getScene();
+    const Scene& scene             = viewport.getScene();
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLighting].get<ShaderProgram>());
     auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
     Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
 
+    //TODO: is this needed?
+    //Engine::Renderer::setViewport(0.0f, 0.0f, viewportDimensions.z, viewportDimensions.w);
     {
         Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
         Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
@@ -1509,7 +1517,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         Skybox* skybox = scene.skybox();
         sendGPUDataGI(skybox);
 
-        Engine::Renderer::renderFullscreenQuad();
+        Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 
         const auto maxTextures = getMaxNumTextureUnits() - 1U;
         bool hasGI = skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData();
@@ -1521,11 +1529,15 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
     }
 }
 void DeferredPipeline::internal_pass_lighting_basic(Viewport& viewport, Camera& camera, bool mainRenderFunction) {
-    const Scene& scene = viewport.getScene();
+    const Scene& scene             = viewport.getScene();
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingBasic].get<ShaderProgram>());
     auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    
+    //TODO: is this needed?
+    //Engine::Renderer::setViewport(0.0f, 0.0f, viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
     {
-        Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
 
         Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
         Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
@@ -1564,7 +1576,7 @@ void DeferredPipeline::internal_pass_lighting_basic(Viewport& viewport, Camera& 
         Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
         Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
 
-        Engine::Renderer::renderFullscreenQuad();
+        Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
     }
 }
 void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera) {
@@ -1602,7 +1614,7 @@ void DeferredPipeline::internal_pass_bloom(Viewport& viewport, GBufferType::Type
     if (Bloom::STATIC_BLOOM.m_Bloom_Active && viewport.getRenderFlags().has(ViewportRenderingFlag::Bloom)) {
         m_GBuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
         Bloom::STATIC_BLOOM.pass(m_GBuffer, viewport, sceneTexture, m_Renderer);
-        for (uint32_t i = 0; i < Bloom::STATIC_BLOOM.m_Num_Passes; ++i) {
+        for (int i = 0; i < Bloom::STATIC_BLOOM.m_Num_Passes; ++i) {
             m_GBuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
             internal_pass_blur(viewport, GBufferType::Bloom, "H");
             m_GBuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
@@ -1620,7 +1632,7 @@ void DeferredPipeline::internal_pass_depth_of_field(Viewport& viewport, GBufferT
 void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewport, Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
     if (!mainRenderFunction || m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::None || !viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
         m_GBuffer.bindFramebuffers(outTexture, "RGBA");
-        internal_pass_final(sceneTexture);
+        internal_pass_final(viewport, sceneTexture);
         m_GBuffer.bindBackbuffer(viewport);   
         internal_pass_depth_and_transparency(viewport, outTexture);
     } else {
@@ -1631,7 +1643,7 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
             case AntiAliasingAlgorithm::FXAA: {
                 if (mainRenderFunction) {
                     m_GBuffer.bindFramebuffers(outTexture, "RGBA");
-                    internal_pass_final(sceneTexture);
+                    internal_pass_final(viewport, sceneTexture);
                     m_GBuffer.bindFramebuffers(sceneTexture, "RGBA");
                     FXAA::STATIC_FXAA.pass(m_GBuffer, viewport, outTexture, m_Renderer);
                     m_GBuffer.bindBackbuffer(viewport);
@@ -1645,11 +1657,11 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
             case AntiAliasingAlgorithm::SMAA_ULTRA: {
                 if (mainRenderFunction) {
                     m_GBuffer.bindFramebuffers(outTexture, "RGBA");
-                    internal_pass_final(sceneTexture);
+                    internal_pass_final(viewport, sceneTexture);
                     std::swap(sceneTexture, outTexture);
-                    //const auto winSize  = glm::vec2{ Resources::getWindowSize() };
-                    const auto& winSize = viewport.getViewportDimensions();
-                    const glm::vec4& SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.z, 1.0f / winSize.w, winSize.z, winSize.w);
+                    const auto winSize              = glm::vec2{ Resources::getWindowSize() };
+                    const auto& viewportDimensions  = viewport.getViewportDimensions();
+                    const glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
                     SMAA::STATIC_SMAA.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
                     SMAA::STATIC_SMAA.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
                     m_GBuffer.bindFramebuffers(outTexture, "RGBA");
@@ -1664,7 +1676,8 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
         }
     }
 }
-void DeferredPipeline::internal_pass_final(GBufferType::Type sceneTexture) {
+void DeferredPipeline::internal_pass_final(Viewport& viewport, GBufferType::Type sceneTexture) {
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal].get<ShaderProgram>());
 
     Engine::Renderer::sendUniform1Safe("HasBloom", (int)Bloom::STATIC_BLOOM.m_Bloom_Active);
@@ -1679,7 +1692,7 @@ void DeferredPipeline::internal_pass_final(GBufferType::Type sceneTexture) {
         Engine::Renderer::sendUniform1Safe("FogDistBlend", Fog::STATIC_FOG.distBlend);
         Engine::Renderer::sendUniform4Safe("FogColor", Fog::STATIC_FOG.color);
     }
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency].get<ShaderProgram>());
@@ -1710,14 +1723,10 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
     Engine::Renderer::GLDisablei(GL_BLEND, 0);
 }
 void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type) {
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredBlur].get<ShaderProgram>());
 
-    glm::vec2 hv{ 0.0f };
-    if (type == "H") { 
-        hv = glm::vec2{ 1.0f, 0.0f };
-    } else { 
-        hv = glm::vec2{ 0.0f, 1.0f };
-    }
+    glm::vec2 hv = (type == "H") ? glm::vec2{ 1.0f, 0.0f } : glm::vec2{ 0.0f, 1.0f };
 
     auto& bloom = Bloom::STATIC_BLOOM;
     Engine::Renderer::sendUniform4("strengthModifier",
@@ -1728,11 +1737,12 @@ void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, st
     );
     Engine::Renderer::sendUniform4("DataA", bloom.m_Blur_Radius, 0.0f, hv.x, hv.y);
 
-    Engine::priv::OpenGLBindTextureRAII image{ "image", m_GBuffer.getTexture(texture), 0, false };
+    Engine::priv::OpenGLBindTextureRAII uSceneToBeBlurred{ "uSceneToBeBlurred", m_GBuffer.getTexture(texture), 0, false };
 
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }
-void DeferredPipeline::internal_pass_normaless_diffuse() {
+void DeferredPipeline::internal_pass_normaless_diffuse(Viewport& viewport) {
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::NormalessDiffuse].get<ShaderProgram>());
 
     m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGBA");
@@ -1742,7 +1752,7 @@ void DeferredPipeline::internal_pass_normaless_diffuse() {
     Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0, false };
     Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 1, false };
 
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) {
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
@@ -1799,7 +1809,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
     auto winSize             = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
 
     //TODO: work on this...
-    m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
+    //m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
 
     internal_render_per_frame_preparation(viewport, camera);
     internal_init_frame_gbuffer(viewport, camera);
@@ -1811,7 +1821,6 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
 
             const float logDepthBufferFCoeff = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
             //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
-
             //same simulation and render space
             /*
             m_CameraUBODataPtr->CameraView        = camera.getView();
@@ -1823,14 +1832,13 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
             m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ camera.getPosition(), camera.getNear() };
             m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ camera.getViewVector(), camera.getFar() };
             m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ 0.0f, 0.0f, 0.0f, logDepthBufferFCoeff };
-            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ viewportDimensions.z, viewportDimensions.w, viewportDimensions.z, viewportDimensions.w };
+            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
             m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
             m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
             */
 
             //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
-            //this helps to deal with shading inaccuracies for when the camera is very far away from the origin
-                
+            //this helps to deal with shading inaccuracies for when the camera is very far away from the origin 
             glm::mat4 viewNoTranslation = camera.getView();
             Engine::Math::setMatrixPosition(viewNoTranslation, 0.0001f, 0.0001f, 0.0001f);
             m_CameraUBODataPtr->CameraView        = viewNoTranslation;
@@ -1842,7 +1850,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
             m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ viewNoTranslation[3][0], viewNoTranslation[3][1], viewNoTranslation[3][2], camera.getNear() };
             m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ glm::vec3{viewNoTranslation[0][2], viewNoTranslation[1][2], viewNoTranslation[2][2]}, camera.getFar() };
             m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ camera.getPosition(), logDepthBufferFCoeff };
-            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ viewportDimensions.z, viewportDimensions.w, viewportDimensions.z, viewportDimensions.w };
+            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
             m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
             m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
         }
@@ -1863,7 +1871,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
 
     Engine::Renderer::GLDisablei(GL_BLEND, 0);
 
-    internal_pass_stencil();
+    internal_pass_stencil(viewport);
 
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
     glBlendFuncSeparatei(0, GL_ONE, GL_ONE, GL_ONE, GL_ONE);
@@ -1891,7 +1899,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
 
     Engine::Renderer::GLDisable(GL_DEPTH_TEST);
     internal_pass_god_rays(viewport, camera);
-    internal_pass_normaless_diffuse();
+    internal_pass_normaless_diffuse(viewport);
     internal_pass_hdr(viewport, camera, GBufferType::Normal, GBufferType::Misc);//out textures
     internal_pass_bloom(viewport, GBufferType::Normal);//in texture
     GBufferType::Type sceneTexture = GBufferType::Misc;

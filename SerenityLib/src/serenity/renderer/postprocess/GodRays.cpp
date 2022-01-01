@@ -23,15 +23,16 @@ uniform int samples;
 
 uniform float alpha;
 varying vec2 texcoords;
-void main(){
-    vec2 uv = texcoords;
+
+void main() {
+    vec2 uv = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
     vec2 deltaUV = vec2(uv - lightPositionOnScreen);
     deltaUV *= 1.0 /  float(samples) * RaysInfo.z;
     float illuminationDecay = 1.0;
     vec3 totalColor = vec3(0.0);
     for(int i = 0; i < samples; ++i){
         uv -= deltaUV / 2.0;
-        vec2 sampleData = texture2D(firstPass, uv).ba;
+        vec2 sampleData = texture2D(USE_SAMPLER_2D(firstPass), uv).ba;
         vec2 unpackedRG = Unpack2NibblesFrom8BitChannel(sampleData.r);
         vec3 realSample = vec3(unpackedRG.r, unpackedRG.g, sampleData.g);
         realSample *= illuminationDecay * RaysInfo.w;
@@ -61,16 +62,16 @@ bool Engine::priv::GodRays::init() {
     return true;
 }
 void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, const glm::vec2& lightScrnPos, float alpha, const RenderModule& renderer) {
-    const auto& dimensions = viewport.getViewportDimensions();
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
     Engine::Renderer::sendUniform4("RaysInfo", exposure, decay, density, weight);
-    Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / dimensions.z, lightScrnPos.y / dimensions.w);
+    Engine::Renderer::sendUniform2("lightPositionOnScreen", lightScrnPos.x / viewportDimensions.z, lightScrnPos.y / viewportDimensions.w);
     Engine::Renderer::sendUniform1("samples", samples);
     Engine::Renderer::sendUniform1("alpha", alpha);
 
     Engine::priv::OpenGLBindTextureRAII firstPass{ "firstPass", gbuffer.getTexture(GBufferType::Misc), 0, false };
 
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }
 
 void Engine::Renderer::godRays::setSun(Entity sunEntity) noexcept {

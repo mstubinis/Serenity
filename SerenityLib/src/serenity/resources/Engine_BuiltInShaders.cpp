@@ -345,7 +345,7 @@ Engine::priv::EShaders::decal_frag =
 "varying vec4 VertexPositionsViewSpace;\n"
 "\n"
 "void main(){\n"
-"    vec2 screenPos = gl_FragCoord.xy / ScreenInfo.xy; \n"
+"    vec2 screenPos = gl_FragCoord.xy / ScreenInfo.zw; \n"
 "    vec3 WorldPosition = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), screenPos, CameraNear, CameraFar);\n"
 "    vec4 ObjectPosition = InvWorldMatrix * vec4(WorldPosition, 1.0);\n"
 "    vec3 absData = abs(ObjectPosition.xyz);\n"
@@ -511,7 +511,7 @@ Engine::priv::EShaders::vertex_skybox = R"(
 layout (location = 0) in vec3 position;
 uniform mat4 VP;
 varying vec3 UV;
-void main(){
+void main() {
     UV = position;
     gl_Position = VP * vec4(position, 1.0);
     gl_Position.z = gl_Position.w;
@@ -525,7 +525,7 @@ varying vec3 UV;
 uniform SAMPLER_TYPE_Cube cubemap;
 const float PI = 3.14159265;
 const vec3 UP = vec3(0.0, 1.0, 0.0);
-void main(){
+void main() {
     vec3 N = normalize(UV);
     vec3 irradiance = vec3(0.0);
     vec3 up = UP;
@@ -533,8 +533,8 @@ void main(){
     up = cross(N, right);
     float sampleDelta = 0.025;
     float nrSamples = 0.0;
-    for(float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta){
-        for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta){
+    for (float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta) {
+        for (float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta) {
             vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
             vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * N;
             irradiance += textureCube(cubemap, sampleVec).rgb * cos(theta) * sin(theta);
@@ -620,7 +620,7 @@ const float PI2 = 6.283185;
 uniform int NUM_SAMPLES;
 varying vec2 texcoords;
 
-vec3 ImportanceSampleGGX(vec2 Xi, float a2, mat3 TBN){
+vec3 ImportanceSampleGGX(vec2 Xi, float a2, mat3 TBN) {
     float phi = PI2 * Xi.x;
     float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a2 - 1.0) * Xi.y));
     float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
@@ -630,19 +630,19 @@ vec3 ImportanceSampleGGX(vec2 Xi, float a2, mat3 TBN){
     Half.z = cosTheta;
     return normalize(TBN * Half);
 }
-float GeometrySchlickGGX(float NdotV, float a){
+float GeometrySchlickGGX(float NdotV, float a) {
     float k = a / 2.0;
     float denom = NdotV * (1.0 - k) + k;
     return NdotV / denom;
 }
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float a){
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float a) {
     float NdotV = max(dot(N, V), 0.0);
     float NdotL = max(dot(N, L), 0.0);
     float ggx2 = GeometrySchlickGGX(NdotV, a);
     float ggx1 = GeometrySchlickGGX(NdotL, a);
     return ggx1 * ggx2;
 }
-vec2 IntegrateBRDF(float NdotV, float roughness){
+vec2 IntegrateBRDF(float NdotV, float roughness) {
     vec3 V;
     V.x = sqrt(1.0 - NdotV * NdotV);
     V.y = 0.0;
@@ -675,7 +675,7 @@ vec2 IntegrateBRDF(float NdotV, float roughness){
     B /= float(NUM_SAMPLES);
     return vec2(A, B);
 }
-void main(){
+void main() {
     gl_FragColor.rg = IntegrateBRDF(texcoords.x, texcoords.y);
 }
 )";
@@ -686,9 +686,10 @@ Engine::priv::EShaders::stencil_passover = R"(
 const vec3 comparison = vec3(1.0, 1.0, 1.0);
 uniform SAMPLER_TYPE_2D gNormalMap;
 varying vec2 texcoords;
-void main(){
-    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);
-    if(distance(normal, comparison) < 0.01){
+void main() {
+    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uvs).rg);
+    if (distance(normal, comparison) < 0.01) {
         discard;
     }
 }
@@ -890,7 +891,7 @@ priv::EShaders::particle_frag +=
 
 "void main(){\n"
 //this code is for soft particles////////////////////////////////////
-"    vec2 screen_uv = gl_FragCoord.xy / vec2(ScreenInfo.x, ScreenInfo.y);\n"
+"    vec2 screen_uv = gl_FragCoord.xy / ScreenInfo.zw;\n"
 "    vec3 worldPos = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), screen_uv, CameraNear, CameraFar);\n"
 "    float dist = distance(worldPos, WorldPosition) * 4.2;\n" //increasing that number will make the particles fade less from edges, but might increase the risk for sharper edges like without soft particles
 "    float alpha = clamp(dist, 0.0, 1.0);\n"
@@ -1021,12 +1022,13 @@ uniform SAMPLER_TYPE_2D gNormalMap;
 uniform SAMPLER_TYPE_2D gDiffuseMap;
 uniform int HasLighting;
 varying vec2 texcoords;
-void main(){
-    vec3 normal   = DecodeOctahedron(texture2D(gNormalMap, texcoords).rg);
-    vec3 diffuse  = texture2D(USE_SAMPLER_2D(gDiffuseMap), texcoords).rgb;
-    if(HasLighting == 0 || distance(normal, comparison) < 0.01){
+void main() {
+    vec2 uvs     = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec3 normal  = DecodeOctahedron(texture2D(gNormalMap, uvs).rg);
+    vec3 diffuse = texture2D(USE_SAMPLER_2D(gDiffuseMap), uvs).rgb;
+    if (HasLighting == 0 || distance(normal, comparison) < 0.01) {
         gl_FragColor = vec4(diffuse, 1.0);
-    }else{
+    } else {
         discard;
     }
 }
@@ -1054,7 +1056,7 @@ varying vec4 vColor;
 
 void main() {
     gl_FragColor = Object_Color;
-    if(DiffuseTextureEnabled == 1){
+    if (DiffuseTextureEnabled == 1) {
         gl_FragColor *= texture2D(DiffuseTexture, vUV);
     }
     gl_FragColor *= vColor;
@@ -1071,9 +1073,9 @@ uniform SAMPLER_TYPE_Cube Texture;
 varying vec3 UV;
 varying vec3 WorldPosition;
 void main(){
-    if(IsFake == 1){
+    if (IsFake == 1) {
         SUBMIT_DIFFUSE(Color);
-    }else{
+    } else {
         SUBMIT_DIFFUSE(textureCube(Texture, UV));
     }
     gl_FragData[0].rgb = pow(gl_FragData[0].rgb, vec3(1.0 / RendererInfo1.y));
@@ -1088,14 +1090,15 @@ Engine::priv::EShaders::copy_depth_frag = R"(
 uniform SAMPLER_TYPE_2D gDepthMap;
 varying vec2 texcoords;
 void main(){
-    gl_FragDepth = texture2D(gDepthMap, texcoords).r;
+    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    gl_FragDepth = texture2D(gDepthMap, uvs).r;
 }
 )";
 #pragma endregion
 
 #pragma region Blur
 Engine::priv::EShaders::blur_frag = R"(
-uniform SAMPLER_TYPE_2D image;
+uniform SAMPLER_TYPE_2D uSceneToBeBlurred;
 
 uniform vec4 DataA; //radius, UNUSED, H,V
 uniform vec4 strengthModifier;
@@ -1105,13 +1108,14 @@ varying vec2 texcoords;
 const int NUM_SAMPLES = 9;
 const float weight[NUM_SAMPLES] = float[](0.227, 0.21, 0.1946, 0.162, 0.12, 0.08, 0.054, 0.03, 0.016);
 
-void main(){
+void main() {
+    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
     vec4 Sum = vec4(0.0);
     vec2 inverseResolution = vec2(1.0) / ScreenInfo.zw;
     for(int i = 0; i < NUM_SAMPLES; ++i){
         vec2 offset = (inverseResolution * float(i)) * DataA.x;
-        Sum += (texture2D(image,texcoords + vec2(offset.x * DataA.z, offset.y * DataA.w)) * weight[i]) * strengthModifier;
-        Sum += (texture2D(image,texcoords - vec2(offset.x * DataA.z, offset.y * DataA.w)) * weight[i]) * strengthModifier;
+        Sum += (texture2D(USE_SAMPLER_2D(uSceneToBeBlurred), uvs + vec2(offset.x * DataA.z, offset.y * DataA.w)) * weight[i]) * strengthModifier;
+        Sum += (texture2D(USE_SAMPLER_2D(uSceneToBeBlurred), uvs - vec2(offset.x * DataA.z, offset.y * DataA.w)) * weight[i]) * strengthModifier;
     }
     gl_FragColor = Sum;
 }
@@ -1123,8 +1127,9 @@ void main(){
 Engine::priv::EShaders::greyscale_frag = R"(
 uniform SAMPLER_TYPE_2D textureMap;
 varying vec2 texcoords;
-void main(){
-    vec4 col = texture2D(textureMap, texcoords);
+void main() {
+    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec4 col = texture2D(textureMap, uvs);
     float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));
     gl_FragColor = vec4(vec3(lum), 1.0);
 }
@@ -1148,16 +1153,17 @@ uniform float FogDistBlend;
 
 varying vec2 texcoords;
 
-void main(){
-    vec4 scene = texture2D(SceneTexture, texcoords);
-    vec4 diffuse = texture2D(gDiffuseMap, texcoords);
+void main() {
+    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec4 scene = texture2D(SceneTexture, uvs);
+    vec4 diffuse = texture2D(gDiffuseMap, uvs);
     if (HasBloom == 1) {
-        vec4 bloom = texture2D(gBloomMap, texcoords);
+        vec4 bloom = texture2D(gBloomMap, uvs);
         scene += bloom;
     }
     gl_FragColor = scene;
     if (HasFog == 1) {
-        float distFrag = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), texcoords, CameraNear, CameraFar), CameraPosition);
+        float distFrag = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uvs, CameraNear, CameraFar), CameraPosition);
         float distVoid = FogDistNull + FogDistBlend;
         float distBlendIn = FogDistBlend - (distVoid - distFrag);
         float omega = smoothstep(0.0, 1.0, (distBlendIn / FogDistBlend));
@@ -1169,34 +1175,34 @@ void main(){
 #pragma endregion
 
 #pragma region DepthAndTransparency
-Engine::priv::EShaders::depth_and_transparency_frag =
-    "\n"
-    "uniform SAMPLER_TYPE_2D SceneTexture;\n"
-    "uniform SAMPLER_TYPE_2D gDepthMap;\n"
-    "\n"
-    //"uniform vec4 TransparencyMaskColor;\n"
-    //"uniform int TransparencyMaskActive;\n"
-    "uniform float DepthMaskValue;\n"
-    "uniform int DepthMaskActive;\n"
-    "\n"
-    "varying vec2 texcoords;\n"
-    "\n";
-Engine::priv::EShaders::depth_and_transparency_frag +=
-    "\n"
-    "void main(){\n"
-    "    vec4 scene = texture2D(SceneTexture, texcoords);\n"
-    "    scene.a = 1.0;\n"
-    "    float depth = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), texcoords, CameraNear, CameraFar), CameraPosition);\n"
-    //"    if (TransparencyMaskActive == 1 && scene.rgb == TransparencyMaskColor.rgb) {\n"
-    //"        scene.a = 0.0;\n"
-    //"    }\n"
-    "    if (DepthMaskActive == 1 && depth > DepthMaskValue) {\n"
-    //"        scene.a = 0.0;\n" //"erase" the pixel if the depth exceeds what the viewport wants
-    "        discard;\n"
-    "    }\n"
-    "    gl_FragColor = scene;\n"
-    //"    gl_FragDepth = 0.000001;\n"
-    "}";
+/*
+uniform vec4 TransparencyMaskColor;
+uniform int TransparencyMaskActive;
+...
+if (TransparencyMaskActive == 1 && scene.rgb == TransparencyMaskColor.rgb) {
+    scene.a = 0.0;
+}
+*/
+Engine::priv::EShaders::depth_and_transparency_frag = R"(
+uniform SAMPLER_TYPE_2D SceneTexture;
+uniform SAMPLER_TYPE_2D gDepthMap;
+
+uniform float DepthMaskValue;
+uniform int DepthMaskActive;
+
+varying vec2 texcoords;
+
+void main() {
+    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec4 scene = texture2D(SceneTexture, uvs);
+    scene.a = 1.0;
+    float depth = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uvs, CameraNear, CameraFar), CameraPosition);
+    if (DepthMaskActive == 1 && depth > DepthMaskValue) {
+        discard;
+    }
+    gl_FragColor = scene;
+}
+)";
 #pragma endregion
 
 #pragma region LightingFrag
@@ -1247,7 +1253,8 @@ flat varying vec3 CamRealPosition;
 flat varying vec3 SceneAmbientColor;
 
 void main(){
-    vec2 uv = gl_FragCoord.xy / ScreenInfo.xy;
+    vec2 uv = (gl_FragCoord.xy / ScreenInfo.zw) * (ScreenInfo.zw / ScreenInfo.xy);
+
     vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
     vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);
     vec3 PxlViewPosition  = (CameraView * vec4(PxlPosition, 1.0)).xyz;
@@ -1309,7 +1316,7 @@ vec3 SchlickFrenselRoughness(float inTheta, vec3 inF0, float inRoughness) {
     return inF0 + (max(vec3(1.0 - inRoughness), inF0) - inF0) * pow(1.0 - inTheta, 5.0);
 }
 void main() {
-    vec2 uv               = gl_FragCoord.xy / ScreenInfo.xy;
+    vec2 uv = (gl_FragCoord.xy / ScreenInfo.zw) * (ScreenInfo.zw / ScreenInfo.xy);
 
     float inSSAO          = 1.0 - texture2D(USE_SAMPLER_2D(gSSAOMap), uv).a;
     vec3 inNormals        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
@@ -1357,7 +1364,7 @@ varying vec2 texcoords;
 flat varying vec3 CamRealPosition;
 
 void main(){
-    vec2 uv = gl_FragCoord.xy / ScreenInfo.xy;
+    vec2 uv = (gl_FragCoord.xy / ScreenInfo.zw) * (ScreenInfo.zw / ScreenInfo.xy);
     vec3 PxlNormal        = DecodeOctahedron(texture2D(USE_SAMPLER_2D(gNormalMap), uv).rg);
     vec3 PxlPosition      = GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uv, CameraNear, CameraFar);
     vec3 PxlViewPosition  = (CameraView * vec4(PxlPosition, 1.0)).xyz;
@@ -1402,7 +1409,9 @@ flat varying vec3 CamRealPosition;
 
 void main(){
     vec4 PrevCanvas  = gl_FragColor;
-    vec2 uv          = gl_FragCoord.xy / ScreenInfo.xy;
+
+    vec2 uv = (gl_FragCoord.xy / ScreenInfo.zw) * (ScreenInfo.zw / ScreenInfo.xy);
+
     vec3 inAlbedo    = texture2D(USE_SAMPLER_2D(gDiffuseMap), uv).rgb;
     float inGlow     = texture2D(USE_SAMPLER_2D(gNormalMap), uv).a;
     gl_FragColor.rgb = inAlbedo * inGlow;

@@ -24,20 +24,21 @@ void Engine::priv::FXAA::internal_init_fragment_code() {
         "\n"
         "varying vec2 texcoords;\n"
         "\n"
-        "void main(){\n"
-        "   vec2 invRes = vec2(0.0004) / vec2(ScreenInfo.z / ScreenInfo.w);\n"
-        "   float depth = texture2D(depthTexture, texcoords).r;\n"
-        //"   float edge = texture2D(edgeTexture, texcoords).r;\n"
+        "void main() {\n"
+        "   vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);\n"
+        "   vec2 invRes = vec2(0.0004) / ScreenInfo.zw;\n"
+        "   float depth = texture2D(USE_SAMPLER_2D(depthTexture), uvs).r;\n"
+        //"   float edge = texture2D(USE_SAMPLER_2D(edgeTexture), uvs).r;\n"
         "   if(depth >= 0.999){\n"
-        "       gl_FragColor = texture2D(inTexture, texcoords);\n"
+        "       gl_FragColor = texture2D(USE_SAMPLER_2D(inTexture), uvs);\n"
         "       return;\n"
         "   }\n"
         //  local constrast check
-        "   vec3 rgbNW = texture2D(inTexture, texcoords + (vec2( -1.0, -1.0)) * invRes).xyz;\n"
-        "   vec3 rgbNE = texture2D(inTexture, texcoords + (vec2(  1.0, -1.0)) * invRes).xyz;\n"
-        "   vec3 rgbSW = texture2D(inTexture, texcoords + (vec2( -1.0,  1.0)) * invRes).xyz;\n"
-        "   vec3 rgbSE = texture2D(inTexture, texcoords + (vec2(  1.0,  1.0)) * invRes).xyz;\n"
-        "   vec3 rgbM  = texture2D(inTexture, texcoords).xyz;\n"
+        "   vec3 rgbNW = texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2( -1.0, -1.0)) * invRes).xyz;\n"
+        "   vec3 rgbNE = texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(  1.0, -1.0)) * invRes).xyz;\n"
+        "   vec3 rgbSW = texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2( -1.0,  1.0)) * invRes).xyz;\n"
+        "   vec3 rgbSE = texture2D(USE_SAMPLER_2D(inTexture), uvs + (vec2(  1.0,  1.0)) * invRes).xyz;\n"
+        "   vec3 rgbM  = texture2D(USE_SAMPLER_2D(inTexture), uvs).xyz;\n"
         "   vec3 luma = vec3(0.299, 0.587, 0.114);\n"
         "   float lumaNW = dot(rgbNW, luma);\n"
         "   float lumaNE = dot(rgbNE, luma);\n"
@@ -50,14 +51,14 @@ void Engine::priv::FXAA::internal_init_fragment_code() {
         "   dir.x = -(lumaNW + lumaNE) - (lumaSW + lumaSE);\n"
         "   dir.y =  (lumaNW + lumaSW) - (lumaNE + lumaSE);\n"
         "   float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);\n"
-        "   float rcpDirMin = 1.0/(min(abs(dir.x), abs(dir.y)) + dirReduce);\n"
-        "   dir = min(vec2(FXAA_SPAN_MAX,FXAA_SPAN_MAX),max(vec2(-FXAA_SPAN_MAX,-FXAA_SPAN_MAX),dir * rcpDirMin)) * invRes;\n"
-        "   vec3 rgbA = 0.5 * (texture2D(inTexture, texcoords   + dir * (1.0/3.0 - 0.5)).xyz + texture2D(inTexture, texcoords + dir * (2.0/3.0 - 0.5)).xyz);\n"
-        "   vec3 rgbB = rgbA * 0.5 + 0.25 * (texture2D(inTexture,texcoords + dir * - 0.5).xyz + texture2D(inTexture, texcoords + dir * 0.5).xyz);\n"
+        "   float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);\n"
+        "   dir = min(vec2(FXAA_SPAN_MAX, FXAA_SPAN_MAX), max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX), dir * rcpDirMin)) * invRes;\n"
+        "   vec3 rgbA = 0.5 * (texture2D(USE_SAMPLER_2D(inTexture), uvs   + dir * (1.0/3.0 - 0.5)).xyz + texture2D(USE_SAMPLER_2D(inTexture), uvs + dir * (2.0/3.0 - 0.5)).xyz);\n"
+        "   vec3 rgbB = rgbA * 0.5 + 0.25 * (texture2D(USE_SAMPLER_2D(inTexture), uvs + dir * - 0.5).xyz + texture2D(USE_SAMPLER_2D(inTexture), uvs + dir * 0.5).xyz);\n"
         "   float lumaB = dot(rgbB,luma);\n"
-        "   if((lumaB < lumaMin) || (lumaB > lumaMax)){\n"
+        "   if ((lumaB < lumaMin) || (lumaB > lumaMax)) {\n"
         "       gl_FragColor = vec4(rgbA, 1.0);\n"
-        "   }else{\n"
+        "   } else {\n"
         "       gl_FragColor = vec4(rgbB, 1.0);\n"
         "   }\n"
         "}";
@@ -81,7 +82,7 @@ bool Engine::priv::FXAA::init() {
     return true;
 }
 void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer) {
-    //const auto& dimensions = viewport.getViewportDimensions();
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform1("FXAA_REDUCE_MIN", reduce_min);
@@ -92,5 +93,5 @@ void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, uint32
     Engine::priv::OpenGLBindTextureRAII edgeTexture{ "edgeTexture", gbuffer.getTexture(GBufferType::Misc), 1, true };
     Engine::priv::OpenGLBindTextureRAII depthTexture{ "depthTexture", gbuffer.getTexture(GBufferType::Depth), 2, false };
 
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }

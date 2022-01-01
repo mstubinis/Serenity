@@ -434,76 +434,74 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
     //lighting
     {
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Lighting");
+        constexpr std::array<const char*, 2> LightingModels = { "Basic", "Physical" };
         ImGui::Checkbox("Lighting Enabled", &renderer.m_Lighting);
         ImGui::SliderFloat("GI Contribution Diffuse", &renderer.m_GI_Diffuse, 0.0f, 1.0f);
         ImGui::SliderFloat("GI Contribution Specular", &renderer.m_GI_Specular, 0.0f, 1.0f);
         ImGui::SliderFloat("GI Contribution Global", &renderer.m_GI_Global, 0.0f, 1.0f);
         renderer.m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderer.m_GI_Diffuse, renderer.m_GI_Specular, renderer.m_GI_Global);
-        static const char* LightingModels[] = { "Basic", "Physical" };
         static int lighting_model_current   = int(renderer.m_LightingAlgorithm);
-        ImGui::ListBox("Lighting Model", &lighting_model_current, LightingModels, IM_ARRAYSIZE(LightingModels));
-        if (lighting_model_current == int(LightingAlgorithm::Basic)) {
+        if (ImGui::ListBox("Lighting Model", &lighting_model_current, LightingModels.data(), int(LightingModels.size()))) {
+            Engine::Renderer::Settings::Lighting::setLightingAlgorithm(lighting_model_current);
+        }
+        if (lighting_model_current == LightingAlgorithm::Basic) {
             auto scene = Engine::Resources::getCurrentScene();
             if (scene) {
-                const auto& ambientColor      = Engine::Resources::getCurrentScene()->getAmbientColor();
-                static float ambientColors[3] = { ambientColor.r, ambientColor.g, ambientColor.b };
-                ImGui::ColorEdit3("Ambient Color", &ambientColors[0]);
-                scene->setAmbientColor(ambientColors[0], ambientColors[1], ambientColors[2]);
+                glm::vec3 ambientColor = Engine::Resources::getCurrentScene()->getAmbientColor();
+                ImGui::ColorEdit3("Ambient Color", &ambientColor[0]);
+                scene->setAmbientColor(ambientColor[0], ambientColor[1], ambientColor[2]);
             }
         }
-        Engine::Renderer::Settings::Lighting::setLightingAlgorithm(static_cast<LightingAlgorithm>(lighting_model_current));
         ImGui::Separator();
     }
     //hdr
     {
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "HDR");
-        static const char* HDRAlgos[] = { "None", "Reinhard", "Filmic", "Exposure", "Uncharted" };
+        constexpr std::array<const char*, 5> HDRAlgos = { "None", "Reinhard", "Filmic", "Exposure", "Uncharted" };
         static int hdr_algo_current   = int(Engine::priv::HDR::STATIC_HDR.m_Algorithm);
-        ImGui::ListBox("HDR Algorithm", &hdr_algo_current, HDRAlgos, IM_ARRAYSIZE(HDRAlgos));
+        if (ImGui::ListBox("HDR Algorithm", &hdr_algo_current, HDRAlgos.data(), int(HDRAlgos.size()))) {
+            Engine::Renderer::hdr::setAlgorithm(hdr_algo_current);
+        }
         ImGui::SliderFloat("HDR Exposure", &Engine::priv::HDR::STATIC_HDR.m_Exposure, -15.0f, 15.0f);
-        Engine::Renderer::hdr::setAlgorithm(hdr_algo_current);
         ImGui::Separator();
     }
     //bloom
     {
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Bloom");
-        static bool bloom_enabled = Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Active;
-        ImGui::Checkbox("Bloom Enabled", &bloom_enabled);
-        ImGui::SliderFloat("Bloom Strength", &Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Strength, 0.0f, 5.0f);
-        ImGui::SliderFloat("Bloom Exposure", &Engine::priv::Bloom::STATIC_BLOOM.m_Exposure, -5.0f, 5.0f);
-        ImGui::SliderFloat("Bloom Threshold", &Engine::priv::Bloom::STATIC_BLOOM.m_Threshold, -5.0f, 5.0f);
-        ImGui::SliderFloat("Bloom Scale", &Engine::priv::Bloom::STATIC_BLOOM.m_Scale, 0.0f, 5.0f);
-        ImGui::SliderFloat("Bloom Blur Radius", &Engine::priv::Bloom::STATIC_BLOOM.m_Blur_Radius, 0.0f, 5.0f);
-        ImGui::SliderFloat("Bloom Blur Strength", &Engine::priv::Bloom::STATIC_BLOOM.m_Blur_Strength, -5.0f, 5.0f);
-        static int bloom_samples = Engine::priv::Bloom::STATIC_BLOOM.m_Num_Passes;
-        ImGui::SliderInt("Bloom Num Passes", &bloom_samples, 0, 16);
-        Engine::Renderer::bloom::enable(bloom_enabled);
-        Engine::Renderer::bloom::setNumPasses(uint32_t(bloom_samples));
+        ImGui::Checkbox("Bloom Enabled",          &Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Active);
+        ImGui::SliderFloat("Bloom Strength",      &Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Strength,  0.0f,  5.0f);
+        ImGui::SliderFloat("Bloom Exposure",      &Engine::priv::Bloom::STATIC_BLOOM.m_Exposure,       -5.0f,  5.0f);
+        ImGui::SliderFloat("Bloom Threshold",     &Engine::priv::Bloom::STATIC_BLOOM.m_Threshold,      -5.0f,  5.0f);
+        ImGui::SliderFloat("Bloom Scale",         &Engine::priv::Bloom::STATIC_BLOOM.m_Scale,           0.0f,  5.0f);
+        ImGui::SliderFloat("Bloom Blur Radius",   &Engine::priv::Bloom::STATIC_BLOOM.m_Blur_Radius,     0.0f,  5.0f);
+        ImGui::SliderFloat("Bloom Blur Strength", &Engine::priv::Bloom::STATIC_BLOOM.m_Blur_Strength,  -5.0f,  5.0f);
+        ImGui::SliderInt("Bloom Num Passes",      &Engine::priv::Bloom::STATIC_BLOOM.m_Num_Passes,      0,     16);
         ImGui::Separator();
     }
     //ssao
     {
-        static const char* SSAOLevels[] = { "Off", "Low", "Medium", "High", "Ultra" };
+        constexpr std::array<const char*, 5> SSAOLevels = { "Off", "Low", "Medium", "High", "Ultra" };
         static int ssao_algo_current    = Engine::priv::SSAO::STATIC_SSAO.m_SSAOLevel;
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Screen Space Ambient Occlusion");
-        ImGui::ListBox("SSAO Level", &ssao_algo_current, SSAOLevels, IM_ARRAYSIZE(SSAOLevels));
-        Engine::Renderer::ssao::setLevel(ssao_algo_current);
-        ImGui::SliderFloat("SSAO Bias", &Engine::priv::SSAO::STATIC_SSAO.m_ssao_bias, -3.0f, 3.0f);
-        ImGui::SliderFloat("SSAO Scale", &Engine::priv::SSAO::STATIC_SSAO.m_ssao_scale, 0.0f, 3.0f);
-        ImGui::SliderFloat("SSAO Radius", &Engine::priv::SSAO::STATIC_SSAO.m_ssao_radius, 0.0f, 10.0f);
-        ImGui::SliderFloat("SSAO Intensity", &Engine::priv::SSAO::STATIC_SSAO.m_ssao_intensity, 0.0f, 10.0f);
-        static int ssao_samples = Engine::priv::SSAO::STATIC_SSAO.m_ssao_samples;
-        ImGui::SliderInt("SSAO Samples", &ssao_samples, 0, int(SSAO_MAX_KERNEL_SIZE));
-        Engine::Renderer::ssao::setSamples(static_cast<uint32_t>(ssao_samples));
+        if (ImGui::ListBox("SSAO Level", &ssao_algo_current, SSAOLevels.data(), int(SSAOLevels.size()))) {
+            Engine::Renderer::ssao::setLevel(ssao_algo_current);
+        }
+        ImGui::SliderFloat("SSAO Bias",      &Engine::priv::SSAO::STATIC_SSAO.m_ssao_bias,           -3.0f,  3.0f);
+        ImGui::SliderFloat("SSAO Scale",     &Engine::priv::SSAO::STATIC_SSAO.m_ssao_scale,           0.0f,  3.0f);
+        ImGui::SliderFloat("SSAO Radius",    &Engine::priv::SSAO::STATIC_SSAO.m_ssao_radius,          0.0f,  10.0f);
+        ImGui::SliderFloat("SSAO Intensity", &Engine::priv::SSAO::STATIC_SSAO.m_ssao_intensity,       0.0f,  10.0f);
+        ImGui::SliderInt("SSAO Samples",     &Engine::priv::SSAO::STATIC_SSAO.m_ssao_samples,         0,     SSAO_MAX_KERNEL_SIZE);
+        ImGui::SliderInt("SSAO Blur Passes", &Engine::priv::SSAO::STATIC_SSAO.m_ssao_blur_num_passes, 0,     32);
         ImGui::Separator();
     }
     //anti-aliasing
     {
-        static const char* AAAlgos[] = { "Off", "FXAA", "SMAA Low", "SMAA Medium", "SMAA High", "SMAA Ultra" };
+        constexpr std::array<const char*, 6> AAAlgos = { "Off", "FXAA", "SMAA Low", "SMAA Medium", "SMAA High", "SMAA Ultra" };
         static int aa_algo_current   = int(renderer.m_AA_algorithm);
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Anti-Aliasing");
-        ImGui::ListBox("Anti-Aliasing Algorithm", &aa_algo_current, AAAlgos, IM_ARRAYSIZE(AAAlgos));
-        Engine::Renderer::Settings::setAntiAliasingAlgorithm(aa_algo_current);
+        if (ImGui::ListBox("Anti-Aliasing Algorithm", &aa_algo_current, AAAlgos.data(), int(AAAlgos.size()))) {
+            Engine::Renderer::Settings::setAntiAliasingAlgorithm(aa_algo_current);
+        }
         ImGui::Separator();
     }
     //debugging

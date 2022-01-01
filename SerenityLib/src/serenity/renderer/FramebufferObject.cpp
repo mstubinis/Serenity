@@ -4,6 +4,34 @@
 
 using namespace Engine::priv;
 
+namespace {
+    void swap_buffers(size_t& fboCurrentIndex, size_t fboSize) {
+        fboCurrentIndex = (fboCurrentIndex + 1) % fboSize; //swap buffers
+    }
+    constexpr const char* debugFramebufferStatusAsStr(const GLenum fbStatus) {
+        switch (fbStatus) {
+            case GL_FRAMEBUFFER_UNDEFINED: {
+                return "UNDEFINED";
+            } case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: {
+                return "INCOMPLETE_ATTACHMENT";
+            } case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: {
+                return "INCOMPLETE_MISSING_ATTACHMENT";
+            } case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: {
+                return "INCOMPLETE_DRAW_BUFFER";
+            } case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: {
+                return "INCOMPLETE_READ_BUFFER";
+            } case GL_FRAMEBUFFER_UNSUPPORTED: {
+                return "UNSUPPORTED";
+            } case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: {
+                return "INCOMPLETE_MULTISAMPLE";
+            } case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: {
+                return "INCOMPLETE_LAYER_TARGETS";
+            }
+        }
+        return "";
+    }
+};
+
 #pragma region FramebufferObjectAttatchmentBaseClass
 
 FramebufferObjectAttatchment::FramebufferObjectAttatchment(const FramebufferObject& fbo, FramebufferAttatchment a, ImageInternalFormat i) 
@@ -68,34 +96,6 @@ void RenderbufferObject::unbind(){
 
 #pragma endregion
 
-namespace Engine::priv {
-    struct FramebufferObjectPublicInterface final {
-        static void swap_buffers(const FramebufferObject* fbo) {
-            fbo->m_CurrentFBOIndex = (fbo->m_CurrentFBOIndex + 1) % fbo->m_FBOs.size(); //swap buffers
-        }
-    };
-};
-namespace {
-    constexpr auto FBO_DEFAULT_BIND_FUNC = [](const FramebufferObject* fbo) {
-        Engine::Renderer::setViewport(0.0f, 0.0f, fbo->width(), fbo->height());
-        Engine::priv::FramebufferObjectPublicInterface::swap_buffers(fbo);
-        Engine::Renderer::bindFBO(*fbo);
-        for (const auto& [idx, attatchment] : fbo->attatchments()) {
-            attatchment->bind();
-        }
-    };
-    constexpr auto FBO_DEFAULT_UNBIND_FUNC = [](const FramebufferObject* fbo) {
-        for (const auto& [idx, attatchment] : fbo->attatchments()) {
-            attatchment->unbind();
-        }
-        Engine::Renderer::unbindFBO();
-        if (Engine::Resources::getNumWindows() > 0) { //called in destructor, so this might be cleaned up after all the windows are cleaned up
-            const auto winSize = Engine::Resources::getWindowSize();
-            Engine::Renderer::setViewport(0.0f, 0.0f, winSize.x, winSize.y);
-        }
-    };
-};
-
 #pragma region FramebufferObject
 
 FramebufferObject::FramebufferObject(uint32_t w, uint32_t h, float divisor, uint32_t swapBufferCount) {
@@ -118,15 +118,13 @@ void FramebufferObject::init(uint32_t width, uint32_t height, float divisor, uin
     for (GLuint& fbo : m_FBOs) {
         glGenFramebuffers(1, &fbo);
     }
-    setCustomBindFunctor(FBO_DEFAULT_BIND_FUNC);
-    setCustomUnbindFunctor(FBO_DEFAULT_UNBIND_FUNC);
 }
 void FramebufferObject::init(uint32_t width, uint32_t height, ImageInternalFormat depthInternalFormat, float divisor, uint32_t swapBufferCount) {
     if (depthInternalFormat == ImageInternalFormat::Depth24Stencil8 || depthInternalFormat == ImageInternalFormat::Depth32FStencil8) {
         attatchRenderBuffer(*this, FramebufferAttatchment::DepthAndStencil, depthInternalFormat);
-    }else if (depthInternalFormat == ImageInternalFormat::StencilIndex8) {
+    } else if (depthInternalFormat == ImageInternalFormat::StencilIndex8) {
         attatchRenderBuffer(*this, FramebufferAttatchment::Stencil, depthInternalFormat);
-    }else {
+    } else {
         attatchRenderBuffer(*this, FramebufferAttatchment::Depth, depthInternalFormat);
     }
 }
@@ -148,31 +146,26 @@ void FramebufferObject::resize(const uint32_t width, const uint32_t height) {
         }
     }
 }
-
-
-constexpr const char* debugFramebufferStatusAsStr(const GLenum fbStatus) {
-    switch (fbStatus) {
-        case GL_FRAMEBUFFER_UNDEFINED: {
-            return "UNDEFINED";
-        } case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: {
-            return "INCOMPLETE_ATTACHMENT";
-        } case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: {
-            return "INCOMPLETE_MISSING_ATTACHMENT";
-        } case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: {
-            return "INCOMPLETE_DRAW_BUFFER";
-        } case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: {
-            return "INCOMPLETE_READ_BUFFER";
-        } case GL_FRAMEBUFFER_UNSUPPORTED: {
-            return "UNSUPPORTED";
-        } case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: {
-            return "INCOMPLETE_MULTISAMPLE";
-        } case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: {
-            return "INCOMPLETE_LAYER_TARGETS";
-        }
+void FramebufferObject::bind() {
+    Engine::Renderer::setViewport(0.0f, 0.0f, m_FramebufferWidth, m_FramebufferHeight);
+    swap_buffers(m_CurrentFBOIndex, m_FBOs.size());
+    Engine::Renderer::bindFBO(*this);
+    for (const auto& [idx, attatchment] : m_Attatchments) {
+        attatchment->bind();
     }
-    return "";
 }
-
+void FramebufferObject::unbind() {
+    for (const auto& [idx, attatchment] : m_Attatchments) {
+        attatchment->unbind();
+    }
+    Engine::Renderer::unbindFBO();
+    /*
+    if (Engine::Resources::getNumWindows() > 0) { //called in destructor, so this might be cleaned up after all the windows are cleaned up
+        const auto winSize = Engine::Resources::getWindowSize();
+        Engine::Renderer::setViewport(0.0f, 0.0f, winSize.x, winSize.y);
+    }
+    */
+}
 bool FramebufferObject::checkStatus() {
     for (const GLuint fbo : m_FBOs) {
         Engine::Renderer::bindFBO(fbo);

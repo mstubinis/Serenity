@@ -19,7 +19,7 @@ namespace Engine::priv {
             Handle         m_Fragment_Shader;
             Handle         m_Shader_Program;
         public:
-            uint32_t  m_Num_Passes       = 3;
+            int       m_Num_Passes       = 3;
             float     m_Bloom_Strength   = 0.0f;
             float     m_Blur_Radius      = 1.24f;
             float     m_Blur_Strength    = 0.62f;
@@ -43,8 +43,8 @@ namespace Engine::Renderer::bloom {
     inline float getExposure() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Exposure; }
     inline void setExposure(float exposure) noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Exposure = exposure; }
     inline bool enabled() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Active; }
-    inline uint32_t getNumPasses() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Num_Passes; }
-    inline void setNumPasses(uint32_t numPasses) noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Num_Passes = numPasses; }
+    inline int getNumPasses() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Num_Passes; }
+    inline void setNumPasses(int numPasses) noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Num_Passes = std::max(0, numPasses); }
     inline void enable(bool enabled = true) noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Active = enabled; }
     inline void disable() noexcept { Engine::priv::Bloom::STATIC_BLOOM.m_Bloom_Active = false; }
     inline float getBlurRadius() noexcept { return Engine::priv::Bloom::STATIC_BLOOM.m_Blur_Radius; }

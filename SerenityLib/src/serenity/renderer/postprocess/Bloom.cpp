@@ -17,13 +17,14 @@ namespace {
     //uniform vec4 Data; //x = scale y = threshold z = exposure w = strength
     std::string internal_get_fragment_code() {
         return R"(
-uniform SAMPLER_TYPE_2D SceneTexture;
+uniform SAMPLER_TYPE_2D uSceneTextureForBlooming;
 
 uniform vec4 Data;
 varying vec2 texcoords;
 
 void main() {
-    vec3 sceneColor = texture2D(SceneTexture, texcoords).rgb;
+    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec3 sceneColor = texture2D(USE_SAMPLER_2D(uSceneTextureForBlooming), uvs).rgb;
     sceneColor = vec3(1.0) - exp(-sceneColor * Data.z);
     vec3 finalColor = sceneColor - vec3(Data.y);
     finalColor = finalColor + (finalColor * Data.w);
@@ -44,11 +45,12 @@ void Engine::priv::Bloom::init() {
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
 }
 void Engine::priv::Bloom::pass(const Engine::priv::GBuffer& gbuffer, const Viewport& viewport, uint32_t sceneTexture, const Engine::priv::RenderModule& renderer) {
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
     Engine::Renderer::sendUniform4("Data", m_Scale, m_Threshold, m_Exposure, m_Bloom_Strength);
 
-    Engine::priv::OpenGLBindTextureRAII SceneTexture{ "SceneTexture", gbuffer.getTexture(sceneTexture), 0, false };
+    Engine::priv::OpenGLBindTextureRAII uSceneTextureForBlooming{ "uSceneTextureForBlooming", gbuffer.getTexture(sceneTexture), 0, false };
 
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }

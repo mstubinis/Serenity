@@ -81,7 +81,7 @@ namespace Engine::priv {
             void internal_init_frame_gbuffer(Viewport&, Camera&);
             void internal_pass_geometry(Viewport&, Camera&);
             void internal_pass_ssao(Viewport&, Camera&);
-            void internal_pass_stencil();
+            void internal_pass_stencil(Viewport&);
             void internal_pass_lighting(Viewport&, Camera&, bool mainRenderFunction);
             void internal_pass_lighting_basic(Viewport&, Camera&, bool mainRenderFunction);
             void internal_pass_forward(Viewport&, Camera&, bool depthPrepass);
@@ -90,11 +90,11 @@ namespace Engine::priv {
             void internal_pass_bloom(Viewport&, GBufferType::Type sceneTexture);
             void internal_pass_depth_of_field(Viewport&, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
             void internal_pass_aa(bool mainRenderFunction, Viewport&, Camera&, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture);
-            void internal_pass_final(GBufferType::Type sceneTexture);
+            void internal_pass_final(Viewport&, GBufferType::Type sceneTexture);
             void internal_pass_depth_and_transparency(Viewport&, GBufferType::Type sceneTexture); //TODO: recheck this
             bool internal_pass_depth_prepass(Viewport&, Camera&);
             void internal_pass_blur(Viewport&, GLuint texture, std::string_view type);
-            void internal_pass_normaless_diffuse();
+            void internal_pass_normaless_diffuse(Viewport&);
 
             void internal_generate_brdf_lut(Handle shaderProgram, uint32_t brdfSize, int numSamples);
 

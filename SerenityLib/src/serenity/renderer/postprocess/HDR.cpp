@@ -31,8 +31,9 @@ uniform int HasGodRays;
 vec3 uncharted(vec3 x, float a, float b, float c, float d, float e, float f){ 
     return vec3(((x * (a * x + c * b) + d * e) / (x * (a * x + b) + d * f)) - e / f); 
 }
-void main(){
-    vec3 lighting = texture2D(USE_SAMPLER_2D(gLightingMap), texcoords).rgb;
+void main() {
+    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec3 lighting = texture2D(USE_SAMPLER_2D(gLightingMap), uvs).rgb;
     if(HDRInfo.w == 1.0){
         lighting  = lighting / (lighting + ConstantOneVec3);
         lighting *= HDRInfo.x;
@@ -55,7 +56,7 @@ void main(){
         lighting     *= white;
     }
     if(HasGodRays == 1){
-        vec3 rays = texture2D(USE_SAMPLER_2D(gGodsRaysMap), texcoords).rgb;
+        vec3 rays = texture2D(USE_SAMPLER_2D(gGodsRaysMap), uvs).rgb;
         lighting += rays * HDRInfo.z;
     }
     gl_FragData[0] = vec4(lighting, 1.0);
@@ -81,6 +82,7 @@ bool Engine::priv::HDR::init() {
     return true;
 }
 void Engine::priv::HDR::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_t outTexture, uint32_t outTexture2, bool godRays, float godRaysFactor, const RenderModule& renderer) {
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_Program.get<ShaderProgram>());
 
     gbuffer.bindFramebuffers(outTexture, outTexture2, "RGBA");
@@ -91,6 +93,6 @@ void Engine::priv::HDR::pass(GBuffer& gbuffer, const Viewport& viewport, uint32_
     Engine::priv::OpenGLBindTextureRAII gLightingMap{ "gLightingMap", gbuffer.getTexture(GBufferType::Lighting), 0, false };
     Engine::priv::OpenGLBindTextureRAII gGodsRaysMap{ "gGodsRaysMap", gbuffer.getTexture(GBufferType::GodRays), 1, false };
 
-    Engine::Renderer::renderFullscreenQuad();
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 
 }

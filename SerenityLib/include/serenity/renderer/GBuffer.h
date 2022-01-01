@@ -64,15 +64,15 @@ namespace Engine::priv{
             void bindBackbuffer(const Viewport& viewport, GLuint final_fbo = 0, GLuint final_rbo = 0);
             void bindBackbuffer(GLuint final_fbo = 0, GLuint final_rbo = 0);
 
-            inline constexpr uint32_t width() const noexcept { return m_Width; }
-            inline constexpr uint32_t height() const noexcept { return m_Height; }
+            [[nodiscard]] inline uint32_t width() const noexcept { return m_Width; }
+            [[nodiscard]] inline uint32_t height() const noexcept { return m_Height; }
 
-            inline constexpr const std::array<FramebufferTexture*, GBufferType::_TOTAL>& getBuffers() const noexcept { return m_FramebufferTextures; }
-            FramebufferTexture& getBuffer(const uint32_t index) const noexcept;
-            Texture& getTexture(const uint32_t index) const noexcept;
+            [[nodiscard]] inline const std::array<FramebufferTexture*, GBufferType::_TOTAL>& getBuffers() const noexcept { return m_FramebufferTextures; }
+            [[nodiscard]] FramebufferTexture& getBuffer(const uint32_t index) const noexcept;
+            [[nodiscard]] Texture& getTexture(const uint32_t index) const noexcept;
 
-            inline constexpr const FramebufferObject& getMainFBO() const noexcept { return m_FBO; }
-            inline constexpr const FramebufferObject& getSmallFBO() const noexcept { return m_SmallFBO; }
+            [[nodiscard]] inline FramebufferObject& getMainFBO() noexcept { return m_FBO; }
+            [[nodiscard]] inline FramebufferObject& getSmallFBO() noexcept { return m_SmallFBO; }
     };
 };
 #endif
