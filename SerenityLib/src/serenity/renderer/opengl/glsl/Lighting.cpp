@@ -85,7 +85,6 @@ vec3 CalcLightInternal(in Light currentLight, vec3 LightDir, vec3 PxlWorldPos, v
     vec3 LightSpecularColor = currentLight.DataD.xyz * Specular;
     vec3 SpecularFactor     = ConstantZeroVec3;
 
-    vec2 uvs = gl_FragCoord.xy / ScreenInfo.zw;
     vec4 ShadowPxlWorldPos = vec4(PxlWorldPos + CamRealPosition, 1.0);
 
     float shadow = ShadowCalculationLightingShader(PxlViewPos, LightDir, PxlNormal, ShadowPxlWorldPos);
@@ -454,7 +453,6 @@ vec3 CalcLightInternalBasic(in Light currentLight, vec3 LightDir, vec3 PxlWorldP
     vec3 LightDiffuseColor  = currentLight.DataD.xyz;
     vec3 LightSpecularColor = currentLight.DataD.xyz * Specular;
 
-    vec2 uvs                = gl_FragCoord.xy / ScreenInfo.zw;
     vec4 ShadowPxlWorldPos  = vec4(PxlWorldPos + CamRealPosition, 1.0);
     float shadow            = ShadowCalculationLightingShader(PxlViewPos, LightDir, PxlNormal, ShadowPxlWorldPos);
     vec3 ShadowColor        = max(vec3(shadow), RendererInfo2.rgb); 

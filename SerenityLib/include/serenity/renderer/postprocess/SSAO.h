@@ -10,7 +10,13 @@ class  Viewport;
 #include <serenity/system/TypeDefs.h>
 #include <serenity/system/Macros.h>
 
-constexpr int SSAO_MAX_KERNEL_SIZE = 16;
+constexpr int   SSAO_MAX_KERNEL_SIZE       = 64;
+constexpr float SSAO_DEFAULT_SCALE         = 0.143f;
+constexpr float SSAO_DEFAULT_RADIUS        = 0.522f;
+constexpr float SSAO_DEFAULT_INTENSITY     = 1.6f;
+constexpr float SSAO_DEFAULT_BIAS          = 0.005f;
+constexpr float SSAO_BLUR_DEFAULT_STRENGTH = 0.48f;
+constexpr float SSAO_BLUR_DEFAULT_RADIUS   = 0.257f;
 
 class SSAOLevel { 
     public:
@@ -38,20 +44,19 @@ namespace Engine::priv {
             SSAO() = default;
             ~SSAO();
         public:
-            SSAOLevel         m_SSAOLevel             = SSAOLevel::Medium;
-            int               m_ssao_samples          = 8;
-            int               m_ssao_blur_num_passes  = 2;
-            float             m_ssao_blur_radius      = 0.66f;
-            float             m_ssao_blur_strength    = 0.48f;
-            float             m_ssao_scale            = 1.0;
-            float             m_ssao_intensity        = 1.8f;
-            float             m_ssao_bias             = 0.048f;
-            float             m_ssao_radius           = 0.175f;
-            bool              m_ssao_do_blur          = true;
+            SSAOLevel         m_SSAOLevel     = SSAOLevel::Medium;
+            int               m_NumSamples    = 64;
+            int               m_BlurNumPasses = 1;
+            float             m_Scale         = SSAO_DEFAULT_SCALE;
+            float             m_Intensity     = SSAO_DEFAULT_INTENSITY;
+            float             m_Bias          = SSAO_DEFAULT_BIAS;
+            float             m_Radius        = SSAO_DEFAULT_RADIUS;
+            bool              m_DoBlur        = true;
 
             static bool init();
             void passSSAO(GBuffer&, const Viewport&, const Camera&, const Engine::priv::RenderModule&);
-            void passBlur(GBuffer&, const Viewport&, std::string_view type, uint32_t texture, const Engine::priv::RenderModule&);
+            void passBlur(GBuffer&, const Viewport&, uint32_t texture, const Engine::priv::RenderModule&);
+            void passBlurCopyPixels(GBuffer&, const Viewport&, uint32_t texture, const Engine::priv::RenderModule&);
 
             static SSAO STATIC_SSAO;
     };
@@ -61,10 +66,6 @@ namespace Engine::Renderer::ssao {
 
     void enableBlur(bool blurEnabled = true) noexcept;
     void disableBlur() noexcept;
-    [[nodiscard]] float getBlurRadius() noexcept;
-    void setBlurRadius(float blurRadius) noexcept;
-    [[nodiscard]] float getBlurStrength() noexcept;
-    void setBlurStrength(float blurStrength) noexcept;
     [[nodiscard]] int getBlurNumPasses() noexcept;
     void setBlurNumPasses(int numPasses) noexcept;
     [[nodiscard]] float getIntensity() noexcept;

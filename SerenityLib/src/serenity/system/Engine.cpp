@@ -143,6 +143,7 @@ void EngineCore::internal_update_logic(GameCore& gameCore, int frameIteration, S
     m_Misc.m_QueuedCommands.for_each_and_clear([](std::function<void()>& item) mutable { item(); });
 
     scene.update(dt);
+
     m_ThreadingModule.update(dt);
 
     m_DiscordModule.update();
@@ -270,6 +271,7 @@ void EngineCore::run(GameCore* gameCore) {
             internal_update_sounds(*gameCore, scene, float(m_Misc.m_Dt));
         }
         renderSimulation(scene);
+
         internal_cleanup();
         m_DebugManager.calculate();
         m_Misc.m_FPS.update(m_Misc.m_Dt);  

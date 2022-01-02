@@ -991,7 +991,7 @@ void DeferredPipeline::renderDirectionalLight(Camera& camera, DirectionalLight& 
     std::string start = "light.";
     sendGPUDataLight(camera, directionalLight, start);
     const auto viewportDimensions = viewport.getViewportDimensions();
-    renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) {
     if (!sunLight.isActive()) {
@@ -1000,7 +1000,7 @@ void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewpo
     std::string start = "light.";
     sendGPUDataLight(camera, sunLight, start);
     const auto viewportDimensions = viewport.getViewportDimensions();
-    renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) {
     if (!pointLight.isActive()) {
@@ -1284,21 +1284,25 @@ void DeferredPipeline::renderInitFrame(Engine::priv::RenderModule& renderer) {
     Engine::Renderer::Settings::clear(true, true, true); // clear all
 }
 void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport, Camera& camera) {
-    const auto& winSize            = Engine::Resources::getWindowSize();
+    const auto winSize             = Engine::Resources::getWindowSize();
     const auto& viewportDimensions = viewport.getViewportDimensions();
     if (viewport.isAspectRatioSynced()) {
         camera.setAspectRatio(viewportDimensions.z / viewportDimensions.w);
     }
     Engine::Renderer::setViewport(viewportDimensions); //m_GBuffer.bindFramebuffers() already does this
-    glScissor(0, 0, winSize.x, winSize.y);
+    glScissor(0, 0, viewportDimensions.z, viewportDimensions.w);
     m_2DProjectionMatrix = glm::ortho(0.0f, viewportDimensions.z, 0.0f, viewportDimensions.w, 0.003f, 3000.0f); //might have to recheck this
 
-    //this is god awful and ugly, but it's needed. find a way to refactor this properly
-    for (uint32_t i = 0; i < 12; ++i) {
+    //this is god awful and ugly, but it's needed. find a way to refactor this properly. TODO: see if this is still actually needed
+    /*
+    //MAX_TEXTURE_UNITS for opengl es
+    for (int32_t i = 0; i < Engine::priv::OpenGLState::constants.MAX_COMBINED_TEXTURE_IMAGE_UNITS; ++i) {
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
+    */
+
     Engine::Renderer::GLEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
@@ -1418,13 +1422,14 @@ void DeferredPipeline::internal_pass_ssao(Viewport& viewport, Camera& camera) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
         m_GBuffer.bindFramebuffers(framebuffer1, "A", false);
         SSAO::STATIC_SSAO.passSSAO(m_GBuffer, viewport, camera, m_Renderer);
-        if (SSAO::STATIC_SSAO.m_ssao_do_blur) {
+
+        if (SSAO::STATIC_SSAO.m_DoBlur) {
             Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
-            for (uint32_t i = 0; i < SSAO::STATIC_SSAO.m_ssao_blur_num_passes; ++i) {
+            for (uint32_t i = 0; i < SSAO::STATIC_SSAO.m_BlurNumPasses; ++i) {
                 m_GBuffer.bindFramebuffers(framebuffer2, "A", false);
-                SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, "H", framebuffer1, m_Renderer);
+                SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, framebuffer1, m_Renderer);
                 m_GBuffer.bindFramebuffers(framebuffer1, "A", false);
-                SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, "V", framebuffer2, m_Renderer);
+                SSAO::STATIC_SSAO.passBlurCopyPixels(m_GBuffer, viewport, framebuffer2, m_Renderer);
             }
         }  
     }
@@ -1723,17 +1728,15 @@ void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, 
     Engine::Renderer::GLDisablei(GL_BLEND, 0);
 }
 void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, std::string_view type) {
-    const auto& viewportDimensions = viewport.getViewportDimensions();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredBlur].get<ShaderProgram>());
-
-    glm::vec2 hv = (type == "H") ? glm::vec2{ 1.0f, 0.0f } : glm::vec2{ 0.0f, 1.0f };
-
-    auto& bloom = Bloom::STATIC_BLOOM;
+    const auto& viewportDimensions = viewport.getViewportDimensions();
+    const glm::vec2 hv = (type == "H") ? glm::vec2{ 1.0f, 0.0f } : glm::vec2{ 0.0f, 1.0f };
+    const auto& bloom = Bloom::STATIC_BLOOM;
     Engine::Renderer::sendUniform4("strengthModifier",
         bloom.m_Blur_Strength,
         bloom.m_Blur_Strength,
         bloom.m_Blur_Strength,
-        SSAO::STATIC_SSAO.m_ssao_blur_strength
+        bloom.m_Blur_Strength
     );
     Engine::Renderer::sendUniform4("DataA", bloom.m_Blur_Radius, 0.0f, hv.x, hv.y);
 
@@ -1802,14 +1805,11 @@ void DeferredPipeline::internal_render2DAPI(uint32_t diffuseBuffer, const std::v
     render2DAPI(commands, mainRenderFunc, viewport, clearDepth);
 }
 void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) {
-    auto& camera             = viewport.getCamera();
-    auto& scene              = viewport.getScene();
-    const auto& sceneAmbient = scene.getAmbientColor();
-    auto& viewportDimensions = viewport.getViewportDimensions();
-    auto winSize             = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
-
-    //TODO: work on this...
-    //m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
+    auto& camera                   = viewport.getCamera();
+    auto& scene                    = viewport.getScene();
+    const auto& sceneAmbient       = scene.getAmbientColor();
+    const auto& viewportDimensions = viewport.getViewportDimensions();
+    const auto winSize             = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
 
     internal_render_per_frame_preparation(viewport, camera);
     internal_init_frame_gbuffer(viewport, camera);
@@ -1819,22 +1819,22 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
             UniformBufferObjectMapper mapper{ *m_UBOCamera };
             m_CameraUBODataPtr = static_cast<UBOCameraDataStruct*>(mapper.getPtr());
 
-            const float logDepthBufferFCoeff = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
+            const float logDepthBufferFCoeff  = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
+            m_CameraUBODataPtr->CameraProj    = camera.getProjection();
+            m_CameraUBODataPtr->CameraInvProj = camera.getProjectionInverse();
+            m_CameraUBODataPtr->ScreenInfo    = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
+            m_CameraUBODataPtr->RendererInfo1 = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
+            m_CameraUBODataPtr->RendererInfo2 = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
             //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
             //same simulation and render space
             /*
             m_CameraUBODataPtr->CameraView        = camera.getView();
-            m_CameraUBODataPtr->CameraProj        = camera.getProjection();
             m_CameraUBODataPtr->CameraViewProj    = camera.getViewProjection();
-            m_CameraUBODataPtr->CameraInvProj     = camera.getProjectionInverse();
             m_CameraUBODataPtr->CameraInvView     = camera.getViewInverse();
             m_CameraUBODataPtr->CameraInvViewProj = camera.getViewProjectionInverse();
             m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ camera.getPosition(), camera.getNear() };
             m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ camera.getViewVector(), camera.getFar() };
             m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ 0.0f, 0.0f, 0.0f, logDepthBufferFCoeff };
-            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
-            m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
-            m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
             */
 
             //this render space places the camera at the origin and offsets submitted model matrices to the vertex shaders by the camera's real simulation position
@@ -1842,17 +1842,12 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
             glm::mat4 viewNoTranslation = camera.getView();
             Engine::Math::setMatrixPosition(viewNoTranslation, 0.0001f, 0.0001f, 0.0001f);
             m_CameraUBODataPtr->CameraView        = viewNoTranslation;
-            m_CameraUBODataPtr->CameraProj        = camera.getProjection();
             m_CameraUBODataPtr->CameraViewProj    = m_CameraUBODataPtr->CameraProj * viewNoTranslation;
-            m_CameraUBODataPtr->CameraInvProj     = camera.getProjectionInverse();
             m_CameraUBODataPtr->CameraInvView     = glm::inverse(m_CameraUBODataPtr->CameraView);
             m_CameraUBODataPtr->CameraInvViewProj = glm::inverse(m_CameraUBODataPtr->CameraViewProj);
             m_CameraUBODataPtr->CameraInfo1       = glm::vec4{ viewNoTranslation[3][0], viewNoTranslation[3][1], viewNoTranslation[3][2], camera.getNear() };
             m_CameraUBODataPtr->CameraInfo2       = glm::vec4{ glm::vec3{viewNoTranslation[0][2], viewNoTranslation[1][2], viewNoTranslation[2][2]}, camera.getFar() };
             m_CameraUBODataPtr->CameraInfo3       = glm::vec4{ camera.getPosition(), logDepthBufferFCoeff };
-            m_CameraUBODataPtr->ScreenInfo        = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
-            m_CameraUBODataPtr->RendererInfo1     = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
-            m_CameraUBODataPtr->RendererInfo2     = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
         }
 #pragma endregion
     }

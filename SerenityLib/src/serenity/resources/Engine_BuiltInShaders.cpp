@@ -706,10 +706,9 @@ uniform mat4 VP;
 
 varying vec2 texcoords;
 
-void main(){
-    vec3 vert = position;
+void main() {
     texcoords = uv;
-    gl_Position = VP * Model * vec4(vert, 1.0);
+    gl_Position = VP * Model * vec4(position, 1.0);
 }
 )";
 #pragma endregion

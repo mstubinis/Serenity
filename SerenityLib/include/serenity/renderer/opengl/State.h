@@ -41,6 +41,7 @@ namespace Engine::priv {
                 GLint MAX_RENDERBUFFER_SIZE;
                 GLint MAX_SAMPLES;
                 GLint MAX_SERVER_WAIT_TIMEOUT;
+                GLint MAX_TEXTURE_UNITS;
                 GLint MAX_TEXTURE_IMAGE_UNITS;
                 GLint MAX_TEXTURE_LOD_BIAS;
                 GLint MAX_TEXTURE_SIZE;

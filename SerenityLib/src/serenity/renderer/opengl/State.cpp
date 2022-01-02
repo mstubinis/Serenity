@@ -39,6 +39,9 @@ Engine::unordered_string_map<std::string, std::string> POPULATE_VERSION_MAP() {
 
 
 void OpenGLState::Constants::calculate() {
+
+    //GL_MAX_TEXTURE_UNITS 
+
     glGetIntegerv(GL_MAJOR_VERSION, &MAJOR_VERSION);
     glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &MAX_3D_TEXTURE_SIZE);
     glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &MAX_ARRAY_TEXTURE_LAYERS);
@@ -63,6 +66,7 @@ void OpenGLState::Constants::calculate() {
 
     glGetIntegerv(GL_MAX_SERVER_WAIT_TIMEOUT, &MAX_SERVER_WAIT_TIMEOUT);
 
+    glGetIntegerv(GL_MAX_TEXTURE_UNITS, &MAX_TEXTURE_UNITS);
     glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MAX_TEXTURE_IMAGE_UNITS);
     glGetIntegerv(GL_MAX_TEXTURE_LOD_BIAS, &MAX_TEXTURE_LOD_BIAS);
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &MAX_TEXTURE_SIZE);
