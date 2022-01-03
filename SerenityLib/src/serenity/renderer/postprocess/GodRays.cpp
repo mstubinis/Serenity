@@ -25,7 +25,7 @@ uniform float alpha;
 varying vec2 texcoords;
 
 void main() {
-    vec2 uv = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uv = ViewportUVCalculation(texcoords);
     vec2 deltaUV = vec2(uv - lightPositionOnScreen);
     deltaUV *= 1.0 /  float(samples) * RaysInfo.z;
     float illuminationDecay = 1.0;
@@ -71,7 +71,7 @@ void Engine::priv::GodRays::pass(GBuffer& gbuffer, const Viewport& viewport, con
 
     Engine::priv::OpenGLBindTextureRAII firstPass{ "firstPass", gbuffer.getTexture(GBufferType::Misc), 0, false };
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }
 
 void Engine::Renderer::godRays::setSun(Entity sunEntity) noexcept {

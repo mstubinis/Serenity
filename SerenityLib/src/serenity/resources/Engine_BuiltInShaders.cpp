@@ -687,7 +687,7 @@ const vec3 comparison = vec3(1.0, 1.0, 1.0);
 uniform SAMPLER_TYPE_2D gNormalMap;
 varying vec2 texcoords;
 void main() {
-    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uvs = ViewportUVCalculation(texcoords);
     vec3 normal = DecodeOctahedron(texture2D(gNormalMap, uvs).rg);
     if (distance(normal, comparison) < 0.01) {
         discard;
@@ -1022,7 +1022,7 @@ uniform SAMPLER_TYPE_2D gDiffuseMap;
 uniform int HasLighting;
 varying vec2 texcoords;
 void main() {
-    vec2 uvs     = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uvs     = ViewportUVCalculation(texcoords);
     vec3 normal  = DecodeOctahedron(texture2D(gNormalMap, uvs).rg);
     vec3 diffuse = texture2D(USE_SAMPLER_2D(gDiffuseMap), uvs).rgb;
     if (HasLighting == 0 || distance(normal, comparison) < 0.01) {
@@ -1089,7 +1089,7 @@ Engine::priv::EShaders::copy_depth_frag = R"(
 uniform SAMPLER_TYPE_2D gDepthMap;
 varying vec2 texcoords;
 void main(){
-    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uvs = ViewportUVCalculation(texcoords);
     gl_FragDepth = texture2D(gDepthMap, uvs).r;
 }
 )";
@@ -1108,7 +1108,7 @@ const int NUM_SAMPLES = 9;
 const float weight[NUM_SAMPLES] = float[](0.227, 0.21, 0.1946, 0.162, 0.12, 0.08, 0.054, 0.03, 0.016);
 
 void main() {
-    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uvs = ViewportUVCalculation(texcoords);
     vec4 Sum = vec4(0.0);
     vec2 inverseResolution = vec2(1.0) / ScreenInfo.zw;
     for(int i = 0; i < NUM_SAMPLES; ++i){
@@ -1127,7 +1127,7 @@ Engine::priv::EShaders::greyscale_frag = R"(
 uniform SAMPLER_TYPE_2D textureMap;
 varying vec2 texcoords;
 void main() {
-    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uvs = ViewportUVCalculation(texcoords);
     vec4 col = texture2D(textureMap, uvs);
     float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));
     gl_FragColor = vec4(vec3(lum), 1.0);
@@ -1153,7 +1153,7 @@ uniform float FogDistBlend;
 varying vec2 texcoords;
 
 void main() {
-    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uvs = ViewportUVCalculation(texcoords);
     vec4 scene = texture2D(SceneTexture, uvs);
     vec4 diffuse = texture2D(gDiffuseMap, uvs);
     if (HasBloom == 1) {
@@ -1192,7 +1192,7 @@ uniform int DepthMaskActive;
 varying vec2 texcoords;
 
 void main() {
-    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uvs = ViewportUVCalculation(texcoords);
     vec4 scene = texture2D(SceneTexture, uvs);
     scene.a = 1.0;
     float depth = distance(GetWorldPosition(USE_SAMPLER_2D(gDepthMap), uvs, CameraNear, CameraFar), CameraPosition);

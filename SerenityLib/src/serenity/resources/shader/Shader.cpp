@@ -10,7 +10,6 @@
 #include <serenity/renderer/opengl/glsl/Materials.h>
 #include <serenity/renderer/opengl/glsl/Lighting.h>
 #include <serenity/renderer/opengl/glsl/Shadows.h>
-#include <serenity/renderer/opengl/glsl/SSAOCode.h>
 #include <serenity/renderer/opengl/glsl/DepthOfFieldCode.h>
 
 #include <serenity/system/Engine.h>
@@ -61,7 +60,6 @@ namespace {
         Engine::priv::opengl::glsl::Materials::convert(shaderCode, versionNumber, shader.getType());
         Engine::priv::opengl::glsl::Lighting::convert(shaderCode, versionNumber, shader.getType());
         Engine::priv::opengl::glsl::Shadows::convert(shaderCode, versionNumber, shader.getType());
-        Engine::priv::opengl::glsl::SSAOCode::convert(shaderCode, versionNumber, shader.getType());
         Engine::priv::opengl::glsl::Compression::convert(shaderCode, versionNumber, shader.getType());
         Engine::priv::opengl::glsl::DepthOfFieldCode::convert(shaderCode, versionNumber, shader.getType());
         Engine::priv::opengl::glsl::DeferredFunctions::convert(shaderCode, versionNumber, shader.getType());

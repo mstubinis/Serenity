@@ -429,7 +429,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BT_USE_DOUBLE_PRECISION;BT_THREADSAFE=1;BT_USE_PPL=1;ENGINE_RIGID_BODY_ENHANCED;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;_ENGINE_FORCE_NO_THEAD_POOL;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;ENGINE_FORCE_NO_LOG_DEPTH;_ENGINE_FORCE_PHYSICS_DEBUG_DRAW;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BT_USE_DOUBLE_PRECISION;BT_THREADSAFE=1;BT_USE_PPL=1;ENGINE_RIGID_BODY_ENHANCED;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;_ENGINE_FORCE_NO_THEAD_POOL;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;_ENGINE_FORCE_PHYSICS_DEBUG_DRAW;ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;$(SolutionDir)include\serenity\dependencies\bullet;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -846,7 +846,6 @@
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Lighting.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Materials.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Shadows.cpp" />
-    <ClCompile Include="src\serenity\renderer\opengl\glsl\SSAOCode.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\glsl\VersionConversion.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\State.cpp" />
     <ClCompile Include="src\serenity\renderer\opengl\UniformBufferObject.cpp" />
@@ -1429,7 +1428,6 @@
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Lighting.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Materials.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Shadows.h" />
-    <ClInclude Include="include\serenity\renderer\opengl\glsl\SSAOCode.h" />
     <ClInclude Include="include\serenity\renderer\opengl\glsl\VersionConversion.h" />
     <ClInclude Include="include\serenity\renderer\opengl\OpenGL.h" />
     <ClInclude Include="include\serenity\renderer\opengl\OpenGLRenderableProperties.h" />

@@ -23,7 +23,7 @@ uniform vec4 Data;
 varying vec2 texcoords;
 
 void main() {
-    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uvs = ViewportUVCalculation(texcoords);
     vec3 sceneColor = texture2D(USE_SAMPLER_2D(uSceneTextureForBlooming), uvs).rgb;
     sceneColor = vec3(1.0) - exp(-sceneColor * Data.z);
     vec3 finalColor = sceneColor - vec3(Data.y);
@@ -52,5 +52,5 @@ void Engine::priv::Bloom::pass(const Engine::priv::GBuffer& gbuffer, const Viewp
 
     Engine::priv::OpenGLBindTextureRAII uSceneTextureForBlooming{ "uSceneTextureForBlooming", gbuffer.getTexture(sceneTexture), 0, false };
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }

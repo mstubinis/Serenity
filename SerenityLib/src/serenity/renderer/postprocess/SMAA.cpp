@@ -38,7 +38,7 @@ varying vec2 varUV;
 varying vec4 varOffset[3];
 
 void main() {
-    varUV         = UV * (ScreenInfo.zw / ScreenInfo.xy);
+    varUV         = ViewportUVCalculation(UV);
     varOffset[0]  = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-1.0, 0.0, 0.0, API_V_DIR(-1.0)), varUV.xyxy);
     varOffset[1]  = mad(SMAA_PIXEL_SIZE.xyxy, vec4( 1.0, 0.0, 0.0, API_V_DIR( 1.0)), varUV.xyxy);
     varOffset[2]  = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-2.0, 0.0, 0.0, API_V_DIR(-2.0)), varUV.xyxy);
@@ -169,7 +169,7 @@ varying vec2 varPixCoord;
 varying vec4 varOffset[3];
 
 void main() {
-    varUV         = UV * (ScreenInfo.zw / ScreenInfo.xy);
+    varUV         = ViewportUVCalculation(UV);
     varPixCoord   = varUV * SMAA_PIXEL_SIZE.zw;
     varOffset[0]  = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-0.25, API_V_DIR(-0.125), 1.25,API_V_DIR(-0.125)), varUV.xyxy);
     varOffset[1]  = mad(SMAA_PIXEL_SIZE.xyxy, vec4(-0.125, API_V_DIR(-0.25), -0.125,API_V_DIR(1.25)), varUV.xyxy);
@@ -435,7 +435,7 @@ varying vec2 varUV;
 varying vec4 varOffset;
 
 void main() {
-    varUV       = UV * (ScreenInfo.zw / ScreenInfo.xy);
+    varUV       = ViewportUVCalculation(UV);
     varOffset   = mad(SMAA_PIXEL_SIZE.xyxy, vec4(1.0, 0.0, 0.0, API_V_DIR(1.0)), varUV.xyxy);
     gl_Position = VP * Model * vec4(position, 1.0);
 }
@@ -587,7 +587,7 @@ void main() {
 constexpr uint32_t TEXTURE_INTERMEDIARY = Engine::priv::GBufferType::Normal;
 
 void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t sceneTexture, uint32_t outTexture, const Engine::priv::RenderModule& renderer) {
-    gbuffer.bindFramebuffers(outTexture, "RGBA"); //probably the lighting buffer
+    gbuffer.bindFramebuffers({ outTexture }, "RGBA"); //probably the lighting buffer
     renderer.bind(m_Shader_Programs[PassStage::Edge].get<ShaderProgram>());
     const auto& viewportDimensions = viewport.getViewportDimensions();
     Engine::Renderer::Settings::clear(true, false, true);//lighting rgba, stencil is completely filled with 0's
@@ -610,7 +610,7 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     Engine::priv::OpenGLBindTextureRAII textureMap{ "textureMap", gbuffer.getTexture(sceneTexture), 0, false };
     Engine::priv::OpenGLBindTextureRAII texturePredication{ "texturePredication", gbuffer.getTexture(GBufferType::Diffuse), 1, true };
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 
     Engine::Renderer::stencilMask(0b1111'1111);
     //only if the stored stencil value is 0b00000001 will the fragments be evaluated
@@ -618,7 +618,7 @@ void Engine::priv::SMAA::passEdge(Engine::priv::GBuffer& gbuffer, const glm::vec
     Engine::Renderer::stencilOp(GL_KEEP, GL_KEEP, GL_KEEP); //Do not change stencil
 }
 void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::vec4& PIXEL_SIZE, const Viewport& viewport, uint32_t outTexture, const Engine::priv::RenderModule& renderer) {
-    gbuffer.bindFramebuffers(TEXTURE_INTERMEDIARY, "RGBA");
+    gbuffer.bindFramebuffers({ TEXTURE_INTERMEDIARY }, "RGBA");
     Engine::Renderer::Settings::clear(true, false, false); //clear color only
     const auto& viewportDimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_Programs[PassStage::Blend].get<ShaderProgram>());
@@ -634,7 +634,7 @@ void Engine::priv::SMAA::passBlend(Engine::priv::GBuffer& gbuffer, const glm::ve
     Engine::Renderer::sendUniform4Safe("SMAAInfo2Ints", MAX_SEARCH_STEPS_DIAG, AREATEX_MAX_DISTANCE, AREATEX_MAX_DISTANCE_DIAG, CORNER_ROUNDING);
     Engine::Renderer::sendUniform4Safe("SMAAInfo2Floats", AREATEX_PIXEL_SIZE.x, AREATEX_PIXEL_SIZE.y, AREATEX_SUBTEX_SIZE, (float)CORNER_ROUNDING / 100.0f);
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 
     Engine::Renderer::GLDisable(GL_STENCIL_TEST);
 }
@@ -646,7 +646,7 @@ void Engine::priv::SMAA::passNeighbor(Engine::priv::GBuffer& gbuffer, const glm:
     Engine::priv::OpenGLBindTextureRAII textureMap{ "textureMap", gbuffer.getTexture(sceneTexture), 0, true };
     Engine::priv::OpenGLBindTextureRAII blend_tex{ "blend_tex", gbuffer.getTexture(TEXTURE_INTERMEDIARY), 1, true };
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }
 void Engine::priv::SMAA::passFinal(Engine::priv::GBuffer& gbuffer, const Viewport& viewport, const Engine::priv::RenderModule& renderer) {
     /*
@@ -657,7 +657,7 @@ void Engine::priv::SMAA::passFinal(Engine::priv::GBuffer& gbuffer, const Viewpor
 
     renderer.bind(m_Shader_Programs[PassStage::Final]);
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
     */
 }
 void Engine::Renderer::smaa::setQuality(SMAAQualityLevel qualityLevel) {

@@ -123,6 +123,9 @@ namespace Engine::Renderer {
     //set width and height to be <= 0.0f to use the window's dimensions automatically
     void renderFullscreenQuad(float width = 0.0f, float height = 0.0f, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f);
 
+    //set width and height to be <= 0.0f to use the window's dimensions automatically
+    void renderFullscreenQuadCentered(float width = 0.0f, float height = 0.0f, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f);
+
     void renderFullscreenTriangle(float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f);
 
     uint32_t getUniformLoc(const char* location);

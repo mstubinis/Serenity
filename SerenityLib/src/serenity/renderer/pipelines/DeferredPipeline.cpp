@@ -991,7 +991,7 @@ void DeferredPipeline::renderDirectionalLight(Camera& camera, DirectionalLight& 
     std::string start = "light.";
     sendGPUDataLight(camera, directionalLight, start);
     const auto viewportDimensions = viewport.getViewportDimensions();
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewport& viewport) {
     if (!sunLight.isActive()) {
@@ -1000,7 +1000,7 @@ void DeferredPipeline::renderSunLight(Camera& camera, SunLight& sunLight, Viewpo
     std::string start = "light.";
     sendGPUDataLight(camera, sunLight, start);
     const auto viewportDimensions = viewport.getViewportDimensions();
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::renderPointLight(Camera& camera, PointLight& pointLight) {
     if (!pointLight.isActive()) {
@@ -1290,7 +1290,7 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
         camera.setAspectRatio(viewportDimensions.z / viewportDimensions.w);
     }
     Engine::Renderer::setViewport(viewportDimensions); //m_GBuffer.bindFramebuffers() already does this
-    glScissor(0, 0, viewportDimensions.z, viewportDimensions.w);
+    glScissor(viewportDimensions.x, viewportDimensions.y, viewportDimensions.z, viewportDimensions.w);
     m_2DProjectionMatrix = glm::ortho(0.0f, viewportDimensions.z, 0.0f, viewportDimensions.w, 0.003f, 3000.0f); //might have to recheck this
 
     //this is god awful and ugly, but it's needed. find a way to refactor this properly. TODO: see if this is still actually needed
@@ -1340,7 +1340,7 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     }
     glEnable(GL_CULL_FACE);
     //glPolygonOffset(0, 0);
-    const auto& viewportDimensions = glm::vec4{ viewport.getViewportDimensions() };
+    const auto& viewportDimensions = viewport.getViewportDimensions();
     Engine::Renderer::setViewport(viewportDimensions);
     Engine::Renderer::colorMask(true, true, true, true);
 }
@@ -1364,15 +1364,13 @@ bool DeferredPipeline::internal_pass_depth_prepass(Viewport& viewport, Camera& c
     return true;
 }
 void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera) {
-    Scene& scene           = viewport.getScene();
+    Scene& scene                   = viewport.getScene();
     const auto& viewportDimensions = viewport.getViewportDimensions();
-    //const glm::vec4& clear = viewport.getBackgroundColor();
+    const auto winSize             = glm::vec2{ Engine::Resources::getWindowSize() };
 
-    m_GBuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, "RGBA");
+    m_GBuffer.bindFramebuffers({ GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc }, "RGBA", true, (winSize.x / 2.0f) - (viewportDimensions.z / 2.0f), (winSize.y / 2.0f) - (viewportDimensions.w / 2.0f), viewportDimensions.z, viewportDimensions.w);
     Engine::Renderer::Settings::clear(true, false, false); // clear color only
     
-
-    Engine::Renderer::setViewport(0.0f, 0.0f, viewportDimensions.z, viewportDimensions.w);
     PublicScene::RenderGeometryOpaque(m_Renderer, scene, &viewport, &camera);
     
     if (m_Renderer.m_DrawSkybox && viewport.getRenderFlags().has(ViewportRenderingFlag::Skybox)) {
@@ -1385,8 +1383,10 @@ void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera
     glDisablei(GL_BLEND, 0);
 }
 void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera, bool depthPrepass) {
-    Scene& scene = viewport.getScene();
-    m_GBuffer.bindFramebuffers(GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting, "RGBA");
+    Scene& scene                   = viewport.getScene();
+    const auto& viewportDimensions = viewport.getViewportDimensions();
+    const auto winSize             = glm::vec2{ Engine::Resources::getWindowSize() };
+    m_GBuffer.bindFramebuffers({ GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting }, "RGBA", true, (winSize.x / 2.0f) - (viewportDimensions.z / 2.0f), (winSize.y / 2.0f) - (viewportDimensions.w / 2.0f), viewportDimensions.z, viewportDimensions.w);
 
     PublicScene::RenderForwardOpaque(m_Renderer, scene, &viewport, &camera);
 
@@ -1416,19 +1416,19 @@ void DeferredPipeline::internal_pass_ssao(Viewport& viewport, Camera& camera) {
     auto framebuffer2 = GBufferType::GodRays;
 
     //TODO: possible optimization: use stencil buffer to reject completely black (or are they white?) pixels during blur passes
-    m_GBuffer.bindFramebuffers(framebuffer1, framebuffer2, "A", false);
+    m_GBuffer.bindFramebuffers({ framebuffer1, framebuffer2 }, "A", false);
     Engine::Renderer::Settings::clear(true, false, false); //bloom and god rays alpha channels cleared to black 
     if (SSAO::STATIC_SSAO.m_SSAOLevel > SSAOLevel::Off && viewport.getRenderFlags().has(ViewportRenderingFlag::SSAO)) {
         Engine::Renderer::GLEnablei(GL_BLEND, 0);//i dont think this is needed anymore
-        m_GBuffer.bindFramebuffers(framebuffer1, "A", false);
+        m_GBuffer.bindFramebuffers({ framebuffer1 }, "A", false);
         SSAO::STATIC_SSAO.passSSAO(m_GBuffer, viewport, camera, m_Renderer);
 
         if (SSAO::STATIC_SSAO.m_DoBlur) {
             Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
             for (uint32_t i = 0; i < SSAO::STATIC_SSAO.m_BlurNumPasses; ++i) {
-                m_GBuffer.bindFramebuffers(framebuffer2, "A", false);
+                m_GBuffer.bindFramebuffers({ framebuffer2 }, "A", false);
                 SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, framebuffer1, m_Renderer);
-                m_GBuffer.bindFramebuffers(framebuffer1, "A", false);
+                m_GBuffer.bindFramebuffers({ framebuffer1 }, "A", false);
                 SSAO::STATIC_SSAO.passBlurCopyPixels(m_GBuffer, viewport, framebuffer2, m_Renderer);
             }
         }  
@@ -1454,7 +1454,7 @@ void DeferredPipeline::internal_pass_stencil(Viewport& viewport) {
     //this sneaky shader discards pixels that are "shadeless" based on their normal being (1,1,1). the discarding allows the stencil to not be written and thus disabling these pixels
     //from the lighting calculations
     Engine::Renderer::sendTexture("gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0);
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 
     Engine::Renderer::clearTexture(0, GL_TEXTURE_2D);
 
@@ -1522,7 +1522,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         Skybox* skybox = scene.skybox();
         sendGPUDataGI(skybox);
 
-        Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+        Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 
         const auto maxTextures = getMaxNumTextureUnits() - 1U;
         bool hasGI = skybox && skybox->cubemap().get<TextureCubemap>()->hasGlobalIlluminationData();
@@ -1581,11 +1581,11 @@ void DeferredPipeline::internal_pass_lighting_basic(Viewport& viewport, Camera& 
         Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
         Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
 
-        Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+        Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
     }
 }
 void DeferredPipeline::internal_pass_god_rays(Viewport& viewport, Camera& camera) {
-    m_GBuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
+    m_GBuffer.bindFramebuffers({ GBufferType::GodRays }, "RGB", false);
     Engine::Renderer::Settings::clear(true, false, false); //godrays rgb channels cleared to black
     auto& godRaysPlatform = GodRays::STATIC_GOD_RAYS;
     auto sun = Engine::Renderer::godRays::getSun();
@@ -1617,26 +1617,26 @@ void DeferredPipeline::internal_pass_hdr(Viewport& viewport, Camera& camera, GBu
 }
 void DeferredPipeline::internal_pass_bloom(Viewport& viewport, GBufferType::Type sceneTexture) {
     if (Bloom::STATIC_BLOOM.m_Bloom_Active && viewport.getRenderFlags().has(ViewportRenderingFlag::Bloom)) {
-        m_GBuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
+        m_GBuffer.bindFramebuffers({ GBufferType::Bloom }, "RGB", false);
         Bloom::STATIC_BLOOM.pass(m_GBuffer, viewport, sceneTexture, m_Renderer);
         for (int i = 0; i < Bloom::STATIC_BLOOM.m_Num_Passes; ++i) {
-            m_GBuffer.bindFramebuffers(GBufferType::GodRays, "RGB", false);
+            m_GBuffer.bindFramebuffers({ GBufferType::GodRays }, "RGB", false);
             internal_pass_blur(viewport, GBufferType::Bloom, "H");
-            m_GBuffer.bindFramebuffers(GBufferType::Bloom, "RGB", false);
+            m_GBuffer.bindFramebuffers({ GBufferType::Bloom }, "RGB", false);
             internal_pass_blur(viewport, GBufferType::GodRays, "V");
         }
     }
 }
 void DeferredPipeline::internal_pass_depth_of_field(Viewport& viewport, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
     if (DepthOfField::STATIC_DOF.dof && viewport.getRenderFlags().has(ViewportRenderingFlag::DepthOfField)) {
-        m_GBuffer.bindFramebuffers(outTexture, "RGBA");
+        m_GBuffer.bindFramebuffers({ outTexture }, "RGBA");
         DepthOfField::STATIC_DOF.pass(m_GBuffer, viewport, sceneTexture, m_Renderer);
         std::swap(sceneTexture, outTexture);
     }
 }
 void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewport, Camera& camera, GBufferType::Type& sceneTexture, GBufferType::Type& outTexture) {
     if (!mainRenderFunction || m_Renderer.m_AA_algorithm == AntiAliasingAlgorithm::None || !viewport.getRenderFlags().has(ViewportRenderingFlag::AntiAliasing)) {
-        m_GBuffer.bindFramebuffers(outTexture, "RGBA");
+        m_GBuffer.bindFramebuffers({ outTexture }, "RGBA");
         internal_pass_final(viewport, sceneTexture);
         m_GBuffer.bindBackbuffer(viewport);   
         internal_pass_depth_and_transparency(viewport, outTexture);
@@ -1647,9 +1647,9 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
             }
             case AntiAliasingAlgorithm::FXAA: {
                 if (mainRenderFunction) {
-                    m_GBuffer.bindFramebuffers(outTexture, "RGBA");
+                    m_GBuffer.bindFramebuffers({ outTexture }, "RGBA");
                     internal_pass_final(viewport, sceneTexture);
-                    m_GBuffer.bindFramebuffers(sceneTexture, "RGBA");
+                    m_GBuffer.bindFramebuffers({ sceneTexture }, "RGBA");
                     FXAA::STATIC_FXAA.pass(m_GBuffer, viewport, outTexture, m_Renderer);
                     m_GBuffer.bindBackbuffer(viewport);
                     internal_pass_depth_and_transparency(viewport, sceneTexture);
@@ -1661,7 +1661,7 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
             case AntiAliasingAlgorithm::SMAA_HIGH: {}
             case AntiAliasingAlgorithm::SMAA_ULTRA: {
                 if (mainRenderFunction) {
-                    m_GBuffer.bindFramebuffers(outTexture, "RGBA");
+                    m_GBuffer.bindFramebuffers({ outTexture }, "RGBA");
                     internal_pass_final(viewport, sceneTexture);
                     std::swap(sceneTexture, outTexture);
                     const auto winSize              = glm::vec2{ Resources::getWindowSize() };
@@ -1669,9 +1669,9 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
                     const glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
                     SMAA::STATIC_SMAA.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
                     SMAA::STATIC_SMAA.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
-                    m_GBuffer.bindFramebuffers(outTexture, "RGBA");
+                    m_GBuffer.bindFramebuffers({ outTexture }, "RGBA");
                     SMAA::STATIC_SMAA.passNeighbor(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, m_Renderer);
-                    //m_GBuffer.bindFramebuffers(sceneTexture, "RGBA");
+                    //m_GBuffer.bindFramebuffers({ sceneTexture }, "RGBA");
                     //SMAA::STATIC_SMAA.passFinal(m_GBuffer, viewport, m_Renderer);
                     m_GBuffer.bindBackbuffer(viewport);
                     internal_pass_depth_and_transparency(viewport, outTexture);
@@ -1697,7 +1697,7 @@ void DeferredPipeline::internal_pass_final(Viewport& viewport, GBufferType::Type
         Engine::Renderer::sendUniform1Safe("FogDistBlend", Fog::STATIC_FOG.distBlend);
         Engine::Renderer::sendUniform4Safe("FogColor", Fog::STATIC_FOG.color);
     }
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::internal_pass_depth_and_transparency(Viewport& viewport, GBufferType::Type sceneTexture) {
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DepthAndTransparency].get<ShaderProgram>());
@@ -1736,26 +1736,26 @@ void DeferredPipeline::internal_pass_blur(Viewport& viewport, GLuint texture, st
         bloom.m_Blur_Strength,
         bloom.m_Blur_Strength,
         bloom.m_Blur_Strength,
-        bloom.m_Blur_Strength
+        SSAO::STATIC_SSAO.m_BlurStrength
     );
     Engine::Renderer::sendUniform4("DataA", bloom.m_Blur_Radius, 0.0f, hv.x, hv.y);
 
     Engine::priv::OpenGLBindTextureRAII uSceneToBeBlurred{ "uSceneToBeBlurred", m_GBuffer.getTexture(texture), 0, false };
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::internal_pass_normaless_diffuse(Viewport& viewport) {
     const auto& viewportDimensions = viewport.getViewportDimensions();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::NormalessDiffuse].get<ShaderProgram>());
 
-    m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGBA");
+    m_GBuffer.bindFramebuffers({ GBufferType::Lighting }, "RGBA");
 
-    Engine::Renderer::sendUniform1Safe("HasLighting", (int)m_Renderer.m_Lighting);
+    Engine::Renderer::sendUniform1Safe("HasLighting", int(m_Renderer.m_Lighting));
 
     Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 0, false };
     Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 1, false };
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }
 void DeferredPipeline::renderPhysicsAPI(bool mainRenderFunc, Viewport& viewport, Camera& camera, Scene& scene) {
     Engine::Renderer::GLEnablei(GL_BLEND, 0);
@@ -1801,7 +1801,7 @@ void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCo
     glDisablei(GL_BLEND, 0);
 }
 void DeferredPipeline::internal_render2DAPI(uint32_t diffuseBuffer, const std::vector<IRenderingPipeline::API2DCommand>& commands, bool mainRenderFunc, Viewport& viewport, bool clearDepth) {
-    m_GBuffer.bindFramebuffers(diffuseBuffer, "RGBA");
+    m_GBuffer.bindFramebuffers({ diffuseBuffer }, "RGBA");
     render2DAPI(commands, mainRenderFunc, viewport, clearDepth);
 }
 void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& viewport, bool mainRenderFunction) {
@@ -1872,7 +1872,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
     glBlendFuncSeparatei(0, GL_ONE, GL_ONE, GL_ONE, GL_ONE);
 
     //this needs to be cleaned up
-    m_GBuffer.bindFramebuffers(GBufferType::Lighting, "RGB");
+    m_GBuffer.bindFramebuffers({ GBufferType::Lighting }, "RGB");
     Engine::Renderer::Settings::clear(true, false, false);
     if (m_Renderer.m_Lighting) {
         if (renderer.m_LightingAlgorithm == LightingAlgorithm::PBR) {
@@ -1999,11 +1999,11 @@ void DeferredPipeline::renderFullscreenTriangle(float depth, float inNear, float
     Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y, inNear, inFar));
     m_FullscreenTriangle.render();
 }
-void DeferredPipeline::renderFullscreenQuad(float width, float height, float depth, float inNear, float inFar) {
+void DeferredPipeline::renderFullscreenQuad(float x, float y, float width, float height, float depth, float inNear, float inFar) {
     const glm::vec2 winSize = glm::vec2{ Engine::Resources::getWindowSize() };
-    auto modelMatrix        = glm::mat4{ 1.0f };
-    modelMatrix             = glm::translate(modelMatrix, glm::vec3{ 0.0f, 0.0f, 0.0f - depth });
-    modelMatrix             = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
+    auto modelMatrix = glm::mat4{ 1.0f };
+    modelMatrix = glm::translate(modelMatrix, glm::vec3{ x, y, 0.0f - depth });
+    modelMatrix = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
     Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y, inNear, inFar));
     m_FullscreenQuad.render();

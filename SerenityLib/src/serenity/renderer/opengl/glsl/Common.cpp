@@ -83,10 +83,21 @@ void Engine::priv::opengl::glsl::Common::convert(std::string& code, uint32_t ver
     }
 #pragma endregion
 
+#pragma region ViewportUVCalculation
+    if (ShaderHelper::lacksDefinition(code, "ViewportUVCalculation(", "vec2 ViewportUVCalculation(")) {
+        ShaderHelper::insertStringAtLine(code, R"(
+vec2 ViewportUVCalculation(vec2 inTexcoords) {
+    vec2 factor = (ScreenInfo.zw / ScreenInfo.xy);
+    return vec2(0.5) + (inTexcoords * factor) - (factor / vec2(2.0));
+}
+)", 1);
+    }
+#pragma endregion
+
 #pragma region Hammersley
     if (ShaderHelper::lacksDefinition(code, "HammersleySequence(", "vec2 HammersleySequence(")) {
         ShaderHelper::insertStringAtLine(code, R"(
-vec2 HammersleySequence(int i, int N){
+vec2 HammersleySequence(int i, int N) {
     return vec2(float(i) / float(N), VanDerCorpus(i));
 }
 )", 1);

@@ -146,8 +146,8 @@ void FramebufferObject::resize(const uint32_t width, const uint32_t height) {
         }
     }
 }
-void FramebufferObject::bind() {
-    Engine::Renderer::setViewport(0.0f, 0.0f, m_FramebufferWidth, m_FramebufferHeight);
+void FramebufferObject::bind(float x, float y, float width, float height) {
+    Engine::Renderer::setViewport(x, y, width <= 0.0 ? m_FramebufferWidth : width, height <= 0.0f ? m_FramebufferHeight : height);
     swap_buffers(m_CurrentFBOIndex, m_FBOs.size());
     Engine::Renderer::bindFBO(*this);
     for (const auto& [idx, attatchment] : m_Attatchments) {
@@ -159,12 +159,6 @@ void FramebufferObject::unbind() {
         attatchment->unbind();
     }
     Engine::Renderer::unbindFBO();
-    /*
-    if (Engine::Resources::getNumWindows() > 0) { //called in destructor, so this might be cleaned up after all the windows are cleaned up
-        const auto winSize = Engine::Resources::getWindowSize();
-        Engine::Renderer::setViewport(0.0f, 0.0f, winSize.x, winSize.y);
-    }
-    */
 }
 bool FramebufferObject::checkStatus() {
     for (const GLuint fbo : m_FBOs) {

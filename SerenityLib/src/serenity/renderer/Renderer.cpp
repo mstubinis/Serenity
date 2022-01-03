@@ -596,8 +596,18 @@ void Engine::Renderer::renderFullscreenQuad(float width, float height, float dep
         width = winSize.x;
     if (height <= 0.0f)
         height = winSize.y;
-    RENDER_MODULE->m_Pipeline->renderFullscreenQuad(width, height, depth, inNear, inFar);
+    RENDER_MODULE->m_Pipeline->renderFullscreenQuad(0.0f, 0.0f, width, height, depth, inNear, inFar);
 }
+void Engine::Renderer::renderFullscreenQuadCentered(float width, float height, float depth, float inNear, float inFar) {
+    const auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    if (width <= 0.0f)
+        width = winSize.x;
+    if (height <= 0.0f)
+        height = winSize.y;
+    RENDER_MODULE->m_Pipeline->renderFullscreenQuad((winSize.x / 2.0f) - (width / 2.0f), (winSize.y / 2.0f) - (height / 2.0f), width, height, depth, inNear, inFar);
+}
+
+
 void Engine::Renderer::renderFullscreenTriangle(float depth, float inNear, float inFar) {
     RENDER_MODULE->m_Pipeline->renderFullscreenTriangle(depth, inNear, inFar);
 }

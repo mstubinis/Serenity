@@ -486,12 +486,15 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
         if (ImGui::ListBox("SSAO Level", &ssao_algo_current, SSAOLevels.data(), int(SSAOLevels.size()))) {
             Engine::Renderer::ssao::setLevel(ssao_algo_current);
         }
-        ImGui::SliderFloat("SSAO Bias",          &Engine::priv::SSAO::STATIC_SSAO.m_Bias,         -1.0f,  1.0f);
-        ImGui::SliderFloat("SSAO Scale",         &Engine::priv::SSAO::STATIC_SSAO.m_Scale,         0.0f,  3.0f);
-        ImGui::SliderFloat("SSAO Radius",        &Engine::priv::SSAO::STATIC_SSAO.m_Radius,        0.0f,  5.0f);
-        ImGui::SliderFloat("SSAO Intensity",     &Engine::priv::SSAO::STATIC_SSAO.m_Intensity,     0.0f,  10.0f);
-        ImGui::SliderInt("SSAO Samples",         &Engine::priv::SSAO::STATIC_SSAO.m_NumSamples,    0,     SSAO_MAX_KERNEL_SIZE);
-        ImGui::SliderInt("SSAO Blur Passes",     &Engine::priv::SSAO::STATIC_SSAO.m_BlurNumPasses, 0,     32);
+        ImGui::SliderFloat("SSAO Bias",          &Engine::priv::SSAO::STATIC_SSAO.m_Bias,           -1.0f,  1.0f);
+        ImGui::SliderFloat("SSAO Scale",         &Engine::priv::SSAO::STATIC_SSAO.m_Scale,           0.0f,  3.0f);
+        ImGui::SliderFloat("SSAO Radius",        &Engine::priv::SSAO::STATIC_SSAO.m_Radius,          0.0f,  5.0f);
+        ImGui::SliderFloat("SSAO Intensity",     &Engine::priv::SSAO::STATIC_SSAO.m_Intensity,       0.0f,  10.0f);
+        ImGui::SliderFloat("SSAO Range Scale",   &Engine::priv::SSAO::STATIC_SSAO.m_RangeCheckScale, 0.0f,  3.0f);
+        ImGui::SliderInt("SSAO Samples",         &Engine::priv::SSAO::STATIC_SSAO.m_NumSamples,      0,     SSAO_MAX_KERNEL_SIZE);
+        ImGui::SliderFloat("SSAO Blur Radius",   &Engine::priv::SSAO::STATIC_SSAO.m_BlurRadius,      0.0f,  10.0f);
+        ImGui::SliderFloat("SSAO Blur Strength", &Engine::priv::SSAO::STATIC_SSAO.m_BlurStrength,    0.0f,  10.0f);
+        ImGui::SliderInt("SSAO Blur Passes",     &Engine::priv::SSAO::STATIC_SSAO.m_BlurNumPasses,   0,     4);
         ImGui::Separator();
     }
     //anti-aliasing

@@ -247,7 +247,7 @@ namespace Engine::priv {
 
 
             void renderFullscreenTriangle(float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) override;
-            void renderFullscreenQuad(float width, float height, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) override;
+            void renderFullscreenQuad(float x, float y, float width, float height, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) override;
 
             void renderInitFrame(Engine::priv::RenderModule&) override;
             void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) override;

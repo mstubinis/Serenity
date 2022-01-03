@@ -90,7 +90,7 @@ namespace Engine::priv {
             void init(uint32_t width, uint32_t height, ImageInternalFormat, float divisor = 1.0f, uint32_t swapBufferCount = 1);
             void cleanup();
 
-            void bind();
+            void bind(float x = 0.0f, float y = 0.0f, float width = 0.0f, float height = 0.0f);
             void unbind();
             inline FramebufferObjectAttatchment* getAttatchement(const uint32_t index) const noexcept { return m_Attatchments.at(index).get(); }
 

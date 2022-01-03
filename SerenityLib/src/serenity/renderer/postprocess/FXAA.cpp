@@ -25,7 +25,7 @@ void Engine::priv::FXAA::internal_init_fragment_code() {
         "varying vec2 texcoords;\n"
         "\n"
         "void main() {\n"
-        "   vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);\n"
+        "   vec2 uvs = ViewportUVCalculation(texcoords);\n"
         "   vec2 invRes = vec2(0.0004) / ScreenInfo.zw;\n"
         "   float depth = texture2D(USE_SAMPLER_2D(depthTexture), uvs).r;\n"
         //"   float edge = texture2D(USE_SAMPLER_2D(edgeTexture), uvs).r;\n"
@@ -93,5 +93,5 @@ void Engine::priv::FXAA::pass(GBuffer& gbuffer, const Viewport& viewport, uint32
     Engine::priv::OpenGLBindTextureRAII edgeTexture{ "edgeTexture", gbuffer.getTexture(GBufferType::Misc), 1, true };
     Engine::priv::OpenGLBindTextureRAII depthTexture{ "depthTexture", gbuffer.getTexture(GBufferType::Depth), 2, false };
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }

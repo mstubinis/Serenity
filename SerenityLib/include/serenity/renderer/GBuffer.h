@@ -42,7 +42,7 @@ namespace Engine::priv{
             uint32_t internal_get_attatchment(uint32_t buffer) noexcept;
             void internal_Build_Texture_Buffer(FramebufferObject& fbo, GBufferType::Type gbuffer_type, uint32_t w, uint32_t h);
             void internal_Destruct();
-            void internal_Start(const std::vector<uint32_t>& types, std::string_view channels, bool first_fbo);
+            void internal_Start(std::vector<uint32_t>&& types, std::string_view channels, bool first_fbo, float x, float y, float width, float height);
         public:
             GBuffer() = default;
             GBuffer(const GBuffer&)                = delete;
@@ -54,12 +54,8 @@ namespace Engine::priv{
             void init(uint32_t width, uint32_t height);
             bool resize(uint32_t width, uint32_t height);
 
-            void bindFramebuffers(std::string_view channels, bool isMainFBO = true);
-            void bindFramebuffers(uint32_t buffer, std::string_view channels, bool isMainFBO = true);
-            void bindFramebuffers(uint32_t, uint32_t, std::string_view channels, bool isMainFBO = true);
-            void bindFramebuffers(uint32_t, uint32_t, uint32_t, std::string_view channels, bool isMainFBO = true);
-            void bindFramebuffers(uint32_t, uint32_t, uint32_t, uint32_t, std::string_view channels, bool isMainFBO = true);
-            void bindFramebuffers(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, std::string_view channels, bool isMainFBO = true);
+            void bindFramebuffers(std::string_view channels, bool isMainFBO = true, float x = 0.0f, float y = 0.0f, float width = 0.0f, float height = 0.0f);
+            void bindFramebuffers(std::vector<uint32_t>&&buffers, std::string_view channels, bool isMainFBO = true, float x = 0.0f, float y = 0.0f, float width = 0.0f, float height = 0.0f);
 
             void bindBackbuffer(const Viewport& viewport, GLuint final_fbo = 0, GLuint final_rbo = 0);
             void bindBackbuffer(GLuint final_fbo = 0, GLuint final_rbo = 0);

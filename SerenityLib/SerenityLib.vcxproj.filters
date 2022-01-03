@@ -641,9 +641,6 @@
     <ClCompile Include="src\serenity\renderer\opengl\glsl\Materials.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\renderer\opengl\glsl\SSAOCode.cpp">
-      <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\renderer\opengl\glsl\VersionConversion.cpp">
       <Filter>Source Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClCompile>
@@ -1952,9 +1949,6 @@
       <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\opengl\glsl\Materials.h">
-      <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\renderer\opengl\glsl\SSAOCode.h">
       <Filter>Header Files\Engine\Core\Renderer\opengl\glsl</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\opengl\glsl\VersionConversion.h">

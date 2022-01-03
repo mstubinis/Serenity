@@ -329,10 +329,8 @@ namespace Engine::priv {
                 const glm::vec4& scissor
             ) = 0;
 
-
-
             virtual void renderFullscreenTriangle(float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) = 0;
-            virtual void renderFullscreenQuad(float width, float height, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) = 0;
+            virtual void renderFullscreenQuad(float x, float y, float width, float height, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) = 0;
 
             virtual void renderInitFrame(Engine::priv::RenderModule&) = 0;
             virtual void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) = 0;

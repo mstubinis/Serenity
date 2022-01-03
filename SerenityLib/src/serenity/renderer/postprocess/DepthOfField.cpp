@@ -25,7 +25,7 @@ varying vec2 texcoords;
 
 void main() {
     vec2 aspectcorrect = vec2(1.0, ScreenInfo.z / ScreenInfo.w);
-    vec2 uvs = texcoords * (ScreenInfo.zw / ScreenInfo.xy);
+    vec2 uvs = ViewportUVCalculation(texcoords);
     float depth = texture2D(USE_SAMPLER_2D(depthTexture), uvs).r;
     float factor = (depth - Data.z);
     vec2 dofblur = vec2(clamp(factor * Data.y, -Data.x, Data.x));
@@ -91,5 +91,5 @@ void Engine::priv::DepthOfField::pass(GBuffer& gbuffer, const Viewport& viewport
     Engine::priv::OpenGLBindTextureRAII inTexture{ "inTexture", gbuffer.getTexture(sceneTexture), 0, true };
     Engine::priv::OpenGLBindTextureRAII textureDepth{ "textureDepth", gbuffer.getTexture(GBufferType::Depth), 1, true };
 
-    Engine::Renderer::renderFullscreenQuad(viewportDimensions.z, viewportDimensions.w);
+    Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
 }
