@@ -22,8 +22,8 @@ namespace Engine::priv {
     class SoundModule final {
         friend class ::SoundQueue;
         private:
-            std::stack<uint32_t>                       m_FreelistEffects;
-            std::stack<uint32_t>                       m_FreelistMusics;
+            std::vector<uint32_t>                      m_FreelistEffects;
+            std::vector<uint32_t>                      m_FreelistMusics;
             std::vector<std::unique_ptr<SoundQueue>>   m_SoundQueues;
 
             void updateSoundQueues(Scene&, const float dt);

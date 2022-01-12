@@ -37,11 +37,11 @@ class DirectionalLight : public Entity, public LightBaseData<DirectionalLight> {
 };
 
 class DirectionalLightShadowData {
-    using CascadeContainerDistances = std::array<float, size_t(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS + 1)>;
-    using CascadeContainerMatrices  = std::array<glm::mat4, DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS>;
     public:
-        CascadeContainerMatrices   m_LightOrthoProjection;
-        glm::mat4                  m_LightViewMatrix;
+        using CascadeContainerDistances = std::array<float, size_t(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS)>;
+        using CascadeContainerMatrices  = std::array<glm::mat4, DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS>;
+    public:
+        CascadeContainerMatrices   m_LightSpaceMatrices;
         CascadeContainerDistances  m_CascadeDistances;
         uint32_t                   m_ShadowWidth           = uint32_t(DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE);
         uint32_t                   m_ShadowHeight          = uint32_t(DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE);
@@ -51,14 +51,6 @@ class DirectionalLightShadowData {
         float                      m_FarCache              = 1.0f;
         LightShadowFrustumType     m_FrustumType           = LightShadowFrustumType::CameraBased;
         bool                       m_Enabled               = true;
-
-        inline void setLookAt(const glm::vec3& direction, const glm::vec3& center, const glm::vec3& up) noexcept {
-            const auto dir = glm::normalize(direction) * 1.0f;
-            m_LightViewMatrix = glm::lookAt(center + dir, center, up);
-        }
-        //inline void update(const DirectionalLight& light, const Camera& camera) noexcept {
-        //    setLookAt(light.getComponent<ComponentTransform>()->getForward(), glm::vec3{ camera.getPosition() }, glm::vec3{ 0.0f, 1.0f, 0.0f });
-        //}
 };
 
 #endif

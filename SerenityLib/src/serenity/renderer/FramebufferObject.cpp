@@ -147,7 +147,7 @@ void FramebufferObject::resize(const uint32_t width, const uint32_t height) {
     }
 }
 void FramebufferObject::bind(float x, float y, float width, float height) {
-    Engine::Renderer::setViewport(x, y, width <= 0.0 ? m_FramebufferWidth : width, height <= 0.0f ? m_FramebufferHeight : height);
+    Engine::Renderer::setViewport(x, y, width <= 0.0f ? m_FramebufferWidth : width, height <= 0.0f ? m_FramebufferHeight : height);
     swap_buffers(m_CurrentFBOIndex, m_FBOs.size());
     Engine::Renderer::bindFBO(*this);
     for (const auto& [idx, attatchment] : m_Attatchments) {

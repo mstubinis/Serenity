@@ -63,7 +63,7 @@ namespace Engine::priv {
             static void render(RenderModule&, Viewport&, bool mainRenderFunc = true);
             static void render2DAPI(RenderModule&, Viewport&, bool mainRenderFunc = true);
 
-            bool setShadowCaster(SunLight&,         bool isShadowCaster);
+            bool setShadowCaster(SunLight&,         bool isShadowCaster, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType, float nearFactor, float farFactor);
             bool setShadowCaster(PointLight&,       bool isShadowCaster);
             bool setShadowCaster(DirectionalLight&, bool isShadowCaster, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType, float nearFactor, float farFactor);
             bool setShadowCaster(SpotLight&,        bool isShadowCaster);
@@ -137,7 +137,7 @@ namespace Engine::Renderer {
     bool setViewport(float x, float y, float width, float height);
     bool setViewport(const glm::vec4& dimensions);
 
-    template<class X, class Y, class W, class H>
+    template<class X, class Y = X, class W = X, class H = X>
     inline bool setViewport(X&& x, Y&& y, W&& width, H&& height) noexcept { 
         return setViewport(
             static_cast<float>(std::forward<X>(x)), 
@@ -357,8 +357,6 @@ namespace Engine::Renderer {
         const glm::vec4& scissor = NO_SCISSOR
     );
 
-
-
     #pragma region UniformSending
     //Uniform 1
     void sendUniform1(const char* l, double x);
@@ -369,19 +367,16 @@ namespace Engine::Renderer {
     void sendUniform1Safe(const char* l, int x);
     void sendUniform1Safe(const char* l, float x);
     void sendUniform1Safe(const char* l, uint32_t x);
-
-    void sendUniform1v(const char* l, const std::vector<double>& d, const uint32_t i);
-    void sendUniform1v(const char* l, const std::vector<int>& d, const uint32_t i);
-    void sendUniform1v(const char* l, const std::vector<float>& d, const uint32_t i);
-    void sendUniform1v(const char* l, double* d, const uint32_t i);
-    void sendUniform1v(const char* l, int* d, const uint32_t i);
-    void sendUniform1v(const char* l, float* d, const uint32_t i);
-    void sendUniform1vSafe(const char* l, const std::vector<float>& d, const uint32_t i);
-    void sendUniform1vSafe(const char* l, const std::vector<double>& d, const uint32_t i);
-    void sendUniform1vSafe(const char* l, const std::vector<int>& d, const uint32_t i);
-    void sendUniform1vSafe(const char* l, float* d, const uint32_t i);
-    void sendUniform1vSafe(const char* l, double* d, const uint32_t i);
-    void sendUniform1vSafe(const char* l, int* d, const uint32_t i);
+    void sendUniform1v(const char* l, const double* d, const uint32_t i);
+    void sendUniform1v(const char* l, const int* d, const uint32_t i);
+    void sendUniform1v(const char* l, const float* d, const uint32_t i);
+    void sendUniform1vSafe(const char* l, const float* d, const uint32_t i);
+    void sendUniform1vSafe(const char* l, const double* d, const uint32_t i);
+    void sendUniform1vSafe(const char* l, const int* d, const uint32_t i);
+    template<class CONTAINER>
+    void sendUniform1v(const char* l, const CONTAINER& container) { sendUniform1v(l, container.data(), uint32_t(container.size())); }
+    template<class CONTAINER>
+    void sendUniform1vSafe(const char* l, const CONTAINER& container) { sendUniform1vSafe(l, container.data(), uint32_t(container.size())); }
 
 
     //Uniform 2
@@ -394,7 +389,6 @@ namespace Engine::Renderer {
     void sendUniform2Safe(const char* l, const glm::ivec2& v);
     void sendUniform2Safe(const char* l, const glm::vec2& v);
     void sendUniform2Safe(const char* l, const glm::uvec2& v);
-
     //separate
     void sendUniform2(const char* l, double x, double y);
     void sendUniform2(const char* l, int x, int y);
@@ -404,20 +398,17 @@ namespace Engine::Renderer {
     void sendUniform2Safe(const char* l, int x, int y);
     void sendUniform2Safe(const char* l, float x, float y);
     void sendUniform2Safe(const char* l, uint32_t x, uint32_t y);
+    void sendUniform2v(const char* l, const glm::dvec2* d, const uint32_t i);
+    void sendUniform2v(const char* l, const glm::ivec2* d, const uint32_t i);
+    void sendUniform2v(const char* l, const glm::vec2* d, const uint32_t i);
+    void sendUniform2vSafe(const char* l, const glm::vec2* d, const uint32_t i);
+    void sendUniform2vSafe(const char* l, const glm::dvec2* d, const uint32_t i);
+    void sendUniform2vSafe(const char* l, const glm::ivec2* d, const uint32_t i);
+    template<class CONTAINER>
+    void sendUniform2v(const char* l, const CONTAINER& container) { sendUniform2v(l, container.data(), uint32_t(container.size())); }
+    template<class CONTAINER>
+    void sendUniform2vSafe(const char* l, const CONTAINER& container) { sendUniform2vSafe(l, container.data(), uint32_t(container.size())); }
 
-    //vector and array of values
-    void sendUniform2v(const char* l, const std::vector<glm::dvec2>& d, const uint32_t i);
-    void sendUniform2v(const char* l, const std::vector<glm::ivec2>& d, const uint32_t i);
-    void sendUniform2v(const char* l, const std::vector<glm::vec2>& d, const uint32_t i);
-    void sendUniform2v(const char* l, glm::dvec2* d, const uint32_t i);
-    void sendUniform2v(const char* l, glm::ivec2* d, const uint32_t i);
-    void sendUniform2v(const char* l, glm::vec2* d, const uint32_t i);
-    void sendUniform2vSafe(const char* l, const std::vector<glm::vec2>& d, const uint32_t i);
-    void sendUniform2vSafe(const char* l, const std::vector<glm::dvec2>& d, const uint32_t i);
-    void sendUniform2vSafe(const char* l, const std::vector<glm::ivec2>& d, const uint32_t i);
-    void sendUniform2vSafe(const char* l, glm::vec2* d, const uint32_t i);
-    void sendUniform2vSafe(const char* l, glm::dvec2* d, const uint32_t i);
-    void sendUniform2vSafe(const char* l, glm::ivec2* d, const uint32_t i);
 
     //Uniform 3
     //vectors
@@ -429,7 +420,6 @@ namespace Engine::Renderer {
     void sendUniform3Safe(const char* l, const glm::ivec3& v);
     void sendUniform3Safe(const char* l, const glm::vec3& v);
     void sendUniform3Safe(const char* l, const glm::uvec3& v);
-
     //separate
     void sendUniform3(const char* l, double x, double y, double z);
     void sendUniform3(const char* l, int x, int y, int z);
@@ -439,20 +429,17 @@ namespace Engine::Renderer {
     void sendUniform3Safe(const char* l, int x, int y, int z);
     void sendUniform3Safe(const char* l, float x, float y, float z);
     void sendUniform3Safe(const char* l, uint32_t x, uint32_t y, uint32_t z);
+    void sendUniform3v(const char* l, const glm::dvec3* d, const uint32_t i);
+    void sendUniform3v(const char* l, const glm::ivec3* d, const uint32_t i);
+    void sendUniform3v(const char* l, const glm::vec3* d, const uint32_t i);
+    void sendUniform3vSafe(const char* l, const glm::vec3* d, const uint32_t i);
+    void sendUniform3vSafe(const char* l, const glm::dvec3* d, const uint32_t i);
+    void sendUniform3vSafe(const char* l, const glm::ivec3* d, const uint32_t i);
+    template<class CONTAINER>
+    void sendUniform3v(const char* l, const CONTAINER& container) { sendUniform3v(l, container.data(), uint32_t(container.size())); }
+    template<class CONTAINER>
+    void sendUniform3vSafe(const char* l, const CONTAINER& container) { sendUniform3vSafe(l, container.data(), uint32_t(container.size())); }
 
-    //vector and array of values
-    void sendUniform3v(const char* l, const std::vector<glm::dvec3>& d, const uint32_t i);
-    void sendUniform3v(const char* l, const std::vector<glm::ivec3>& d, const uint32_t i);
-    void sendUniform3v(const char* l, const std::vector<glm::vec3>& d, const uint32_t i);
-    void sendUniform3v(const char* l, glm::dvec3* d, const uint32_t i);
-    void sendUniform3v(const char* l, glm::ivec3* d, const uint32_t i);
-    void sendUniform3v(const char* l, glm::vec3* d, const uint32_t i);
-    void sendUniform3vSafe(const char* l, const std::vector<glm::vec3>& d, const uint32_t i);
-    void sendUniform3vSafe(const char* l, const std::vector<glm::dvec3>& d, const uint32_t i);
-    void sendUniform3vSafe(const char* l, const std::vector<glm::ivec3>& d, const uint32_t i);
-    void sendUniform3vSafe(const char* l, glm::vec3* d, const uint32_t i);
-    void sendUniform3vSafe(const char* l, glm::dvec3* d, const uint32_t i);
-    void sendUniform3vSafe(const char* l, glm::ivec3* d, const uint32_t i);
 
     //Uniform 4
     //vectors
@@ -464,7 +451,6 @@ namespace Engine::Renderer {
     void sendUniform4Safe(const char* l, const glm::ivec4& v);
     void sendUniform4Safe(const char* l, const glm::vec4& v);
     void sendUniform4Safe(const char* l, const glm::uvec4& v);
-
     //separate
     void sendUniform4(const char* l, double x, double y, double z, double w);
     void sendUniform4(const char* l, int x, int y, int z, int w);
@@ -474,50 +460,58 @@ namespace Engine::Renderer {
     void sendUniform4Safe(const char* l, int x, int y, int z, int w);
     void sendUniform4Safe(const char* l, float x, float y, float z, float w);
     void sendUniform4Safe(const char* l, uint32_t x, uint32_t y, uint32_t z, uint32_t w);
-
-    //vector / array of values
-    void sendUniform4v(const char* l, const std::vector<glm::dvec4>& d, const uint32_t i);
-    void sendUniform4v(const char* l, const std::vector<glm::ivec4>& d, const uint32_t i);
-    void sendUniform4v(const char* l, const std::vector<glm::vec4>& d, const uint32_t i);
-    void sendUniform4v(const char* l, glm::dvec4* d, const uint32_t i);
-    void sendUniform4v(const char* l, glm::ivec4* d, const uint32_t i);
-    void sendUniform4v(const char* l, glm::vec4* d, const uint32_t i);
-    void sendUniform4vSafe(const char* l, const std::vector<glm::vec4>& d, const uint32_t i);
-    void sendUniform4vSafe(const char* l, const std::vector<glm::dvec4>& d, const uint32_t i);
-    void sendUniform4vSafe(const char* l, const std::vector<glm::ivec4>& d, const uint32_t i);
-    void sendUniform4vSafe(const char* l, glm::vec4* d, const uint32_t i);
-    void sendUniform4vSafe(const char* l, glm::dvec4* d, const uint32_t i);
-    void sendUniform4vSafe(const char* l, glm::ivec4* d, const uint32_t i);
+    void sendUniform4v(const char* l, const glm::dvec4* d, const uint32_t i);
+    void sendUniform4v(const char* l, const glm::ivec4* d, const uint32_t i);
+    void sendUniform4v(const char* l, const glm::vec4* d, const uint32_t i);
+    void sendUniform4vSafe(const char* l, const glm::vec4* d, const uint32_t i);
+    void sendUniform4vSafe(const char* l, const glm::dvec4* d, const uint32_t i);
+    void sendUniform4vSafe(const char* l, const glm::ivec4* d, const uint32_t i);
+    template<class CONTAINER>
+    void sendUniform4v(const char* l, const CONTAINER& container) { sendUniform4v(l, container.data(), uint32_t(container.size())); }
+    template<class CONTAINER>
+    void sendUniform4vSafe(const char* l, const CONTAINER& container) { sendUniform4vSafe(l, container.data(), uint32_t(container.size())); }
 
     //Matrix 2x2
     void sendUniformMatrix2(const char* l, const glm::mat2& m);
-    void sendUniformMatrix2v(const char* l, const std::vector<glm::mat2>& m, const uint32_t count);
     void sendUniformMatrix2(const char* l, const glm::dmat2& m);
-    void sendUniformMatrix2v(const char* l, const std::vector<glm::dmat2>& m, const uint32_t count);
     void sendUniformMatrix2Safe(const char* l, const glm::mat2& m);
-    void sendUniformMatrix2vSafe(const char* l, const std::vector<glm::mat2>& m, const uint32_t count);
     void sendUniformMatrix2Safe(const char* l, const glm::dmat2& m);
-    void sendUniformMatrix2vSafe(const char* l, const std::vector<glm::dmat2>& m, const uint32_t count);
+    void sendUniformMatrix2v(const char* l, const glm::mat2* m, const uint32_t count);
+    void sendUniformMatrix2v(const char* l, const glm::dmat2* m, const uint32_t count);
+    void sendUniformMatrix2vSafe(const char* l, const glm::mat2* m, const uint32_t count);
+    void sendUniformMatrix2vSafe(const char* l, const glm::dmat2* m, const uint32_t count);
+    template<class CONTAINER>
+    void sendUniformMatrix2v(const char* l, const CONTAINER& container) { sendUniformMatrix2v(l, container.data(), uint32_t(container.size())); }
+    template<class CONTAINER>
+    void sendUniformMatrix2vSafe(const char* l, const CONTAINER& container) { sendUniformMatrix2vSafe(l, container.data(), uint32_t(container.size())); }
 
     //Matrix 3x3
     void sendUniformMatrix3(const char* l, const glm::mat3& m);
-    void sendUniformMatrix3v(const char* l, const std::vector<glm::mat3>& m, const uint32_t count);
     void sendUniformMatrix3(const char* l, const glm::dmat3& m);
-    void sendUniformMatrix3v(const char* l, const std::vector<glm::dmat3>& m, const uint32_t count);
     void sendUniformMatrix3Safe(const char* l, const glm::mat3& m);
-    void sendUniformMatrix3vSafe(const char* l, const std::vector<glm::mat3>& m, const uint32_t count);
     void sendUniformMatrix3Safe(const char* l, const glm::dmat3& m);
-    void sendUniformMatrix3vSafe(const char* l, const std::vector<glm::dmat3>& m, const uint32_t count);
+    void sendUniformMatrix3v(const char* l, const glm::mat3* m, const uint32_t count);
+    void sendUniformMatrix3v(const char* l, const glm::dmat3* m, const uint32_t count);
+    void sendUniformMatrix3vSafe(const char* l, const glm::mat3* m, const uint32_t count);
+    void sendUniformMatrix3vSafe(const char* l, const glm::dmat3* m, const uint32_t count);
+    template<class CONTAINER>
+    void sendUniformMatrix3v(const char* l, const CONTAINER& container) { sendUniformMatrix3v(l, container.data(), uint32_t(container.size())); }
+    template<class CONTAINER>
+    void sendUniformMatrix3vSafe(const char* l, const CONTAINER& container) { sendUniformMatrix3vSafe(l, container.data(), uint32_t(container.size())); }
 
     //Matrix4x4
     void sendUniformMatrix4(const char* l, const glm::mat4& m);
-    void sendUniformMatrix4v(const char* l, const std::vector<glm::mat4>& m, const uint32_t count);
     void sendUniformMatrix4(const char* l, const glm::dmat4& m);
-    void sendUniformMatrix4v(const char* l, const std::vector<glm::dmat4>& m, const uint32_t count);
     void sendUniformMatrix4Safe(const char* l, const glm::mat4& m);
-    void sendUniformMatrix4vSafe(const char* l, const std::vector<glm::mat4>& m, const uint32_t count);
     void sendUniformMatrix4Safe(const char* l, const glm::dmat4& m);
-    void sendUniformMatrix4vSafe(const char* l, const std::vector<glm::dmat4>& m, const uint32_t count);
+    void sendUniformMatrix4v(const char* l, const glm::mat4* m, const uint32_t count);
+    void sendUniformMatrix4v(const char* l, const glm::dmat4* m, const uint32_t count);
+    void sendUniformMatrix4vSafe(const char* l, const glm::mat4* m, const uint32_t count);
+    void sendUniformMatrix4vSafe(const char* l, const glm::dmat4* m, const uint32_t count);
+    template<class CONTAINER>
+    void sendUniformMatrix4v(const char* l, const CONTAINER& container) { sendUniformMatrix4v(l, container.data(), uint32_t(container.size())); }
+    template<class CONTAINER>
+    void sendUniformMatrix4vSafe(const char* l, const CONTAINER& container) { sendUniformMatrix4vSafe(l, container.data(), uint32_t(container.size())); }
 
     #pragma endregion
 }

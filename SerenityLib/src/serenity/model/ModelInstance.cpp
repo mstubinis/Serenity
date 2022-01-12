@@ -38,7 +38,7 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     }
     if (animationContainer.size() > 0) {
         Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
-        Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getTransforms(), (uint32_t)animationContainer.getTransforms().size());
+        Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getTransforms());
     } else {
         Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
     }
@@ -48,8 +48,7 @@ constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engi
     const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ renderingMatrix }));
 
     //view space normals
-    //const glm::mat4 view = cam.getView();
-    //const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ view * model }));
+    //const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ cam.getView() * model }));
 
     Engine::Renderer::sendUniformMatrix4("Model", renderingMatrix);
     Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
@@ -73,7 +72,6 @@ ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     : m_ModelMatrix        { std::move(other.m_ModelMatrix) }
     , m_Orientation        { std::move(other.m_Orientation) }
-    , m_Position           { std::move(other.m_Position) }
     , m_Scale              { std::move(other.m_Scale) }
     , m_CustomBindFunctor  { std::move(other.m_CustomBindFunctor) }
     , m_CustomUnbindFunctor{ std::move(other.m_CustomUnbindFunctor) }
@@ -104,7 +102,6 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
     if (this != &other) {
         m_ModelMatrix         = std::move(other.m_ModelMatrix);
         m_Orientation         = std::move(other.m_Orientation);
-        m_Position            = std::move(other.m_Position);
         m_Scale               = std::move(other.m_Scale);
         m_CustomBindFunctor   = std::move(other.m_CustomBindFunctor);
         m_CustomUnbindFunctor = std::move(other.m_CustomUnbindFunctor);
@@ -163,15 +160,14 @@ void ModelInstance::internal_update_model_matrix(bool recalcRadius) {
     if (model && recalcRadius) {
         Engine::priv::ComponentModel_Functions::CalculateRadius(*model);
     }
-    Math::setFinalModelMatrix(m_ModelMatrix, m_Position, m_Orientation, m_Scale);
+    Math::setFinalModelMatrix(m_ModelMatrix, getPosition(), m_Orientation, m_Scale);
 }
 void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) {
     m_Stage = stage;
     componentModel.setStage(stage, m_Index);
 }
 void ModelInstance::setPosition(float x, float y, float z){
-    m_Position = glm::vec3(x, y, z);
-    internal_update_model_matrix(false);
+    Engine::Math::setMatrixPosition(m_ModelMatrix, x, y, z);
 }
 void ModelInstance::setOrientation(const glm::quat& orientation) {
     m_Orientation = orientation;
@@ -190,8 +186,8 @@ void ModelInstance::setScale(float x, float y, float z){
     internal_update_model_matrix(recalcRadius);
 }
 void ModelInstance::translate(float x, float y, float z) {
-    m_Position += glm::vec3(x, y, z);
-    internal_update_model_matrix(false);
+    const auto pos = getPosition();
+    Engine::Math::setMatrixPosition(m_ModelMatrix, pos.x + x, pos.y + y, pos.z + z);
 }
 void ModelInstance::rotate(float x, float y, float z, bool local){
     Math::rotate(m_Orientation, x, y, z, local);

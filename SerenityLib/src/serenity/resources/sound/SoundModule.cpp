@@ -12,11 +12,13 @@ namespace {
 }
 
 Engine::priv::SoundModule::SoundModule() {
+    m_FreelistEffects.reserve(MAX_SOUND_EFFECTS);
+    m_FreelistMusics.reserve(MAX_SOUND_MUSIC);
     for (uint32_t i = 0; i < MAX_SOUND_EFFECTS; ++i) {
-        m_FreelistEffects.push(i);
+        m_FreelistEffects.push_back(i);
     }
     for (uint32_t i = 0; i < MAX_SOUND_MUSIC; ++i) {
-        m_FreelistMusics.push(i);
+        m_FreelistMusics.push_back(i);
     }
     SOUND_MODULE = this;
 }
@@ -25,16 +27,16 @@ Engine::priv::SoundModule::~SoundModule() {
 }
 SoundEffect* Engine::priv::SoundModule::getNextFreeEffect() {
     if (m_FreelistEffects.size() > 0){
-        auto index = m_FreelistEffects.top();
-        m_FreelistEffects.pop();
+        const auto index = m_FreelistEffects.back();
+        m_FreelistEffects.pop_back();
         return &m_SoundEffects[index];
     }
     return nullptr;
 }
 SoundMusic* Engine::priv::SoundModule::getNextFreeMusic() {
     if (m_FreelistMusics.size() > 0) {
-        auto index = m_FreelistMusics.top();
-        m_FreelistMusics.pop();
+        const auto index = m_FreelistMusics.back();
+        m_FreelistMusics.pop_back();
         return &m_SoundMusics[index];
     }
     return nullptr;
@@ -74,7 +76,7 @@ void Engine::priv::SoundModule::updateSoundQueues(Scene& scene, const float dt) 
         queue->update(dt);
     }
     std::erase_if(m_SoundQueues, [](auto& queue) {
-        return (queue->empty());
+        return queue->empty();
     });
 }
 void Engine::priv::SoundModule::updateSoundEffects(Scene& scene, const float dt) {
@@ -83,7 +85,7 @@ void Engine::priv::SoundModule::updateSoundEffects(Scene& scene, const float dt)
         if (soundEffect.m_Active) {
             soundEffect.update(dt);
             if (soundEffect.getStatus() == SoundStatus::Stopped || soundEffect.getStatus() == SoundStatus::Fresh) {
-                m_FreelistEffects.push(i);
+                m_FreelistEffects.push_back(i);
                 soundEffect.m_Active = false;
             }
         }
@@ -95,7 +97,7 @@ void Engine::priv::SoundModule::updateSoundMusic(Scene& scene, const float dt) {
         if (soundMusic.m_Active) {
             soundMusic.update(dt);
             if (soundMusic.getStatus() == SoundStatus::Stopped || soundMusic.getStatus() == SoundStatus::Fresh) {
-                m_FreelistMusics.push(i);
+                m_FreelistMusics.push_back(i);
                 soundMusic.m_Active = false;
             }
         }
@@ -118,7 +120,7 @@ SoundEffect* Engine::Sound::playEffect(Handle handle, uint32_t loops){
         SOUND_MODULE->setSoundInformation(handle, *effect);
         effect->play(loops);
     } else {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << " - returned a null sound effect for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version())
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << " - returned a null sound effect for handle: " << handle.toString())
     }
     return effect;
 }
@@ -128,7 +130,7 @@ SoundMusic* Engine::Sound::playMusic(Handle handle, uint32_t loops){
         SOUND_MODULE->setSoundInformation(handle, *music);
         music->play(loops);
     } else {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << " - returned a null sound music for handle: " << handle.index() << ", " << handle.type() << ", " << handle.version())
+        ENGINE_PRODUCTION_LOG(__FUNCTION__ << " - returned a null sound music for handle: " << handle.toString())
     }
     return music;
 }
@@ -150,8 +152,14 @@ std::array<SoundMusic, MAX_SOUND_MUSIC>& Engine::Sound::getAllSoundMusics() {
 }
 
 Engine::priv::SoundEffectLUABinder Engine::lua::sound::playEffect(Handle soundHandle, luabridge::LuaRef numLoops) {
-    return Engine::priv::SoundEffectLUABinder{ *Engine::Sound::playEffect(soundHandle, numLoops.isNil() ? 1U : numLoops.cast<uint32_t>()) };
+    return Engine::priv::SoundEffectLUABinder{ *Engine::Sound::playEffect(
+        soundHandle, 
+        numLoops.isNil() ? 1U : numLoops.cast<uint32_t>()
+    ) };
 }
 Engine::priv::SoundMusicLUABinder Engine::lua::sound::playMusic(Handle soundHandle, luabridge::LuaRef numLoops) {
-    return Engine::priv::SoundMusicLUABinder{ *Engine::Sound::playMusic(soundHandle, numLoops.isNil() ? 1U : numLoops.cast<uint32_t>()) };
+    return Engine::priv::SoundMusicLUABinder{ *Engine::Sound::playMusic(
+        soundHandle,
+        numLoops.isNil() ? 1U : numLoops.cast<uint32_t>()
+    ) };
 }

@@ -194,13 +194,12 @@ namespace Engine::priv {
             void toggleShadowCaster(RodLight&, bool) override;
             void toggleShadowCaster(ProjectionLight&, bool) override;
 
-            bool buildShadowCaster(SunLight&) override;
+            bool buildShadowCaster(SunLight&, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType, float nearFactor, float farFactor) override;
             bool buildShadowCaster(PointLight&) override;
             bool buildShadowCaster(DirectionalLight&, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType, float nearFactor, float farFactor) override;
             bool buildShadowCaster(SpotLight&) override;
             bool buildShadowCaster(RodLight&) override;
             bool buildShadowCaster(ProjectionLight&) override;
-            void setShadowDirectionalLightDirection(DirectionalLight&, const glm::vec3& direction) override;
 
             void sendGPUDataAllLights(const Scene&, const Camera&) override;
             void sendGPUDataGI(Skybox*) override;
@@ -248,6 +247,7 @@ namespace Engine::priv {
 
             void renderFullscreenTriangle(float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) override;
             void renderFullscreenQuad(float x, float y, float width, float height, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) override;
+            void renderFullscreenQuadCentered(float width, float height, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) override;
 
             void renderInitFrame(Engine::priv::RenderModule&) override;
             void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) override;

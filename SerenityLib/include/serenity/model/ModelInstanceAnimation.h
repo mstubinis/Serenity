@@ -4,7 +4,6 @@
 
 struct MeshNodeData;
 namespace Engine::priv {
-    struct DefaultModelInstanceBindFunctor;
     class  ModelInstanceAnimationContainer;
     class  AnimationData;
     class  MeshSkeleton;
@@ -19,7 +18,6 @@ namespace Engine::priv {
 
 namespace Engine::priv {
     class ModelInstanceAnimation final {
-        friend struct DefaultModelInstanceBindFunctor;
         friend class  ModelInstanceAnimationContainer;
         private:
             AnimationData* m_AnimationData    = nullptr;
@@ -38,16 +36,15 @@ namespace Engine::priv {
 
             ModelInstanceAnimation(const ModelInstanceAnimation&)                = delete;
             ModelInstanceAnimation& operator=(const ModelInstanceAnimation&)     = delete;
-            ModelInstanceAnimation(ModelInstanceAnimation&&) noexcept            = default;
-            ModelInstanceAnimation& operator=(ModelInstanceAnimation&&) noexcept = default;
+            ModelInstanceAnimation(ModelInstanceAnimation&&) noexcept;
+            ModelInstanceAnimation& operator=(ModelInstanceAnimation&&) noexcept;
 
             void update(const float dt, std::vector<glm::mat4>& transforms);
     };
     class ModelInstanceAnimationContainer final {
-        friend struct DefaultModelInstanceBindFunctor;
         private:
-            std::vector<ModelInstanceAnimation> m_Animation_Instances;
-            std::vector<glm::mat4>              m_Transforms;
+            std::vector<ModelInstanceAnimation>  m_Animation_Instances;
+            std::vector<glm::mat4>               m_Transforms;
 
             void internal_emplace_animation(Handle mesh, const uint16_t animationIndex, float startTime, float endTime, uint16_t requestedLoops) noexcept;
         public:

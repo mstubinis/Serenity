@@ -71,6 +71,8 @@ namespace {
     void internal_init_blur_fragment_code() {
         GLSL_FRAG_CODE_BLUR = R"(
 uniform sampler2D image;
+uniform float strength;
+
 varying vec2 texcoords;
 
 const int NOISE_SIZE = )" + std::to_string(SSAO_NORMALMAP_SIZE) + R"(;
@@ -86,7 +88,7 @@ void main() {
             result += texture2D(image, uvs + offset).a;
         }
     }
-    gl_FragColor.a = result / (float(NOISE_SIZE) * float(NOISE_SIZE));
+    gl_FragColor.a = (result / (float(NOISE_SIZE) * float(NOISE_SIZE))) * strength;
 }
     )";
 
@@ -233,6 +235,7 @@ void Engine::priv::SSAO::passBlur(GBuffer& gbuffer, const Viewport& viewport, ui
     const auto& viewportDimensions = viewport.getViewportDimensions();
     renderer.bind(m_Shader_Program_Blur.get<ShaderProgram>());
 
+    Engine::Renderer::sendUniform1("strength", m_BlurStrength);
     Engine::priv::OpenGLBindTextureRAII image{ "image", gbuffer.getTexture(texture), 0, false };
 
     Engine::Renderer::renderFullscreenQuadCentered(viewportDimensions.z, viewportDimensions.w);
@@ -285,8 +288,6 @@ void Engine::Renderer::ssao::setLevel(const SSAOLevel level) {
 
 void Engine::Renderer::ssao::enableBlur(bool blurEnabled) noexcept { Engine::priv::SSAO::STATIC_SSAO.m_DoBlur = blurEnabled; }
 void Engine::Renderer::ssao::disableBlur() noexcept { Engine::priv::SSAO::STATIC_SSAO.m_DoBlur = false; }
-float Engine::Renderer::ssao::getBlurRadius() noexcept { return Engine::priv::SSAO::STATIC_SSAO.m_BlurRadius; }
-void Engine::Renderer::ssao::setBlurRadius(float blurRadius) noexcept { Engine::priv::SSAO::STATIC_SSAO.m_BlurRadius = std::max(0.0f, blurRadius); }
 float Engine::Renderer::ssao::getBlurStrength() noexcept { return Engine::priv::SSAO::STATIC_SSAO.m_BlurStrength; }
 void Engine::Renderer::ssao::setBlurStrength(float blurStrength) noexcept { Engine::priv::SSAO::STATIC_SSAO.m_BlurStrength = std::max(0.0f, blurStrength); }
 float Engine::Renderer::ssao::getIntensity() noexcept { return Engine::priv::SSAO::STATIC_SSAO.m_Intensity; }

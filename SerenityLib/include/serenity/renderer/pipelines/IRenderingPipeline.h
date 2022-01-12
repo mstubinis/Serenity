@@ -133,13 +133,12 @@ namespace Engine::priv {
             virtual void toggleShadowCaster(RodLight&, bool) = 0;
             virtual void toggleShadowCaster(ProjectionLight&, bool) = 0;
 
-            virtual bool buildShadowCaster(SunLight&) = 0;
+            virtual bool buildShadowCaster(SunLight&, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType, float nearFactor, float farFactor) = 0;
             virtual bool buildShadowCaster(PointLight&) = 0;
             virtual bool buildShadowCaster(DirectionalLight&, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType, float nearFactor, float farFactor) = 0;
             virtual bool buildShadowCaster(SpotLight&) = 0;
             virtual bool buildShadowCaster(RodLight&) = 0;
             virtual bool buildShadowCaster(ProjectionLight&) = 0;
-            virtual void setShadowDirectionalLightDirection(DirectionalLight&, const glm::vec3& direction) = 0;
 
             virtual void sendGPUDataAllLights(const Scene&, const Camera&) = 0;
             virtual void sendGPUDataGI(Skybox*) = 0;
@@ -331,6 +330,7 @@ namespace Engine::priv {
 
             virtual void renderFullscreenTriangle(float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) = 0;
             virtual void renderFullscreenQuad(float x, float y, float width, float height, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) = 0;
+            virtual void renderFullscreenQuadCentered(float width, float height, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f) = 0;
 
             virtual void renderInitFrame(Engine::priv::RenderModule&) = 0;
             virtual void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunction) = 0;

@@ -786,7 +786,9 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, Handle shaderProgram, Scene&
     Skybox::bindMesh();
 }
 void DeferredPipeline::toggleShadowCaster(SunLight& sunLight, bool isCaster) {
-
+    if (m_ShadowCasters.m_ShadowCastersSunHashed.contains(&sunLight)) {
+        m_ShadowCasters.m_ShadowCastersSunHashed.at(&sunLight)->m_Enabled = isCaster;
+    }
 }
 void DeferredPipeline::toggleShadowCaster(PointLight& pointLight, bool isCaster) {
 
@@ -805,23 +807,46 @@ void DeferredPipeline::toggleShadowCaster(RodLight& rodLight, bool isCaster) {
 void DeferredPipeline::toggleShadowCaster(ProjectionLight& projectionLight, bool isCaster) {
 
 }
-bool DeferredPipeline::buildShadowCaster(SunLight& sunLight) {
+bool DeferredPipeline::buildShadowCaster(SunLight& sunLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
+    if (!m_ShadowCasters.m_ShadowCastersSunHashed.contains(&sunLight)) {
+        auto& data = m_ShadowCasters.m_ShadowCastersSun.emplace_back(
+            &sunLight,
+            NEW GLDeferredSunLightShadowInfo{ 
+                shadowMapWidth, 
+                shadowMapHeight,
+                frustumType, 
+                nearFactor, 
+                farFactor 
+            }
+        );
+        m_ShadowCasters.m_ShadowCastersSunHashed.emplace(&sunLight, std::get<1>(data));
+        return true;
+    } else {
+        auto& data = m_ShadowCasters.m_ShadowCastersSunHashed.at(&sunLight);
+        data->setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
+    }
     return false;
 }
 bool DeferredPipeline::buildShadowCaster(PointLight& pointLight) {
     return false;
 }
-bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight, uint32_t shadowMapWidth, uint32_t shadowMapSize, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
+bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
     if (!m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
         auto& data = m_ShadowCasters.m_ShadowCastersDirectional.emplace_back(
             &directionalLight, 
-            NEW GLDeferredDirectionalLightShadowInfo{ *Engine::Resources::getCurrentScene()->getActiveCamera(), directionalLight, shadowMapWidth, shadowMapSize, frustumType, nearFactor, farFactor }
+            NEW GLDeferredDirectionalLightShadowInfo{
+                shadowMapWidth,
+                shadowMapHeight,
+                frustumType, 
+                nearFactor, 
+                farFactor 
+            }
         );
         m_ShadowCasters.m_ShadowCastersDirectionalHashed.emplace(&directionalLight, std::get<1>(data));
         return true;
     } else {
         auto& data = m_ShadowCasters.m_ShadowCastersDirectionalHashed.at(&directionalLight);
-        data->setShadowInfo(shadowMapWidth, shadowMapSize, frustumType, nearFactor, farFactor);
+        data->setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
     }
     return false;
 }
@@ -833,11 +858,6 @@ bool DeferredPipeline::buildShadowCaster(RodLight& rodLight) {
 }
 bool DeferredPipeline::buildShadowCaster(ProjectionLight& projectionLight) {
     return false;
-}
-void DeferredPipeline::setShadowDirectionalLightDirection(DirectionalLight& directionalLight, const glm::vec3& direction) {
-    if (!m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
-        m_ShadowCasters.m_ShadowCastersDirectionalHashed[&directionalLight]->setLookAt(direction, glm::vec3{ 0.0f }, glm::vec3{ 0.0f, 1.0f, 0.0f });
-    }
 }
 void DeferredPipeline::sendGPUDataAllLights(const Scene& scene, const Camera& camera) {
     int maxLights = glm::min(int(scene.getNumLights()), MAX_LIGHTS_PER_PASS);
@@ -885,6 +905,14 @@ void DeferredPipeline::sendGPUDataLight(const Camera& camera, const SunLight& su
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(sunLight.getType()));
     sendUniform1Safe("Type", 0.0f);
     sendUniform1Safe("uShadowEnabled", 0);
+    if (m_Renderer.m_Lighting) {
+        if (m_ShadowCasters.m_ShadowCastersSunHashed.contains(&sunLight)) {
+            auto& data = *m_ShadowCasters.m_ShadowCastersSunHashed.at(&sunLight);
+            if (data.m_Enabled) {
+                data.bindUniformsReading(5); //TODO: this texture slot might not work for forward lighting
+            }
+        }
+    }
 }
 int DeferredPipeline::sendGPUDataLight(const Camera& camera, const PointLight& pointLight, const std::string& start) {
     auto transform  = pointLight.getComponent<ComponentTransform>();
@@ -922,7 +950,7 @@ void DeferredPipeline::sendGPUDataLight(const Camera& camera, const DirectionalL
         if (m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
             auto& data = *m_ShadowCasters.m_ShadowCastersDirectionalHashed.at(&directionalLight);
             if (data.m_Enabled) {
-                data.bindUniformsReading(5, camera); //TODO: this texture slot might not work for forward lighting
+                data.bindUniformsReading(5); //TODO: this texture slot might not work for forward lighting
             }
         }
     }
@@ -1289,19 +1317,16 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
     if (viewport.isAspectRatioSynced()) {
         camera.setAspectRatio(viewportDimensions.z / viewportDimensions.w);
     }
-    Engine::Renderer::setViewport(viewportDimensions); //m_GBuffer.bindFramebuffers() already does this
-    glScissor(viewportDimensions.x, viewportDimensions.y, viewportDimensions.z, viewportDimensions.w);
-    m_2DProjectionMatrix = glm::ortho(0.0f, viewportDimensions.z, 0.0f, viewportDimensions.w, 0.003f, 3000.0f); //might have to recheck this
+    //if resizing gbuffer
+        m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
+        Engine::Renderer::setViewport(0.0f, 0.0f, m_GBuffer.width(), m_GBuffer.height());
+    //else
+        //Engine::Renderer::setViewport(viewportDimensions); //m_GBuffer.bindFramebuffers() already does this
 
-    //this is god awful and ugly, but it's needed. find a way to refactor this properly. TODO: see if this is still actually needed
-    /*
-    //MAX_TEXTURE_UNITS for opengl es
-    for (int32_t i = 0; i < Engine::priv::OpenGLState::constants.MAX_COMBINED_TEXTURE_IMAGE_UNITS; ++i) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-    }
-    */
+
+    //glScissor(viewportDimensions.x, viewportDimensions.y, viewportDimensions.z, viewportDimensions.w);
+
+    m_2DProjectionMatrix = glm::ortho(0.0f, viewportDimensions.z, 0.0f, viewportDimensions.w, 0.003f, 3000.0f); //TODO: might have to recheck this
 
     Engine::Renderer::GLEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -1321,13 +1346,15 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
 
     glDisable(GL_CULL_FACE);
     //glPolygonOffset(1.0, 1.0);
+
+    //directional lights
     for (const auto& [directionalLight, data] : m_ShadowCasters.m_ShadowCastersDirectional) {
         if (data->m_Enabled) {
-            data->calculateOrthographicProjections(camera, *directionalLight);
+            data->calculateOrthographicProjections(camera, directionalLight->getDirection());
             Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
             for (int i = 0; i < int(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS); ++i) {
                 data->bindUniformsWriting(i);
-                const glm::mat4 viewProj = data->m_LightOrthoProjection[i] * data->m_LightViewMatrix;
+                const auto& viewProj = data->m_LightSpaceMatrices[i];
 
                 PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
                 PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
@@ -1338,6 +1365,26 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
             }
         }
     }
+    //sun lights
+    for (const auto& [sunLight, data] : m_ShadowCasters.m_ShadowCastersSun) {
+        if (data->m_Enabled) {
+            data->calculateOrthographicProjections(camera, glm::normalize(sunLight->getPosition() - camera.getPosition()));
+            Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
+            for (int i = 0; i < int(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS); ++i) {
+                data->bindUniformsWriting(i);
+                const auto& viewProj = data->m_LightSpaceMatrices[i];
+
+                PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderGeometryTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderForwardOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderForwardTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
+                PublicScene::RenderForwardTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
+            }
+        }
+    }
+
+
     glEnable(GL_CULL_FACE);
     //glPolygonOffset(0, 0);
     const auto& viewportDimensions = viewport.getViewportDimensions();
@@ -1366,9 +1413,14 @@ bool DeferredPipeline::internal_pass_depth_prepass(Viewport& viewport, Camera& c
 void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera) {
     Scene& scene                   = viewport.getScene();
     const auto& viewportDimensions = viewport.getViewportDimensions();
-    const auto winSize             = glm::vec2{ Engine::Resources::getWindowSize() };
+    const auto gbufferSize         = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
 
-    m_GBuffer.bindFramebuffers({ GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc }, "RGBA", true, (winSize.x / 2.0f) - (viewportDimensions.z / 2.0f), (winSize.y / 2.0f) - (viewportDimensions.w / 2.0f), viewportDimensions.z, viewportDimensions.w);
+    m_GBuffer.bindFramebuffers({ GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc }, "RGBA", true, 
+        (gbufferSize.x / 2.0f) - (viewportDimensions.z / 2.0f),
+        (gbufferSize.y / 2.0f) - (viewportDimensions.w / 2.0f),
+        viewportDimensions.z, 
+        viewportDimensions.w
+    );
     Engine::Renderer::Settings::clear(true, false, false); // clear color only
     
     PublicScene::RenderGeometryOpaque(m_Renderer, scene, &viewport, &camera);
@@ -1385,8 +1437,14 @@ void DeferredPipeline::internal_pass_geometry(Viewport& viewport, Camera& camera
 void DeferredPipeline::internal_pass_forward(Viewport& viewport, Camera& camera, bool depthPrepass) {
     Scene& scene                   = viewport.getScene();
     const auto& viewportDimensions = viewport.getViewportDimensions();
-    const auto winSize             = glm::vec2{ Engine::Resources::getWindowSize() };
-    m_GBuffer.bindFramebuffers({ GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting }, "RGBA", true, (winSize.x / 2.0f) - (viewportDimensions.z / 2.0f), (winSize.y / 2.0f) - (viewportDimensions.w / 2.0f), viewportDimensions.z, viewportDimensions.w);
+    const auto gbufferSize         = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
+
+    m_GBuffer.bindFramebuffers({ GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting }, "RGBA", true, 
+        (gbufferSize.x / 2.0f) - (viewportDimensions.z / 2.0f),
+        (gbufferSize.y / 2.0f) - (viewportDimensions.w / 2.0f),
+        viewportDimensions.z, 
+        viewportDimensions.w
+    );
 
     PublicScene::RenderForwardOpaque(m_Renderer, scene, &viewport, &camera);
 
@@ -1471,10 +1529,9 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
     const auto& viewportDimensions = viewport.getViewportDimensions();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLighting].get<ShaderProgram>());
     auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
-    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
+    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities);
 
     //TODO: is this needed?
-    //Engine::Renderer::setViewport(0.0f, 0.0f, viewportDimensions.z, viewportDimensions.w);
     {
         Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
         Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
@@ -1511,7 +1568,7 @@ void DeferredPipeline::internal_pass_lighting(Viewport& viewport, Camera& camera
         //do GI here. (only doing GI during the main render pass, not during light probes
         glBlendEquationSeparate(GL_MAX, GL_FUNC_ADD);
         m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingGI].get<ShaderProgram>());
-        Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
+        Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities);
 
         Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
         Engine::priv::OpenGLBindTextureRAII gNormalMap{ "gNormalMap", m_GBuffer.getTexture(GBufferType::Normal), 1, false };
@@ -1539,9 +1596,7 @@ void DeferredPipeline::internal_pass_lighting_basic(Viewport& viewport, Camera& 
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredLightingBasic].get<ShaderProgram>());
     auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
     
-    //TODO: is this needed?
-    //Engine::Renderer::setViewport(0.0f, 0.0f, viewportDimensions.z, viewportDimensions.w);
-    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities, (uint32_t)Material::m_MaterialProperities.size());
+    Engine::Renderer::sendUniform4v("materials[0]", Material::m_MaterialProperities);
     {
 
         Engine::priv::OpenGLBindTextureRAII gDiffuseMap{ "gDiffuseMap", m_GBuffer.getTexture(GBufferType::Diffuse), 0, false };
@@ -1664,9 +1719,11 @@ void DeferredPipeline::internal_pass_aa(bool mainRenderFunction, Viewport& viewp
                     m_GBuffer.bindFramebuffers({ outTexture }, "RGBA");
                     internal_pass_final(viewport, sceneTexture);
                     std::swap(sceneTexture, outTexture);
-                    const auto winSize              = glm::vec2{ Resources::getWindowSize() };
+                    const auto gbufferSize          = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
                     const auto& viewportDimensions  = viewport.getViewportDimensions();
-                    const glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / winSize.x, 1.0f / winSize.y, winSize.x, winSize.y);
+
+
+                    const glm::vec4 SMAA_PIXEL_SIZE = glm::vec4(1.0f / gbufferSize.x, 1.0f / gbufferSize.y, gbufferSize.x, gbufferSize.y);
                     SMAA::STATIC_SMAA.passEdge(m_GBuffer, SMAA_PIXEL_SIZE, viewport, sceneTexture, outTexture, m_Renderer);
                     SMAA::STATIC_SMAA.passBlend(m_GBuffer, SMAA_PIXEL_SIZE, viewport, outTexture, m_Renderer);
                     m_GBuffer.bindFramebuffers({ outTexture }, "RGBA");
@@ -1685,8 +1742,8 @@ void DeferredPipeline::internal_pass_final(Viewport& viewport, GBufferType::Type
     const auto& viewportDimensions = viewport.getViewportDimensions();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::DeferredFinal].get<ShaderProgram>());
 
-    Engine::Renderer::sendUniform1Safe("HasBloom", (int)Bloom::STATIC_BLOOM.m_Bloom_Active);
-    Engine::Renderer::sendUniform1Safe("HasFog", (int)Fog::STATIC_FOG.fog_active);
+    Engine::Renderer::sendUniform1Safe("HasBloom", int(Bloom::STATIC_BLOOM.m_Bloom_Active));
+    Engine::Renderer::sendUniform1Safe("HasFog", int(Fog::STATIC_FOG.fog_active));
 
     Engine::priv::OpenGLBindTextureRAII SceneTexture{ "SceneTexture", m_GBuffer.getTexture(sceneTexture), 0, true };
     Engine::priv::OpenGLBindTextureRAII gBloomMap{ "gBloomMap", m_GBuffer.getTexture(GBufferType::Bloom), 1, true };
@@ -1809,10 +1866,12 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
     auto& scene                    = viewport.getScene();
     const auto& sceneAmbient       = scene.getAmbientColor();
     const auto& viewportDimensions = viewport.getViewportDimensions();
-    const auto winSize             = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
 
     internal_render_per_frame_preparation(viewport, camera);
     internal_init_frame_gbuffer(viewport, camera);
+
+    const auto gbufferSize = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
+
     if (mainRenderFunction) {
 #pragma region Camera UBO
         if (m_UBOCamera && Engine::priv::OpenGLState::constants.supportsUBO()) {
@@ -1822,7 +1881,7 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
             const float logDepthBufferFCoeff  = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
             m_CameraUBODataPtr->CameraProj    = camera.getProjection();
             m_CameraUBODataPtr->CameraInvProj = camera.getProjectionInverse();
-            m_CameraUBODataPtr->ScreenInfo    = glm::vec4{ winSize.x, winSize.y, viewportDimensions.z, viewportDimensions.w };
+            m_CameraUBODataPtr->ScreenInfo    = glm::vec4{ gbufferSize.x, gbufferSize.y, viewportDimensions.z, viewportDimensions.w };
             m_CameraUBODataPtr->RendererInfo1 = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
             m_CameraUBODataPtr->RendererInfo2 = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
             //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces
@@ -1992,7 +2051,9 @@ void DeferredPipeline::renderBackgroundTriangle(const glm::vec2& position, const
 }
 
 void DeferredPipeline::renderFullscreenTriangle(float depth, float inNear, float inFar) {
-    const glm::vec2 winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    const auto winSize      = glm::vec2{ Engine::Resources::getWindowSize() };
+    const auto gbufferSize  = glm::vec2{m_GBuffer.width(), m_GBuffer.height() };
+
     auto modelMatrix        = glm::mat4{ 1.0f };
     modelMatrix             = glm::translate(modelMatrix, glm::vec3{ 0.0f, 0.0f, 0.0f - depth });
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
@@ -2000,11 +2061,36 @@ void DeferredPipeline::renderFullscreenTriangle(float depth, float inNear, float
     m_FullscreenTriangle.render();
 }
 void DeferredPipeline::renderFullscreenQuad(float x, float y, float width, float height, float depth, float inNear, float inFar) {
-    const glm::vec2 winSize = glm::vec2{ Engine::Resources::getWindowSize() };
-    auto modelMatrix = glm::mat4{ 1.0f };
-    modelMatrix = glm::translate(modelMatrix, glm::vec3{ x, y, 0.0f - depth });
-    modelMatrix = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
+    const auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    if (width <= 0.0f)
+        width = winSize.x;
+    if (height <= 0.0f)
+        height = winSize.y;
+    
+
+    const auto gbufferSize = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
+
+
+    auto modelMatrix       = glm::mat4{ 1.0f };
+    modelMatrix            = glm::translate(modelMatrix, glm::vec3{ x, y, 0.0f - depth });
+    modelMatrix            = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
     Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
-    Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y, inNear, inFar));
+    Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y, inNear, inFar));  //todo: change to gbufferSize?
+    m_FullscreenQuad.render();
+}
+void DeferredPipeline::renderFullscreenQuadCentered(float width, float height, float depth, float inNear, float inFar) {
+    const auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
+    const auto gbufferSize = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
+
+    if (width <= 0.0f)
+        width = gbufferSize.x;
+    if (height <= 0.0f)
+        height = gbufferSize.y;
+
+    auto modelMatrix = glm::mat4{ 1.0f };
+    modelMatrix = glm::translate(modelMatrix, glm::vec3{ (gbufferSize.x / 2.0f) - (width / 2.0f), (gbufferSize.y / 2.0f) - (height / 2.0f), 0.0f - depth });
+    modelMatrix = glm::scale(modelMatrix, glm::vec3{ width / gbufferSize.x, height / gbufferSize.y, 1.0f });
+    Engine::Renderer::sendUniformMatrix4Safe("Model", modelMatrix);
+    Engine::Renderer::sendUniformMatrix4Safe("VP", glm::ortho(0.0f, winSize.x, 0.0f, winSize.y, inNear, inFar)); //todo: change to gbufferSize?
     m_FullscreenQuad.render();
 }

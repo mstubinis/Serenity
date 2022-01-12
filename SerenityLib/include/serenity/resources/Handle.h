@@ -32,6 +32,7 @@ class Handle final {
         [[nodiscard]] inline constexpr uint32_t index() const { return m_Index; }
         [[nodiscard]] inline constexpr uint32_t version() const { return m_Version; }
         [[nodiscard]] inline constexpr uint32_t type() const { return m_Type; }
+        [[nodiscard]] inline std::string toString() const { return std::to_string(m_Index) + ", " + std::to_string(m_Version) + ", " + std::to_string(m_Type); }
         inline explicit constexpr operator uint32_t() const noexcept { return m_Type << 27 | m_Version << 12 | m_Index; }
         inline constexpr operator bool() const noexcept { return !null(); }
         

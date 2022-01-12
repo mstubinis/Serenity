@@ -9,39 +9,39 @@ class  DirectionalLight;
 #include <vector>
 
 namespace Engine::priv {
-    class GLDeferredDirectionalLightShadowInfo final : public DirectionalLightShadowData {
+    class GLDeferredDirectionalLightShadowInfo : public DirectionalLightShadowData {
         private:
             bool initGL();
             void calculateSplits(const Camera&);
         public:
-            std::array<GLuint, (size_t)DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS>  m_DepthTexture        = { 0 };
-            std::vector<glm::mat4>                                                   m_BufferLightMatrices = std::vector<glm::mat4>(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS);
-            std::vector<float>                                                       m_BufferVClips        = std::vector<float>(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS);
-            GLuint                                                                   m_FBO                 = 0;
+            std::array<GLuint, DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS> m_DepthTexture = { 0 };
+            GLuint                                                          m_FBO          = 0;
 
 
             GLDeferredDirectionalLightShadowInfo() = delete;
-            GLDeferredDirectionalLightShadowInfo(const Camera&, const DirectionalLight&, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType, float nearFactor, float farFactor);
+            GLDeferredDirectionalLightShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType, float nearFactor, float farFactor);
             ~GLDeferredDirectionalLightShadowInfo();
 
-            void bindUniformsReading(int textureStartSlot, const Camera&) noexcept;
+            void bindUniformsReading(int textureStartSlot) noexcept;
             void bindUniformsWriting(int cascadeMapIndex);
-            void calculateOrthographicProjections(const Camera&, const DirectionalLight&);
+            void calculateOrthographicProjections(const Camera&, const glm::vec3& direction);
             void setShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType, float nearFactor, float farFactor);
     };
-    class GLDeferredSunLightShadowInfo final : public SunLightShadowData {
+    class GLDeferredSunLightShadowInfo : public GLDeferredDirectionalLightShadowInfo {
+        public:
+            GLDeferredSunLightShadowInfo() = delete;
+            GLDeferredSunLightShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType, float nearFactor, float farFactor);
+    };
+    class GLDeferredPointLightShadowInfo : public PointLightShadowData {
 
     };
-    class GLDeferredPointLightShadowInfo final : public PointLightShadowData {
+    class GLDeferredProjectionLightShadowInfo : public ProjectionLightShadowData {
 
     };
-    class GLDeferredProjectionLightShadowInfo final : public ProjectionLightShadowData {
+    class GLDeferredRodLightShadowInfo : public RodLightShadowData {
 
     };
-    class GLDeferredRodLightShadowInfo final : public RodLightShadowData {
-
-    };
-    class GLDeferredSpotLightShadowInfo final : public SpotLightShadowData {
+    class GLDeferredSpotLightShadowInfo : public SpotLightShadowData {
 
     };
 

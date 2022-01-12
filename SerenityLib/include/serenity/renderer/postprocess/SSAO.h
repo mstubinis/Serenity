@@ -40,8 +40,7 @@ namespace Engine::priv {
         SSAOLevel         m_SSAOLevel = SSAOLevel::Medium;
         int               m_NumSamples = 8;
         int               m_BlurNumPasses = 1;
-        float             m_BlurRadius = 0.66f;
-        float             m_BlurStrength = 0.48f;
+        float             m_BlurStrength = 1.00f;
         float             m_Scale = 1.0;
         float             m_Intensity = 2.1f;
         float             m_Bias = 0.018f;
@@ -62,8 +61,6 @@ namespace Engine::Renderer::ssao {
 
     void enableBlur(bool blurEnabled = true) noexcept;
     void disableBlur() noexcept;
-    [[nodiscard]] float getBlurRadius() noexcept;
-    void setBlurRadius(float blurRadius) noexcept;
     [[nodiscard]] float getBlurStrength() noexcept;
     void setBlurStrength(float blurStrength) noexcept;
     [[nodiscard]] float getIntensity() noexcept;

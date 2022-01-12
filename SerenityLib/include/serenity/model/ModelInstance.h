@@ -49,7 +49,6 @@ class ModelInstance final : public Observer {
     private:
         glm::mat4                                         m_ModelMatrix         = glm::mat4{ 1.0f };
         glm::quat                                         m_Orientation         = glm::quat{ 1.0f, 0.0f, 0.0f, 0.0f };
-        glm::vec3                                         m_Position            = glm::vec3{ 0.0f, 0.0f, 0.0f };
         glm::vec3                                         m_Scale               = glm::vec3{ 1.0f, 1.0f, 1.0f };
         BindFunc                                          m_CustomBindFunctor   = [](ModelInstance*, const Engine::priv::RenderModule*) {};
         UnbindFunc                                        m_CustomUnbindFunctor = [](ModelInstance*, const Engine::priv::RenderModule*) {};
@@ -84,7 +83,7 @@ class ModelInstance final : public Observer {
         static inline void setDefaultViewportFlag(uint32_t flag) noexcept { m_ViewportFlagDefault = flag; }
         static inline void setDefaultViewportFlag(ViewportFlag flag) noexcept { m_ViewportFlagDefault = flag; }
     public:
-        ModelInstance(Entity, Handle mesh, Handle material, Handle shaderProgram = Handle{});
+        ModelInstance(Entity, Handle mesh, Handle material, Handle shaderProgram = {});
 
         ModelInstance(const ModelInstance&)                 = delete;
         ModelInstance& operator=(const ModelInstance&)      = delete;
@@ -130,7 +129,7 @@ class ModelInstance final : public Observer {
         [[nodiscard]] inline const Engine::color_vector_4& getGodRaysColor() const noexcept { return m_GodRaysColor; }
         [[nodiscard]] inline const glm::mat4& getModelMatrix() const noexcept { return m_ModelMatrix; }
         [[nodiscard]] inline const glm::vec3& getScale() const noexcept { return m_Scale; }
-        [[nodiscard]] inline const glm::vec3& getPosition() const noexcept { return m_Position; }
+        [[nodiscard]] inline glm::vec3 getPosition() const noexcept { return { m_ModelMatrix[3][0], m_ModelMatrix [3][1], m_ModelMatrix [3][2] }; }
         [[nodiscard]] inline const glm::quat& getRotation() const noexcept { return m_Orientation; }
         [[nodiscard]] inline Handle getShaderProgram() const noexcept { return m_ShaderProgramHandle; }
         [[nodiscard]] inline Handle getMesh() const noexcept { return m_MeshHandle; }

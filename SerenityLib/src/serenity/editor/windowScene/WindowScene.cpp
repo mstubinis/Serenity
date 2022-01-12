@@ -198,7 +198,11 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
                             ImGui::SameLine();
                             
                             ImGui::Separator();
-                            ImGui::InputFloat3("position", &instance.m_Position[0]);
+
+                            auto pos = instance.getPosition();
+                            ImGui::InputFloat3("position", &pos[0]);
+                            instance.setPosition(pos);
+
                             ImGui::InputFloat4("rotation", &instance.m_Orientation[0]);
                             ImGui::InputFloat3("scale", &instance.m_Scale[0]);
                             ImGui::Text(std::string("Radius: " + std::to_string(instance.m_Radius)).c_str());
@@ -492,7 +496,6 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
         ImGui::SliderFloat("SSAO Intensity",     &Engine::priv::SSAO::STATIC_SSAO.m_Intensity,       0.0f,  10.0f);
         ImGui::SliderFloat("SSAO Range Scale",   &Engine::priv::SSAO::STATIC_SSAO.m_RangeCheckScale, 0.0f,  3.0f);
         ImGui::SliderInt("SSAO Samples",         &Engine::priv::SSAO::STATIC_SSAO.m_NumSamples,      0,     SSAO_MAX_KERNEL_SIZE);
-        ImGui::SliderFloat("SSAO Blur Radius",   &Engine::priv::SSAO::STATIC_SSAO.m_BlurRadius,      0.0f,  10.0f);
         ImGui::SliderFloat("SSAO Blur Strength", &Engine::priv::SSAO::STATIC_SSAO.m_BlurStrength,    0.0f,  10.0f);
         ImGui::SliderInt("SSAO Blur Passes",     &Engine::priv::SSAO::STATIC_SSAO.m_BlurNumPasses,   0,     4);
         ImGui::Separator();

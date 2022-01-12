@@ -13,10 +13,35 @@ ModelInstanceAnimation::ModelInstanceAnimation(MeshNodeData& nodeData, Animation
     , m_Skeleton       { &skeleton }
     , m_NodeData       { &nodeData }
     , m_StartTime      { startTime }
-    , m_EndTime        { (endTime < 0.0f) ? animData.duration() : endTime }
+    , m_EndTime        { (endTime <= 0.0f) ? animData.duration() : endTime }
     , m_NumBones       { skeleton.numBones() }
     , m_RequestedLoops { requestedLoops }
 {}
+ModelInstanceAnimation::ModelInstanceAnimation(ModelInstanceAnimation&& other) noexcept
+    : m_AnimationData { std::exchange(other.m_AnimationData, nullptr) }
+    , m_Skeleton      { std::exchange(other.m_Skeleton, nullptr) }
+    , m_NodeData      { std::exchange(other.m_NodeData, nullptr) }
+    , m_CurrentTime   { std::move(other.m_CurrentTime) }
+    , m_StartTime     { std::move(other.m_StartTime) }
+    , m_EndTime       { std::move(other.m_EndTime) }
+    , m_NumBones      { std::move(other.m_NumBones) }
+    , m_CurrentLoops  { std::move(other.m_CurrentLoops) }
+    , m_RequestedLoops{ std::move(other.m_RequestedLoops) }
+{}
+ModelInstanceAnimation& ModelInstanceAnimation::operator=(ModelInstanceAnimation&& other) noexcept {
+    if (this != &other) {
+        m_AnimationData  = std::exchange(other.m_AnimationData, nullptr);
+        m_Skeleton       = std::exchange(other.m_Skeleton, nullptr);
+        m_NodeData       = std::exchange(other.m_NodeData, nullptr);
+        m_CurrentTime    = std::move(other.m_CurrentTime);
+        m_StartTime      = std::move(other.m_StartTime);
+        m_EndTime        = std::move(other.m_EndTime);
+        m_NumBones       = std::move(other.m_NumBones);
+        m_CurrentLoops   = std::move(other.m_CurrentLoops);
+        m_RequestedLoops = std::move(other.m_RequestedLoops);
+    }
+    return *this;
+}
 void ModelInstanceAnimation::update(const float dt, std::vector<glm::mat4>& transforms) {
     m_CurrentTime  += dt;
     transforms.resize(m_NumBones, glm::mat4{ 1.0f });
@@ -55,9 +80,9 @@ void ModelInstanceAnimationContainer::update(const float dt) {
         return;
     }
     m_Transforms.clear();
-    std::for_each(std::begin(m_Animation_Instances), std::end(m_Animation_Instances), [this, dt](auto& animation) {
+    for (auto& animation : m_Animation_Instances) {
         animation.update(dt, m_Transforms);
-    });
+    }
     //cleanup any completed animations
     std::erase_if(m_Animation_Instances, [](const auto& anim) {
         return anim.m_RequestedLoops > 0 && anim.m_CurrentLoops >= anim.m_RequestedLoops;
