@@ -227,14 +227,14 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
                 if (camera && ImGui::TreeNode("ComponentCamera")) {
                     if (camera->getType() == ComponentCamera::CameraType::Perspective) {
                         ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Perspective Camera");
-                        ImGui::SliderFloat("Angle", &camera->m_Angle, 0.0f, glm::radians(180.0f));
-                        ImGui::InputFloat("AspectRatio", &camera->m_AspectRatio);
+                        ImGui::SliderFloat("Angle", &camera->m_AngleOrLeft, 0.0f, glm::radians(180.0f));
+                        ImGui::InputFloat("AspectRatio", &camera->m_AspectRatioOrRight);
                         ImGui::InputFloat("Near", &camera->m_NearPlane);
                         ImGui::InputFloat("Far", &camera->m_FarPlane);
                     } else {
                         ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Orthographic Camera");
-                        ImGui::InputFloat("Left", &camera->m_Left);
-                        ImGui::InputFloat("Right", &camera->m_Right);
+                        ImGui::InputFloat("Left", &camera->m_AngleOrLeft);
+                        ImGui::InputFloat("Right", &camera->m_AspectRatioOrRight);
                         ImGui::InputFloat("Top", &camera->m_Top);
                         ImGui::InputFloat("Bottom", &camera->m_Bottom);
                         ImGui::InputFloat("Near", &camera->m_NearPlane);
@@ -451,11 +451,15 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
         if (lighting_model_current == LightingAlgorithm::Basic) {
             auto scene = Engine::Resources::getCurrentScene();
             if (scene) {
-                glm::vec3 ambientColor = Engine::Resources::getCurrentScene()->getAmbientColor();
+                glm::vec3 ambientColor = scene->getAmbientColor();
                 ImGui::ColorEdit3("Ambient Color", &ambientColor[0]);
                 scene->setAmbientColor(ambientColor[0], ambientColor[1], ambientColor[2]);
             }
         }
+        ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Shadow Settings");
+        ImGui::SliderFloat("Z Mult Factor", &renderer.m_ShadowZMultFactor, 0.0f, 10.0f);
+        ImGui::SliderFloat("Clipspace offset", &renderer.m_ShadowClipspaceOffset, 0.0f, 3.0f);
+
         ImGui::Separator();
     }
     //hdr

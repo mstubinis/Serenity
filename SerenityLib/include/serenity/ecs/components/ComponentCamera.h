@@ -5,13 +5,10 @@
 class Camera;
 class ComponentModel;
 class ComponentCamera;
+class SystemComponentCamera;
 namespace Engine::priv {
     class  EditorWindowSceneFunctions;
 };
-namespace Engine::priv::Culling {
-    class  SphereIntersectTest;
-    class  PointIntersectTest;
-}
 
 #include <serenity/dependencies/glm.h>
 #include <serenity/ecs/ECS.h>
@@ -25,34 +22,25 @@ namespace Engine::priv {
 class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
     friend class  Camera;
     friend class  ComponentModel;
+    friend class  SystemComponentCamera;
     friend struct Engine::priv::ComponentCamera_Functions;
     friend class  Engine::priv::EditorWindowSceneFunctions;
-    friend class  Engine::priv::Culling::SphereIntersectTest;
-    friend class  Engine::priv::Culling::PointIntersectTest;
     public:
         enum class CameraType : uint8_t {
             Perspective,
             Orthographic,
         };
     private:
-        glm::mat4                m_ViewMatrix        = glm::mat4{ 1.0f };
-        glm::mat4                m_ProjectionMatrix  = glm::mat4{ 1.0f };
-
+        glm::mat4                m_ViewMatrix          = glm::mat4{ 1.0f };
+        glm::mat4                m_ProjectionMatrix    = glm::mat4{ 1.0f };
         std::array<glm::vec4, 6> m_FrustumPlanes;
-
-        float                    m_NearPlane         = 0.01f;
-        float                    m_FarPlane          = 2000.0f;
-        float                    m_Bottom            = 0.0f;
-        float                    m_Top               = 0.0f;
-        union { 
-			float                m_Angle             = 60.0f;
-			float                m_Left; 
-		};
-        union { 
-			float                m_AspectRatio       = 1.0f;
-			float                m_Right; 
-		};
-        CameraType               m_Type              = CameraType::Perspective;
+        float                    m_NearPlane           = 0.01f;
+        float                    m_FarPlane            = 2000.0f;
+        float                    m_Bottom              = 0.0f;
+        float                    m_Top                 = 0.0f;
+	    float                    m_AngleOrLeft         = 60.0f;
+		float                    m_AspectRatioOrRight  = 1.0f;
+        CameraType               m_Type                = CameraType::Perspective;
 
         ComponentCamera() = delete;
     public:
@@ -72,8 +60,8 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         inline void setProjectionMatrix(const glm::mat4& projectionMatrix) noexcept { m_ProjectionMatrix = projectionMatrix; }
 
         [[nodiscard]] inline constexpr CameraType getType() const noexcept { return m_Type; }
-        [[nodiscard]] inline constexpr float getAngle() const noexcept { return m_Angle; }
-        [[nodiscard]] inline constexpr float getAspectRatio() const noexcept { return m_AspectRatio; }
+        [[nodiscard]] inline constexpr float getAngle() const noexcept { return m_AngleOrLeft; }
+        [[nodiscard]] inline constexpr float getAspectRatio() const noexcept { return m_AspectRatioOrRight; }
         [[nodiscard]] inline constexpr float getNear() const noexcept { return m_NearPlane; }
         [[nodiscard]] inline constexpr float getFar() const noexcept { return m_FarPlane; }
 
@@ -90,7 +78,7 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         [[nodiscard]] inline glm::mat4 getViewProjectionInverse() const noexcept { return glm::inverse(m_ProjectionMatrix * m_ViewMatrix); }
         [[nodiscard]] inline glm::vec3 getViewVector() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2])); }
 
-        [[nodiscard]] inline std::array<glm::vec4, 6>& getFrustrumPlanes() noexcept { return m_FrustumPlanes; }
+        [[nodiscard]] inline const std::array<glm::vec4, 6>& getFrustrumPlanes() const noexcept { return m_FrustumPlanes; }
         [[nodiscard]] inline glm::vec3 getRight() const noexcept { return glm::normalize(glm::vec3(m_ViewMatrix[0][0], m_ViewMatrix[1][0], m_ViewMatrix[2][0])); }
 };
 

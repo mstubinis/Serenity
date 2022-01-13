@@ -13,15 +13,16 @@ void Engine::priv::opengl::glsl::Shadows::convert(std::string& code, uint32_t ve
 float ShadowCalculationLightingShader(vec3 PxlViewPos, vec3 LightDir, vec3 PxlNormal, vec4 ShadowPxlWorldPos) {
     float shadow = 1.0;
     for (int i = 0; i < NUM_CASCADES; i++) {
+        int iNext = i + 1;
         float currDepth = abs(PxlViewPos.z);
-        if (currDepth < uCascadeEndClipSpace[i]) {
+        if (currDepth < uCascadeEndClipSpace[iNext]) {
             vec4 FragPosLightSpace = uLightMatrix[i] * ShadowPxlWorldPos;
             shadow = ShadowCalculation(i, FragPosLightSpace, PxlNormal, LightDir);
             if (i < NUM_CASCADES - 1) {
-                float fade = clamp((1.0 - currDepth / uCascadeEndClipSpace[i]) / 0.05, 0.0, 1.0);
+                float fade = clamp((1.0 - currDepth / uCascadeEndClipSpace[iNext]) / 0.05, 0.0, 1.0);
                 if (fade < 1.0) {
-                    vec4 NextFragPosLightSpace = uLightMatrix[i + 1] * ShadowPxlWorldPos;
-                    float nextShadow = ShadowCalculation(i + 1, NextFragPosLightSpace, PxlNormal, LightDir);
+                    vec4 NextFragPosLightSpace = uLightMatrix[iNext] * ShadowPxlWorldPos;
+                    float nextShadow = ShadowCalculation(iNext, NextFragPosLightSpace, PxlNormal, LightDir);
                     shadow = mix(nextShadow, shadow, fade);
                 }
             }
@@ -37,10 +38,11 @@ float ShadowCalculationLightingShader(vec3 PxlViewPos, vec3 LightDir, vec3 PxlNo
 
     if (ShaderHelper::lacksDefinition(code, "ShadowCalculation(", "float ShadowCalculation(")) {
         std::string shadowCode = "const int NUM_CASCADES = " + std::to_string(int(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS)) + ";\n";
+        shadowCode += "const int NUM_CASCADES_DISTS = " + std::to_string(int(DIRECTIONAL_LIGHT_NUM_CASCADING_DISTANCES)) + ";\n";
    //         ViewportUVCalculation(projCoords.xy), 
         shadowCode += R"(
 uniform sampler2D uShadowTexture[NUM_CASCADES];
-uniform float uCascadeEndClipSpace[NUM_CASCADES];
+uniform float uCascadeEndClipSpace[NUM_CASCADES_DISTS];
 uniform int uShadowEnabled;
 uniform vec2 uShadowTexelSize;
 float ShadowCalculation(int inCascadeIndex, vec4 inFragPosLightSpace, vec3 inNormal, vec3 inLightDir){

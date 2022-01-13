@@ -31,6 +31,7 @@ namespace Engine::Math {
     [[nodiscard]] bool IsNear(glm::vec3& v1, glm::vec3& v2, float threshold) noexcept;
 
     void extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection, std::array<glm::vec4, 6>& outPlanes);
+    void extractViewFrustumPlanesHartmannGribbs(Camera&);
 
     inline void Float32From16(float* out, const uint16_t in) noexcept { *out = glm::unpackHalf1x16(in); }
     inline void Float16From32(uint16_t* out, const float in) noexcept { *out = glm::packHalf1x16(in); }

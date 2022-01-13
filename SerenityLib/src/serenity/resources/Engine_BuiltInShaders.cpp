@@ -1441,7 +1441,9 @@ void main() {
 }
 */
 Engine::priv::EShaders::shadow_depth_frag = R"(
-void main(){}
+void main() {
+    //gl_FragDepth = gl_FragCoord.z;
+}
 )";
 #pragma endregion
 }

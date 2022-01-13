@@ -177,10 +177,10 @@ void Camera::setLocalPosition(const glm_vec3& position) {
 }
 
 float Camera::getAngle() const noexcept {
-    return getComponent<ComponentCamera>()->m_Angle; 
+    return getComponent<ComponentCamera>()->m_AngleOrLeft; 
 }
 float Camera::getAspectRatio() const noexcept {
-    return getComponent<ComponentCamera>()->m_AspectRatio; 
+    return getComponent<ComponentCamera>()->m_AspectRatioOrRight; 
 }
 float Camera::getNear() const noexcept {
     return getComponent<ComponentCamera>()->m_NearPlane; 

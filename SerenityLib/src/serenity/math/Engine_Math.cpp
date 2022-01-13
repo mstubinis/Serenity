@@ -3,6 +3,7 @@
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/scene/Camera.h>
 #include <serenity/scene/Scene.h>
+#include <serenity/ecs/components/ComponentCamera.h>
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -204,6 +205,11 @@ void Math::extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProject
     }
     //https://www.gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf
 }
+void Math::extractViewFrustumPlanesHartmannGribbs(Camera& camera) {
+    const auto& frustumPlanes = camera.getComponent<ComponentCamera>()->getFrustrumPlanes();
+    Math::extractViewFrustumPlanesHartmannGribbs(camera.getViewProjection(), const_cast<std::array<glm::vec4, 6>&>(frustumPlanes));
+}
+
 glm::quat Math::toGLM(const btQuaternion& BTquat) {
     return glm::quat{ (float)BTquat.getW(), (float)BTquat.getX(), (float)BTquat.getY(), (float)BTquat.getZ() };
 }

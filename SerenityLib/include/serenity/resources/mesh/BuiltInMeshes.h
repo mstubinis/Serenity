@@ -3,25 +3,31 @@
 #define ENGINE_MESH_BUILT_IN_MESHES_H
 
 #include <serenity/resources/Handle.h>
+#include <serenity/system/Macros.h>
 #include <array>
 
 namespace Engine::priv {
     class BuiltInMeshses final {
-        enum class BuiltInMeshEnum : unsigned int {
-            PointLight,
-            SpotLight,
-            RodLight,
-            ProjectionLight,
-            Triangle,
-            Cube,
-            Plane,
-            Plane2D,
-            Font,
-            Particle,
-        _TOTAL};
+        class BuiltInMeshEnum {
+            public:
+                enum Type : uint32_t {
+                    PointLight,
+                    SpotLight,
+                    RodLight,
+                    ProjectionLight,
+                    Triangle,
+                    Cube,
+                    Plane,
+                    Plane2D,
+                    Font,
+                    Particle,
+                    _TOTAL
+                };
+                BUILD_ENUM_CLASS_MEMBERS(BuiltInMeshEnum, Type)
+        };
 
         private:
-            std::array<Handle, (size_t)BuiltInMeshEnum::_TOTAL> m_BuiltInMeshes;
+            std::array<Handle, BuiltInMeshEnum::_TOTAL> m_BuiltInMeshes;
 
             bool build_point_light_mesh();
             bool build_spot_light_mesh();

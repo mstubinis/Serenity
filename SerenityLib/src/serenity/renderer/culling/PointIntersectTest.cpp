@@ -3,43 +3,45 @@
 #include <serenity/scene/Camera.h>
 #include <serenity/math/Engine_Math.h>
 
-int Engine::priv::Culling::PointIntersectTest::pointIntersectTest(const glm_vec3& position, const std::array<glm::vec4, 6>& frustumPlanes) {
-    const auto zero = (decimal)0.0;
-    for (uint32_t i = 0; i < frustumPlanes.size(); ++i) {
-        const auto d = frustumPlanes[i].x * position.x + frustumPlanes[i].y * position.y + frustumPlanes[i].z * position.z + frustumPlanes[i].w;
-        if (d > zero) {
-            return 0; //outside
+namespace {
+    int internal_pointIntersectTest(const glm_vec3& position, const std::array<glm::vec4, 6>& frustumPlanes) {
+        for (const auto& frustPlane : frustumPlanes) {
+            const auto d = frustPlane.x * position.x + frustPlane.y * position.y + frustPlane.z * position.z + frustPlane.w;
+            if (d > decimal(0.0)) {
+                return 0; //outside
+            }
         }
+        return 1; //inside
     }
-    return 1; //inside
+    int internal_pointIntersectTest(const glm_vec3& position, const Camera& camera) {
+        return internal_pointIntersectTest(position, camera.getComponent<ComponentCamera>()->getFrustrumPlanes());
+    }
+    int internal_pointIntersectTest(const glm_vec3& position, const ComponentCamera& componentCamera) {
+        return internal_pointIntersectTest(position, componentCamera.getFrustrumPlanes());
+    }
 }
-int Engine::priv::Culling::PointIntersectTest::pointIntersectTest(const glm_vec3& position, const Camera& camera) {
-    return Engine::priv::Culling::PointIntersectTest::pointIntersectTest(position, camera.getComponent<ComponentCamera>()->m_FrustumPlanes);
-}
-int Engine::priv::Culling::PointIntersectTest::pointIntersectTest(const glm_vec3& position, const ComponentCamera& componentCamera) {
-    return Engine::priv::Culling::PointIntersectTest::pointIntersectTest(position, componentCamera.m_FrustumPlanes);
-}
+
 int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const std::array<glm::vec4, 6>& frustumPlanes) {
-    return Engine::priv::Culling::PointIntersectTest::pointIntersectTest(position, frustumPlanes);
+    return internal_pointIntersectTest(position, frustumPlanes);
 }
 int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const Camera& camera) {
-    return Engine::priv::Culling::PointIntersectTest::pointIntersectTest(position, camera);
+    return internal_pointIntersectTest(position, camera);
 }
 int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const Camera* const camera) {
-    return camera ? Engine::priv::Culling::PointIntersectTest::pointIntersectTest(position, *camera) : 1;
+    return camera ? internal_pointIntersectTest(position, *camera) : 1;
 }
 int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const ComponentCamera& componentCamera) {
-    return Engine::priv::Culling::PointIntersectTest::pointIntersectTest(position, componentCamera);
+    return internal_pointIntersectTest(position, componentCamera);
 }
 
 
 
 int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
-    glm::mat4 viewProjMatrix = projectionMatrix * viewMatrix;
-    return Engine::priv::Culling::pointIntersectTest(position, viewProjMatrix);
+    const glm::mat4 viewProjMatrix = projectionMatrix * viewMatrix;
+    return pointIntersectTest(position, viewProjMatrix);
 }
 int Engine::priv::Culling::pointIntersectTest(const glm_vec3& position, const glm::mat4& viewProjectionMatrix) {
     std::array<glm::vec4, 6> planes;
     Engine::Math::extractViewFrustumPlanesHartmannGribbs(viewProjectionMatrix, planes);
-    return Engine::priv::Culling::pointIntersectTest(position, planes);
+    return pointIntersectTest(position, planes);
 }

@@ -1319,12 +1319,8 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
     }
     //if resizing gbuffer
         m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
-        Engine::Renderer::setViewport(0.0f, 0.0f, m_GBuffer.width(), m_GBuffer.height());
     //else
-        //Engine::Renderer::setViewport(viewportDimensions); //m_GBuffer.bindFramebuffers() already does this
-
-
-    //glScissor(viewportDimensions.x, viewportDimensions.y, viewportDimensions.z, viewportDimensions.w);
+        //glScissor(viewportDimensions.x, viewportDimensions.y, viewportDimensions.z, viewportDimensions.w);
 
     m_2DProjectionMatrix = glm::ortho(0.0f, viewportDimensions.z, 0.0f, viewportDimensions.w, 0.003f, 3000.0f); //TODO: might have to recheck this
 
@@ -1352,7 +1348,7 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
         if (data->m_Enabled) {
             data->calculateOrthographicProjections(camera, directionalLight->getDirection());
             Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
-            for (int i = 0; i < int(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS); ++i) {
+            for (int i = 0; i < int(data->m_LightSpaceMatrices.size()); ++i) {
                 data->bindUniformsWriting(i);
                 const auto& viewProj = data->m_LightSpaceMatrices[i];
 
@@ -1370,7 +1366,7 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
         if (data->m_Enabled) {
             data->calculateOrthographicProjections(camera, glm::normalize(sunLight->getPosition() - camera.getPosition()));
             Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
-            for (int i = 0; i < int(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS); ++i) {
+            for (int i = 0; i < int(data->m_LightSpaceMatrices.size()); ++i) {
                 data->bindUniformsWriting(i);
                 const auto& viewProj = data->m_LightSpaceMatrices[i];
 
@@ -1483,7 +1479,7 @@ void DeferredPipeline::internal_pass_ssao(Viewport& viewport, Camera& camera) {
 
         if (SSAO::STATIC_SSAO.m_DoBlur) {
             Engine::Renderer::GLDisablei(GL_BLEND, 0); //yes this is absolutely needed
-            for (uint32_t i = 0; i < SSAO::STATIC_SSAO.m_BlurNumPasses; ++i) {
+            for (int i = 0; i < SSAO::STATIC_SSAO.m_BlurNumPasses; ++i) {
                 m_GBuffer.bindFramebuffers({ framebuffer2 }, "A", false);
                 SSAO::STATIC_SSAO.passBlur(m_GBuffer, viewport, framebuffer1, m_Renderer);
                 m_GBuffer.bindFramebuffers({ framebuffer1 }, "A", false);

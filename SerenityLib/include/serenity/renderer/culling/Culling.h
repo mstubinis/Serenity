@@ -24,7 +24,6 @@ namespace Engine::priv::Culling {
     void cull(const Viewport* const, const std::vector<ModelInstance*>&);
     void cull(const std::vector<ModelInstance*>&);
 
-    const std::array<glm::vec4, 6>& getFrustumPlanes(const Camera& camera);
     std::array<glm::vec4, 6> getFrustumPlanes(const glm::mat4& viewProjectionMatrix);
 }
 

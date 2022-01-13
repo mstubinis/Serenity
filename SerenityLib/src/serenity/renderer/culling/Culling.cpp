@@ -37,7 +37,7 @@ namespace {
 };
 
 void Engine::priv::Culling::cull(const Camera* const camera, const Viewport* const viewport, const std::vector<ModelInstance*>& inModelInstances) {
-    const auto planes = Engine::priv::Culling::getFrustumPlanes(*camera);
+    const auto& planes = camera->getComponent<ComponentCamera>()->getFrustrumPlanes();
     cull_impl(inModelInstances, viewport, planes, camera, [](const glm_vec3& modelWorldPosition, ComponentModel* model, const auto& cameraOrMatrixOrPlanes, const Camera* const camera) {
         return all_passed(
             Engine::priv::Culling::sphereIntersectTest(modelWorldPosition, model->getRadius(), cameraOrMatrixOrPlanes) != 0,
@@ -75,9 +75,6 @@ void Engine::priv::Culling::cull(const Viewport* const viewport, const std::vect
 }
 void Engine::priv::Culling::cull(const std::vector<ModelInstance*>& inModelInstances) {
     Engine::priv::Culling::cull(nullptr, nullptr, inModelInstances);
-}
-const std::array<glm::vec4, 6>& Engine::priv::Culling::getFrustumPlanes(const Camera& camera) {
-    return camera.getComponent<ComponentCamera>()->getFrustrumPlanes();
 }
 std::array<glm::vec4, 6> Engine::priv::Culling::getFrustumPlanes(const glm::mat4& viewProjectionMatrix) {
     std::array<glm::vec4, 6> planes;

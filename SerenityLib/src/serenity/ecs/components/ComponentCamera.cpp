@@ -4,113 +4,95 @@
 
 void Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(ComponentCamera& component) noexcept {
     if (component.m_Type == ComponentCamera::CameraType::Perspective) {
-        component.m_ProjectionMatrix = glm::perspective(component.m_Angle, component.m_AspectRatio, component.m_NearPlane, component.m_FarPlane);
+        component.m_ProjectionMatrix = glm::perspective(component.m_AngleOrLeft, component.m_AspectRatioOrRight, component.m_NearPlane, component.m_FarPlane);
     } else {
-        component.m_ProjectionMatrix = glm::ortho(component.m_Left, component.m_Right, component.m_Bottom, component.m_Top, component.m_NearPlane, component.m_FarPlane);
+        component.m_ProjectionMatrix = glm::ortho(component.m_AngleOrLeft, component.m_AspectRatioOrRight, component.m_Bottom, component.m_Top, component.m_NearPlane, component.m_FarPlane);
     }
+    Engine::Math::extractViewFrustumPlanesHartmannGribbs(component.getViewProjection(), component.m_FrustumPlanes);
 }
 
 #pragma region Component
 
-/*
-        glm::mat4                m_ViewMatrix        = glm::mat4{ 1.0f };
-        glm::mat4                m_ProjectionMatrix  = glm::mat4{ 1.0f };
-        std::array<glm::vec4, 6> m_FrustumPlanes;
-        float                    m_NearPlane         = 0.01f;
-        float                    m_FarPlane          = 2000.0f;
-        float                    m_Bottom            = 0.0f;
-        float                    m_Top               = 0.0f;
-        union {
-            float                m_Angle             = 60.0f;
-            float                m_Left;
-        };
-        union {
-            float                m_AspectRatio       = 1.0f;
-            float                m_Right;
-        };
-        CameraType               m_Type              = CameraType::Perspective;
-*/
-
 ComponentCamera::ComponentCamera(Entity entity, float angleDegrees, float aspectRatio, float nearPlane, float farPlane) 
-    : m_NearPlane  { nearPlane }
-    , m_FarPlane   { farPlane }
-    , m_Angle      { glm::radians(angleDegrees) }
-    , m_AspectRatio{ aspectRatio }
-    , m_Type       { CameraType::Perspective }
+    : m_NearPlane         { nearPlane }
+    , m_FarPlane          { farPlane }
+    , m_AngleOrLeft       { glm::radians(angleDegrees) }
+    , m_AspectRatioOrRight{ aspectRatio }
+    , m_Type              { CameraType::Perspective }
 {
-    setProjectionMatrix(glm::perspective(m_Angle, m_AspectRatio, m_NearPlane, m_FarPlane));
+    setProjectionMatrix(glm::perspective(m_AngleOrLeft, m_AspectRatioOrRight, m_NearPlane, m_FarPlane));
     setViewMatrix(glm::lookAt(glm::vec3{ 0.0f }, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3{ 0.0f, 1.0f, 0.0f }));
 }
 ComponentCamera::ComponentCamera(Entity entity, float left, float right, float bottom, float top, float nearPlane, float farPlane) 
-    : m_NearPlane{ nearPlane }
-    , m_FarPlane{ farPlane }
-    , m_Bottom{ bottom }
-    , m_Top{ top }
-    , m_Left     { left }
-    , m_Right    { right }
-    , m_Type     { CameraType::Orthographic }
+    : m_NearPlane         { nearPlane }
+    , m_FarPlane          { farPlane }
+    , m_Bottom            { bottom }
+    , m_Top               { top }
+    , m_AngleOrLeft       { left }
+    , m_AspectRatioOrRight{ right }
+    , m_Type              { CameraType::Orthographic }
 {
-    setProjectionMatrix(glm::ortho(m_Left, m_Right, m_Bottom, m_Top, m_NearPlane, m_FarPlane));
+    setProjectionMatrix(glm::ortho(m_AngleOrLeft, m_AspectRatioOrRight, m_Bottom, m_Top, m_NearPlane, m_FarPlane));
     setViewMatrix(glm::lookAt(glm::vec3{ 0.0f }, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3{ 0.0f, 1.0f, 0.0f }));
 }
 ComponentCamera::ComponentCamera(const ComponentCamera& other) 
-    : m_ViewMatrix      { (other.m_ViewMatrix) }
-    , m_ProjectionMatrix{ (other.m_ProjectionMatrix) }
-    , m_FrustumPlanes   { (other.m_FrustumPlanes) }
-    , m_NearPlane       { (other.m_NearPlane) }
-    , m_FarPlane        { (other.m_FarPlane) }
-    , m_Bottom          { (other.m_Bottom) }
-    , m_Top             { (other.m_Top) }
-    , m_Angle           { (other.m_Angle) }
-    , m_AspectRatio     { (other.m_AspectRatio) }
-    , m_Type            { (other.m_Type) }
+    : m_ViewMatrix        { (other.m_ViewMatrix) }
+    , m_ProjectionMatrix  { (other.m_ProjectionMatrix) }
+    , m_FrustumPlanes     { (other.m_FrustumPlanes) }
+    , m_NearPlane         { (other.m_NearPlane) }
+    , m_FarPlane          { (other.m_FarPlane) }
+    , m_Bottom            { (other.m_Bottom) }
+    , m_Top               { (other.m_Top) }
+    , m_AngleOrLeft       { (other.m_AngleOrLeft) }
+    , m_AspectRatioOrRight{ (other.m_AspectRatioOrRight) }
+    , m_Type              { (other.m_Type) }
 {}
 ComponentCamera& ComponentCamera::operator=(const ComponentCamera& other) {
     if (&other != this) {
-        m_ViewMatrix       = (other.m_ViewMatrix);
-        m_ProjectionMatrix = (other.m_ProjectionMatrix);
-        m_FrustumPlanes    = (other.m_FrustumPlanes);
-        m_NearPlane        = (other.m_NearPlane);
-        m_FarPlane         = (other.m_FarPlane);
-        m_Bottom           = (other.m_Bottom);
-        m_Top              = (other.m_Top);
-        m_Angle            = (other.m_Angle);
-        m_AspectRatio      = (other.m_AspectRatio);
-        m_Type             = (other.m_Type);
+        m_ViewMatrix         = (other.m_ViewMatrix);
+        m_ProjectionMatrix   = (other.m_ProjectionMatrix);
+        m_FrustumPlanes      = (other.m_FrustumPlanes);
+        m_NearPlane          = (other.m_NearPlane);
+        m_FarPlane           = (other.m_FarPlane);
+        m_Bottom             = (other.m_Bottom);
+        m_Top                = (other.m_Top);
+        m_AngleOrLeft        = (other.m_AngleOrLeft);
+        m_AspectRatioOrRight = (other.m_AspectRatioOrRight);
+        m_Type               = (other.m_Type);
     }
     return *this;
 }
 ComponentCamera::ComponentCamera(ComponentCamera&& other) noexcept 
-    : m_ViewMatrix      { std::move(other.m_ViewMatrix) }
-    , m_ProjectionMatrix{ std::move(other.m_ProjectionMatrix) }
-    , m_FrustumPlanes   { std::move(other.m_FrustumPlanes) }
-    , m_NearPlane       { std::move(other.m_NearPlane) }
-    , m_FarPlane        { std::move(other.m_FarPlane) }
-    , m_Bottom          { std::move(other.m_Bottom) }
-    , m_Top             { std::move(other.m_Top) }
-    , m_Angle           { std::move(other.m_Angle) }
-    , m_AspectRatio     { std::move(other.m_AspectRatio) }
-    , m_Type            { std::move(other.m_Type) }
+    : m_ViewMatrix        { std::move(other.m_ViewMatrix) }
+    , m_ProjectionMatrix  { std::move(other.m_ProjectionMatrix) }
+    , m_FrustumPlanes     { std::move(other.m_FrustumPlanes) }
+    , m_NearPlane         { std::move(other.m_NearPlane) }
+    , m_FarPlane          { std::move(other.m_FarPlane) }
+    , m_Bottom            { std::move(other.m_Bottom) }
+    , m_Top               { std::move(other.m_Top) }
+    , m_AngleOrLeft       { std::move(other.m_AngleOrLeft) }
+    , m_AspectRatioOrRight{ std::move(other.m_AspectRatioOrRight) }
+    , m_Type              { std::move(other.m_Type) }
 {}
 ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
     if (this != &other) {
-        m_ViewMatrix       = std::move(other.m_ViewMatrix);
-        m_ProjectionMatrix = std::move(other.m_ProjectionMatrix);
-        m_FrustumPlanes    = std::move(other.m_FrustumPlanes);
-        m_NearPlane        = std::move(other.m_NearPlane);
-        m_FarPlane         = std::move(other.m_FarPlane);
-        m_Bottom           = std::move(other.m_Bottom);
-        m_Top              = std::move(other.m_Top);
-        m_Angle            = std::move(other.m_Angle);
-        m_AspectRatio      = std::move(other.m_AspectRatio);
-        m_Type             = std::move(other.m_Type);
+        m_ViewMatrix         = std::move(other.m_ViewMatrix);
+        m_ProjectionMatrix   = std::move(other.m_ProjectionMatrix);
+        m_FrustumPlanes      = std::move(other.m_FrustumPlanes);
+        m_NearPlane          = std::move(other.m_NearPlane);
+        m_FarPlane           = std::move(other.m_FarPlane);
+        m_Bottom             = std::move(other.m_Bottom);
+        m_Top                = std::move(other.m_Top);
+        m_AngleOrLeft        = std::move(other.m_AngleOrLeft);
+        m_AspectRatioOrRight = std::move(other.m_AspectRatioOrRight);
+        m_Type               = std::move(other.m_Type);
     }
     return *this;
 }
 
 void ComponentCamera::resize(uint32_t width, uint32_t height) noexcept {
     if (m_Type == CameraType::Perspective) {
-        m_AspectRatio = width / (float)height;
+        m_AspectRatioOrRight = width / float(height);
     }
     Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
@@ -124,11 +106,11 @@ void ComponentCamera::lookAt(const glm::vec3& eye, const glm::vec3& center, cons
     m_ViewMatrix = glm::lookAt(eye, center, up);
 }
 void ComponentCamera::setAngle(float angleInRadians) noexcept {
-	m_Angle = angleInRadians;
+    m_AngleOrLeft = angleInRadians;
     Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 void ComponentCamera::setAspectRatio(float aspectRatio) noexcept {
-	m_AspectRatio = aspectRatio;
+    m_AspectRatioOrRight = aspectRatio;
     Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*this);
 }
 void ComponentCamera::setNear(float nearPlane) noexcept {

@@ -3,7 +3,7 @@
 #include <serenity/model/ModelInstance.h>
 
 bool Engine::priv::Culling::distanceTest(const glm_vec3& objectPosition, const float objectRadius, const glm_vec3& cameraPosition) {
-    const decimal comparison = (decimal)objectRadius * ModelInstance::getGlobalDistanceFactor();
+    const decimal comparison = decimal(objectRadius) * ModelInstance::getGlobalDistanceFactor();
     return glm::distance2(objectPosition, cameraPosition) <= comparison * comparison;
 }
 bool Engine::priv::Culling::distanceTest(const glm_vec3& objectPosition, const float objectRadius, const Camera& camera) {

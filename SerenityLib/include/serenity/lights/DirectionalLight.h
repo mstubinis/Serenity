@@ -9,7 +9,8 @@ class DirectionalLight;
 #include <array>
 
 constexpr const uint32_t  DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE   = 2048;
-constexpr const uint8_t   DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS = 4;
+constexpr const uint8_t   DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS = 5;
+constexpr const uint8_t   DIRECTIONAL_LIGHT_NUM_CASCADING_DISTANCES   = DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS + 1;
 constexpr const uint8_t   DIRECTIONAL_LIGHT_NUM_FRUSTUM_CORNERS       = 8;
 
 class DirectionalLight : public Entity, public LightBaseData<DirectionalLight> {
@@ -38,7 +39,7 @@ class DirectionalLight : public Entity, public LightBaseData<DirectionalLight> {
 
 class DirectionalLightShadowData {
     public:
-        using CascadeContainerDistances = std::array<float, size_t(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS)>;
+        using CascadeContainerDistances = std::array<float, size_t(DIRECTIONAL_LIGHT_NUM_CASCADING_DISTANCES)>;
         using CascadeContainerMatrices  = std::array<glm::mat4, DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS>;
     public:
         CascadeContainerMatrices   m_LightSpaceMatrices;

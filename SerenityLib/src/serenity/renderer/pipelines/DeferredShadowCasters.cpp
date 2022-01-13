@@ -1,14 +1,21 @@
 #include <serenity/renderer/pipelines/DeferredShadowCasters.h>
 #include <serenity/renderer/Renderer.h>
+#include <serenity/system/Engine.h>
 
 namespace {
     std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view) {
         const auto inv = glm::inverse(proj * view);
         std::vector<glm::vec4> frustumCorners;
+        frustumCorners.reserve(8);
         for (uint32_t x = 0; x < 2; ++x) {
             for (uint32_t y = 0; y < 2; ++y) {
                 for (uint32_t z = 0; z < 2; ++z) {
-                    const glm::vec4 pt = inv * glm::vec4{ 2.0f * float(x) - 1.0f, 2.0f * float(y) - 1.0f, 2.0f * float(z) - 1.0f, 1.0f };
+                    const glm::vec4 pt = inv * glm::vec4{ 
+                        2.0f * float(x) - 1.0f, 
+                        2.0f * float(y) - 1.0f, 
+                        2.0f * float(z) - 1.0f, 
+                        1.0f 
+                    };
                     frustumCorners.push_back(pt / pt.w);
                 }
             }
@@ -40,7 +47,7 @@ namespace {
             maxZ = std::max(maxZ, trf.z);
         }
         // Tune this parameter according to the scene
-        constexpr float zMult = 10.0f;
+        const float zMult = Engine::priv::Core::m_Engine->m_RenderModule.m_ShadowZMultFactor;
         if (minZ < 0) {
             minZ *= zMult;
         } else {
@@ -62,10 +69,12 @@ Engine::priv::GLDeferredDirectionalLightShadowInfo::GLDeferredDirectionalLightSh
     setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
 }
 void Engine::priv::GLDeferredDirectionalLightShadowInfo::calculateSplits(const Camera& camera) {
-    m_CascadeDistances[0] = camera.getFar() * 0.02f;
-    m_CascadeDistances[1] = camera.getFar() * 0.04f;
-    m_CascadeDistances[2] = camera.getFar() * 0.1f;
-    m_CascadeDistances[3] = camera.getFar() * 0.5f;
+    m_CascadeDistances[0] = camera.getNear();
+    m_CascadeDistances[1] = camera.getFar() * 0.02f;
+    m_CascadeDistances[2] = camera.getFar() * 0.04f;
+    m_CascadeDistances[3] = camera.getFar() * 0.1f;
+    m_CascadeDistances[4] = camera.getFar() * 0.5f;
+    m_CascadeDistances[5] = camera.getFar();
 }
 Engine::priv::GLDeferredDirectionalLightShadowInfo::~GLDeferredDirectionalLightShadowInfo() {
     glDeleteFramebuffers(1, &m_FBO);
@@ -113,7 +122,7 @@ void Engine::priv::GLDeferredDirectionalLightShadowInfo::setShadowInfo(uint32_t 
 }
 void Engine::priv::GLDeferredDirectionalLightShadowInfo::bindUniformsReading(int textureStartSlot) noexcept {
     Engine::Renderer::sendUniformMatrix4vSafe("uLightMatrix[0]", m_LightSpaceMatrices);
-    Engine::Renderer::sendUniform1vSafe("uCascadeEndClipSpace[0]", m_CascadeDistances.data(), uint32_t(m_CascadeDistances.size()));
+    Engine::Renderer::sendUniform1vSafe("uCascadeEndClipSpace[0]", m_CascadeDistances);
     Engine::Renderer::sendUniform1Safe("uShadowEnabled", 1);
     Engine::Renderer::sendUniform2Safe("uShadowTexelSize", 1.0f / float(m_ShadowWidth), 1.0f / float(m_ShadowHeight));
 
@@ -127,15 +136,9 @@ void Engine::priv::GLDeferredDirectionalLightShadowInfo::bindUniformsWriting(int
 }
 void Engine::priv::GLDeferredDirectionalLightShadowInfo::calculateOrthographicProjections(const Camera& camera, const glm::vec3& direction) {
     calculateSplits(camera);
-    //the small += 0.5f's are used to help expand for the shadow fading. They are needed
-    for (size_t i = 0; i < m_CascadeDistances.size() /* + 1*/; ++i) {
-        if (i == 0) {
-            m_LightSpaceMatrices[i] = getLightSpaceMatrix(camera.getNear(), m_CascadeDistances[i] + 0.5f, direction, camera);
-        } else if (i < m_CascadeDistances.size()) {
-            m_LightSpaceMatrices[i] = getLightSpaceMatrix(m_CascadeDistances[i - 1] - 0.5f, m_CascadeDistances[i] + 0.5f, direction, camera);
-        } else {
-            m_LightSpaceMatrices[i] = getLightSpaceMatrix(m_CascadeDistances[i - 1] - 0.5f, camera.getFar(), direction, camera);
-        }
+    const float offset = Engine::priv::Core::m_Engine->m_RenderModule.m_ShadowClipspaceOffset;
+    for (size_t i = 0; i < m_LightSpaceMatrices.size(); ++i) {
+        m_LightSpaceMatrices[i] = getLightSpaceMatrix(m_CascadeDistances[i] += (i == 0 ? 0.0f : -offset), m_CascadeDistances[i + 1] + offset, direction, camera);
     }
 }
 

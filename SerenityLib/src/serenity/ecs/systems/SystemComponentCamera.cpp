@@ -5,10 +5,12 @@
 SystemComponentCamera::SystemComponentCamera(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }
 {
+    /*
     setUpdateFunction([](SystemBaseClass& inSystem, const float dt, Scene& scene) {
-        auto& system     = (SystemComponentCamera&)inSystem;
+        auto& system     = static_cast<SystemComponentCamera&>(inSystem);
         system.forEach([](Entity entity, ComponentCamera* b) {
-            Engine::Math::extractViewFrustumPlanesHartmannGribbs(b->getViewProjection(), b->getFrustrumPlanes());
+            Engine::Math::extractViewFrustumPlanesHartmannGribbs(b->getViewProjection(), b->m_FrustumPlanes);
         }, SystemExecutionPolicy::ParallelWait);
     });
+    */
 }

@@ -42,17 +42,21 @@ namespace Engine::priv {
     class RenderModule final {
         public:
             std::unique_ptr<IRenderingPipeline>  m_Pipeline;
-            AntiAliasingAlgorithm                m_AA_algorithm      = AntiAliasingAlgorithm::FXAA;
-            LightingAlgorithm                    m_LightingAlgorithm = LightingAlgorithm::PBR;
-            DepthFunc                            m_Depth_Function    = DepthFunc::Less;
-            float                                m_Gamma             = 2.2f;
-            float                                m_GI_Diffuse        = 1.0f;
-            float                                m_GI_Specular       = 1.0f;
-            float                                m_GI_Global         = 1.0f;
-            float                                m_GI_Pack           = 0.0f;
-            bool                                 m_Lighting          = true;
-            bool                                 m_DrawSkybox        = true;
-            bool                                 m_DrawPhysicsDebug  = false;
+            AntiAliasingAlgorithm                m_AA_algorithm          = AntiAliasingAlgorithm::FXAA;
+            LightingAlgorithm                    m_LightingAlgorithm     = LightingAlgorithm::PBR;
+            DepthFunc                            m_Depth_Function        = DepthFunc::Less;
+            float                                m_Gamma                 = 2.2f;
+            float                                m_GI_Diffuse            = 1.0f;
+            float                                m_GI_Specular           = 1.0f;
+            float                                m_GI_Global             = 1.0f;
+            float                                m_GI_Pack               = 0.0f;
+
+            float                                m_ShadowZMultFactor     = 1.5f;
+            float                                m_ShadowClipspaceOffset = 1.0f;
+
+            bool                                 m_Lighting              = true;
+            bool                                 m_DrawSkybox            = true;
+            bool                                 m_DrawPhysicsDebug      = false;
         public:
             RenderModule(const EngineOptions&);
 
