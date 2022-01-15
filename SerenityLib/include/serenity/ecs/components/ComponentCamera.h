@@ -31,9 +31,9 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
             Orthographic,
         };
     private:
+        std::array<glm::vec4, 6> m_FrustumPlanes;
         glm::mat4                m_ViewMatrix          = glm::mat4{ 1.0f };
         glm::mat4                m_ProjectionMatrix    = glm::mat4{ 1.0f };
-        std::array<glm::vec4, 6> m_FrustumPlanes;
         float                    m_NearPlane           = 0.01f;
         float                    m_FarPlane            = 2000.0f;
         float                    m_Bottom              = 0.0f;
@@ -47,8 +47,8 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
         ComponentCamera(Entity, float angle, float aspectRatio, float nearPlane, float farPlane);
 		ComponentCamera(Entity, float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
-        ComponentCamera(const ComponentCamera&);
-        ComponentCamera& operator=(const ComponentCamera&);
+        ComponentCamera(const ComponentCamera&) = delete;
+        ComponentCamera& operator=(const ComponentCamera&) = delete;
         ComponentCamera(ComponentCamera&&) noexcept;
         ComponentCamera& operator=(ComponentCamera&&) noexcept;
 
@@ -57,21 +57,22 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
 
         void setViewMatrix(const glm::mat4& viewMatrix) noexcept;
         void setViewMatrix(glm::mat4&& viewMatrix) noexcept;
-        inline void setProjectionMatrix(const glm::mat4& projectionMatrix) noexcept { m_ProjectionMatrix = projectionMatrix; }
+        void setProjectionMatrix(const glm::mat4& projectionMatrix) noexcept;
+        void setProjectionMatrix(glm::mat4&& projectionMatrix) noexcept;
 
-        [[nodiscard]] inline constexpr CameraType getType() const noexcept { return m_Type; }
-        [[nodiscard]] inline constexpr float getAngle() const noexcept { return m_AngleOrLeft; }
-        [[nodiscard]] inline constexpr float getAspectRatio() const noexcept { return m_AspectRatioOrRight; }
-        [[nodiscard]] inline constexpr float getNear() const noexcept { return m_NearPlane; }
-        [[nodiscard]] inline constexpr float getFar() const noexcept { return m_FarPlane; }
+        [[nodiscard]] inline CameraType getType() const noexcept { return m_Type; }
+        [[nodiscard]] inline float getAngle() const noexcept { return m_AngleOrLeft; }
+        [[nodiscard]] inline float getAspectRatio() const noexcept { return m_AspectRatioOrRight; }
+        [[nodiscard]] inline float getNear() const noexcept { return m_NearPlane; }
+        [[nodiscard]] inline float getFar() const noexcept { return m_FarPlane; }
 
         void setAngle(float angle) noexcept;
         void setAspectRatio(float aspectRatio) noexcept;
         void setNear(float Near) noexcept;
         void setFar(float Far) noexcept;
 
-        [[nodiscard]] inline constexpr glm::mat4 getProjection() const noexcept { return m_ProjectionMatrix; }
-        [[nodiscard]] inline constexpr glm::mat4 getView() const noexcept { return m_ViewMatrix; }
+        [[nodiscard]] inline glm::mat4 getProjection() const noexcept { return m_ProjectionMatrix; }
+        [[nodiscard]] inline glm::mat4 getView() const noexcept { return m_ViewMatrix; }
         [[nodiscard]] inline glm::mat4 getProjectionInverse() const noexcept { return glm::inverse(m_ProjectionMatrix); }
         [[nodiscard]] inline glm::mat4 getViewInverse() const noexcept { return glm::inverse(m_ViewMatrix); }
         [[nodiscard]] inline glm::mat4 getViewProjection() const noexcept { return m_ProjectionMatrix * m_ViewMatrix; }

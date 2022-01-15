@@ -38,6 +38,7 @@ namespace Engine::priv {
             glm::vec4 CameraInfo2;      //viewVecX, viewVecY, viewVecZ, far
             glm::vec4 CameraInfo3;      //realposX, realposY, realposZ, logarithmDepthBufferFCoefficient
             glm::vec4 ScreenInfo;       //mainWindowSizeX, mainWindowSizeY, viewportSizeX, viewportSizeY
+            glm::vec4 ScreenInfo1;      //viewportX, viewportY, unused, unused
             glm::vec4 RendererInfo1;    //GIPacked, gamma, unused, unused
             glm::vec4 RendererInfo2;    //ambientR, ambientG, ambientB, unused
         };

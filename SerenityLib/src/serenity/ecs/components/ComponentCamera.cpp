@@ -35,37 +35,10 @@ ComponentCamera::ComponentCamera(Entity entity, float left, float right, float b
     setProjectionMatrix(glm::ortho(m_AngleOrLeft, m_AspectRatioOrRight, m_Bottom, m_Top, m_NearPlane, m_FarPlane));
     setViewMatrix(glm::lookAt(glm::vec3{ 0.0f }, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3{ 0.0f, 1.0f, 0.0f }));
 }
-ComponentCamera::ComponentCamera(const ComponentCamera& other) 
-    : m_ViewMatrix        { (other.m_ViewMatrix) }
-    , m_ProjectionMatrix  { (other.m_ProjectionMatrix) }
-    , m_FrustumPlanes     { (other.m_FrustumPlanes) }
-    , m_NearPlane         { (other.m_NearPlane) }
-    , m_FarPlane          { (other.m_FarPlane) }
-    , m_Bottom            { (other.m_Bottom) }
-    , m_Top               { (other.m_Top) }
-    , m_AngleOrLeft       { (other.m_AngleOrLeft) }
-    , m_AspectRatioOrRight{ (other.m_AspectRatioOrRight) }
-    , m_Type              { (other.m_Type) }
-{}
-ComponentCamera& ComponentCamera::operator=(const ComponentCamera& other) {
-    if (&other != this) {
-        m_ViewMatrix         = (other.m_ViewMatrix);
-        m_ProjectionMatrix   = (other.m_ProjectionMatrix);
-        m_FrustumPlanes      = (other.m_FrustumPlanes);
-        m_NearPlane          = (other.m_NearPlane);
-        m_FarPlane           = (other.m_FarPlane);
-        m_Bottom             = (other.m_Bottom);
-        m_Top                = (other.m_Top);
-        m_AngleOrLeft        = (other.m_AngleOrLeft);
-        m_AspectRatioOrRight = (other.m_AspectRatioOrRight);
-        m_Type               = (other.m_Type);
-    }
-    return *this;
-}
 ComponentCamera::ComponentCamera(ComponentCamera&& other) noexcept 
-    : m_ViewMatrix        { std::move(other.m_ViewMatrix) }
+    : m_FrustumPlanes     { std::move(other.m_FrustumPlanes) }
+    , m_ViewMatrix        { std::move(other.m_ViewMatrix) }
     , m_ProjectionMatrix  { std::move(other.m_ProjectionMatrix) }
-    , m_FrustumPlanes     { std::move(other.m_FrustumPlanes) }
     , m_NearPlane         { std::move(other.m_NearPlane) }
     , m_FarPlane          { std::move(other.m_FarPlane) }
     , m_Bottom            { std::move(other.m_Bottom) }
@@ -76,9 +49,9 @@ ComponentCamera::ComponentCamera(ComponentCamera&& other) noexcept
 {}
 ComponentCamera& ComponentCamera::operator=(ComponentCamera&& other) noexcept {
     if (this != &other) {
+        m_FrustumPlanes      = std::move(other.m_FrustumPlanes);
         m_ViewMatrix         = std::move(other.m_ViewMatrix);
         m_ProjectionMatrix   = std::move(other.m_ProjectionMatrix);
-        m_FrustumPlanes      = std::move(other.m_FrustumPlanes);
         m_NearPlane          = std::move(other.m_NearPlane);
         m_FarPlane           = std::move(other.m_FarPlane);
         m_Bottom             = std::move(other.m_Bottom);
@@ -102,6 +75,13 @@ void ComponentCamera::setViewMatrix(const glm::mat4& viewMatrix) noexcept {
 void ComponentCamera::setViewMatrix(glm::mat4&& viewMatrix) noexcept {
     m_ViewMatrix = std::move(viewMatrix);
 }
+void ComponentCamera::setProjectionMatrix(const glm::mat4& projectionMatrix) noexcept {
+    m_ProjectionMatrix = projectionMatrix;
+}
+void ComponentCamera::setProjectionMatrix(glm::mat4&& projectionMatrix) noexcept {
+    m_ProjectionMatrix = std::move(projectionMatrix);
+}
+
 void ComponentCamera::lookAt(const glm::vec3& eye, const glm::vec3& center, const glm::vec3& up) noexcept {
     m_ViewMatrix = glm::lookAt(eye, center, up);
 }

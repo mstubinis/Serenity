@@ -1427,13 +1427,15 @@ layout(location = 0) in vec3 position;
 uniform mat4 uLightMatrix;
 uniform mat4 Model;
 
+varying vec4 vViewPos;
+
 void main() {
     gl_Position = uLightMatrix * Model * vec4(position, 1.0);
+    vViewPos = CameraView * Model * vec4(position, 1.0);
 }  
 )";
 
 /*
-//gl_FragDepth += gl_FrontFacing ? BIAS : 0.0;
 const float BIAS = 0.002;
 void main() {
     gl_FragDepth  = gl_FragCoord.z;
@@ -1441,8 +1443,11 @@ void main() {
 }
 */
 Engine::priv::EShaders::shadow_depth_frag = R"(
+varying vec4 vViewPos;
+
 void main() {
     //gl_FragDepth = gl_FragCoord.z;
+    //gl_FragDepth = length(vViewPos.xyz);
 }
 )";
 #pragma endregion

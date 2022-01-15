@@ -221,7 +221,7 @@ void Engine::priv::SSAO::passSSAO(GBuffer& gbuffer, const Viewport& viewport, co
     const float screen_width       = viewportDimensions.z * divisor;
     const float screen_height      = viewportDimensions.w * divisor;
 
-    Engine::Renderer::sendUniform2("ScreenSize", screen_width, screen_height);
+    Engine::Renderer::sendUniform2Safe("ScreenSize", screen_width, screen_height);
     Engine::Renderer::sendUniform4("SSAOInfo", m_Radius, m_Intensity, m_Bias, m_Scale);
     Engine::Renderer::sendUniform4("SSAOInfoA", m_RangeCheckScale, 0.0f, float(m_NumSamples), 0.0f);
 

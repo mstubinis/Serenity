@@ -1318,7 +1318,7 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
         camera.setAspectRatio(viewportDimensions.z / viewportDimensions.w);
     }
     //if resizing gbuffer
-        m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
+        //m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
     //else
         //glScissor(viewportDimensions.x, viewportDimensions.y, viewportDimensions.z, viewportDimensions.w);
 
@@ -1330,8 +1330,11 @@ void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport,
     Engine::Renderer::GLEnablei(GL_BLEND, 0); //this is needed for sure
 }
 void DeferredPipeline::internal_init_frame_gbuffer(Viewport& viewport, Camera& camera) {
-    m_GBuffer.bindFramebuffers("", true);
-    Engine::Renderer::Settings::clear(false, true, true); // clear depth & stencil only
+    m_GBuffer.bindFramebuffers({ GBufferType::Diffuse, GBufferType::Normal, GBufferType::Misc, GBufferType::Lighting }, "RGBA", true);
+    Engine::Renderer::Settings::clear(true, true, true); // clear all
+
+    m_GBuffer.bindFramebuffers({ GBufferType::Bloom, GBufferType::GodRays }, "RGBA", false);
+    Engine::Renderer::Settings::clear(true, true, true); // clear all
 }
 void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& scene, Camera& camera) {
     if (!m_Renderer.m_Lighting) {
@@ -1875,9 +1878,11 @@ void DeferredPipeline::render(Engine::priv::RenderModule& renderer, Viewport& vi
             m_CameraUBODataPtr = static_cast<UBOCameraDataStruct*>(mapper.getPtr());
 
             const float logDepthBufferFCoeff  = (2.0f / glm::log2(camera.getFar() + 1.0f)) * 0.5f;
+
             m_CameraUBODataPtr->CameraProj    = camera.getProjection();
             m_CameraUBODataPtr->CameraInvProj = camera.getProjectionInverse();
             m_CameraUBODataPtr->ScreenInfo    = glm::vec4{ gbufferSize.x, gbufferSize.y, viewportDimensions.z, viewportDimensions.w };
+            m_CameraUBODataPtr->ScreenInfo1   = glm::vec4{ viewportDimensions.x, viewportDimensions.y, glm::tan((camera.getAngle())) * 0.5f, camera.getAspectRatio() };
             m_CameraUBODataPtr->RendererInfo1 = glm::vec4{ renderer.m_GI_Pack, renderer.m_Gamma, 0.0f, 0.0f };
             m_CameraUBODataPtr->RendererInfo2 = glm::vec4{ sceneAmbient.r, sceneAmbient.g, sceneAmbient.b, 0.0f };
             //TODO: change the manual camera uniform sending (for when glsl version < 140) to give a choice between the two render spaces

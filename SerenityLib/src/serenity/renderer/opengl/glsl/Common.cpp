@@ -255,7 +255,8 @@ vec4 RangeTo1(vec4 color){
     ShaderHelper::sfind(code, "CameraInvViewProj") || ShaderHelper::sfind(code, "CameraNear") || ShaderHelper::sfind(code, "CameraFar") ||
     ShaderHelper::sfind(code, "CameraInfo1") || ShaderHelper::sfind(code, "CameraInfo2") || ShaderHelper::sfind(code, "CameraViewVector") ||
     ShaderHelper::sfind(code, "CameraRealPosition") || ShaderHelper::sfind(code, "CameraInfo3") || ShaderHelper::sfind(code, "ScreenInfo") || 
-    ShaderHelper::sfind(code, "RendererInfo1") || ShaderHelper::sfind(code, "RendererInfo2") || ShaderHelper::sfind(code, "LogFCoefficient")) {
+    ShaderHelper::sfind(code, "ScreenInfo1") || ShaderHelper::sfind(code, "RendererInfo1") || ShaderHelper::sfind(code, "RendererInfo2") ||
+    ShaderHelper::sfind(code, "LogFCoefficient")) {
         if (versionNumber >= 140) { //UBO only supported at 140 or above
             if (!ShaderHelper::sfind(code, "layout (std140) uniform Camera")) {
                 ShaderHelper::insertStringAtLine(code, R"(
@@ -270,6 +271,7 @@ layout (std140) uniform Camera {
     vec4 CameraInfo2;
     vec4 CameraInfo3;
     vec4 ScreenInfo;
+    vec4 ScreenInfo1;
     vec4 RendererInfo1;
     vec4 RendererInfo2;
 };
@@ -294,6 +296,7 @@ uniform vec4 CameraInfo1;
 uniform vec4 CameraInfo2;
 uniform vec4 CameraInfo3;
 uniform vec4 ScreenInfo;
+uniform vec4 ScreenInfo1;
 uniform vec4 RendererInfo1;
 uniform vec4 RendererInfo2;
 vec3 CameraPosition = CameraInfo1.xyz;
