@@ -139,6 +139,16 @@ namespace {
         }
         return captureViews;
     }
+
+    void resize_shadow_containers(const auto& light, auto& hashMap, auto& mainContainer) {
+        const auto sceneID = light.sceneID();
+        if (hashMap.size() <= sceneID) {
+            hashMap.resize(sceneID + 1);
+        }
+        if (mainContainer.size() <= sceneID) {
+            mainContainer.resize(sceneID + 1);
+        }
+    }
 }
 
 struct ShaderEnum final { enum Shader : uint32_t {
@@ -786,16 +796,20 @@ void DeferredPipeline::renderSkybox(Skybox* skybox, Handle shaderProgram, Scene&
     Skybox::bindMesh();
 }
 void DeferredPipeline::toggleShadowCaster(SunLight& sunLight, bool isCaster) {
-    if (m_ShadowCasters.m_ShadowCastersSunHashed.contains(&sunLight)) {
-        m_ShadowCasters.m_ShadowCastersSunHashed.at(&sunLight)->m_Enabled = isCaster;
+    const auto sceneID = sunLight.sceneID();
+    resize_shadow_containers(sunLight, m_ShadowCasters.m_ShadowCastersSunHashed, m_ShadowCasters.m_ShadowCastersSun);
+    if (m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].contains(&sunLight)) {
+        m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].at(&sunLight)->m_Enabled = isCaster;
     }
 }
 void DeferredPipeline::toggleShadowCaster(PointLight& pointLight, bool isCaster) {
 
 }
 void DeferredPipeline::toggleShadowCaster(DirectionalLight& directionalLight, bool isCaster) {
-    if (m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
-        m_ShadowCasters.m_ShadowCastersDirectionalHashed.at(&directionalLight)->m_Enabled = isCaster;
+    const auto sceneID = directionalLight.sceneID();
+    resize_shadow_containers(directionalLight, m_ShadowCasters.m_ShadowCastersSunHashed, m_ShadowCasters.m_ShadowCastersSun);
+    if (m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].contains(&directionalLight)) {
+        m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].at(&directionalLight)->m_Enabled = isCaster;
     }
 }
 void DeferredPipeline::toggleShadowCaster(SpotLight& spotLight, bool isCaster) {
@@ -808,8 +822,11 @@ void DeferredPipeline::toggleShadowCaster(ProjectionLight& projectionLight, bool
 
 }
 bool DeferredPipeline::buildShadowCaster(SunLight& sunLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
-    if (!m_ShadowCasters.m_ShadowCastersSunHashed.contains(&sunLight)) {
-        auto& data = m_ShadowCasters.m_ShadowCastersSun.emplace_back(
+    const auto sceneID = sunLight.sceneID();
+    resize_shadow_containers(sunLight, m_ShadowCasters.m_ShadowCastersSunHashed, m_ShadowCasters.m_ShadowCastersSun);
+
+    if (!m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].contains(&sunLight)) {
+        auto& data = m_ShadowCasters.m_ShadowCastersSun[sceneID].emplace_back(
             &sunLight,
             NEW GLDeferredSunLightShadowInfo{ 
                 shadowMapWidth, 
@@ -819,10 +836,10 @@ bool DeferredPipeline::buildShadowCaster(SunLight& sunLight, uint32_t shadowMapW
                 farFactor 
             }
         );
-        m_ShadowCasters.m_ShadowCastersSunHashed.emplace(&sunLight, std::get<1>(data));
+        m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].emplace(&sunLight, std::get<1>(data));
         return true;
     } else {
-        auto& data = m_ShadowCasters.m_ShadowCastersSunHashed.at(&sunLight);
+        auto& data = m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].at(&sunLight);
         data->setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
     }
     return false;
@@ -831,8 +848,11 @@ bool DeferredPipeline::buildShadowCaster(PointLight& pointLight) {
     return false;
 }
 bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
-    if (!m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
-        auto& data = m_ShadowCasters.m_ShadowCastersDirectional.emplace_back(
+    const auto sceneID = directionalLight.sceneID();
+    resize_shadow_containers(directionalLight, m_ShadowCasters.m_ShadowCastersDirectionalHashed, m_ShadowCasters.m_ShadowCastersDirectional);
+
+    if (!m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].contains(&directionalLight)) {
+        auto& data = m_ShadowCasters.m_ShadowCastersDirectional[sceneID].emplace_back(
             &directionalLight, 
             NEW GLDeferredDirectionalLightShadowInfo{
                 shadowMapWidth,
@@ -842,10 +862,10 @@ bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight, uin
                 farFactor 
             }
         );
-        m_ShadowCasters.m_ShadowCastersDirectionalHashed.emplace(&directionalLight, std::get<1>(data));
+        m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].emplace(&directionalLight, std::get<1>(data));
         return true;
     } else {
-        auto& data = m_ShadowCasters.m_ShadowCastersDirectionalHashed.at(&directionalLight);
+        auto& data = m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].at(&directionalLight);
         data->setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
     }
     return false;
@@ -858,6 +878,9 @@ bool DeferredPipeline::buildShadowCaster(RodLight& rodLight) {
 }
 bool DeferredPipeline::buildShadowCaster(ProjectionLight& projectionLight) {
     return false;
+}
+void DeferredPipeline::deleteAllShadowCasters(Scene& scene) {
+    m_ShadowCasters.clearSceneData(scene);
 }
 void DeferredPipeline::sendGPUDataAllLights(const Scene& scene, const Camera& camera) {
     int maxLights = glm::min(int(scene.getNumLights()), MAX_LIGHTS_PER_PASS);
@@ -906,8 +929,8 @@ void DeferredPipeline::sendGPUDataLight(const Camera& camera, const SunLight& su
     sendUniform1Safe("Type", 0.0f);
     sendUniform1Safe("uShadowEnabled", 0);
     if (m_Renderer.m_Lighting) {
-        if (m_ShadowCasters.m_ShadowCastersSunHashed.contains(&sunLight)) {
-            auto& data = *m_ShadowCasters.m_ShadowCastersSunHashed.at(&sunLight);
+        if (m_ShadowCasters.m_ShadowCastersSunHashed[sunLight.sceneID()].contains(&sunLight)) {
+            auto& data = *m_ShadowCasters.m_ShadowCastersSunHashed[sunLight.sceneID()].at(&sunLight);
             if (data.m_Enabled) {
                 data.bindUniformsReading(5); //TODO: this texture slot might not work for forward lighting
             }
@@ -947,8 +970,8 @@ void DeferredPipeline::sendGPUDataLight(const Camera& camera, const DirectionalL
     sendUniform1Safe("Type", 0.0f);
     sendUniform1Safe("uShadowEnabled", 0);
     if (m_Renderer.m_Lighting) {
-        if (m_ShadowCasters.m_ShadowCastersDirectionalHashed.contains(&directionalLight)) {
-            auto& data = *m_ShadowCasters.m_ShadowCastersDirectionalHashed.at(&directionalLight);
+        if (m_ShadowCasters.m_ShadowCastersDirectionalHashed[directionalLight.sceneID()].contains(&directionalLight)) {
+            auto& data = *m_ShadowCasters.m_ShadowCastersDirectionalHashed[directionalLight.sceneID()].at(&directionalLight);
             if (data.m_Enabled) {
                 data.bindUniformsReading(5); //TODO: this texture slot might not work for forward lighting
             }
@@ -1314,9 +1337,6 @@ void DeferredPipeline::renderInitFrame(Engine::priv::RenderModule& renderer) {
 void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport, Camera& camera) {
     const auto winSize             = Engine::Resources::getWindowSize();
     const auto& viewportDimensions = viewport.getViewportDimensions();
-    if (viewport.isAspectRatioSynced()) {
-        camera.setAspectRatio(viewportDimensions.z / viewportDimensions.w);
-    }
     //if resizing gbuffer
         //m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
     //else
@@ -1340,6 +1360,7 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     if (!m_Renderer.m_Lighting) {
         return;
     }
+    const auto sceneID = scene.id();
     m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::ShadowDepth].get<ShaderProgram>());
     Engine::Renderer::colorMask(false, false, false, false);
 
@@ -1347,42 +1368,45 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     //glPolygonOffset(1.0, 1.0);
 
     //directional lights
-    for (const auto& [directionalLight, data] : m_ShadowCasters.m_ShadowCastersDirectional) {
-        if (data->m_Enabled) {
-            data->calculateOrthographicProjections(camera, directionalLight->getDirection());
-            Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
-            for (int i = 0; i < int(data->m_LightSpaceMatrices.size()); ++i) {
-                data->bindUniformsWriting(i);
-                const auto& viewProj = data->m_LightSpaceMatrices[i];
+    if (m_ShadowCasters.m_ShadowCastersDirectional.size() > sceneID) {
+        for (const auto& [directionalLight, data] : m_ShadowCasters.m_ShadowCastersDirectional[sceneID]) {
+            if (data->m_Enabled) {
+                data->calculateOrthographicProjections(camera, directionalLight->getDirection());
+                Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
+                for (int i = 0; i < int(data->m_LightSpaceMatrices.size()); ++i) {
+                    data->bindUniformsWriting(i);
+                    const auto& viewProj = data->m_LightSpaceMatrices[i];
 
-                PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderGeometryTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderForwardOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderForwardTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderForwardTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderGeometryTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderForwardOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderForwardTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderForwardTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
+                }
             }
         }
     }
     //sun lights
-    for (const auto& [sunLight, data] : m_ShadowCasters.m_ShadowCastersSun) {
-        if (data->m_Enabled) {
-            data->calculateOrthographicProjections(camera, glm::normalize(sunLight->getPosition() - camera.getPosition()));
-            Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
-            for (int i = 0; i < int(data->m_LightSpaceMatrices.size()); ++i) {
-                data->bindUniformsWriting(i);
-                const auto& viewProj = data->m_LightSpaceMatrices[i];
+    if (m_ShadowCasters.m_ShadowCastersSun.size() > sceneID) {
+        for (const auto& [sunLight, data] : m_ShadowCasters.m_ShadowCastersSun[scene.id()]) {
+            if (data->m_Enabled) {
+                data->calculateOrthographicProjections(camera, glm::normalize(sunLight->getPosition() - camera.getPosition()));
+                Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
+                for (int i = 0; i < int(data->m_LightSpaceMatrices.size()); ++i) {
+                    data->bindUniformsWriting(i);
+                    const auto& viewProj = data->m_LightSpaceMatrices[i];
 
-                PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderGeometryTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderForwardOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderForwardTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
-                PublicScene::RenderForwardTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderGeometryTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderForwardOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderForwardTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
+                    PublicScene::RenderForwardTransparentTrianglesSortedShadowMap(m_Renderer, scene, nullptr, viewProj);
+                }
             }
         }
     }
-
 
     glEnable(GL_CULL_FACE);
     //glPolygonOffset(0, 0);
@@ -1838,8 +1862,9 @@ void DeferredPipeline::render2DAPI(const std::vector<IRenderingPipeline::API2DCo
             //yes this is stupid on opengl's part.. but to be able to write to the depth buffer you need depth testing enabled DESPITE there
             //being a depthMask function that should be the only requirement... well whatever, to always pass depth test - use glDepthFunc(GL_ALWAYS)
             Engine::Renderer::GLEnable(GL_DEPTH_TEST);
-            //Engine::Renderer::setDepthFunc(GL_LEQUAL);
-            Engine::Renderer::setDepthFunc(GL_ALWAYS);
+
+            Engine::Renderer::setDepthFunc(GL_LEQUAL);
+            //Engine::Renderer::setDepthFunc(GL_ALWAYS);
 
             Engine::Renderer::Settings::clear(false, clearDepth, false); //clear depth only
             m_Renderer.bind(m_InternalShaderPrograms[ShaderProgramEnum::Deferred2DAPI].get<ShaderProgram>());

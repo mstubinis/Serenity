@@ -303,7 +303,7 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& ca
     unsigned int inBounds = 0;
 
     auto screen_pos = glm::project(position, view, projection, viewport);
-    float dot       = glm::dot(camera.getViewVector(), position - glm::vec3(camera.getPosition()));
+    float dot       = glm::dot(camera.getViewVector(), position - glm::vec3{ camera.getPosition() });
     if (clampToEdge) {
         if (screen_pos.x >= viewport.x && screen_pos.x <= viewport.z) {
             if (screen_pos.y >= viewport.y && screen_pos.y <= viewport.w) {
@@ -312,17 +312,17 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& ca
                 }
             }
         }
-    }else{
+    } else {
         if (dot < 0.0f) { //negative dot means infront
             inBounds = 1;
         }
     }
     if (inBounds) {
-        return glm::vec3(screen_pos.x, screen_pos.y, static_cast<float>(inBounds));
+        return glm::vec3{ screen_pos.x, screen_pos.y, static_cast<float>(inBounds) };
     }
     if (clampToEdge) {
-        v2 center(viewport.z / 2.0f, viewport.w / 2.0f);
-        glm::vec3 res(0.0f, 0.0f, inBounds);
+        v2 center{ viewport.z / 2.0f, viewport.w / 2.0f };
+        glm::vec3 res{ 0.0f, 0.0f, inBounds };
         v2 perm;
         if (dot >= 0.0f) {
             //reflect screen_pos along center
@@ -334,15 +334,15 @@ glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& ca
             norm = glm::normalize(norm);
             norm *= 9999999.0f;
 
-            perm = getPerimiterIntersection(center, center + norm, v2(0, 0), v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
-        }else{
-            perm = getPerimiterIntersection(center, v2(screen_pos.x, screen_pos.y), v2(0, 0), v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
+            perm = getPerimiterIntersection(center, center + norm, v2{ 0, 0 }, v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
+        } else {
+            perm = getPerimiterIntersection(center, v2{ screen_pos.x, screen_pos.y }, v2{ 0, 0 }, v2(0, 0 + viewport.w), v2(0 + viewport.z, 0 + viewport.w), v2(0 + viewport.z, 0));
         }
         res.x = perm.x;
         res.y = perm.y;
         return res;
     }
-    return glm::vec3(screen_pos.x, screen_pos.y, static_cast<float>(inBounds));
+    return glm::vec3{ screen_pos.x, screen_pos.y, static_cast<float>(inBounds) };
 }
 glm::vec3 Math::getScreenCoordinates(const glm::vec3& position, const Camera& camera, const glm::vec4& viewport, bool clampToEdge) {
     return Math::getScreenCoordinates(position, camera, camera.getView(), camera.getProjection(), viewport, clampToEdge);

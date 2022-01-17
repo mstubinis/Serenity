@@ -26,6 +26,7 @@ namespace Engine::priv {
             void bindUniformsWriting(int cascadeMapIndex);
             void calculateOrthographicProjections(const Camera&, const glm::vec3& direction);
             void setShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType, float nearFactor, float farFactor);
+            void setShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight);
     };
     class GLDeferredSunLightShadowInfo : public GLDeferredDirectionalLightShadowInfo {
         public:
@@ -48,10 +49,10 @@ namespace Engine::priv {
     class GLDeferredLightShadowCasters final {
         public:
             template<class LIGHT, class SHADOW_DATA>
-            class CasterContainer : public std::vector<std::tuple<LIGHT*, SHADOW_DATA*>> {};
+            class CasterContainer : public std::vector<std::vector<std::tuple<LIGHT*, SHADOW_DATA*>>> {};
 
             template<class LIGHT, class SHADOW_DATA>
-            class CasterHashMap : public std::unordered_map<const LIGHT*, SHADOW_DATA*> {}; //bool is shadow casting enabled or disabled
+            class CasterHashMap : public std::vector<std::unordered_map<const LIGHT*, SHADOW_DATA*>> {}; //bool is shadow casting enabled or disabled
         public:
             CasterContainer<DirectionalLight, GLDeferredDirectionalLightShadowInfo>  m_ShadowCastersDirectional;
             CasterContainer<SunLight,         GLDeferredSunLightShadowInfo>          m_ShadowCastersSun;
@@ -67,21 +68,9 @@ namespace Engine::priv {
             CasterHashMap<RodLight, GLDeferredRodLightShadowInfo>                  m_ShadowCastersRodHashed;
             CasterHashMap<SpotLight, GLDeferredSpotLightShadowInfo>                m_ShadowCastersSpotHashed;
         public:
-            template<class CONTAINER>
-            void internal_free_memory_container(CONTAINER& container) noexcept {
-                for (auto& itr : container) {
-                    SAFE_DELETE(std::get<1>(itr));
-                }
-                container.clear();
-            }
-            ~GLDeferredLightShadowCasters() {
-                internal_free_memory_container(m_ShadowCastersSpot);
-                internal_free_memory_container(m_ShadowCastersRod);
-                internal_free_memory_container(m_ShadowCastersProjection);
-                internal_free_memory_container(m_ShadowCastersPoint);
-                internal_free_memory_container(m_ShadowCastersSun);
-                internal_free_memory_container(m_ShadowCastersDirectional);
-            }
+            ~GLDeferredLightShadowCasters();
+            void clearSceneData(const Scene&);
+            void clearSceneData(const uint32_t sceneID);
     };
 }
 

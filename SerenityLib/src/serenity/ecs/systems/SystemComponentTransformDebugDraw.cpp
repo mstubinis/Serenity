@@ -30,11 +30,13 @@ SystemComponentTransformDebugDraw::SystemComponentTransformDebugDraw(Engine::pri
                 Engine::Physics::drawDebugLine(world_pos, world_pos + right, 0.0f, 1.0f, 0.0f);
                 Engine::Physics::drawDebugLine(world_pos, world_pos + up,    0.0f, 0.0f, 1.0f);
             }
-            const auto screenPos = Engine::Math::getScreenCoordinates(world_pos, *scene->getActiveCamera(), false);
-            //if (screenPos.z > 0) {
-            //    const std::string text{ "ID: " + std::to_string(entity.id()) };
-            //    Font::renderTextStatic(text, glm::vec2{ screenPos.x, screenPos.y }, glm::vec4{ 1.0f }, 0.0f, glm::vec2{ 0.5f }, 0.1f, TextAlignment::Left);
-            //}
+            /*
+            const auto screenPos = transform->getScreenCoordinates(false);
+            if (screenPos.z > 0) {
+                const std::string text{ "ID: " + std::to_string(entity.id()) };
+                Font::renderTextStatic(text, glm::vec2{ screenPos.x, screenPos.y }, glm::vec4{ 1.0f }, 0.0f, glm::vec2{ 0.5f }, 0.1f, TextAlignment::Left);
+            }
+            */
         }, &scene, SystemExecutionPolicy::Normal);
         #endif
     });  

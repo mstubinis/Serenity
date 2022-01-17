@@ -101,21 +101,26 @@ Handle Engine::priv::EditorCore::internal_load_embedded_image(const uint8_t* dat
     }
     return Engine::Resources::loadTexture(pixels.data(), width, height, textureName);
 }
-void Engine::priv::EditorCore::renderLightIcons(Scene& scene) {
-    if (m_Enabled && m_Shown) {
+void Engine::priv::EditorCore::renderLightIcons(Scene& scene, Viewport& viewport) {
+    if (m_Enabled && m_Shown && (viewport.getRenderFlags() & ViewportRenderingFlag::API2D)) {
         //auto& directionalLights = Engine::priv::PublicScene::GetLights<DirectionalLight>(scene);
         auto& sunLights         = Engine::priv::PublicScene::GetLights<SunLight>(scene);
         auto& pointLights       = Engine::priv::PublicScene::GetLights<PointLight>(scene);
         auto& spotLights        = Engine::priv::PublicScene::GetLights<SpotLight>(scene);
         auto& rodLights         = Engine::priv::PublicScene::GetLights<RodLight>(scene);
-        auto camera             = scene.getActiveCamera();
-        if (camera) {
-            auto render_light_icons = [&camera](auto& container, Handle texture) {
+        if (scene.getActiveCamera()) {
+            auto render_light_icons = [&scene, &viewport](auto& container, Handle texture) {
                 const auto depth = 0.1f;
                 for (const auto& light : container) {
-                    const auto twoDPos = Engine::Math::getScreenCoordinates(glm::vec3{ light->getComponent<ComponentTransform>()->getPosition() }, *camera, false);
+                    //const auto twoDPos = light->getComponent<ComponentTransform>()->getScreenCoordinates(false);
+                    const auto twoDPos = Engine::Math::getScreenCoordinates(
+                        light->getComponent<ComponentTransform>()->getWorldPosition(),
+                        *scene.getActiveCamera(), 
+                        viewport.getViewportDimensions(),
+                        false
+                    );
                     if (twoDPos.z > 0) {
-                        Engine::Renderer::renderTexture(texture, glm::vec2{ twoDPos }, light->getColor(), 0.0f, glm::vec2{ 1.0f }, depth);
+                        Engine::Renderer::renderTexture(texture, glm::vec2{ twoDPos }, light->getColor(), 0.0f, glm::vec2{ 1.0f }, depth, Alignment::Center);
                     }
                 }
             };

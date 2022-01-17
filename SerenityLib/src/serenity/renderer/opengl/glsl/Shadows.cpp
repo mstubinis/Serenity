@@ -39,7 +39,6 @@ float ShadowCalculationLightingShader(vec3 PxlViewPos, vec3 LightDir, vec3 PxlNo
     if (ShaderHelper::lacksDefinition(code, "ShadowCalculation(", "float ShadowCalculation(")) {
         std::string shadowCode = "const int NUM_CASCADES = " + std::to_string(int(DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS)) + ";\n";
         shadowCode += "const int NUM_CASCADES_DISTS = " + std::to_string(int(DIRECTIONAL_LIGHT_NUM_CASCADING_DISTANCES)) + ";\n";
-   //         ViewportUVCalculation(projCoords.xy), 
         shadowCode += R"(
 uniform sampler2D uShadowTexture[NUM_CASCADES];
 uniform float uCascadeEndClipSpace[NUM_CASCADES_DISTS];
@@ -54,7 +53,7 @@ float ShadowCalculation(int inCascadeIndex, vec4 inFragPosLightSpace, vec3 inNor
     if (projCoords.z > 1.0) {
         return 1.0;
     }
-    float bias = max((0.002 + (inCascadeIndex * 0.001515)) * (1.0 - dot(inNormal, inLightDir)), 0.0002);
+    float bias = max((0.001 + (inCascadeIndex * 0.001515)) * (1.0 - dot(inNormal, inLightDir)), 0.0019);
     float shadow = SampleShadowLinearPCF(
          USE_SAMPLER_2D(uShadowTexture[inCascadeIndex]), 
          (projCoords.xy), 

@@ -140,6 +140,8 @@ namespace Engine::priv {
             virtual bool buildShadowCaster(RodLight&) = 0;
             virtual bool buildShadowCaster(ProjectionLight&) = 0;
 
+            virtual void deleteAllShadowCasters(Scene&) = 0;
+
             virtual void sendGPUDataAllLights(const Scene&, const Camera&) = 0;
             virtual void sendGPUDataGI(Skybox*) = 0;
             virtual void sendGPUDataLight(const Camera&, const SunLight&,         const std::string& start) = 0;

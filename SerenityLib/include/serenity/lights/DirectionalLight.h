@@ -44,8 +44,8 @@ class DirectionalLightShadowData {
     public:
         CascadeContainerMatrices   m_LightSpaceMatrices;
         CascadeContainerDistances  m_CascadeDistances;
-        uint32_t                   m_ShadowWidth           = uint32_t(DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE);
-        uint32_t                   m_ShadowHeight          = uint32_t(DIRECTIONAL_LIGHT_DEFAULT_SHADOW_MAP_SIZE);
+        uint32_t                   m_ShadowWidth           = 0;
+        uint32_t                   m_ShadowHeight          = 0;
         float                      m_NearFactor            = 1.0f;
         float                      m_FarFactor             = 1.0f;
         float                      m_NearCache             = 1.0f;

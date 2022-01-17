@@ -264,5 +264,10 @@ void ComponentModel::setUserPointer(void* UserPointer) noexcept {
         instance->setUserPointer(UserPointer);
     }
 }
+void ComponentModel::setShadowCaster(bool isShadowCaster) noexcept {
+    for (auto& modelInstance : m_ModelInstances) {
+        modelInstance->setShadowCaster(isShadowCaster);
+    }
+}
 
 #pragma endregion

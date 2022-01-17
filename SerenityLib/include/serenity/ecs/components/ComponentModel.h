@@ -100,6 +100,8 @@ class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel
             m_ModelInstances[index]->setCustomUnbindFunctor(func);
         }
 
+        void setShadowCaster(bool isShadowCaster) noexcept;
+
         inline ModelInstance& operator[](size_t index) { return *m_ModelInstances[index].get(); }
         inline const ModelInstance& operator[](size_t index) const { return *m_ModelInstances[index].get(); }
 

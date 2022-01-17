@@ -7,6 +7,7 @@ class  Window;
 class  Scene;
 class  Camera;
 class  Shader;
+class  Viewport;
 namespace Engine::priv {
     class  ResourceManager;
     class  EditorWindowScene;
@@ -56,7 +57,7 @@ namespace Engine::priv {
 
             void processEvent(const sf::Event&);
             void update(Window&, const float dt);
-            void renderLightIcons(Scene&);
+            void renderLightIcons(Scene&, Viewport&);
             void render(Window&);
 
     };

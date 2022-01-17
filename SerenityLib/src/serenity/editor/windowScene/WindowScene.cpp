@@ -187,8 +187,12 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
                             const auto& GRColor  = instance.getGodRaysColor();
                             float aColor[4]      = { color.r(), color.g(), color.b(), color.a() };
                             float aGodRays[3]    = { GRColor.r(), GRColor.g(), GRColor.b() };
-                            ImGui::ColorEdit4("Color", &aColor[0]);
-                            ImGui::ColorEdit3("God Rays Color", &aGodRays[0]);
+                            if (ImGui::ColorEdit4("Color", &aColor[0])) {
+                                instance.setColor(aColor[0], aColor[1], aColor[2], aColor[3]);
+                            }
+                            if (ImGui::ColorEdit3("God Rays Color", &aGodRays[0])) {
+                                instance.setGodRaysColor(aGodRays[0], aGodRays[1], aGodRays[2]);
+                            }
 
                             ImGui::Checkbox("Force Render", &instance.m_ForceRender);
                             ImGui::SameLine();
@@ -200,8 +204,9 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
                             ImGui::Separator();
 
                             auto pos = instance.getPosition();
-                            ImGui::InputFloat3("position", &pos[0]);
-                            instance.setPosition(pos);
+                            if (ImGui::InputFloat3("position", &pos[0])) {
+                                instance.setPosition(pos);
+                            }
 
                             ImGui::InputFloat4("rotation", &instance.m_Orientation[0]);
                             ImGui::InputFloat3("scale", &instance.m_Scale[0]);
@@ -215,8 +220,7 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
                             ImGui::Text(std::string("Shader: " + c).c_str());
                             ImGui::Text(std::string("Stage: " + std::string(instance.m_Stage.toString())).c_str());
                             ImGui::Separator();
-                            instance.setColor(aColor[0], aColor[1], aColor[2], aColor[3]);
-                            instance.setGodRaysColor(aGodRays[0], aGodRays[1], aGodRays[2]);
+                            
                             instance.internal_update_model_matrix(true);
 
                             ImGui::TreePop();
@@ -272,24 +276,29 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
 
     auto base_light_logic = [](auto& light) {
         bool isLightActive = light.isActive();
-        ImGui::Checkbox("Enabled", &isLightActive);
-        light.activate(isLightActive);
+        if (ImGui::Checkbox("Enabled", &isLightActive)) {
+            light.activate(isLightActive);
+        }
 
         bool isShadowCaster = light.isShadowCaster();
-        ImGui::Checkbox("Casts Shadows", &isShadowCaster);
-        light.setShadowCaster(isShadowCaster);
+        if (ImGui::Checkbox("Casts Shadows", &isShadowCaster)) {
+            light.setShadowCaster(isShadowCaster); //TODO: currently, the default args for this override whatever was used previously.
+        }
 
         const auto& color = light.getColor();
-        ImGui::ColorEdit4("Color", const_cast<float*>(glm::value_ptr(color)));
-        light.setColor(color);
+        if (ImGui::ColorEdit4("Color", const_cast<float*>(glm::value_ptr(color)))) {
+            light.setColor(color);
+        }
 
         auto diff = light.getDiffuseIntensity();
         auto spec = light.getSpecularIntensity();
-        ImGui::SliderFloat("Diffuse Intensity", &diff, 0.0f, 20.0f);
-        ImGui::SliderFloat("Specular Intensity", &spec, 0.0f, 20.0f);
-        light.setDiffuseIntensity(diff);
-        light.setSpecularIntensity(spec);
+        if (ImGui::SliderFloat("Diffuse Intensity", &diff, 0.0f, 20.0f)) {
+            light.setDiffuseIntensity(diff);
+        }
+        if (ImGui::SliderFloat("Specular Intensity", &spec, 0.0f, 20.0f)) {
 
+
+        }
         //TODO: position? all lights use position EXCEPT directional lights
     };
 
@@ -319,22 +328,27 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
                 auto constant_ = light.getConstant();
                 auto linear_   = light.getLinear();
                 auto exponent_ = light.getExponent();
-                ImGui::SliderFloat("Constant", &constant_, 0.0f, 5.0f);
-                ImGui::SliderFloat("Linear", &linear_, 0.0f, 5.0f);
-                ImGui::SliderFloat("Exponent", &exponent_, 0.0f, 5.0f);
-                light.setConstant(constant_);
-                light.setLinear(linear_);
-                light.setExponent(exponent_);
+                if (ImGui::SliderFloat("Constant", &constant_, 0.0f, 5.0f)) {
+                    light.setConstant(constant_);
+                }
+                if (ImGui::SliderFloat("Linear", &linear_, 0.0f, 5.0f)) {
+                    light.setLinear(linear_);
+                }
+                if (ImGui::SliderFloat("Exponent", &exponent_, 0.0f, 5.0f)) {
+                    light.setExponent(exponent_);
+                }
                 static const char* AttenuModels[] = { "Constant", "Distance", "Distance Squared", "Constant Linear Exponent", "Distance Radius Squared" };
                 static int curr_atten_model       = int(light.getAttenuationModel());
-                ImGui::ListBox("Attenuation Model", &curr_atten_model, AttenuModels, IM_ARRAYSIZE(AttenuModels));
-                light.setAttenuationModel(static_cast<LightAttenuation>(curr_atten_model));
+                if (ImGui::ListBox("Attenuation Model", &curr_atten_model, AttenuModels, IM_ARRAYSIZE(AttenuModels))) {
+                    light.setAttenuationModel(static_cast<LightAttenuation>(curr_atten_model));
+                }
             };
 
             lamda_lights(directionalLights, "Directional Lights", "Directional Light", [&](DirectionalLight& light) {
                 const auto dir = light.getDirection();
-                ImGui::InputFloat3("Direction", const_cast<float*>(glm::value_ptr(dir)));
-                light.setDirection(dir); //TODO: add a check to see if the direction is different in this function call? this is quite expensive to do per frame
+                if (ImGui::InputFloat3("Direction", const_cast<float*>(glm::value_ptr(dir)))) {
+                    light.setDirection(dir); //TODO: add a check to see if the direction is different in this function call? this is quite expensive to do per frame
+                }
             });
             lamda_lights(sunLights, "Sun Lights", "Sun Light", [&](SunLight& light) {
                 auto transform   = light.getComponent<ComponentTransform>();
@@ -347,16 +361,19 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
                 lamda_point_light_data(light);
                 auto cutoff      = light.getCutoff();
                 auto outerCutoff = light.getCutoffOuter();
-                ImGui::SliderFloat("Inner Cutoff", &cutoff, 0.0f, 180.0f);
-                ImGui::SliderFloat("Outer Cutoff", &outerCutoff, 0.0f, 180.0f);
-                light.setCutoffDegrees(cutoff);
-                light.setCutoffOuterDegrees(outerCutoff);
+                if (ImGui::SliderFloat("Inner Cutoff", &cutoff, 0.0f, 180.0f)) {
+                    light.setCutoffDegrees(cutoff);
+                }
+                if (ImGui::SliderFloat("Outer Cutoff", &outerCutoff, 0.0f, 180.0f)) {
+                    light.setCutoffOuterDegrees(outerCutoff);
+                }
             });
             lamda_lights(rodLights, "Rod Lights", "Rod Light", [&](RodLight& light) {
                 lamda_point_light_data(light);
                 auto rodLength = light.getRodLength();
-                ImGui::SliderFloat("Rod Length", &rodLength, 0.0f, 50.0f);
-                light.setRodLength(rodLength);
+                if (ImGui::SliderFloat("Rod Length", &rodLength, 0.0f, 50.0f)) {
+                    light.setRodLength(rodLength);
+                }
             });
             ImGui::TreePop();
             ImGui::Separator();
@@ -427,8 +444,9 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
     {
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "General");
         bool vsync = Engine::Resources::getWindow().isVsyncEnabled();
-        ImGui::Checkbox("Vsync ", &vsync);
-        Engine::Resources::getWindow().setVerticalSyncEnabled(vsync);
+        if (ImGui::Checkbox("Vsync ", &vsync)) {
+            Engine::Resources::getWindow().setVerticalSyncEnabled(vsync);
+        }
     }
     //skybox
     {
@@ -452,8 +470,9 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
             auto scene = Engine::Resources::getCurrentScene();
             if (scene) {
                 glm::vec3 ambientColor = scene->getAmbientColor();
-                ImGui::ColorEdit3("Ambient Color", &ambientColor[0]);
-                scene->setAmbientColor(ambientColor[0], ambientColor[1], ambientColor[2]);
+                if (ImGui::ColorEdit3("Ambient Color", &ambientColor[0])) {
+                    scene->setAmbientColor(ambientColor[0], ambientColor[1], ambientColor[2]);
+                }
             }
         }
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Shadow Settings");
@@ -530,42 +549,51 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
 
                 const auto& color = material->getF0();
                 float color_arr[] = { color.r(), color.g(), color.b(), color.a() };
-                ImGui::ColorEdit3("F0 Color", &color_arr[0]);
-                material->setF0Color(uint8_t(color_arr[0] * 255.0f), uint8_t(color_arr[1] * 255.0f), uint8_t(color_arr[2] * 255.0f));
+                if (ImGui::ColorEdit3("F0 Color", &color_arr[0])) {
+                    material->setF0Color(uint8_t(color_arr[0] * 255.0f), uint8_t(color_arr[1] * 255.0f), uint8_t(color_arr[2] * 255.0f));
+                }
 
                 int glow = int(material->getGlow());
-                ImGui::SliderInt("Glow", &glow, 0, 255);
-                material->setGlow(uint8_t(glow));
+                if (ImGui::SliderInt("Glow", &glow, 0, 255)) {
+                    material->setGlow(uint8_t(glow));
+                }
 
                 int alpha = int(material->getAlpha());
-                ImGui::SliderInt("Alpha", &alpha, 0, 255);
-                material->setAlpha(uint8_t(alpha));
+                if (ImGui::SliderInt("Alpha", &alpha, 0, 255)) {
+                    material->setAlpha(uint8_t(alpha));
+                }
 
                 int ao = int(material->getAO());
-                ImGui::SliderInt("AO", &ao, 0, 255);
-                material->setAO(uint8_t(ao));
+                if (ImGui::SliderInt("AO", &ao, 0, 255)) {
+                    material->setAO(uint8_t(ao));
+                }
 
                 int metalness = int(material->getMetalness());
-                ImGui::SliderInt("Metalness", &metalness, 0, 255);
-                material->setMetalness(uint8_t(metalness));
+                if (ImGui::SliderInt("Metalness", &metalness, 0, 255)) {
+                    material->setMetalness(uint8_t(metalness));
+                }
 
                 int smoothness = int(material->getSmoothness());
-                ImGui::SliderInt("Smoothness", &smoothness, 0, 255);
-                material->setSmoothness(uint8_t(smoothness));
+                if (ImGui::SliderInt("Smoothness", &smoothness, 0, 255)) {
+                    material->setSmoothness(uint8_t(smoothness));
+                }
 
                 bool isShadeless = material->getShadeless();
-                ImGui::Checkbox("Shadeless", &isShadeless);
-                material->setShadeless(isShadeless);
+                if (ImGui::Checkbox("Shadeless", &isShadeless)) {
+                    material->setShadeless(isShadeless);
+                }
 
                 static const char* DiffuseModels[] = { "None", "Lambert", "Oren Nayar", "Ashikhmin Shirley", "Minnaert" };
-                int diffuseModel = int(material->getDiffuseModel());
-                ImGui::ListBox("Diffuse Model", &diffuseModel, DiffuseModels, IM_ARRAYSIZE(DiffuseModels));
-                material->setDiffuseModel(static_cast<DiffuseModel>(diffuseModel));
+                int diffuseModel = material->getDiffuseModel();
+                if (ImGui::ListBox("Diffuse Model", &diffuseModel, DiffuseModels, IM_ARRAYSIZE(DiffuseModels))) {
+                    material->setDiffuseModel(diffuseModel);
+                }
 
                 static const char* SpecularModels[] = { "None", "Blinn Phong", "Phong", "GGX", "Cook Torrance", "Guassian", "Beckmann", "Ashikhmin Shirley"};
-                int specularModel = int(material->getSpecularModel());
-                ImGui::ListBox("Specular Model", &specularModel, SpecularModels, IM_ARRAYSIZE(SpecularModels));
-                material->setSpecularModel(static_cast<SpecularModel>(specularModel));
+                int specularModel = material->getSpecularModel();
+                if (ImGui::ListBox("Specular Model", &specularModel, SpecularModels, IM_ARRAYSIZE(SpecularModels))) {
+                    material->setSpecularModel(specularModel);
+                }
 
                 ImGui::TreePop();
                 ImGui::Separator();

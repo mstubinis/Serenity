@@ -58,6 +58,8 @@ Scene::Scene(uint32_t id, std::string_view name)
     : Scene{ id, name, SceneOptions::DEFAULT_OPTIONS }
 {}
 Scene::~Scene() {
+    //TODO: remove shadow information from renderer
+    Engine::priv::Core::m_Engine->m_RenderModule.m_Pipeline->deleteAllShadowCasters(*this);
     SAFE_DELETE(m_Skybox);
     SAFE_DELETE_VECTOR(m_Cameras);
     m_ECS.destruct();

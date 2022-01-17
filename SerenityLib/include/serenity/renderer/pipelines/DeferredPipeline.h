@@ -201,6 +201,7 @@ namespace Engine::priv {
             bool buildShadowCaster(SpotLight&) override;
             bool buildShadowCaster(RodLight&) override;
             bool buildShadowCaster(ProjectionLight&) override;
+            void deleteAllShadowCasters(Scene&) override;
 
             void sendGPUDataAllLights(const Scene&, const Camera&) override;
             void sendGPUDataGI(Skybox*) override;

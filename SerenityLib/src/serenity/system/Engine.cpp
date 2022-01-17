@@ -182,10 +182,14 @@ void EngineCore::internal_render(GameCore& gameCore, Scene& scene, Window& windo
         m_RenderModule._sort2DAPICommands();
         m_RenderModule.m_Pipeline->renderInitFrame(m_RenderModule);
         scene.render();
-        m_Editor.renderLightIcons(scene);
         auto& scene_viewports = Engine::priv::PublicScene::GetViewports(scene);
         for (auto& viewport : scene_viewports) {
             if (viewport.isActive()) {
+                if (viewport.isAspectRatioSynced()) {
+                    const auto& viewportDimensions = viewport.getViewportDimensions();
+                    viewport.getCamera().setAspectRatio(viewportDimensions.z / viewportDimensions.w);
+                }
+                m_Editor.renderLightIcons(scene, viewport);
                 viewport.render(m_RenderModule, viewport, true);
             }
         }
