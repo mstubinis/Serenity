@@ -8,6 +8,26 @@
 
 namespace Engine::priv {
 	struct no_args_t {};
+
+	namespace detail {
+		template<std::size_t I = 0, class TUPLE_TYPE, class ... DATA_TYPES>
+		constexpr void insertion_sort_assignment_part_1(std::tuple<DATA_TYPES...>& data, auto& key, const auto i) {
+			if constexpr (I < sizeof...(DATA_TYPES)) {
+				using TYPE = typename std::tuple_element<I, TUPLE_TYPE>::type::VAL_TYPE;
+				std::memmove(&std::get<I>(key)[0], &std::get<I>(data)[i], sizeof(TYPE));
+				insertion_sort_assignment_part_1<I + 1, TUPLE_TYPE, DATA_TYPES...>(data, key, i);
+			}
+		}
+
+		template<std::size_t I = 0, class TUPLE_TYPE, class ... DATA_TYPES>
+		constexpr void insertion_sort_assignment_part_2(std::tuple<DATA_TYPES...>& data, auto& key, const auto i) {
+			if constexpr(I < sizeof...(DATA_TYPES)) {
+				using TYPE = typename std::tuple_element<I, TUPLE_TYPE>::type::VAL_TYPE;
+				std::memmove(&std::get<I>(data)[i], &std::get<I>(key)[0], sizeof(TYPE));
+				insertion_sort_assignment_part_2<I + 1, TUPLE_TYPE, DATA_TYPES...>(data, key, i);
+			}
+		}
+	}
 }
 namespace Engine {
 	constexpr Engine::priv::no_args_t no_args{};
@@ -76,7 +96,7 @@ namespace Engine {
 				}
 			};
 		public:
-			using TUPLE_TYPE = std::tuple<ARRAY_WRAPPER<TYPES>...>;
+			using TUPLE_TYPE        = std::tuple<ARRAY_WRAPPER<TYPES>...>;
 		private:
 			TUPLE_TYPE  m_Data;
 			size_t      m_Size = 0;
@@ -115,7 +135,6 @@ namespace Engine {
 					difference_type operator-(const CRTP& r) const { return m_I - r.m_I; }
 			};
 		public:
-
 
 			template<size_t ... INDICES>
 			class Iterator : public IteratorBase<Iterator<INDICES...>> {
@@ -197,10 +216,7 @@ namespace Engine {
 					template<class STREAM> inline void print(STREAM& stream) const { stream << std::get<INDEX>(m_Vector->data()).data[IteratorBaseType::m_I] << '\n'; }
 				};
 
-
 		public:
-
-
 			constexpr DODMembers() = default;
 
 			~DODMembers() {
@@ -244,12 +260,10 @@ namespace Engine {
 				return m_Size;
 			}
 
-
 			template<size_t MEMBER_INDEX>
 			inline constexpr auto& get(size_t index) noexcept {
 				return std::get<MEMBER_INDEX>(m_Data).data[index];
 			}
-
 
 			constexpr void shrink_to_fit() {
 				if (m_Capacity > m_Size) {
@@ -285,7 +299,7 @@ namespace Engine {
 				arrayData.swap(index1, index2);
 			}
 
-
+#if 0
 			template<size_t INDEX>
 			constexpr void sort_bubble(const auto sorter, size_t firstIndex, size_t lastIndex) {
 				bool swapped = false;
@@ -313,6 +327,40 @@ namespace Engine {
 			template<size_t INDEX> inline constexpr void sort_bubble() { 
 				if (size() <= 1) { return; }
 				sort_bubble<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
+			}
+#endif
+
+			template<size_t INDEX>
+			void sort_insertion(const auto sorter, size_t firstIndex, size_t lastIndex) {
+				auto& arrayData = std::get<INDEX>(m_Data);
+				using ssize_t = std::make_signed_t<std::size_t>;
+				ssize_t i = firstIndex + 1;
+				TUPLE_TYPE key;
+
+				std::apply([this](auto&&... args) { (args.moveMemory(0, 1), ...); }, key);
+				while (i <= lastIndex) {
+					Engine::priv::detail::insertion_sort_assignment_part_1<0, TUPLE_TYPE>(m_Data, key, i);
+					ssize_t j = i - 1;
+					while (j >= 0 && !sorter(arrayData[j], std::get<INDEX>(key)[0])) {
+						std::apply([this, j](auto&&... args) {(args.move(j, j + 1), ...); }, m_Data);
+						j -= 1;
+					}
+					Engine::priv::detail::insertion_sort_assignment_part_2<0, TUPLE_TYPE>(m_Data, key, j + 1);
+					i += 1;
+				}
+			}
+
+			template<size_t INDEX>
+			void sort_insertion(size_t firstIndex, size_t lastIndex) {
+				assert(firstIndex >= 0 && firstIndex < size());
+				assert(lastIndex >= 0 && lastIndex < size());
+				if (lastIndex <= firstIndex) { return; }
+				sort_insertion<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex);
+			}
+			template<size_t INDEX>
+			void sort_insertion() {
+				if (size() <= 1) { return; }
+				sort_insertion<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
 			}
 
 			template<size_t INDEX>
@@ -381,7 +429,7 @@ namespace Engine {
 				assert(lastIndex >= 0 && lastIndex < size());
 				if (lastIndex <= firstIndex) { return; }
 				if (lastIndex - firstIndex <= 32) {
-					sort_bubble<INDEX>(sorter, firstIndex, lastIndex); //TODO: use insertion_sort
+					sort_insertion<INDEX>(sorter, firstIndex, lastIndex);
 					return;
 				}
 				sort_quick<INDEX>(sorter, firstIndex, lastIndex);
