@@ -28,8 +28,7 @@ Entity Engine::priv::ECSEntityPool::createEntity(const Scene& scene) noexcept {
         Entity entity{ id, scene.id(), 0 };
         {
             std::lock_guard lock{ m_Mutex };
-            m_Pool.emplace_back();
-            m_Pool[id] = entity;
+            m_Pool.emplace_back(entity);
         }
         return entity;
     } else {

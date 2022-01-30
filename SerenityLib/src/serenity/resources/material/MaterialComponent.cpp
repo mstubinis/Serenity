@@ -12,7 +12,7 @@
 #include <SFML/OpenGL.hpp>
 
 namespace {
-    std::string WholeStringBuffer;
+    std::string WHOLE_STR_BUFFER;
 }
 
 constexpr std::array<glm::vec4, MaterialComponentType::_TOTAL> MISC_DATA_INFO { {
@@ -80,11 +80,11 @@ MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHand
     return &layer;
 }
 void MaterialComponent::bind(size_t component_index, int& inTextureUnit) const {
-    WholeStringBuffer.clear();
-    WholeStringBuffer += "components[" + std::to_string(component_index) + "].";
-    Engine::Renderer::sendUniform2Safe((WholeStringBuffer + "compDat").c_str(), int(m_NumLayers), int(m_ComponentType != MaterialComponentType::Empty));
+    WHOLE_STR_BUFFER.clear();
+    WHOLE_STR_BUFFER += "components[" + std::to_string(component_index) + "].";
+    Engine::Renderer::sendUniform2Safe((WHOLE_STR_BUFFER + "compDat").c_str(), int(m_NumLayers), int(bool(m_ComponentType != MaterialComponentType::Empty)));
     for (uint32_t layerNumber = 0; layerNumber < MAX_MATERIAL_LAYERS_PER_COMPONENT; ++layerNumber) {
-        m_Layers[layerNumber].sendDataToGPU(WholeStringBuffer, layerNumber, inTextureUnit);
+        m_Layers[layerNumber].sendDataToGPU(WHOLE_STR_BUFFER, layerNumber, inTextureUnit);
     }
 }
 void MaterialComponent::update(const float dt) {

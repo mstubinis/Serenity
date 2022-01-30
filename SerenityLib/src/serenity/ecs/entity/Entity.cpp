@@ -7,21 +7,21 @@
 
 using namespace Engine::priv;
 
+
 Entity::Entity(Scene& scene) {
     *this = scene.createEntity();
 }
-Entity::Entity(Entity&& other) noexcept {
-    if (&other != this) {
-        m_ID              = (other.m_ID);
-        m_SceneID         = (other.m_SceneID);
-        m_VersionID       = (other.m_VersionID);
-        other.m_ID        = getMaxEntityIDBits(ID_BIT_POSITIONS);
-        other.m_SceneID   = getMaxEntityIDBits(SCENE_BIT_POSITIONS);
-        other.m_VersionID = getMaxEntityIDBits(VERSION_BIT_POSITIONS);
-    }
+Entity::Entity(Entity&& other) noexcept 
+    : m_ID{ (other.m_ID) }
+    , m_SceneID{ (other.m_SceneID) }
+    , m_VersionID{ (other.m_VersionID) }
+{
+    other.m_ID        = getMaxEntityIDBits(ID_BIT_POSITIONS);
+    other.m_SceneID   = getMaxEntityIDBits(SCENE_BIT_POSITIONS);
+    other.m_VersionID = getMaxEntityIDBits(VERSION_BIT_POSITIONS);
 }
 Entity& Entity::operator=(Entity&& other) noexcept {
-    if (&other != this) {
+    if (this != &other) {
         m_ID              = (other.m_ID);
         m_SceneID         = (other.m_SceneID);
         m_VersionID       = (other.m_VersionID);
@@ -31,6 +31,8 @@ Entity& Entity::operator=(Entity&& other) noexcept {
     }
     return *this;
 }
+
+
 bool Entity::isValid() const noexcept {
     Scene* scene_ptr = scene();
     return !isNull() && (scene_ptr && !PublicScene::GetECS(*scene_ptr).getEntityPool().isEntityVersionDifferent(*this));

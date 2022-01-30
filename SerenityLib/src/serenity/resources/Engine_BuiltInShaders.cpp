@@ -798,16 +798,16 @@ Engine::priv::EShaders::forward_frag =
     "}\n"
     "void main(){\n"
     "    InData inData;\n"
-    "    inData.uv = UV;\n"
-    "    inData.diffuse = vec4(0.0,0.0,0.0,0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
-    "    inData.objectColor = Unpack32BitUIntTo4ColorFloats(Object_Color);\n"
-    "    inData.normals = normalize(Normals);\n"
-    "    inData.glow = MaterialBasePropertiesOne.x;\n"
-    "    inData.specular = 1.0;\n"
-    "    inData.ao = MaterialBasePropertiesOne.y;\n"
-    "    inData.metalness = MaterialBasePropertiesOne.z;\n"
-    "    inData.smoothness = MaterialBasePropertiesOne.w;\n"
-    "    inData.materialF0 = Material_F0AndID.rgb;\n"
+    "    inData.uv            = UV;\n"
+    "    inData.diffuse       = vec4(0.0, 0.0, 0.0, 0.0001);\n" //this is extremely wierd, but we need some form of alpha to get painters algorithm to work...
+    "    inData.objectColor   = Unpack32BitUIntTo4ColorFloats(Object_Color);\n"
+    "    inData.normals       = normalize(Normals);\n"
+    "    inData.glow          = MaterialBasePropertiesOne.x;\n"
+    "    inData.specular      = 1.0;\n"
+    "    inData.ao            = MaterialBasePropertiesOne.y;\n"
+    "    inData.metalness     = MaterialBasePropertiesOne.z;\n"
+    "    inData.smoothness    = MaterialBasePropertiesOne.w;\n"
+    "    inData.materialF0    = Material_F0AndID.rgb;\n"
     "    inData.worldPosition = WorldPosition;\n"
 
     "    ProcessComponentDiffuse(components[0], inData);\n"
@@ -832,17 +832,17 @@ Engine::priv::EShaders::forward_frag =
     "            vec3 lightCalculation = ConstantZeroVec3;\n"
     "            vec3 LightPosition    = vec3(currentLight.DataC.yzw) - CamRealPosition;\n"
     "            vec3 LightDirection   = normalize(vec3(currentLight.DataA.w, currentLight.DataB.x, currentLight.DataB.y));\n"
-    "            if(currentLight.DataD.w == 0.0){\n"       //sun
+    "            if (currentLight.DataD.w == 0.0) {\n"       //sun
     "                lightCalculation = CalcLightInternal(currentLight, normalize(LightPosition - WorldPosition), WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
-    "            }else if(currentLight.DataD.w == 1.0){\n" //point
+    "            } else if (currentLight.DataD.w == 1.0) {\n" //point
     "                lightCalculation = CalcPointLight(currentLight, LightPosition, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
-    "            }else if(currentLight.DataD.w == 2.0){\n" //directional
+    "            } else if (currentLight.DataD.w == 2.0) {\n" //directional
     "                lightCalculation = CalcLightInternal(currentLight, LightDirection, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
-    "            }else if(currentLight.DataD.w == 3.0){\n" //spot
+    "            } else if (currentLight.DataD.w == 3.0) {\n" //spot
     "                lightCalculation = CalcSpotLight(currentLight, LightDirection, LightPosition, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
-    "            }else if(currentLight.DataD.w == 4.0){\n" //rod
+    "            } else if (currentLight.DataD.w == 4.0) {\n" //rod
     "                lightCalculation = CalcRodLight(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
-    "            }else if(currentLight.DataD.w == 5.0){\n" //projection
+    "            } else if (currentLight.DataD.w == 5.0) {\n" //projection
     "                lightCalculation = CalcProjectionLight(currentLight, vec3(currentLight.DataA.w, currentLight.DataB.xy), currentLight.DataC.yzw, WorldPosition, ViewPosition, inData.normals, inData.specular, inData.diffuse.rgb, SSAO, MetalSmooth, MaterialBasePropertiesTwo.x, inData.materialF0, MaterialBasePropertiesTwo.y, MaterialBasePropertiesTwo.z, AO);\n"
     "            }\n"
     "            lightTotal += lightCalculation;\n"
@@ -850,11 +850,11 @@ Engine::priv::EShaders::forward_frag =
              //GI here
     "        vec3 inGIContribution = Unpack3FloatsInto1FloatUnsigned(RendererInfo1.x);\n" //x = diffuse, y = specular, z = global
     "        lightTotal           += CalcGILight(SSAO, inData.normals, inData.diffuse.xyz, WorldPosition, AO, MetalSmooth.x, MetalSmooth.y, inData.glow, inData.materialF0, MaterialBasePropertiesTwo.x, inGIContribution).rgb;\n"
-    "    }else{\n"
+    "    } else {\n"
     "        lightTotal = inData.diffuse.rgb;\n"
     "    }\n"
     "    inData.diffuse.a *= MaterialBasePropertiesTwo.x;\n"
-    "    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
+    //"    vec4 GodRays = Unpack32BitUIntTo4ColorFloats(Gods_Rays_Color);\n"
     "    SUBMIT_DIFFUSE(vec4(lightTotal.rgb, inData.diffuse.a));\n"
     "    SUBMIT_NORMALS(1.0, 1.0);\n"
     "    SUBMIT_MATERIAL_ID_AND_AO(0.0, 0.0);\n"
@@ -871,11 +871,11 @@ Engine::priv::EShaders::particle_frag =
 "\n"
 "USE_LOG_DEPTH_FRAGMENT\n"
 
-"uniform SAMPLER_TYPE_2D DiffuseTexture0;\n";
+"uniform SAMPLER_TYPE_2D Tex0;\n";
 
 for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
-        "uniform SAMPLER_TYPE_2D DiffuseTexture" + std::to_string(i) + ";\n";
+"uniform SAMPLER_TYPE_2D Tex" + std::to_string(i) + ";\n";
 }
 
 priv::EShaders::particle_frag +=
@@ -897,11 +897,11 @@ priv::EShaders::particle_frag +=
 //////////////////////////////////////////////////////////////////////////
 "    vec4 finalColor = ParticleColor;\n"
 "    if(MaterialIndex == 0U)\n"
-"        finalColor *= texture2D(DiffuseTexture0, UV); \n";
+"        finalColor *= texture2D(Tex0, UV); \n";
 for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
 "    else if (MaterialIndex == " + std::to_string(i) + "U)\n"
-"        finalColor *= texture2D(DiffuseTexture" + std::to_string(i) + ", UV); \n";
+"        finalColor *= texture2D(Tex" + std::to_string(i) + ", UV); \n";
 }
 priv::EShaders::particle_frag +=
 "    else\n"
@@ -975,7 +975,7 @@ flat varying vec3 CamPosition;
 varying vec3 TangentCameraPos;
 varying vec3 TangentFragPos;
 
-void main(){
+void main() {
     InData inData;
     inData.uv = UV;
     inData.diffuse = vec4(0.0, 0.0, 0.0, 0.0001);
@@ -1000,7 +1000,7 @@ void main(){
     ProcessComponentParallax(components[9], inData);
 
     vec2 OutNormals = EncodeOctahedron(inData.normals);
-    if(Shadeless == 1){
+    if (Shadeless == 1) {
         OutNormals = ConstantOneVec2;
         inData.diffuse *= (1.0 + inData.glow);
     }

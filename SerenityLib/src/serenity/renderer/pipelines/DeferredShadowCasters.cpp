@@ -61,12 +61,16 @@ namespace {
         auto lightOrtho = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
         return lightOrtho * lightView;
     }
+    
+    
+    void internal_free_memory_container(auto& container, const uint32_t sceneID) noexcept {
+        if (container.size() > sceneID) {
+            container[sceneID].clear();
+        }
+    }
     void internal_free_memory_container(auto& container) noexcept {
-        for (auto& vectorContainer : container) {
-            for (auto& itr : vectorContainer) {
-                SAFE_DELETE(std::get<1>(itr));
-            }
-            vectorContainer.clear();
+        for (size_t sceneID = 0; sceneID < container.size(); ++sceneID) {
+            internal_free_memory_container(container, uint32_t(sceneID));
         }
         container.clear();
     }
@@ -82,10 +86,36 @@ namespace {
 Engine::priv::GLDeferredDirectionalLightShadowInfo::GLDeferredDirectionalLightShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
     setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
 }
+Engine::priv::GLDeferredDirectionalLightShadowInfo::~GLDeferredDirectionalLightShadowInfo() {
+    if (m_FBO != 0) {
+        glDeleteFramebuffers(1, &m_FBO);
+    }
+    if (std::all_of(std::begin(m_DepthTexture), std::end(m_DepthTexture), [](const auto& item) { return item == 0; }) == false) {
+        glDeleteTextures(GLsizei(m_DepthTexture.size()), m_DepthTexture.data());
+    }
+}
+Engine::priv::GLDeferredDirectionalLightShadowInfo::GLDeferredDirectionalLightShadowInfo(GLDeferredDirectionalLightShadowInfo&& other) noexcept 
+    : DirectionalLightShadowData{ std::move(other) }
+    , m_DepthTexture            { std::move(other.m_DepthTexture) }
+    , m_FBO                     { std::exchange(other.m_FBO, GLuint(0)) }
+{
+    other.m_DepthTexture.fill(0);
+}
+Engine::priv::GLDeferredDirectionalLightShadowInfo& Engine::priv::GLDeferredDirectionalLightShadowInfo::operator=(GLDeferredDirectionalLightShadowInfo&& other) noexcept {
+    if (this != &other) {
+        DirectionalLightShadowData(std::move(other));
+        m_DepthTexture = std::move(other.m_DepthTexture);
+        m_FBO          = std::exchange(other.m_FBO, GLuint(0));
+        other.m_DepthTexture.fill(0);
+    }
+    return *this;
+}
+
+
 void Engine::priv::GLDeferredDirectionalLightShadowInfo::calculateSplits(const Camera& camera) {
     if (m_FrustumType == LightShadowFrustumType::CameraBased) {
         const auto cameraNear = camera.getNear() * m_NearFactor;
-        const auto cameraFar  = camera.getFar() * m_FarFactor;
+        const auto cameraFar = camera.getFar() * m_FarFactor;
         m_CascadeDistances[0] = cameraNear;
         m_CascadeDistances[1] = cameraFar * 0.02f;
         m_CascadeDistances[2] = cameraFar * 0.04f;
@@ -100,10 +130,6 @@ void Engine::priv::GLDeferredDirectionalLightShadowInfo::calculateSplits(const C
         m_CascadeDistances[4] = m_FarFactor * 0.5f;
         m_CascadeDistances[5] = m_FarFactor;
     }
-}
-Engine::priv::GLDeferredDirectionalLightShadowInfo::~GLDeferredDirectionalLightShadowInfo() {
-    glDeleteFramebuffers(1, &m_FBO);
-    glDeleteTextures(GLsizei(m_DepthTexture.size()), m_DepthTexture.data());
 }
 bool Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
     if (m_DepthTexture[0] == 0) {
@@ -187,6 +213,16 @@ Engine::priv::GLDeferredSunLightShadowInfo::GLDeferredSunLightShadowInfo(uint32_
     : Engine::priv::GLDeferredDirectionalLightShadowInfo{ shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor }
 {
 }
+Engine::priv::GLDeferredSunLightShadowInfo::GLDeferredSunLightShadowInfo(GLDeferredSunLightShadowInfo&& other) noexcept
+    : GLDeferredDirectionalLightShadowInfo{ std::move(other) }
+{
+}
+Engine::priv::GLDeferredSunLightShadowInfo& Engine::priv::GLDeferredSunLightShadowInfo::operator=(GLDeferredSunLightShadowInfo&& other) noexcept {
+    if (this != &other) {
+        GLDeferredDirectionalLightShadowInfo(std::move(other));
+    }
+    return *this;
+}
 
 #pragma endregion
 
@@ -203,16 +239,16 @@ void Engine::priv::GLDeferredLightShadowCasters::clearSceneData(const Scene& sce
     clearSceneData(scene.id());
 }
 void Engine::priv::GLDeferredLightShadowCasters::clearSceneData(const uint32_t sceneID) {
-    cleanup_container_from_scene(m_ShadowCastersDirectional, sceneID);
+    internal_free_memory_container(m_ShadowCastersDirectional, sceneID);
     cleanup_container_from_scene(m_ShadowCastersDirectionalHashed, sceneID);
-    cleanup_container_from_scene(m_ShadowCastersPoint, sceneID);
+    internal_free_memory_container(m_ShadowCastersPoint, sceneID);
     cleanup_container_from_scene(m_ShadowCastersPointHashed, sceneID);
-    cleanup_container_from_scene(m_ShadowCastersProjection, sceneID);
+    internal_free_memory_container(m_ShadowCastersProjection, sceneID);
     cleanup_container_from_scene(m_ShadowCastersProjectionHashed, sceneID);
-    cleanup_container_from_scene(m_ShadowCastersRod, sceneID);
+    internal_free_memory_container(m_ShadowCastersRod, sceneID);
     cleanup_container_from_scene(m_ShadowCastersRodHashed, sceneID);
-    cleanup_container_from_scene(m_ShadowCastersSpot, sceneID);
+    internal_free_memory_container(m_ShadowCastersSpot, sceneID);
     cleanup_container_from_scene(m_ShadowCastersSpotHashed, sceneID);
-    cleanup_container_from_scene(m_ShadowCastersSun, sceneID);
+    internal_free_memory_container(m_ShadowCastersSun, sceneID);
     cleanup_container_from_scene(m_ShadowCastersSunHashed, sceneID);
 }

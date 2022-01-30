@@ -112,7 +112,6 @@ void Engine::priv::EditorCore::renderLightIcons(Scene& scene, Viewport& viewport
             auto render_light_icons = [&scene, &viewport](auto& container, Handle texture) {
                 const auto depth = 0.1f;
                 for (const auto& light : container) {
-                    //const auto twoDPos = light->getComponent<ComponentTransform>()->getScreenCoordinates(false);
                     const auto twoDPos = Engine::Math::getScreenCoordinates(
                         light->getComponent<ComponentTransform>()->getWorldPosition(),
                         *scene.getActiveCamera(), 

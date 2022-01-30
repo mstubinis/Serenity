@@ -10,19 +10,19 @@
 void Engine::priv::opengl::glsl::Shadows::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
     if (ShaderHelper::lacksDefinition(code, "ShadowCalculationLightingShader(", "float ShadowCalculationLightingShader(")) {
         std::string shadowCode = R"(
-float ShadowCalculationLightingShader(vec3 PxlViewPos, vec3 LightDir, vec3 PxlNormal, vec4 ShadowPxlWorldPos) {
+float ShadowCalculationLightingShader(vec3 PxlViewPos, vec3 LightDir, vec3 PxlNormal, vec4 ShadowPxlWorldSpace) {
     float shadow = 1.0;
     for (int i = 0; i < NUM_CASCADES; i++) {
         int iNext = i + 1;
         float currDepth = abs(PxlViewPos.z);
         if (currDepth < uCascadeEndClipSpace[iNext]) {
-            vec4 FragPosLightSpace = uLightMatrix[i] * ShadowPxlWorldPos;
-            shadow = ShadowCalculation(i, FragPosLightSpace, PxlNormal, LightDir);
+            vec4 ShadowPxlLightSpace = uLightMatrix[i] * ShadowPxlWorldSpace;
+            shadow = ShadowCalculation(i, ShadowPxlLightSpace, PxlNormal, LightDir);
             if (i < NUM_CASCADES - 1) {
                 float fade = clamp((1.0 - currDepth / uCascadeEndClipSpace[iNext]) / 0.05, 0.0, 1.0);
                 if (fade < 1.0) {
-                    vec4 NextFragPosLightSpace = uLightMatrix[iNext] * ShadowPxlWorldPos;
-                    float nextShadow = ShadowCalculation(iNext, NextFragPosLightSpace, PxlNormal, LightDir);
+                    vec4 NextShadowPxlLightSpace = uLightMatrix[iNext] * ShadowPxlWorldSpace;
+                    float nextShadow = ShadowCalculation(iNext, NextShadowPxlLightSpace, PxlNormal, LightDir);
                     shadow = mix(nextShadow, shadow, fade);
                 }
             }
@@ -44,11 +44,11 @@ uniform sampler2D uShadowTexture[NUM_CASCADES];
 uniform float uCascadeEndClipSpace[NUM_CASCADES_DISTS];
 uniform int uShadowEnabled;
 uniform vec2 uShadowTexelSize;
-float ShadowCalculation(int inCascadeIndex, vec4 inFragPosLightSpace, vec3 inNormal, vec3 inLightDir){
+float ShadowCalculation(int inCascadeIndex, vec4 inShadowPxlLightSpace, vec3 inNormal, vec3 inLightDir){
     if (uShadowEnabled == 0) {
         return 1.0;
     }
-    vec3 projCoords = inFragPosLightSpace.xyz / inFragPosLightSpace.w;
+    vec3 projCoords = inShadowPxlLightSpace.xyz / inShadowPxlLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     if (projCoords.z > 1.0) {
         return 1.0;
@@ -56,7 +56,7 @@ float ShadowCalculation(int inCascadeIndex, vec4 inFragPosLightSpace, vec3 inNor
     float bias = max((0.001 + (inCascadeIndex * 0.001515)) * (1.0 - dot(inNormal, inLightDir)), 0.0019);
     float shadow = SampleShadowLinearPCF(
          USE_SAMPLER_2D(uShadowTexture[inCascadeIndex]), 
-         (projCoords.xy), 
+         projCoords.xy, 
          projCoords.z - bias, 
          uShadowTexelSize
     );

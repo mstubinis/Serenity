@@ -580,57 +580,57 @@ void DeferredPipeline::sendTextureSafe(const char* location, uint32_t textureObj
     m_OpenGLStateMachine.GL_glBindTextureForRendering(textureTarget, textureObject);
     Engine::Renderer::sendUniform1Safe(location, unit);
 }
-void DeferredPipeline::sendTextures(const char* location, const Texture** textures, int slot, const int arrSize) {
+void DeferredPipeline::sendTextures(const char* location, const Texture** textures, int startingSlot, const int arrSize) {
     m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
-        m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
+        m_OpenGLStateMachine.GL_glActiveTexture(startingSlot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(textures[i]->getTextureType().toGLType(), textures[i]->address());
-        m_TextureSlotsBuffer[i] = slot + i;
+        m_TextureSlotsBuffer[i] = startingSlot + i;
     }
     Engine::Renderer::sendUniform1v(location, m_TextureSlotsBuffer.data(), arrSize);
 }
-void DeferredPipeline::sendTextures(const char* location, const TextureCubemap** cubemaps, int slot, const int arrSize) {
+void DeferredPipeline::sendTextures(const char* location, const TextureCubemap** cubemaps, int startingSlot, const int arrSize) {
     m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
-        m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
+        m_OpenGLStateMachine.GL_glActiveTexture(startingSlot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(GL_TEXTURE_CUBE_MAP, cubemaps[i]->address());
-        m_TextureSlotsBuffer[i] = slot + i;
+        m_TextureSlotsBuffer[i] = startingSlot + i;
     }
     Engine::Renderer::sendUniform1v(location, m_TextureSlotsBuffer.data(), arrSize);
 }
-void DeferredPipeline::sendTextures(const char* location, const GLuint* addresses, int slot, GLuint glTextureType, const int arrSize) {
+void DeferredPipeline::sendTextures(const char* location, const GLuint* addresses, int startingSlot, GLuint glTextureType, const int arrSize) {
     m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
-        m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
+        m_OpenGLStateMachine.GL_glActiveTexture(startingSlot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(glTextureType, addresses[i]);
-        m_TextureSlotsBuffer[i] = slot + i;
+        m_TextureSlotsBuffer[i] = startingSlot + i;
     }
     Engine::Renderer::sendUniform1v(location, m_TextureSlotsBuffer.data(), arrSize);
 }
-void DeferredPipeline::sendTexturesSafe(const char* location, const Texture** textures, int slot, const int arrSize) {
+void DeferredPipeline::sendTexturesSafe(const char* location, const Texture** textures, int startingSlot, const int arrSize) {
     m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
-        m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
+        m_OpenGLStateMachine.GL_glActiveTexture(startingSlot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(textures[i]->getTextureType().toGLType(), textures[i]->address());
-        m_TextureSlotsBuffer[i] = slot + i;
+        m_TextureSlotsBuffer[i] = startingSlot + i;
     }
     Engine::Renderer::sendUniform1vSafe(location, m_TextureSlotsBuffer.data(), arrSize);
 }
-void DeferredPipeline::sendTexturesSafe(const char* location, const TextureCubemap** cubemaps, int slot, const int arrSize) {
+void DeferredPipeline::sendTexturesSafe(const char* location, const TextureCubemap** cubemaps, int startingSlot, const int arrSize) {
     m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
-        m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
+        m_OpenGLStateMachine.GL_glActiveTexture(startingSlot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(GL_TEXTURE_CUBE_MAP, cubemaps[i]->address());
-        m_TextureSlotsBuffer[i] = slot + i;
+        m_TextureSlotsBuffer[i] = startingSlot + i;
     }
     Engine::Renderer::sendUniform1vSafe(location, m_TextureSlotsBuffer.data(), arrSize);
 }
-void DeferredPipeline::sendTexturesSafe(const char* location, const GLuint* data, int slot, GLuint glTextureType, const int arrSize) {
+void DeferredPipeline::sendTexturesSafe(const char* location, const GLuint* data, int startingSlot, GLuint glTextureType, const int arrSize) {
     m_TextureSlotsBuffer.resize(arrSize);
     for (int i = 0; i < arrSize; ++i) {
-        m_OpenGLStateMachine.GL_glActiveTexture(slot + i);
+        m_OpenGLStateMachine.GL_glActiveTexture(startingSlot + i);
         m_OpenGLStateMachine.GL_glBindTextureForRendering(glTextureType, data[i]);
-        m_TextureSlotsBuffer[i] = slot + i;
+        m_TextureSlotsBuffer[i] = startingSlot + i;
     }
     Engine::Renderer::sendUniform1vSafe(location, m_TextureSlotsBuffer.data(), arrSize);
 }
@@ -828,7 +828,7 @@ bool DeferredPipeline::buildShadowCaster(SunLight& sunLight, uint32_t shadowMapW
     if (!m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].contains(&sunLight)) {
         auto& data = m_ShadowCasters.m_ShadowCastersSun[sceneID].emplace_back(
             &sunLight,
-            NEW GLDeferredSunLightShadowInfo{ 
+            GLDeferredSunLightShadowInfo{ 
                 shadowMapWidth, 
                 shadowMapHeight,
                 frustumType, 
@@ -836,7 +836,7 @@ bool DeferredPipeline::buildShadowCaster(SunLight& sunLight, uint32_t shadowMapW
                 farFactor 
             }
         );
-        m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].emplace(&sunLight, std::get<1>(data));
+        m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].emplace(&sunLight, &std::get<1>(data));
         return true;
     } else {
         auto& data = m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].at(&sunLight);
@@ -854,7 +854,7 @@ bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight, uin
     if (!m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].contains(&directionalLight)) {
         auto& data = m_ShadowCasters.m_ShadowCastersDirectional[sceneID].emplace_back(
             &directionalLight, 
-            NEW GLDeferredDirectionalLightShadowInfo{
+            GLDeferredDirectionalLightShadowInfo{
                 shadowMapWidth,
                 shadowMapHeight,
                 frustumType, 
@@ -862,7 +862,7 @@ bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight, uin
                 farFactor 
             }
         );
-        m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].emplace(&directionalLight, std::get<1>(data));
+        m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].emplace(&directionalLight, &std::get<1>(data));
         return true;
     } else {
         auto& data = m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].at(&directionalLight);
@@ -932,7 +932,9 @@ void DeferredPipeline::sendGPUDataLight(const Camera& camera, const SunLight& su
         if (m_ShadowCasters.m_ShadowCastersSunHashed[sunLight.sceneID()].contains(&sunLight)) {
             auto& data = *m_ShadowCasters.m_ShadowCastersSunHashed[sunLight.sceneID()].at(&sunLight);
             if (data.m_Enabled) {
-                data.bindUniformsReading(5); //TODO: this texture slot might not work for forward lighting
+                //startingSpot - start from the maxSlot minus the 3 textures used in the GI portion. TODO: better do this without hardcoding
+                const auto startingSpot = getMaxNumTextureUnits() - 1U - 3 - DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS;
+                data.bindUniformsReading(startingSpot); //TODO: this texture slot might not work for forward lighting
             }
         }
     }
@@ -951,8 +953,8 @@ int DeferredPipeline::sendGPUDataLight(const Camera& camera, const PointLight& p
     sendUniform4Safe((start + "DataA").c_str(), 0.0f, pointLight.getDiffuseIntensity(), pointLight.getSpecularIntensity(), 0.0f);
     sendUniform4Safe((start + "DataB").c_str(), 0.0f, 0.0f, pointLight.getConstant(), pointLight.getLinear());
     sendUniform4Safe((start + "DataC").c_str(), pointLight.getExponent(), pos.x, pos.y, pos.z);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)pointLight.getType());
-    sendUniform4Safe((start + "DataE").c_str(), 0.0f, 0.0f, (float)pointLight.getAttenuationModel(), 0.0f);
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(pointLight.getType()));
+    sendUniform4Safe((start + "DataE").c_str(), 0.0f, 0.0f, float(pointLight.getAttenuationModel()), 0.0f);
     sendUniform1Safe("Type", 1.0f);
     sendUniform1Safe("uShadowEnabled", 0);
     if (distSq <= (cull * cull)) { //inside the light volume
@@ -966,14 +968,16 @@ void DeferredPipeline::sendGPUDataLight(const Camera& camera, const DirectionalL
     const auto& col = directionalLight.getColor();
     sendUniform4Safe((start + "DataA").c_str(), 0.0f, directionalLight.getDiffuseIntensity(), directionalLight.getSpecularIntensity(), forward.x);
     sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, 0.0f, 0.0f);
-    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, (float)directionalLight.getType());
+    sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(directionalLight.getType()));
     sendUniform1Safe("Type", 0.0f);
     sendUniform1Safe("uShadowEnabled", 0);
     if (m_Renderer.m_Lighting) {
         if (m_ShadowCasters.m_ShadowCastersDirectionalHashed[directionalLight.sceneID()].contains(&directionalLight)) {
             auto& data = *m_ShadowCasters.m_ShadowCastersDirectionalHashed[directionalLight.sceneID()].at(&directionalLight);
             if (data.m_Enabled) {
-                data.bindUniformsReading(5); //TODO: this texture slot might not work for forward lighting
+                //startingSpot - start from the maxSlot minus the 3 textures used in the GI portion. TODO: better do this without hardcoding
+                const auto startingSpot = getMaxNumTextureUnits() - 1U - 3 - DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS;
+                data.bindUniformsReading(startingSpot); //TODO: this texture slot might not work for forward lighting
             }
         }
     }
@@ -1183,16 +1187,16 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, H
     const size_t particle_count = system.ParticlesDOD.size();
     if (particle_count > 0) {
         m_Renderer.bind(program.get<ShaderProgram>());
-        for (const auto& [id, mat] : system.BimapMaterialToIndexReverse) {
-            system.MaterialIDToIndex.try_emplace(id, (uint32_t)system.MaterialIDToIndex.size());
+        for (auto it = system.Bimap.rbegin(); it != system.Bimap.rend(); ++it) {
+            system.MaterialIDToIndex.try_emplace(it->first, (uint32_t)system.MaterialIDToIndex.size());
         }
         for (auto& particlePOD : system.ParticlesDOD) {
             particlePOD.MatID = system.MaterialIDToIndex.at(particlePOD.MatID);
         }
         for (const auto& [id, index] : system.MaterialIDToIndex) {
-            Material* mat              = system.BimapMaterialToIndexReverse.at(id);
+            Material* mat              = system.Bimap.at(id);
             Texture& texture           = *mat->getComponent(MaterialComponentType::Diffuse).getTexture(0).get<Texture>();
-            const std::string location = "DiffuseTexture" + std::to_string(index);
+            const std::string location = "Tex" + std::to_string(index);
             Engine::Renderer::sendTextureSafe(location.c_str(), texture, index);
         }
         const auto maxTextures = getMaxNumTextureUnits() - 1U;
@@ -1337,6 +1341,15 @@ void DeferredPipeline::renderInitFrame(Engine::priv::RenderModule& renderer) {
 void DeferredPipeline::internal_render_per_frame_preparation(Viewport& viewport, Camera& camera) {
     const auto winSize             = Engine::Resources::getWindowSize();
     const auto& viewportDimensions = viewport.getViewportDimensions();
+
+    /*
+    for (uint32_t i = 0; i < Engine::priv::OpenGLState::constants.MAX_COMBINED_TEXTURE_IMAGE_UNITS; ++i) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+    }
+    */
+
     //if resizing gbuffer
         //m_GBuffer.resize(uint32_t(viewportDimensions.z), uint32_t(viewportDimensions.w));
     //else
@@ -1369,13 +1382,13 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
 
     //directional lights
     if (m_ShadowCasters.m_ShadowCastersDirectional.size() > sceneID) {
-        for (const auto& [directionalLight, data] : m_ShadowCasters.m_ShadowCastersDirectional[sceneID]) {
-            if (data->m_Enabled) {
-                data->calculateOrthographicProjections(camera, directionalLight->getDirection());
-                Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
-                for (int i = 0; i < int(data->m_LightSpaceMatrices.size()); ++i) {
-                    data->bindUniformsWriting(i);
-                    const auto& viewProj = data->m_LightSpaceMatrices[i];
+        for (auto& [directionalLight, data] : m_ShadowCasters.m_ShadowCastersDirectional[sceneID]) {
+            if (data.m_Enabled) {
+                data.calculateOrthographicProjections(camera, directionalLight->getDirection());
+                Engine::Renderer::setViewport(0.0f, 0.0f, data.m_ShadowWidth, data.m_ShadowHeight);
+                for (int i = 0; i < int(data.m_LightSpaceMatrices.size()); ++i) {
+                    data.bindUniformsWriting(i);
+                    const auto& viewProj = data.m_LightSpaceMatrices[i];
 
                     PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
                     PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
@@ -1389,13 +1402,13 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     }
     //sun lights
     if (m_ShadowCasters.m_ShadowCastersSun.size() > sceneID) {
-        for (const auto& [sunLight, data] : m_ShadowCasters.m_ShadowCastersSun[scene.id()]) {
-            if (data->m_Enabled) {
-                data->calculateOrthographicProjections(camera, glm::normalize(sunLight->getPosition() - camera.getPosition()));
-                Engine::Renderer::setViewport(0.0f, 0.0f, data->m_ShadowWidth, data->m_ShadowHeight);
-                for (int i = 0; i < int(data->m_LightSpaceMatrices.size()); ++i) {
-                    data->bindUniformsWriting(i);
-                    const auto& viewProj = data->m_LightSpaceMatrices[i];
+        for (auto& [sunLight, data] : m_ShadowCasters.m_ShadowCastersSun[scene.id()]) {
+            if (data.m_Enabled) {
+                data.calculateOrthographicProjections(camera, glm::normalize(sunLight->getPosition() - camera.getPosition()));
+                Engine::Renderer::setViewport(0.0f, 0.0f, data.m_ShadowWidth, data.m_ShadowHeight);
+                for (int i = 0; i < int(data.m_LightSpaceMatrices.size()); ++i) {
+                    data.bindUniformsWriting(i);
+                    const auto& viewProj = data.m_LightSpaceMatrices[i];
 
                     PublicScene::RenderGeometryOpaqueShadowMap(m_Renderer, scene, nullptr, viewProj);
                     PublicScene::RenderGeometryTransparentShadowMap(m_Renderer, scene, nullptr, viewProj);
@@ -2092,11 +2105,6 @@ void DeferredPipeline::renderFullscreenQuad(float x, float y, float width, float
         width = winSize.x;
     if (height <= 0.0f)
         height = winSize.y;
-    
-
-    const auto gbufferSize = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
-
-
     auto modelMatrix       = glm::mat4{ 1.0f };
     modelMatrix            = glm::translate(modelMatrix, glm::vec3{ x, y, 0.0f - depth });
     modelMatrix            = glm::scale(modelMatrix, glm::vec3{ width / winSize.x, height / winSize.y, 1.0f });
@@ -2107,12 +2115,10 @@ void DeferredPipeline::renderFullscreenQuad(float x, float y, float width, float
 void DeferredPipeline::renderFullscreenQuadCentered(float width, float height, float depth, float inNear, float inFar) {
     const auto winSize = glm::vec2{ Engine::Resources::getWindowSize() };
     const auto gbufferSize = glm::vec2{ m_GBuffer.width(), m_GBuffer.height() };
-
     if (width <= 0.0f)
         width = gbufferSize.x;
     if (height <= 0.0f)
         height = gbufferSize.y;
-
     auto modelMatrix = glm::mat4{ 1.0f };
     modelMatrix = glm::translate(modelMatrix, glm::vec3{ (gbufferSize.x / 2.0f) - (width / 2.0f), (gbufferSize.y / 2.0f) - (height / 2.0f), 0.0f - depth });
     modelMatrix = glm::scale(modelMatrix, glm::vec3{ width / gbufferSize.x, height / gbufferSize.y, 1.0f });

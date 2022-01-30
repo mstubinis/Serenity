@@ -20,6 +20,12 @@ namespace Engine::priv {
 
             GLDeferredDirectionalLightShadowInfo() = delete;
             GLDeferredDirectionalLightShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType, float nearFactor, float farFactor);
+
+            GLDeferredDirectionalLightShadowInfo(const GLDeferredDirectionalLightShadowInfo&) = delete;
+            GLDeferredDirectionalLightShadowInfo& operator=(const GLDeferredDirectionalLightShadowInfo&) = delete;
+            GLDeferredDirectionalLightShadowInfo(GLDeferredDirectionalLightShadowInfo&&) noexcept;
+            GLDeferredDirectionalLightShadowInfo& operator=(GLDeferredDirectionalLightShadowInfo&&) noexcept;
+
             ~GLDeferredDirectionalLightShadowInfo();
 
             void bindUniformsReading(int textureStartSlot) noexcept;
@@ -31,6 +37,12 @@ namespace Engine::priv {
     class GLDeferredSunLightShadowInfo : public GLDeferredDirectionalLightShadowInfo {
         public:
             GLDeferredSunLightShadowInfo() = delete;
+
+            GLDeferredSunLightShadowInfo(const GLDeferredSunLightShadowInfo&) = delete;
+            GLDeferredSunLightShadowInfo& operator=(const GLDeferredSunLightShadowInfo&) = delete;
+            GLDeferredSunLightShadowInfo(GLDeferredSunLightShadowInfo&&) noexcept;
+            GLDeferredSunLightShadowInfo& operator=(GLDeferredSunLightShadowInfo&&) noexcept;
+
             GLDeferredSunLightShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType, float nearFactor, float farFactor);
     };
     class GLDeferredPointLightShadowInfo : public PointLightShadowData {
@@ -49,7 +61,7 @@ namespace Engine::priv {
     class GLDeferredLightShadowCasters final {
         public:
             template<class LIGHT, class SHADOW_DATA>
-            class CasterContainer : public std::vector<std::vector<std::tuple<LIGHT*, SHADOW_DATA*>>> {};
+            class CasterContainer : public std::vector<std::vector<std::tuple<LIGHT*, SHADOW_DATA>>> {};
 
             template<class LIGHT, class SHADOW_DATA>
             class CasterHashMap : public std::vector<std::unordered_map<const LIGHT*, SHADOW_DATA*>> {}; //bool is shadow casting enabled or disabled

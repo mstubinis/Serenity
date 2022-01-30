@@ -17,8 +17,8 @@ namespace Engine::priv {
             mutable ContainerType  m_Lights;
             mutable ContainerType  m_LightsShadows; //lights that have their shadow casting enabled
 
-            bool internal_is_light_in_container(LIGHT* light, const ContainerType& container) noexcept {
-                for (const auto itr : container) {
+            [[nodiscard]] bool internal_is_light_in_container(LIGHT* light, const ContainerType& container) const noexcept {
+                for (const LIGHT* itr : container) {
                     if (itr == light) {
                         return true;
                     }
@@ -37,7 +37,7 @@ namespace Engine::priv {
 
             template<class ... ARGS> 
             [[nodiscard]] inline Engine::view_ptr<LIGHT> createLight(ARGS&& ... args) {
-                return m_Lights.emplace_back(NEW LIGHT(std::forward<ARGS>(args)...)); 
+                return m_Lights.emplace_back(NEW LIGHT{ std::forward<ARGS>(args)... });
             }
 
             bool deleteLight(LIGHT* light) noexcept {
@@ -45,20 +45,21 @@ namespace Engine::priv {
                     return false;
                 }
                 light->destroy();
-                std::erase_if(m_Lights,        [&light](auto& itr) { return itr == light; });
-                std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
+                Engine::swap_and_pop_single(m_Lights,        [](auto& itr, LIGHT* light) { return itr == light; }, light);
+                Engine::swap_and_pop_single(m_LightsShadows, [](auto& itr, LIGHT* light) { return itr == light; }, light);
                 SAFE_DELETE(light);
                 return true;
             }
             bool setShadowCaster(LIGHT* light, bool isShadowCaster) {
-                if (isShadowCaster){
-                    if (!internal_is_light_in_container(light, m_LightsShadows)) {
+                if (isShadowCaster) {
+                    const bool isAlreadyInContainer = internal_is_light_in_container(light, m_LightsShadows);
+                    assert(!isAlreadyInContainer);
+                    if (!isAlreadyInContainer) {
                         m_LightsShadows.push_back(light);
                         return true;
                     }
-                }else{
-                    const auto result = std::erase_if(m_LightsShadows, [&light](auto& itr) { return itr == light; });
-                    return bool(result);
+                } else {
+                    return Engine::swap_and_pop_single(m_LightsShadows, [](auto& itr, LIGHT* light) { return itr == light; }, light);
                 }
                 return false;
             }

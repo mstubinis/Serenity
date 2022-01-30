@@ -38,7 +38,7 @@ bool Engine::priv::ThreadPool::startup(int numThreads) {
         m_Stopped = false;
 #if !defined(ENGINE_FORCE_NO_THEAD_POOL)
         m_WorkerThreads.reserve(numThreads);
-        for (int i = 0; i < numThreads; ++i) {
+        for (uint32_t index = 0; index < numThreads; ++index) {
             m_WorkerThreads.add_thread([this](std::stop_token stopToken) {
                 while (!m_Stopped) {
                     PoolTaskPtr job;
@@ -56,7 +56,7 @@ bool Engine::priv::ThreadPool::startup(int numThreads) {
                     job->operator()();
                     m_WaitCounter -= 1;
                 }
-            });
+            }, index);
         }
 #endif
         return true;
@@ -86,7 +86,7 @@ void Engine::priv::ThreadPool::internal_update_single_threaded() {
     internal_execute_callbacks();
 }
 void Engine::priv::ThreadPool::internal_update_multi_threaded() {
-    std::lock_guard lock{ m_Mutex };   
+    std::lock_guard lock{ m_Mutex };
     //this CANNOT be split up in different loops / steps: future is_ready MIGHT be false for the first run,
     //and then true for the second run, in which case it gets removed without calling its then function
     internal_execute_callbacks();

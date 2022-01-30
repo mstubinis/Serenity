@@ -1,8 +1,9 @@
 #include <serenity/renderer/RendererIncludes.h>
+#include <array>
 
 namespace {
 #ifndef ENGINE_PRODUCTION
-    std::array<const char*, RenderStage::_TOTAL> ENUM_TO_NAMES{ {
+    constexpr const std::array<const char*, RenderStage::_TOTAL> ENUM_TO_NAMES{ {
         "GeometryOpaque",
         "GeometryOpaque_2",
         "GeometryOpaque_3",

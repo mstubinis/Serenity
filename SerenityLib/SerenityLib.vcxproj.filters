@@ -3286,6 +3286,12 @@
     <ClInclude Include="include\serenity\lua\bindings\SoundBindings.h">
       <Filter>Header Files\Engine\Core\LUA\Bindings</Filter>
     </ClInclude>
+    <ClInclude Include="include\serenity\containers\DODMembers.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\containers\BimapUnordered.h">
+      <Filter>Header Files\Engine\Core\Containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\serenity\ecs\systems\SystemBaseClass.inl">

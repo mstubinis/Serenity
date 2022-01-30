@@ -77,6 +77,7 @@ void EngineCore::internal_init_os_specific(const EngineOptions& options) {
     for (int i = 0; i < options.argc; i++) {
         const std::string key = std::string(options.argv[i]);
         std::string lowerKey;
+        lowerKey.reserve(key.length());
         for (size_t j = 0; j < key.length(); ++j) {
             lowerKey += std::tolower(key[j], loc);
         }
@@ -190,7 +191,7 @@ void EngineCore::internal_render(GameCore& gameCore, Scene& scene, Window& windo
                     viewport.getCamera().setAspectRatio(viewportDimensions.z / viewportDimensions.w);
                 }
                 m_Editor.renderLightIcons(scene, viewport);
-                viewport.render(m_RenderModule, viewport, true);
+                Engine::priv::ViewportPriv::render(m_RenderModule, viewport, true);
             }
         }
         m_Editor.render(window);
@@ -230,7 +231,7 @@ void EngineCore::run(GameCore* gameCore) {
     double accumulator       = ENGINE_FIXED_TIMESTEP_VALUE_D;
     auto   currentTime       = m_Misc.m_Timer.now();
 
-    auto   updateWindows     = [this, gameCore](const float timeElasped, Scene& scene) {
+    auto   updateOncePerFrame = [this, gameCore](const float timeElasped, Scene& scene) {
         for (const auto& window : m_ResourceManager.m_Windows) {
             internal_post_update(scene, *window, timeElasped);
             m_EngineEventHandler.poll_events(*window, *gameCore);
@@ -266,7 +267,7 @@ void EngineCore::run(GameCore* gameCore) {
         frameIteration = 0;
         while (accumulator >= ENGINE_FIXED_TIMESTEP_VALUE_D) {
             if (frameIteration == 0) {
-                updateWindows(float(m_Misc.m_Dt), scene);
+                updateOncePerFrame(float(m_Misc.m_Dt), scene);
             }
             updateSimulation(frameIteration, ENGINE_FIXED_TIMESTEP_VALUE, scene);
             accumulator -= ENGINE_FIXED_TIMESTEP_VALUE_D;

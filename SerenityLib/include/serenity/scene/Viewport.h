@@ -9,6 +9,7 @@ class  LightProbe;
 namespace Engine::priv {
     class RenderModule;
     class EngineEventHandler;
+    class ViewportPriv;
 };
 
 #include <serenity/system/TypeDefs.h>
@@ -40,20 +41,25 @@ class Viewport final {
     friend class Scene;
     friend class Engine::priv::RenderModule;
     friend class Engine::priv::EngineEventHandler;
+    friend class Engine::priv::ViewportPriv;
     friend class LightProbe;
 
     public:
         using RenderFunc = void(*)(Engine::priv::RenderModule&, Viewport&, bool);
         using ResizeFunc = void(*)(float x, float y, float newWidth, float newHeight, Viewport&, void* resizeUserPointer);
     private:
-        struct StateFlags final { enum Flag : uint8_t {
-            Active              = 1 << 0,
-            AspectRatioSynced   = 1 << 1,
-            DepthMaskActive     = 1 << 2,
-        };};
+        class StateFlags { 
+            public:
+                enum Type : uint8_t {
+                    Active              = 1 << 0,
+                    AspectRatioSynced   = 1 << 1,
+                    DepthMaskActive     = 1 << 2,
+                };
+                BUILD_ENUM_CLASS_MEMBERS(StateFlags, Type)
+        };
 
-        glm::vec4                     m_Viewport_Dimensions        = glm::vec4(0.0f, 0.0f, 256.0f, 256.0f);
-        glm::vec4                     m_BackgroundColor            = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        glm::vec4                     m_Viewport_Dimensions        = glm::vec4{ 0.0f, 0.0f, 256.0f, 256.0f };
+        glm::vec4                     m_BackgroundColor            = glm::vec4{ 0.0f, 0.0f, 0.0f, 1.0f };
         RenderFunc                    m_RenderFuncPointer          = nullptr;
         ResizeFunc                    m_ResizeFuncPointer          = [](float x, float y, float newWidth, float newHeight, Viewport&, void*) {};
         void*                         m_ResizeFuncPointerUserData  = nullptr;
@@ -79,7 +85,6 @@ class Viewport final {
         [[nodiscard]] inline uint32_t getId() const noexcept { return m_ID; }
         inline void setID(uint32_t id) noexcept { m_ID = id; }
 
-        void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunc) const noexcept;
         inline void setRenderFunc(RenderFunc renderFuncPtr) noexcept { m_RenderFuncPointer = renderFuncPtr; }
         inline void setResizeFunc(ResizeFunc resizeFuncPtr) noexcept { m_ResizeFuncPointer = resizeFuncPtr; }
         inline void setResizeFuncUserPointer(void* userPointer) noexcept { m_ResizeFuncPointerUserData = userPointer; }
@@ -111,5 +116,12 @@ class Viewport final {
         inline void setCamera(Camera& camera) noexcept { m_Camera = &camera; }
         void setViewportDimensions(float x, float y, float width, float height);
 };
+
+namespace Engine::priv {
+    class ViewportPriv {
+        public:
+            static void render(Engine::priv::RenderModule&, Viewport&, bool mainRenderFunc) noexcept;
+    };
+}
 
 #endif

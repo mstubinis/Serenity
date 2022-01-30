@@ -17,6 +17,7 @@ namespace Engine::priv {
 #include <serenity/renderer/particles/ParticleEmitter.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/containers/PartialVectorPOD.h>
+#include <serenity/containers/BimapUnordered.h>
 #include <serenity/resources/Handle.h>
 #include <vector>
 #include <queue>
@@ -92,16 +93,16 @@ namespace Engine::priv {
             void internal_update_emitters(const float dt);
             void internal_update_particles(const float dt, Camera&);
         public:
-            Engine::partial_vector_pod<ParticleDOD>          ParticlesDOD;
+            Engine::partial_vector_pod<ParticleDOD>                    ParticlesDOD;
 
-            std::unordered_map<Material*, uint32_t>          BimapMaterialToIndex;
-            std::unordered_map<uint32_t, Material*>          BimapMaterialToIndexReverse;
-            std::unordered_map<uint32_t, uint32_t>           MaterialIDToIndex;
+            Engine::unordered_bimap<Material*, uint32_t>               Bimap;
+            std::unordered_map<uint32_t, uint32_t>                     MaterialIDToIndex;
 
             //for the threads...
-            std::vector<std::vector<ParticleDOD>>                THREAD_PART_1;
-            std::vector<std::unordered_map<Material*, uint32_t>> THREAD_PART_4;
-            std::vector<std::unordered_map<uint32_t, Material*>> THREAD_PART_5;
+            std::vector<std::vector<ParticleDOD>>                      THREAD_PART_1;
+            std::vector<Engine::unordered_bimap<Material*, uint32_t>>  THREAD_PART_4;
+
+
         public:
             ParticleSystem(uint32_t maxEmitters, uint32_t maxParticles);
             ParticleSystem(const ParticleSystem&)                = delete;

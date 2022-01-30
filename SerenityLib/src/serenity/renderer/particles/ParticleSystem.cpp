@@ -25,64 +25,59 @@ Engine::priv::ParticleSystem::ParticleSystem(uint32_t maxEmitters, uint32_t maxP
     const auto num_cores        = Engine::hardware_concurrency();
     const auto maxMaterialSlots = std::min(Engine::priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME);
 
-    BimapMaterialToIndex.reserve(maxMaterialSlots);
-    BimapMaterialToIndexReverse.reserve(maxMaterialSlots);
+    Bimap.reserve(maxMaterialSlots);
+
     MaterialIDToIndex.reserve(maxMaterialSlots);
 
     THREAD_PART_1.resize(num_cores);
     THREAD_PART_4.resize(num_cores);
-    THREAD_PART_5.resize(num_cores);
+
     for (auto& _4 : THREAD_PART_4) {
         _4.reserve(maxMaterialSlots);
-    }
-    for (auto& _5 : THREAD_PART_5) {
-        _5.reserve(maxMaterialSlots);
     }
 }
 
 void Engine::priv::ParticleSystem::internal_update_emitters(const float dt) {
-    if (m_ParticleEmitters.size() == 0) {
-        return;
+    if (!m_ParticleEmitters.empty()) {
+        auto lamda_update_emitter = [this, dt](ParticleEmitter& emitter, size_t j, size_t k) {
+            if (emitter.isActive()) {
+                emitter.update(j, dt, *this, true);
+            }
+        };
+        Engine::priv::threading::addJobSplitVectored(lamda_update_emitter, m_ParticleEmitters, true);
     }  
-    auto lamda_update_emitter = [this, dt](ParticleEmitter& emitter, size_t j, size_t k) {
-        if (emitter.isActive()) {
-            emitter.update(j, dt, *this, true);
-        }
-    };
-    Engine::priv::threading::addJobSplitVectored(lamda_update_emitter, m_ParticleEmitters, true);
 }
 
 void Engine::priv::ParticleSystem::internal_update_particles(const float dt, Camera& camera) {
-    if (m_Particles.size() == 0) {
-        return;
-    }
-    auto lamda_update_particle = [this, dt](Particle& particle, size_t j, size_t k) {
-        if (particle.m_Timer > 0.0f) {
-            auto& prop                  = *particle.m_EmitterSource->m_Properties;
-            particle.m_Timer           += dt;
-            particle.m_Scale           += prop.m_ChangeInScaleFunctor(dt, particle);
-            particle.m_Color            = prop.m_ColorFunctor(dt, particle);
-            particle.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(dt, particle);
-            particle.m_Angle           += particle.m_AngularVelocity;
-            particle.m_Velocity        += prop.m_ChangeInVelocityFunctor(dt, particle);
-            particle.m_Position        += (particle.m_Velocity * dt);
-            if (particle.m_Timer >= prop.m_Lifetime) {
-                particle.m_Timer  = 0.0f;
-                {
-                    std::lock_guard lock{ m_Mutex };
-                    m_ParticleFreelist.emplace_back(j);
+    if (!m_Particles.empty()) {
+        auto lamda_update_particle = [this, dt](Particle& particle, size_t j, size_t k) {
+            if (particle.m_Timer > 0.0f) {
+                auto& prop = *particle.m_EmitterSource->m_Properties;
+                particle.m_Timer           += dt;
+                particle.m_Scale           += prop.m_ChangeInScaleFunctor(dt, particle);
+                particle.m_Color            = prop.m_ColorFunctor(dt, particle);
+                particle.m_AngularVelocity += prop.m_ChangeInAngularVelocityFunctor(dt, particle);
+                particle.m_Angle           += particle.m_AngularVelocity;
+                particle.m_Velocity        += prop.m_ChangeInVelocityFunctor(dt, particle);
+                particle.m_Position        += (particle.m_Velocity * dt);
+                if (particle.m_Timer >= prop.m_Lifetime) {
+                    particle.m_Timer = 0.0f;
+                    {
+                        std::lock_guard lock{ m_Mutex };
+                        m_ParticleFreelist.emplace_back(j);
+                    }
                 }
             }
-        }
-    };
-    Engine::priv::threading::addJobSplitVectored(lamda_update_particle, m_Particles, true);
+        };
+        Engine::priv::threading::addJobSplitVectored(lamda_update_particle, m_Particles, true);
+    }
 }
 
 Engine::view_ptr<ParticleEmitter> Engine::priv::ParticleSystem::add_emitter(ParticleEmissionProperties& properties, Scene& scene, float lifetime, Entity parent) {
-    while (m_ParticleEmitterFreelist.size() > 0) { //first, try to reuse an empty
+    while (!m_ParticleEmitterFreelist.empty()) { //first, try to reuse an empty
         size_t freeindex = m_ParticleEmitterFreelist.back();
         m_ParticleEmitterFreelist.pop_back();
-        if (freeindex >= m_ParticleEmitters.size() && m_ParticleEmitterFreelist.size() > 0) {
+        if (freeindex >= m_ParticleEmitters.size() && !m_ParticleEmitterFreelist.empty()) {
             continue;
         }
         if (!m_ParticleEmitters[freeindex].isActive()) {
@@ -99,10 +94,10 @@ Engine::view_ptr<ParticleEmitter> Engine::priv::ParticleSystem::add_emitter(Part
     return nullptr;
 }
 bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const glm::vec3& emitterPosition, const glm::quat& emitterRotation) {
-    while (m_ParticleFreelist.size() > 0) { //first, try to reuse an empty
+    while (!m_ParticleFreelist.empty()) { //first, try to reuse an empty
         size_t freeindex = m_ParticleFreelist.back();
         m_ParticleFreelist.pop_back();
-        if (freeindex >= m_Particles.size() && m_ParticleFreelist.size() > 0) {
+        if (freeindex >= m_Particles.size() && !m_ParticleFreelist.empty()) {
             continue;
         }
         if (!m_Particles[freeindex].isActive()) {
@@ -136,8 +131,8 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
     auto& planeMesh = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().get<Mesh>();
     ParticlesDOD.clear();
 
-    BimapMaterialToIndex.clear();
-    BimapMaterialToIndexReverse.clear();
+    Bimap.clear();
+
     MaterialIDToIndex.clear();
 
     if (ParticlesDOD.capacity() < particles_size) {
@@ -149,7 +144,6 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
 
     for (auto& _1 : THREAD_PART_1) _1.clear();
     for (auto& _4 : THREAD_PART_4) _4.clear();
-    for (auto& _5 : THREAD_PART_5) _5.clear();
 
     for (auto& _1 : THREAD_PART_1) _1.reserve(reserve_size);
 
@@ -161,9 +155,9 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
         float comparison       = radius * 3100.0f; //TODO: this is obviously different from the other culling functions
         if (particle.isActive() && (glm::distance2(pos, camPos) <= (comparison * comparison)) && sphereTest > 0) {
             //its just pretty expensive in general...
-            if (!THREAD_PART_4[k].contains(particle.m_Material)) {
-                THREAD_PART_4[k].try_emplace(particle.m_Material,          particle.m_Material->getID());
-                THREAD_PART_5[k].try_emplace(particle.m_Material->getID(), particle.m_Material);
+            if (!THREAD_PART_4[k].contains_key(particle.m_Material)) {
+                THREAD_PART_4[k].emplace(particle.m_Material,          particle.m_Material->getID());
+                //THREAD_PART_5[k].try_emplace(particle.m_Material->getID(), particle.m_Material);
             }
             ///////////////////////////////////////////
 
@@ -190,13 +184,9 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
         for (auto& particleDOD : _1) {
             ParticlesDOD.push(std::move(particleDOD));
         }
-        //ParticlesDOD.insert(ParticlesDOD.end(), std::make_move_iterator(_1.begin()), std::make_move_iterator(_1.end())); 
     }
     for (auto& _4 : THREAD_PART_4) { 
-        BimapMaterialToIndex.merge(_4);
-    }
-    for (auto& _5 : THREAD_PART_5) { 
-        BimapMaterialToIndexReverse.merge(_5);
+        Bimap.merge(_4);
     }
 
     //auto z = (chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now() - start));

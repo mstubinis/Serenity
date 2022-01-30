@@ -78,8 +78,11 @@ void Viewport::setViewportDimensions(float x, float y, float width, float height
     m_Viewport_Dimensions.z = width;
     m_Viewport_Dimensions.w = height;
 }
-void Viewport::render(Engine::priv::RenderModule& renderModule, Viewport& viewport, bool mainRenderFunc) const noexcept {
-    if (m_RenderFuncPointer) {
-        m_RenderFuncPointer(renderModule, viewport, mainRenderFunc);
+
+
+
+void Engine::priv::ViewportPriv::render(Engine::priv::RenderModule& renderModule, Viewport& viewport, bool mainRenderFunc) noexcept {
+    if (viewport.m_RenderFuncPointer) {
+        viewport.m_RenderFuncPointer(renderModule, viewport, mainRenderFunc);
     }
 }

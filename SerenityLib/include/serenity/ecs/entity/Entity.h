@@ -31,9 +31,8 @@ class Entity {
             , m_SceneID{ sceneID }
             , m_VersionID{ versionID }
         {}
-
-        Entity(const Entity&)                = default;
-        Entity& operator=(const Entity&)     = default;
+        Entity(const Entity&) = default;
+        Entity& operator=(const Entity&) = default;
         Entity(Entity&&) noexcept;
         Entity& operator=(Entity&&) noexcept;
 
