@@ -6,6 +6,14 @@
 #include <utility>
 #include <serenity/system/Macros.h>
 
+namespace Engine::priv {
+	struct no_args_t {};
+}
+namespace Engine {
+	constexpr Engine::priv::no_args_t no_args{};
+}
+
+
 namespace Engine {
 	template<class ... TYPES>
 	class DODMembers {
@@ -21,8 +29,8 @@ namespace Engine {
 					}
 				}
 
-				inline constexpr char& operator[](size_t index) noexcept { return data[index]; }
-				inline constexpr const char& operator[](size_t index) const noexcept { return data[index]; }
+				inline constexpr T& operator[](size_t index) noexcept { return data[index]; }
+				inline constexpr const T& operator[](size_t index) const noexcept { return data[index]; }
 
 				constexpr void moveMemory(size_t oldCapacity, size_t newCapacity) {
 					void* newMemoryDst = malloc(sizeof(T) * newCapacity);
@@ -38,7 +46,7 @@ namespace Engine {
 				}
 #if 0
 				constexpr void construct(size_t location, T&& arg) {
-					if constexpr (std::is_placeholder_v<T>) {
+					if constexpr (std::is_placeholder_v<T> || std::is_same_v<ARGS..., Engine::priv::no_args_t>) {
 						new (data + location) T{};
 			        } else {
 						new (data + location) T(std::forward<T>(args)...);
@@ -47,13 +55,25 @@ namespace Engine {
 #endif
 				template<class ... ARGS>
 				constexpr void constructEmplace(size_t location, ARGS&&... args) {
-					if constexpr (std::is_placeholder_v<ARGS...>) {
+					if constexpr (std::is_placeholder_v<ARGS...> || std::is_same_v<ARGS..., Engine::priv::no_args_t>) {
 						new (data + location) T{};
 					} else {
 						new (data + location) T(std::forward<ARGS>(args)...);
 					}
 				}
 
+				void swap(size_t index1, size_t index2) {
+					char tempBuffer[sizeof(T)];
+					std::memmove(&tempBuffer[0], &data[index1], sizeof(T));
+					std::memmove(&data[index1], &data[index2], sizeof(T));
+					std::memmove(&data[index2], &tempBuffer[0], sizeof(T));
+				}
+				void move(size_t indexSrc, size_t indexDest) {
+					std::memmove(&data[indexDest], &data[indexSrc], sizeof(T));
+				}
+				void move(void* srcData, size_t indexDest) {
+					std::memmove(&data[indexDest], srcData, sizeof(T));
+				}
 			};
 		public:
 			using TUPLE_TYPE = std::tuple<ARRAY_WRAPPER<TYPES>...>;
@@ -116,6 +136,14 @@ namespace Engine {
 						((void)fillImpl<INDICES>(res, offset), ...);
 						return res;
 					}
+					template<size_t I>
+					void printImpl(auto& stream) const {
+						if constexpr (I < sizeof...(INDICES) - 1) {
+							stream << std::get<I>(m_Vector->data()).data[IteratorBaseType::m_I] << ", ";
+						} else {
+							stream << std::get<I>(m_Vector->data()).data[IteratorBaseType::m_I];
+						}
+					}
 				public:
 
 					Iterator() = default;
@@ -130,6 +158,12 @@ namespace Engine {
 					inline const auto operator->() const { return fill(0); }
 					inline auto operator[](IteratorBaseType::counter_type m) { return fill(m); }
 					inline const auto operator[](IteratorBaseType::counter_type m) const { return fill(m); }
+
+					template<class STREAM>
+					void print(STREAM& stream) const {
+						((printImpl<INDICES>(stream)), ...);
+						stream << '\n';
+					}
 			};
 
 
@@ -159,6 +193,8 @@ namespace Engine {
 					inline const auto& operator->() const { return fill(0); }
 					inline auto& operator[](IteratorBaseType::counter_type m) { return fill(m); }
 					inline const auto& operator[](IteratorBaseType::counter_type m) const { return fill(m); }
+
+					template<class STREAM> inline void print(STREAM& stream) const { stream << std::get<INDEX>(m_Vector->data()).data[IteratorBaseType::m_I] << '\n'; }
 				};
 
 
@@ -243,16 +279,123 @@ namespace Engine {
 
 			template<size_t INDEX>
 			void swap(size_t index1, size_t index2) {
-				using TYPE      = typename std::tuple_element<INDEX, TUPLE_TYPE>::type::VAL_TYPE;
-				auto& arrayData = std::get<INDEX>(m_Data).data;
+				auto& arrayData = std::get<INDEX>(m_Data);
 				assert(index1 >= 0 && index1 < size());
 				assert(index2 >= 0 && index2 < size());
-				char tempBuffer[sizeof(TYPE)];
-				std::memmove(&tempBuffer[0], &arrayData[index1], sizeof(TYPE));
-				std::memmove(&arrayData[index1], &arrayData[index2], sizeof(TYPE));
-				std::memmove(&arrayData[index2], &tempBuffer[0], sizeof(TYPE));
+				arrayData.swap(index1, index2);
 			}
 
+
+			template<size_t INDEX>
+			constexpr void sort_bubble(const auto sorter, size_t firstIndex, size_t lastIndex) {
+				bool swapped = false;
+				auto& arrayData = std::get<INDEX>(m_Data).data;
+				assert(firstIndex >= 0 && firstIndex < size());
+				assert(lastIndex >= 0 && lastIndex < size());
+				assert(lastIndex > firstIndex);
+				size_t n = lastIndex - firstIndex;
+				for (size_t i = 0; i < n; i++) {
+					for (size_t j = firstIndex + 1; j < (lastIndex + 1) - i; j++) {
+						if (!sorter(arrayData[j - 1], arrayData[j])) {
+							std::apply([this, j](auto&&... args) {( args.swap(j - 1, j), ...); }, m_Data);
+							swapped = true;
+						}
+					}
+					if (!swapped) { break; }
+				}
+			}
+			template<size_t INDEX> inline constexpr void sort_bubble(size_t firstIndex, size_t lastIndex) { 
+				assert(firstIndex >= 0 && firstIndex < size());
+				assert(lastIndex >= 0 && lastIndex < size());
+				if (lastIndex <= firstIndex) { return; }
+				sort_bubble<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex);
+			}
+			template<size_t INDEX> inline constexpr void sort_bubble() { 
+				if (size() <= 1) { return; }
+				sort_bubble<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
+			}
+
+			template<size_t INDEX>
+			void sort_quick(const auto sorter, size_t firstIndex, size_t lastIndex) {
+				assert(firstIndex >= 0 && firstIndex < size());
+				assert(lastIndex >= 0 && lastIndex < size());
+				if (lastIndex - firstIndex <= 1) {
+					return;
+				}
+				auto median_of_three = [this](const auto& sorter, auto& data, int left, int right) {
+					int mid = left + (right - left) / 2;
+					if (!sorter(data[left], data[mid])) {
+						std::apply([this, left, mid](auto&&... args) {(args.swap(left, mid), ...); }, m_Data);
+					}
+					if (!sorter(data[left], data[right])) {
+						std::apply([this, left, right](auto&&... args) {(args.swap(left, right), ...); }, m_Data);
+					}
+					if (!sorter(data[mid], data[right])) {
+						std::apply([this, mid, right](auto&&... args) {(args.swap(mid, right), ...); }, m_Data);
+					}
+					return data[mid];
+				};
+				auto partition_hoare_duplicates = [this, &median_of_three](const auto& sorter, auto& data, int left, int right) -> std::pair<int, int> {
+					auto pivot = median_of_three(sorter, data, left, right);
+					int i = left - 1;
+					int j = right + 1;
+					for (;;) {
+						while (sorter(data[++i], pivot));
+						while (sorter(pivot, data[--j]));
+						if (i >= j) {
+							break;
+						}
+						std::apply([this, i, j](auto&&... args) {(args.swap(i, j), ...); }, m_Data);
+					}
+					// exclude middle values == pivot
+					i = j;
+					j++;
+					while (i > left && data[i] == pivot) i--;
+					while (j < right && data[j] == pivot) j++;
+					return { i, j };
+				};
+				auto quicksort = [&partition_hoare_duplicates](const auto& sorter, auto& data, int left, int right, const auto& quicksort_impl) -> void {
+					if (left < right) {
+						auto indices = partition_hoare_duplicates(sorter, data, left, right);
+						quicksort_impl(sorter, data, left, indices.first,   quicksort_impl);
+						quicksort_impl(sorter, data, indices.second, right, quicksort_impl);
+					}
+				};
+				auto& arrayData = std::get<INDEX>(m_Data);
+				quicksort(sorter, arrayData, int(firstIndex), int(lastIndex), quicksort);
+			}
+			template<size_t INDEX> inline constexpr void sort_quick(size_t firstIndex, size_t lastIndex) { 
+				assert(firstIndex >= 0 && firstIndex < size());
+				assert(lastIndex >= 0 && lastIndex < size());
+				if (lastIndex <= firstIndex) { return; }
+				sort_quick<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex); 
+			}
+			template<size_t INDEX> inline constexpr void sort_quick() {
+				if (size() <= 1) { return; }
+				sort_quick<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
+			}
+
+			template<size_t INDEX>
+			constexpr void sort(const auto sorter, size_t firstIndex, size_t lastIndex) {
+				assert(firstIndex >= 0 && firstIndex < size());
+				assert(lastIndex >= 0 && lastIndex < size());
+				if (lastIndex <= firstIndex) { return; }
+				if (lastIndex - firstIndex <= 32) {
+					sort_bubble<INDEX>(sorter, firstIndex, lastIndex); //TODO: use insertion_sort
+					return;
+				}
+				sort_quick<INDEX>(sorter, firstIndex, lastIndex);
+			}
+			template<size_t INDEX> inline constexpr void sort(size_t firstIndex, size_t lastIndex) {
+				assert(firstIndex >= 0 && firstIndex < size());
+				assert(lastIndex >= 0 && lastIndex < size());
+				if (lastIndex <= firstIndex) { return; }
+				sort<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex);
+			}
+			template<size_t INDEX> inline constexpr void sort() {
+				if (size() <= 1) { return; }
+				sort<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
+			}
 	};
 }
 
