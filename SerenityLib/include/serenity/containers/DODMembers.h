@@ -5,27 +5,91 @@
 #include <tuple>
 #include <utility>
 #include <serenity/system/Macros.h>
+#include <serenity/threading/ThreadingModule.h>
+#include <serenity/system/Engine.h>
+#include <execution>
 
 namespace Engine::priv {
 	struct no_args_t {};
 
 	namespace detail {
+		using ssize_t = std::make_signed_t<std::size_t>;
+
 		template<std::size_t I = 0, class TUPLE_TYPE, class ... DATA_TYPES>
-		constexpr void insertion_sort_assignment_part_1(std::tuple<DATA_TYPES...>& data, auto& key, const auto i) {
+		constexpr void insertion_sort_assignment_part_1(std::tuple<DATA_TYPES...>& data, auto& key, const auto index) {
 			if constexpr (I < sizeof...(DATA_TYPES)) {
 				using TYPE = typename std::tuple_element<I, TUPLE_TYPE>::type::VAL_TYPE;
-				std::memmove(&std::get<I>(key)[0], &std::get<I>(data)[i], sizeof(TYPE));
-				insertion_sort_assignment_part_1<I + 1, TUPLE_TYPE, DATA_TYPES...>(data, key, i);
+				std::memmove(&std::get<I>(key)[0], &std::get<I>(data)[index], sizeof(TYPE));
+				insertion_sort_assignment_part_1<I + 1, TUPLE_TYPE, DATA_TYPES...>(data, key, index);
+			}
+		}
+		template<std::size_t I = 0, class TUPLE_TYPE, class ... DATA_TYPES>
+		constexpr void insertion_sort_assignment_part_2(std::tuple<DATA_TYPES...>& data, auto& key, const auto index) {
+			if constexpr(I < sizeof...(DATA_TYPES)) {
+				using TYPE = typename std::tuple_element<I, TUPLE_TYPE>::type::VAL_TYPE;
+				std::memmove(&std::get<I>(data)[index], &std::get<I>(key)[0], sizeof(TYPE));
+				insertion_sort_assignment_part_2<I + 1, TUPLE_TYPE, DATA_TYPES...>(data, key, index);
 			}
 		}
 
-		template<std::size_t I = 0, class TUPLE_TYPE, class ... DATA_TYPES>
-		constexpr void insertion_sort_assignment_part_2(std::tuple<DATA_TYPES...>& data, auto& key, const auto i) {
-			if constexpr(I < sizeof...(DATA_TYPES)) {
-				using TYPE = typename std::tuple_element<I, TUPLE_TYPE>::type::VAL_TYPE;
-				std::memmove(&std::get<I>(data)[i], &std::get<I>(key)[0], sizeof(TYPE));
-				insertion_sort_assignment_part_2<I + 1, TUPLE_TYPE, DATA_TYPES...>(data, key, i);
+		auto quicksort_median_of_three(auto& arrays, const auto& sorter, auto& data, auto left, auto right) {
+			const auto mid = left + (right - left) / 2;
+			if (!sorter(data[left], data[mid])) {
+				std::apply([&arrays, left, mid](auto&&... args) {(args.swap(left, mid), ...); }, arrays);
 			}
+			if (!sorter(data[left], data[right])) {
+				std::apply([&arrays, left, right](auto&&... args) {(args.swap(left, right), ...); }, arrays);
+			}
+			if (!sorter(data[mid], data[right])) {
+				std::apply([&arrays, mid, right](auto&&... args) {(args.swap(mid, right), ...); }, arrays);
+			}
+			return data[mid];
+		}
+		std::pair<ssize_t, ssize_t> quicksort_partition_hoare_duplicates(auto& arrays, const auto& sorter, auto& data, ssize_t left, ssize_t right) {
+			const auto pivot = quicksort_median_of_three(arrays, sorter, data, left, right);
+			ssize_t i = left - 1;
+			ssize_t j = right + 1;
+			for (;;) {
+				while (sorter(data[++i], pivot));
+				while (sorter(pivot, data[--j]));
+				if (i >= j) {
+					break;
+				}
+				std::apply([&arrays, i, j](auto&&... args) {(args.swap(i, j), ...); }, arrays);
+			}
+			// exclude middle values == pivot
+			i = j;
+			j++;
+			while (i > left && data[i] == pivot) i--;
+			while (j < right && data[j] == pivot) j++;
+			return { i, j };
+		}
+		void quicksort_parallel_impl(auto& arrays, auto& data, ssize_t left, ssize_t right, auto sorter, size_t parallelThreshold) {
+			const auto pivot = quicksort_partition_hoare_duplicates(arrays, sorter, data, left, right);
+			auto job1 = [&arrays, &data, left, pivot, sorter, parallelThreshold]() {
+				quicksort_parallel_impl(arrays, data, left, pivot.first, sorter, parallelThreshold);
+			};
+			auto job2 = [&arrays, &data, right, pivot, sorter, parallelThreshold]() {
+				quicksort_parallel_impl(arrays, data, pivot.second, right, sorter, parallelThreshold);
+			};
+			if (left < pivot.first) {
+				if (pivot.first - left > ssize_t(parallelThreshold)) {
+					Engine::priv::threading::addJob(job1);
+				} else {
+					job1();
+				}
+			}
+			if (pivot.second < right) {
+				if (right - pivot.second > ssize_t(parallelThreshold)) {
+					Engine::priv::threading::addJob(job2);
+				} else {
+					job2();
+				}
+			}
+		}
+		void quicksort_parallel(auto& arrays, auto& data, size_t left, size_t right, auto sorter, size_t parallelThreshold) {
+			quicksort_parallel_impl(arrays, data, ssize_t(left), ssize_t(right), sorter, parallelThreshold);
+			Engine::priv::threading::waitForAll();
 		}
 	}
 }
@@ -42,6 +106,12 @@ namespace Engine {
 			struct ARRAY_WRAPPER {
 				using VAL_TYPE = T;
 				T* data = nullptr;
+
+				ARRAY_WRAPPER() = default;
+				ARRAY_WRAPPER(const ARRAY_WRAPPER&) = delete;
+				ARRAY_WRAPPER& operator=(const ARRAY_WRAPPER&) = delete;
+				ARRAY_WRAPPER(ARRAY_WRAPPER&&) noexcept = delete;
+				ARRAY_WRAPPER& operator=(ARRAY_WRAPPER&&) noexcept = delete;
 
 				~ARRAY_WRAPPER() {
 					if (data) {
@@ -83,6 +153,9 @@ namespace Engine {
 				}
 
 				void swap(size_t index1, size_t index2) {
+					if (index1 == index2) {
+						return;
+					}
 					char tempBuffer[sizeof(T)];
 					std::memmove(&tempBuffer[0], &data[index1], sizeof(T));
 					std::memmove(&data[index1], &data[index2], sizeof(T));
@@ -223,6 +296,19 @@ namespace Engine {
 				clear();
 			}
 
+			template<size_t INDEX>
+			constexpr bool is_sorted() {
+				auto& arrayData = std::get<INDEX>(m_Data);
+				for (size_t i = 1; i < m_Size; ++i) {
+					const auto& lhs = arrayData[i - 1];
+					const auto& rhs = arrayData[i];
+					if (lhs > rhs) {
+						return false;
+					}
+				}
+				return true;
+			}
+
 			constexpr void clear() {
 				std::apply([this](auto&&... args) { (args.destructMemory(m_Size), ...); }, m_Data);
 				m_Size = 0;
@@ -299,150 +385,98 @@ namespace Engine {
 				arrayData.swap(index1, index2);
 			}
 
-#if 0
-			template<size_t INDEX>
-			constexpr void sort_bubble(const auto sorter, size_t firstIndex, size_t lastIndex) {
-				bool swapped = false;
-				auto& arrayData = std::get<INDEX>(m_Data).data;
-				assert(firstIndex >= 0 && firstIndex < size());
-				assert(lastIndex >= 0 && lastIndex < size());
-				assert(lastIndex > firstIndex);
-				size_t n = lastIndex - firstIndex;
-				for (size_t i = 0; i < n; i++) {
-					for (size_t j = firstIndex + 1; j < (lastIndex + 1) - i; j++) {
-						if (!sorter(arrayData[j - 1], arrayData[j])) {
-							std::apply([this, j](auto&&... args) {( args.swap(j - 1, j), ...); }, m_Data);
-							swapped = true;
-						}
-					}
-					if (!swapped) { break; }
-				}
-			}
-			template<size_t INDEX> inline constexpr void sort_bubble(size_t firstIndex, size_t lastIndex) { 
-				assert(firstIndex >= 0 && firstIndex < size());
-				assert(lastIndex >= 0 && lastIndex < size());
-				if (lastIndex <= firstIndex) { return; }
-				sort_bubble<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex);
-			}
-			template<size_t INDEX> inline constexpr void sort_bubble() { 
-				if (size() <= 1) { return; }
-				sort_bubble<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
-			}
-#endif
 
-			template<size_t INDEX>
-			void sort_insertion(const auto sorter, size_t firstIndex, size_t lastIndex) {
+			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy>
+			void sort_insertion(const auto sorter, size_t firstIndex, size_t lastIndex, size_t parallelThreshold = 300) {
 				auto& arrayData = std::get<INDEX>(m_Data);
 				using ssize_t = std::make_signed_t<std::size_t>;
 				ssize_t i = firstIndex + 1;
 				TUPLE_TYPE key;
 
-				std::apply([this](auto&&... args) { (args.moveMemory(0, 1), ...); }, key);
-				while (i <= lastIndex) {
-					Engine::priv::detail::insertion_sort_assignment_part_1<0, TUPLE_TYPE>(m_Data, key, i);
+				std::apply([this](auto&&... args) { (args.moveMemory(0, 1), ...); }, key); //build memory for one element per type in key
+				while (i <= ssize_t(lastIndex)) {
+					Engine::priv::detail::insertion_sort_assignment_part_1<0, TUPLE_TYPE>(m_Data, key, i); //key = data[i]
 					ssize_t j = i - 1;
 					while (j >= 0 && !sorter(arrayData[j], std::get<INDEX>(key)[0])) {
 						std::apply([this, j](auto&&... args) {(args.move(j, j + 1), ...); }, m_Data);
 						j -= 1;
 					}
-					Engine::priv::detail::insertion_sort_assignment_part_2<0, TUPLE_TYPE>(m_Data, key, j + 1);
+					Engine::priv::detail::insertion_sort_assignment_part_2<0, TUPLE_TYPE>(m_Data, key, j + 1); //data[j + 1] = key
 					i += 1;
 				}
 			}
 
-			template<size_t INDEX>
-			void sort_insertion(size_t firstIndex, size_t lastIndex) {
+			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy>
+			void sort_insertion(size_t firstIndex, size_t lastIndex, size_t parallelThreshold = 300) {
 				assert(firstIndex >= 0 && firstIndex < size());
 				assert(lastIndex >= 0 && lastIndex < size());
 				if (lastIndex <= firstIndex) { return; }
-				sort_insertion<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex);
+				sort_insertion<INDEX, ExecPol>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex);
 			}
-			template<size_t INDEX>
-			void sort_insertion() {
+			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy>
+			void sort_insertion(size_t parallelThreshold = 300) {
 				if (size() <= 1) { return; }
-				sort_insertion<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
+				sort_insertion<INDEX, ExecPol>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
 			}
 
-			template<size_t INDEX>
-			void sort_quick(const auto sorter, size_t firstIndex, size_t lastIndex) {
-				assert(firstIndex >= 0 && firstIndex < size());
-				assert(lastIndex >= 0 && lastIndex < size());
-				if (lastIndex - firstIndex <= 1) {
-					return;
-				}
-				auto median_of_three = [this](const auto& sorter, auto& data, int left, int right) {
-					int mid = left + (right - left) / 2;
-					if (!sorter(data[left], data[mid])) {
-						std::apply([this, left, mid](auto&&... args) {(args.swap(left, mid), ...); }, m_Data);
-					}
-					if (!sorter(data[left], data[right])) {
-						std::apply([this, left, right](auto&&... args) {(args.swap(left, right), ...); }, m_Data);
-					}
-					if (!sorter(data[mid], data[right])) {
-						std::apply([this, mid, right](auto&&... args) {(args.swap(mid, right), ...); }, m_Data);
-					}
-					return data[mid];
-				};
-				auto partition_hoare_duplicates = [this, &median_of_three](const auto& sorter, auto& data, int left, int right) -> std::pair<int, int> {
-					auto pivot = median_of_three(sorter, data, left, right);
-					int i = left - 1;
-					int j = right + 1;
-					for (;;) {
-						while (sorter(data[++i], pivot));
-						while (sorter(pivot, data[--j]));
-						if (i >= j) {
-							break;
+			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy>
+			void sort_quick(const auto sorter, size_t left, size_t right, size_t parallelThreshold = 300) {
+				using ssize_t = std::make_signed_t<std::size_t>;
+				assert(left >= 0 && left < size());
+				assert(right >= 0 && right < size());
+
+				if (left < right) {
+					if constexpr (std::is_same_v<ExecPol, std::execution::parallel_policy> || std::is_same_v<ExecPol, std::execution::parallel_unsequenced_policy>) {
+						Engine::priv::detail::quicksort_parallel(m_Data, std::get<INDEX>(m_Data), left, right, sorter, parallelThreshold);
+					} else {
+						ssize_t top = -1;
+						std::vector<std::pair<ssize_t, ssize_t>> stackOfIndices(ssize_t(right) - ssize_t(left) + 1, {0, 0});
+						stackOfIndices[++top] = { left, right };
+						while (top >= 0) {
+							ssize_t L = stackOfIndices[top].first;
+							ssize_t R = stackOfIndices[top].second;
+							--top;
+							if (L >= R) {
+								continue;
+							}
+							const auto pivot = Engine::priv::detail::quicksort_partition_hoare_duplicates(m_Data, sorter, std::get<INDEX>(m_Data), L, R);
+							stackOfIndices[++top] = { L, pivot.first };
+							stackOfIndices[++top] = { pivot.second, R };
 						}
-						std::apply([this, i, j](auto&&... args) {(args.swap(i, j), ...); }, m_Data);
 					}
-					// exclude middle values == pivot
-					i = j;
-					j++;
-					while (i > left && data[i] == pivot) i--;
-					while (j < right && data[j] == pivot) j++;
-					return { i, j };
-				};
-				auto quicksort = [&partition_hoare_duplicates](const auto& sorter, auto& data, int left, int right, const auto& quicksort_impl) -> void {
-					if (left < right) {
-						auto indices = partition_hoare_duplicates(sorter, data, left, right);
-						quicksort_impl(sorter, data, left, indices.first,   quicksort_impl);
-						quicksort_impl(sorter, data, indices.second, right, quicksort_impl);
-					}
-				};
-				auto& arrayData = std::get<INDEX>(m_Data);
-				quicksort(sorter, arrayData, int(firstIndex), int(lastIndex), quicksort);
+				}
 			}
-			template<size_t INDEX> inline constexpr void sort_quick(size_t firstIndex, size_t lastIndex) { 
+			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy> inline constexpr void sort_quick(size_t firstIndex, size_t lastIndex, size_t parallelThreshold = 300) {
 				assert(firstIndex >= 0 && firstIndex < size());
 				assert(lastIndex >= 0 && lastIndex < size());
 				if (lastIndex <= firstIndex) { return; }
-				sort_quick<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex); 
+				sort_quick<INDEX, ExecPol>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex);
 			}
-			template<size_t INDEX> inline constexpr void sort_quick() {
+			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy> inline constexpr void sort_quick(size_t parallelThreshold = 300) {
 				if (size() <= 1) { return; }
-				sort_quick<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
+				sort_quick<INDEX, ExecPol>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
 			}
 
-			template<size_t INDEX>
-			constexpr void sort(const auto sorter, size_t firstIndex, size_t lastIndex) {
+			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy>
+			constexpr void sort(const auto sorter, size_t firstIndex, size_t lastIndex, size_t parallelThreshold = 300) {
 				assert(firstIndex >= 0 && firstIndex < size());
 				assert(lastIndex >= 0 && lastIndex < size());
 				if (lastIndex <= firstIndex) { return; }
 				if (lastIndex - firstIndex <= 32) {
-					sort_insertion<INDEX>(sorter, firstIndex, lastIndex);
+					sort_insertion<INDEX, ExecPol>(sorter, firstIndex, lastIndex);
 					return;
 				}
-				sort_quick<INDEX>(sorter, firstIndex, lastIndex);
+				sort_quick<INDEX, ExecPol>(sorter, firstIndex, lastIndex);
 			}
-			template<size_t INDEX> inline constexpr void sort(size_t firstIndex, size_t lastIndex) {
+			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy> inline constexpr void sort(size_t firstIndex, size_t lastIndex, size_t parallelThreshold = 300) {
 				assert(firstIndex >= 0 && firstIndex < size());
 				assert(lastIndex >= 0 && lastIndex < size());
 				if (lastIndex <= firstIndex) { return; }
-				sort<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex);
+				sort<INDEX, ExecPol>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, firstIndex, lastIndex);
 			}
-			template<size_t INDEX> inline constexpr void sort() {
+			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy> inline constexpr void sort(size_t parallelThreshold = 300) {
 				if (size() <= 1) { return; }
-				sort<INDEX>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
+				sort<INDEX, ExecPol>([](const auto& lhs, const auto& rhs) -> bool { return lhs < rhs; }, 0, size() - 1);
 			}
 	};
 }

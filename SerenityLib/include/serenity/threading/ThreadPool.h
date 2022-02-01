@@ -33,7 +33,7 @@ namespace Engine::priv {
             std::condition_variable_any                  m_ConditionVariableAny;
             std::atomic<int32_t>                         m_WaitCounter           = 0;
             bool                                         m_Stopped               = true;
-      
+
             void internal_update_single_threaded();
             void internal_execute_callbacks();
             void internal_update_multi_threaded();

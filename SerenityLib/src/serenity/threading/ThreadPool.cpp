@@ -101,10 +101,10 @@ void Engine::priv::ThreadPool::update() {
 void Engine::priv::ThreadPool::wait_for_all() noexcept {
 #if !defined(ENGINE_FORCE_NO_THEAD_POOL)
     if (size() > 0) {
-        while (m_WaitCounter > 0) {
+        while (m_WaitCounter.load(std::memory_order_relaxed) > 0) {
             std::this_thread::yield();
         }
-        //while (m_WaitCounter.load(std::memory_order_relaxed) > 0);
+        //while (m_WaitCounter > 0);
     }
 #endif
     update();
