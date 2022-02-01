@@ -170,6 +170,12 @@ void TerrainData::clearData() {
         shape->setUserIndex2(std::numeric_limits<int>().min());
     }
 }
+btScalar TerrainData::getLength() const noexcept {
+    return m_BtHeightfieldShapesSizeCols > 0 ? btScalar(m_BtHeightfieldShapesSizeCols - 1) * btScalar(m_BtHeightfieldShapes[0]->getUserIndex2()) : btScalar(0.0);
+}
+btScalar TerrainData::getWidth() const noexcept {
+    return m_BtHeightfieldShapesSizeRows > 0 ? btScalar(m_BtHeightfieldShapesSizeRows - 1) * btScalar(m_BtHeightfieldShapes[0]->getUserIndex()) : btScalar(0.0);
+}
 btScalar TerrainData::bilinearFilter(uint32_t pixelX, uint32_t pixelY, uint32_t vertexX, uint32_t vertexY, sf::Image& heightmapImage) {
     const auto pixel_00      = heightmapImage.getPixel(pixelX,     pixelY).r;
     const auto pixel_10      = heightmapImage.getPixel(pixelX + 1, pixelY).r;
@@ -253,8 +259,8 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, uint32_t pointsPerPi
         for (uint32_t j = 0; j < vertColSize; ++j) {
             tempHeightCoords[getIdx(vertRowSize, i, j)] *= scale_by;
             auto pixel = tempHeightCoords[getIdx(vertRowSize, i, j)];
-            m_MinAndMaxHeight.first  = glm::min(m_MinAndMaxHeight.first, (float)pixel);
-            m_MinAndMaxHeight.second = glm::max(m_MinAndMaxHeight.second, (float)pixel);
+            m_MinAndMaxHeight.first  = glm::min(m_MinAndMaxHeight.first, float(pixel));
+            m_MinAndMaxHeight.second = glm::max(m_MinAndMaxHeight.second, float(pixel));
 
         }
     }
@@ -271,25 +277,25 @@ bool TerrainData::calculate_data(sf::Image& heightmapImage, uint32_t pointsPerPi
     for (uint32_t sectorX = 0; sectorX < m_BtHeightfieldShapesSizeRows; ++sectorX) {
         for (uint32_t sectorY = 0; sectorY < m_BtHeightfieldShapesSizeCols; ++sectorY) {
             std::vector<float> dummy_values = { 1.0f };//Bullet will do an assert check for null data, but i am manually assigning the data later on
-            auto& shape = m_BtHeightfieldShapes[getIdx(m_BtHeightfieldShapesSizeRows, sectorX, sectorY)];
-            shape = new TerrainHeightfieldShape(vertexPerSectorSize + 1, vertexPerSectorSize + 1, dummy_values.data(), (float)m_HeightScale, m_MinAndMaxHeight.first, m_MinAndMaxHeight.second, 1, PHY_ScalarType::PHY_FLOAT, false);
-            shape->setUserIndex2(vertexPerSectorSize);
-            shape->setUserIndex(vertexPerSectorSize);
+            auto& physicsShape = m_BtHeightfieldShapes[getIdx(m_BtHeightfieldShapesSizeRows, sectorX, sectorY)];
+            physicsShape = new TerrainHeightfieldShape(vertexPerSectorSize + 1, vertexPerSectorSize + 1, dummy_values.data(), (float)m_HeightScale, m_MinAndMaxHeight.first, m_MinAndMaxHeight.second, 1, PHY_ScalarType::PHY_FLOAT, false);
+            physicsShape->setUserIndex2(vertexPerSectorSize);
+            physicsShape->setUserIndex(vertexPerSectorSize);
         }
     }
 
     //fill in data
     for (uint32_t sectorX = 0; sectorX < m_BtHeightfieldShapesSizeRows; ++sectorX) {
         for (uint32_t sectorY = 0; sectorY < m_BtHeightfieldShapesSizeCols; ++sectorY) {
-            auto& shape = *m_BtHeightfieldShapes[getIdx(m_BtHeightfieldShapesSizeRows, sectorX, sectorY)];
+            auto& physicsShape = *m_BtHeightfieldShapes[getIdx(m_BtHeightfieldShapesSizeRows, sectorX, sectorY)];
             for (uint32_t x = sectorX * vertexPerSectorSize; x < (sectorX * vertexPerSectorSize) + (vertexPerSectorSize + 1); ++x) {
                 for (uint32_t y = sectorY * vertexPerSectorSize; y < (sectorY * vertexPerSectorSize) + (vertexPerSectorSize + 1); ++y) {
                     uint32_t x_       = glm::min(x, (uint32_t)vertRowSize - 1U);
                     uint32_t y_       = glm::min(y, (uint32_t)vertColSize - 1U);
-                    shape.m_Data.push_back(tempHeightCoords[getIdx(vertRowSize, x_, y_)]);
+                    physicsShape.m_Data.push_back(tempHeightCoords[getIdx(vertRowSize, x_, y_)]);
                 }
             }
-            shape.setData(shape.m_Data.data());
+            physicsShape.setData(physicsShape.m_Data.data());
         }
     }
     return true;
@@ -304,6 +310,9 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
 {
     m_TerrainData.calculate_data(heightmapImage, pointsPerPixel, heightScale, blurIterations);
     Terrain::setUseDiamondSubdivision(useDiamondSubdivisions);
+
+    btScalar maxOriginY = m_TerrainData.getLength();
+    btScalar maxOriginX = m_TerrainData.getWidth();
     m_MeshHandle = Engine::Resources::addResource<Mesh>(name, *this, 0.0f);
 
     addComponent<ComponentModel>(m_MeshHandle, materialHandle);
@@ -316,8 +325,6 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
     auto model   = getComponent<ComponentModel>();
     m_TerrainData.m_FinalCompoundShape = new btCompoundShape();
 
-    btScalar maxOriginY = m_TerrainData.m_BtHeightfieldShapesSizeCols > 0 ? btScalar(m_TerrainData.m_BtHeightfieldShapesSizeCols - 1) * btScalar(m_TerrainData.m_BtHeightfieldShapes[0]->getUserIndex2()) : btScalar(0.0);
-    btScalar maxOriginX = m_TerrainData.m_BtHeightfieldShapesSizeRows > 0 ? btScalar(m_TerrainData.m_BtHeightfieldShapesSizeRows - 1) * btScalar(m_TerrainData.m_BtHeightfieldShapes[0]->getUserIndex()) : btScalar(0.0);
     for (uint32_t sectorX = 0; sectorX < m_TerrainData.m_BtHeightfieldShapesSizeRows; ++sectorX) {
         for (uint32_t sectorY = 0; sectorY < m_TerrainData.m_BtHeightfieldShapesSizeCols; ++sectorY) {
             auto* heightfield = m_TerrainData.m_BtHeightfieldShapes[(m_TerrainData.m_BtHeightfieldShapesSizeRows * sectorX) + sectorY];
@@ -326,9 +333,9 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
             btTransform xform;
             xform.setIdentity();
             xform.setOrigin(btVector3{ 
-                btScalar(btScalar(sectorY) * btScalar(dimensions.y)),
+                btScalar(btScalar(sectorY) * btScalar(dimensions.y)) - (maxOriginY * btScalar(0.5)),
                 btScalar(0.0), 
-                btScalar(btScalar(sectorX) * btScalar(dimensions.x))
+                btScalar(btScalar(sectorX) * btScalar(dimensions.x)) - (maxOriginX * btScalar(0.5))
             });
             m_TerrainData.m_FinalCompoundShape->addChildShape(xform, m_TerrainData.m_BtHeightfieldShapes[(m_TerrainData.m_BtHeightfieldShapesSizeRows * sectorX) + sectorY]);
             m_TerrainData.m_FinalCompoundShape->recalculateLocalAabb();
@@ -339,7 +346,6 @@ Terrain::Terrain(const std::string& name, sf::Image& heightmapImage, Handle& mat
     rigid->setDynamic(false);
     rigid->addFlags(ComponentRigidBody::Flags::DISABLE_WORLD_GRAVITY);
     rigid->setGravity(0.0, 0.0, 0.0);
-    Terrain::translate(-maxOriginY * btScalar(0.5), 0, -maxOriginX * btScalar(0.5));
 }
 Terrain::~Terrain() {
 

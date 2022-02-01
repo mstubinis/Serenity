@@ -290,12 +290,10 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     float offsetSectorX = 0.0f;
     float offsetSectorY = 0.0f;
 
-    auto hash_position  = [](const glm::vec3& position) {
-        int64_t hash = 0;
+    auto hash_position  = [](const glm::vec3& position) -> int64_t {
         int32_t x    = static_cast<int32_t>(position.x);
         int32_t z    = static_cast<int32_t>(position.z);
-        hash         = (static_cast<int64_t>(x) << 32) | z;
-        return hash;
+        return (static_cast<int64_t>(x) << 32) | z;
     };
 
 
@@ -308,6 +306,8 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
     float totalVertexSizeX = fsideSize * terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows;
     float totalVertexSizeY = terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows > 0 ? (fsideSize * terrain.m_TerrainData.m_BtHeightfieldShapesSizeCols) : 0.0f;
 
+    btScalar maxOriginY = terrain.m_TerrainData.getLength();
+    btScalar maxOriginX = terrain.m_TerrainData.getWidth();
     for (size_t sectorX = 0; sectorX < terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows; ++sectorX) {
         for (size_t sectorY = 0; sectorY < terrain.m_TerrainData.m_BtHeightfieldShapesSizeCols; ++sectorY) {
             auto& heightfield = *heightfields[(terrain.m_TerrainData.m_BtHeightfieldShapesSizeRows * sectorX) + sectorY];
@@ -331,7 +331,7 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
                     valid[3] = heightfield.getAndValidateVertex(i + 1, j + 1, btVerts[3], false);
 
                     for (int i = 0; i < 4; ++i) {
-                        verts[i].position = glm::vec3(offsetSectorY + btVerts[i].x(), btVerts[i].y(), offsetSectorX + btVerts[i].z());
+                        verts[i].position = glm::vec3{ offsetSectorY + btVerts[i].x(), btVerts[i].y(), offsetSectorX + btVerts[i].z() };
                     }
 
                     glm::vec3 a = verts[3].position - verts[0].position;
@@ -392,6 +392,12 @@ void Mesh::internal_build_from_terrain(const Terrain& terrain) {
             data.m_Normals[v.index] = smoothed;
         }
     }
+    //offset to centerize the mesh
+    for (auto& pos : data.m_Points) {
+        pos += glm::vec3{ -maxOriginY * btScalar(0.5), 0.0f, -maxOriginX * btScalar(0.5) };
+    }
+
+
     Engine::priv::MeshLoader::CalculateTBNAssimp(data);
     if (terrain.m_MeshHandle.null()) {
         Engine::priv::PublicMesh::FinalizeVertexData(m_CPUData, data);

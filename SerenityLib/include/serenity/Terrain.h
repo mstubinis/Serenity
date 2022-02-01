@@ -65,6 +65,9 @@ class TerrainData final {
         ~TerrainData();
 
         void clearData();
+
+        [[nodiscard]] btScalar getWidth() const noexcept;
+        [[nodiscard]] btScalar getLength() const noexcept;
 };
 
 class Terrain : public Observer, public Entity {
