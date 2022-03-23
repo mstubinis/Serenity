@@ -393,25 +393,16 @@ void DeferredPipeline::init() {
     glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
     glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STREAM_DRAW);
 
-    auto sizeofOne = sizeof(Engine::priv::ParticleFloatType) * 4;
-    auto sizeofTwo = sizeof(Engine::priv::ParticleFloatType) * 2;
+    auto sizeofOne = sizeof(ParticleFloatType) * 4;
+    auto sizeofTwo = sizeof(ParticleFloatType) * 2;
 
-
-#if defined(ENGINE_PARTICLES_HALF_SIZE)
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_HALF_FLOAT,      GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)0  );
+    glVertexAttribPointer(2, 4, PARTICLE_FLOAT_TYPE, GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)0  );
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_HALF_FLOAT,      GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)sizeofOne);
+    glVertexAttribPointer(3, 2, PARTICLE_FLOAT_TYPE, GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)sizeofOne);
     glEnableVertexAttribArray(4);
     glVertexAttribIPointer(4, 2, GL_UNSIGNED_SHORT, sizeof(Engine::priv::ParticleDOD), (void*)(sizeofOne + sizeofTwo));
-#else
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Engine::priv::ParticleDOD), (void*)0);
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Engine::priv::ParticleDOD), (void*)sizeofOne);
-    glEnableVertexAttribArray(4);
-    glVertexAttribIPointer(4, 2, GL_UNSIGNED_INT, sizeof(Engine::priv::ParticleDOD), (void*)(sizeofOne + sizeofTwo));
-#endif
+
     glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
@@ -1207,7 +1198,7 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, H
 
         auto& particleMesh = *Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().get<Mesh>();
         m_Renderer.bind(&particleMesh);
-        glDrawElementsInstanced(GL_TRIANGLES, (GLsizei)particleMesh.getVertexData().m_Indices.size(), GL_UNSIGNED_INT, 0, (GLsizei)particle_count);
+        glDrawElementsInstanced(GL_TRIANGLES, GLsizei(particleMesh.getVertexData().m_Indices.size()), GL_UNSIGNED_INT, 0, GLsizei(particle_count));
         m_Renderer.unbind(&particleMesh);
     }
 }

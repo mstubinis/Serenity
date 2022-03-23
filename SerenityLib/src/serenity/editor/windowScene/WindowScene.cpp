@@ -49,13 +49,17 @@ namespace Engine::priv {
     class EditorWindowSceneFunctions {
         public: 
             static void internal_render_entities(Scene& currentScene);
+            static void internal_render_systems(Scene& currentScene);
             static void internal_render_renderer(Scene& currentScene);
             static void internal_render_resources(Scene& currentScene);
             static void internal_render_profiler(Scene& currentScene);
             static void internal_render_network(Scene& currentScene);
 
+            static void internal_render_entity(Entity);
+
             constexpr static std::array<EditorWindowSceneFunction, Engine::priv::EditorWindowScene::TabType::_TOTAL> TAB_TYPES_DATA { {
                 { "Entities", &internal_render_entities },
+                { "Systems", &internal_render_systems },
                 { "Renderer", &internal_render_renderer },
                 { "Resources", &internal_render_resources },
                 { "Profiler", &internal_render_profiler },
@@ -64,7 +68,133 @@ namespace Engine::priv {
     };
 }
 
+void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) {
+    auto name = e.getComponent<ComponentName>();
+    if (ImGui::TreeNode(("Entity " + std::to_string(e.id()) + (name ? (" - " + name->name()) : "")).c_str())) {
+        //for each component...
+        auto transform = e.getComponent<ComponentTransform>();
+        auto rigid = e.getComponent<ComponentRigidBody>();
+        auto shape = e.getComponent<ComponentCollisionShape>();
+        auto model = e.getComponent<ComponentModel>();
+        auto camera = e.getComponent<ComponentCamera>();
+        auto script = e.getComponent<ComponentScript>();
+        if (name && ImGui::TreeNode("ComponentName")) {
+            ImGui::Text(std::string("Name: " + name->name()).c_str());
+            ImGui::TreePop();
+        }
+        if (transform && ImGui::TreeNode("ComponentTransform")) {
+            ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Position"); ImGui::SameLine(); ImGui::InputDouble3("##trans_pos", &transform->m_Position[0]);
+            ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Rotation"); ImGui::SameLine(); ImGui::InputFloat4("##trans_rot", &transform->m_Rotation[0]);
+            ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Scale   "); ImGui::SameLine(); ImGui::InputFloat3("##trans_scl", &transform->m_Scale[0]);
 
+            //getChildren() is somewhat expensive, 0(N) N = num max entities in scene
+            const auto& children = e.getChildren();
+            if (children.size() > 0) {
+                ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Children:");
+                for (const auto child : children) {
+                    ImGui::Text(std::string("Entity: " + child.toString()).c_str());
+                }
+                ImGui::Separator();
+            }
+            ImGui::TreePop();
+        }
+        if (rigid && ImGui::TreeNode("ComponentRigidBody")) {
+            ImGui::TreePop();
+        }
+        if (shape && ImGui::TreeNode("ComponentCollisionShape")) {
+            ImGui::TreePop();
+        }
+        if (model && ImGui::TreeNode("ComponentModel")) {
+            ImGui::Text(std::string("Radius: " + std::to_string(model->getRadius())).c_str());
+            const std::string bbX = std::to_string(model->getBoundingBox().x);
+            const std::string bbY = std::to_string(model->getBoundingBox().y);
+            const std::string bbZ = std::to_string(model->getBoundingBox().z);
+            ImGui::Text(std::string("BoundingBox: " + bbX + ", " + bbY + ", " + bbZ).c_str());
+            for (size_t i = 0; i < model->getNumModels(); ++i) {
+                ModelInstance& instance = model->getModel(i);
+                if (ImGui::TreeNode(("ModelInstance " + std::to_string(i)).c_str())) {
+                    const auto& color = instance.getColor();
+                    const auto& GRColor = instance.getGodRaysColor();
+                    float aColor[4] = { color.r(), color.g(), color.b(), color.a() };
+                    float aGodRays[3] = { GRColor.r(), GRColor.g(), GRColor.b() };
+                    if (ImGui::ColorEdit4("Color", &aColor[0])) {
+                        instance.setColor(aColor[0], aColor[1], aColor[2], aColor[3]);
+                    }
+                    if (ImGui::ColorEdit3("God Rays Color", &aGodRays[0])) {
+                        instance.setGodRaysColor(aGodRays[0], aGodRays[1], aGodRays[2]);
+                    }
+
+                    ImGui::Checkbox("Force Render", &instance.m_ForceRender);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Cast Shadow", &instance.m_IsShadowCaster);
+                    ImGui::SameLine();
+                    ImGui::Checkbox("Show", &instance.m_Visible);
+                    ImGui::SameLine();
+
+                    ImGui::Separator();
+
+                    auto pos = instance.getPosition();
+                    if (ImGui::InputFloat3("position", &pos[0])) {
+                        instance.setPosition(pos);
+                    }
+
+                    ImGui::InputFloat4("rotation", &instance.m_Orientation[0]);
+                    ImGui::InputFloat3("scale", &instance.m_Scale[0]);
+                    ImGui::Text(std::string("Radius: " + std::to_string(instance.m_Radius)).c_str());
+                    ImGui::Separator();
+                    const std::string a = instance.m_MeshHandle.null() ? "N/A" : instance.m_MeshHandle.get<Mesh>()->name();
+                    const std::string b = instance.m_MaterialHandle.null() ? "N/A" : instance.m_MaterialHandle.get<Material>()->name();
+                    const std::string c = instance.m_ShaderProgramHandle.null() ? "N/A" : instance.m_ShaderProgramHandle.get<ShaderProgram>()->name();
+                    ImGui::Text(std::string("Mesh: " + a).c_str());
+                    ImGui::Text(std::string("Material: " + b).c_str());
+                    ImGui::Text(std::string("Shader: " + c).c_str());
+                    ImGui::Text(std::string("Stage: " + std::string(instance.m_Stage.toString())).c_str());
+                    ImGui::Separator();
+
+                    instance.internal_update_model_matrix(true);
+
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::TreePop();
+        }
+        if (camera && ImGui::TreeNode("ComponentCamera")) {
+            if (camera->getType() == ComponentCamera::CameraType::Perspective) {
+                ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Perspective Camera");
+                ImGui::SliderFloat("Angle", &camera->m_AngleOrLeft, 0.0f, glm::radians(180.0f));
+                ImGui::InputFloat("AspectRatio", &camera->m_AspectRatioOrRight);
+                ImGui::InputFloat("Near", &camera->m_NearPlane);
+                ImGui::InputFloat("Far", &camera->m_FarPlane);
+            }
+            else {
+                ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Orthographic Camera");
+                ImGui::InputFloat("Left", &camera->m_AngleOrLeft);
+                ImGui::InputFloat("Right", &camera->m_AspectRatioOrRight);
+                ImGui::InputFloat("Top", &camera->m_Top);
+                ImGui::InputFloat("Bottom", &camera->m_Bottom);
+                ImGui::InputFloat("Near", &camera->m_NearPlane);
+                ImGui::InputFloat("Far", &camera->m_FarPlane);
+            }
+            Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*camera);
+            ImGui::TreePop();
+        }
+        if (script && ImGui::TreeNode("ComponentScript")) {
+            auto& scriptData = COMPONENT_SCRIPT_CONTENT.at(e.id());
+            ImVec2 ImGUIWindowSize = ImGui::GetWindowContentRegionMax();
+            ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Script");
+            float textboxWidth = ImGUIWindowSize.x - 120.0f;
+            float textboxHeight = float(std::max(300, int(ImGUIWindowSize.y)));
+            if (ImGui::InputTextMultiline("##ScriptContent", scriptData.data.data(), scriptData.data.size() + 1024, ImVec2(textboxWidth, textboxHeight), ImGuiInputTextFlags_NoHorizontalScroll)) {
+
+            }
+            if (ImGui::Button("Update", ImVec2(50, 25))) {
+                script->init(scriptData.data.data());
+            }
+            ImGui::TreePop();
+        }
+        ImGui::TreePop();
+    }
+}
 void Engine::priv::EditorWindowSceneFunctions::internal_render_network(Scene& currentScene) {
     const ImVec4 yellow      = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     const auto& tcpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.getSocketManager().getTCPSockets();
@@ -138,131 +268,8 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
     ImGui::BeginChild("SceneEntities");
     const auto& entities = Engine::priv::PublicScene::GetEntities(currentScene);
     if (ImGui::TreeNode("Entities")) {
-        for (const auto e : entities) {
-            auto name = e.getComponent<ComponentName>();
-            if (ImGui::TreeNode(("Entity " + std::to_string(e.id()) + (name ? (" - " + name->name()) : "")).c_str())) {
-                //for each component...
-                auto transform = e.getComponent<ComponentTransform>();
-                auto rigid     = e.getComponent<ComponentRigidBody>();
-                auto shape     = e.getComponent<ComponentCollisionShape>();
-                auto model     = e.getComponent<ComponentModel>();
-                auto camera    = e.getComponent<ComponentCamera>();
-                auto script    = e.getComponent<ComponentScript>();
-                if (name && ImGui::TreeNode("ComponentName")) {
-                    ImGui::Text(std::string("Name: " + name->name()).c_str());
-                    ImGui::TreePop();
-                }
-                if (transform && ImGui::TreeNode("ComponentTransform")) {
-                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Position"); ImGui::SameLine(); ImGui::InputDouble3("##trans_pos", &transform->m_Position[0]);
-                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Rotation"); ImGui::SameLine(); ImGui::InputFloat4("##trans_rot", &transform->m_Rotation[0]);
-                    ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Scale   "); ImGui::SameLine(); ImGui::InputFloat3("##trans_scl", &transform->m_Scale[0]);
-
-                    //getChildren() is somewhat expensive, 0(N) N = num max entities in scene
-                    const auto& children = e.getChildren();
-                    if (children.size() > 0) {
-                        ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Children:");
-                        for (const auto child : children) {
-                            ImGui::Text(std::string("Entity: " + child.toString()).c_str());
-                        }
-                        ImGui::Separator();
-                    }
-                    ImGui::TreePop();
-                }
-                if (rigid && ImGui::TreeNode("ComponentRigidBody")) {
-                    ImGui::TreePop();
-                }
-                if (shape && ImGui::TreeNode("ComponentCollisionShape")) {
-                    ImGui::TreePop();
-                }
-                if (model && ImGui::TreeNode("ComponentModel")) {
-                    ImGui::Text(std::string("Radius: " + std::to_string(model->getRadius())).c_str());
-                    const std::string bbX = std::to_string(model->getBoundingBox().x);
-                    const std::string bbY = std::to_string(model->getBoundingBox().y);
-                    const std::string bbZ = std::to_string(model->getBoundingBox().z);
-                    ImGui::Text(std::string("BoundingBox: " + bbX + ", " + bbY + ", " + bbZ).c_str());
-                    for (size_t i = 0; i < model->getNumModels(); ++i) {
-                        ModelInstance& instance = model->getModel(i);
-                        if (ImGui::TreeNode(("ModelInstance " + std::to_string(i)).c_str())) {
-                            const auto& color    = instance.getColor();
-                            const auto& GRColor  = instance.getGodRaysColor();
-                            float aColor[4]      = { color.r(), color.g(), color.b(), color.a() };
-                            float aGodRays[3]    = { GRColor.r(), GRColor.g(), GRColor.b() };
-                            if (ImGui::ColorEdit4("Color", &aColor[0])) {
-                                instance.setColor(aColor[0], aColor[1], aColor[2], aColor[3]);
-                            }
-                            if (ImGui::ColorEdit3("God Rays Color", &aGodRays[0])) {
-                                instance.setGodRaysColor(aGodRays[0], aGodRays[1], aGodRays[2]);
-                            }
-
-                            ImGui::Checkbox("Force Render", &instance.m_ForceRender);
-                            ImGui::SameLine();
-                            ImGui::Checkbox("Cast Shadow", &instance.m_IsShadowCaster);
-                            ImGui::SameLine();
-                            ImGui::Checkbox("Show", &instance.m_Visible);
-                            ImGui::SameLine();
-                            
-                            ImGui::Separator();
-
-                            auto pos = instance.getPosition();
-                            if (ImGui::InputFloat3("position", &pos[0])) {
-                                instance.setPosition(pos);
-                            }
-
-                            ImGui::InputFloat4("rotation", &instance.m_Orientation[0]);
-                            ImGui::InputFloat3("scale", &instance.m_Scale[0]);
-                            ImGui::Text(std::string("Radius: " + std::to_string(instance.m_Radius)).c_str());
-                            ImGui::Separator();
-                            const std::string a = instance.m_MeshHandle.null() ? "N/A" : instance.m_MeshHandle.get<Mesh>()->name();
-                            const std::string b = instance.m_MaterialHandle.null() ? "N/A" : instance.m_MaterialHandle.get<Material>()->name();
-                            const std::string c = instance.m_ShaderProgramHandle.null() ? "N/A" : instance.m_ShaderProgramHandle.get<ShaderProgram>()->name();
-                            ImGui::Text(std::string("Mesh: " + a).c_str());
-                            ImGui::Text(std::string("Material: " + b).c_str());
-                            ImGui::Text(std::string("Shader: " + c).c_str());
-                            ImGui::Text(std::string("Stage: " + std::string(instance.m_Stage.toString())).c_str());
-                            ImGui::Separator();
-                            
-                            instance.internal_update_model_matrix(true);
-
-                            ImGui::TreePop();
-                        }
-                    }
-                    ImGui::TreePop();
-                }
-                if (camera && ImGui::TreeNode("ComponentCamera")) {
-                    if (camera->getType() == ComponentCamera::CameraType::Perspective) {
-                        ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Perspective Camera");
-                        ImGui::SliderFloat("Angle", &camera->m_AngleOrLeft, 0.0f, glm::radians(180.0f));
-                        ImGui::InputFloat("AspectRatio", &camera->m_AspectRatioOrRight);
-                        ImGui::InputFloat("Near", &camera->m_NearPlane);
-                        ImGui::InputFloat("Far", &camera->m_FarPlane);
-                    } else {
-                        ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Orthographic Camera");
-                        ImGui::InputFloat("Left", &camera->m_AngleOrLeft);
-                        ImGui::InputFloat("Right", &camera->m_AspectRatioOrRight);
-                        ImGui::InputFloat("Top", &camera->m_Top);
-                        ImGui::InputFloat("Bottom", &camera->m_Bottom);
-                        ImGui::InputFloat("Near", &camera->m_NearPlane);
-                        ImGui::InputFloat("Far", &camera->m_FarPlane);
-                    }
-                    Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*camera);
-                    ImGui::TreePop();
-                }
-                if (script && ImGui::TreeNode("ComponentScript")) {
-                    auto& scriptData       = COMPONENT_SCRIPT_CONTENT.at(e.id());
-                    ImVec2 ImGUIWindowSize = ImGui::GetWindowContentRegionMax();
-                    ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Script");
-                    float textboxWidth     = ImGUIWindowSize.x - 120.0f;
-                    float textboxHeight    = float(std::max(300, int(ImGUIWindowSize.y)));
-                    if (ImGui::InputTextMultiline("##ScriptContent", scriptData.data.data(), scriptData.data.size() + 1024, ImVec2(textboxWidth, textboxHeight), ImGuiInputTextFlags_NoHorizontalScroll)) {
-
-                    }
-                    if (ImGui::Button("Update", ImVec2(50, 25))) {
-                        script->init(scriptData.data.data());
-                    }
-                    ImGui::TreePop();
-                }
-                ImGui::TreePop();
-            }
+        for (const Entity e : entities) {
+            internal_render_entity(e);
         }
         ImGui::TreePop();
         ImGui::Separator();
@@ -380,6 +387,46 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
         }
     }
     ImGui::EndChild();
+}
+void Engine::priv::EditorWindowSceneFunctions::internal_render_systems(Scene& currentScene) {
+#ifndef ENGINE_PRODUCTION
+    ImGui::BeginChild("SceneSystems");
+    auto& systems = Engine::priv::PublicScene::GetECS(currentScene).getSystemPool();
+    if (ImGui::TreeNode("Systems")) {
+        systems.forEachOrdered([](SystemBaseClass* system) {
+            const char* systemName = typeid(*system).name();
+            if (ImGui::TreeNode(systemName)) {
+                const auto& entities = system->getEntities();
+                const auto& associatedComponents = system->getAssociatedComponents();
+                if (ImGui::TreeNode(("Entities (" + std::to_string(entities.size()) + ")").c_str())) {
+                    for (const Entity e : entities) {
+                        internal_render_entity(e);
+                    }
+                    ImGui::TreePop();
+                    ImGui::Separator();
+                }
+                if (associatedComponents.size() > 0) {
+                    if (ImGui::TreeNode(("Component Pools (" + std::to_string(associatedComponents.size()) + ")").c_str())) {
+                        for (const auto& associatedComponentData : associatedComponents) {
+                            const auto ComponentClassName = associatedComponentData.pool->getComponentDebugName();
+                            if (ImGui::TreeNode(ComponentClassName)) {
+                                ImGui::TreePop();
+                                ImGui::Separator();
+                            }
+                        }
+                        ImGui::TreePop();
+                        ImGui::Separator();
+                    }
+                }
+                ImGui::TreePop();
+                ImGui::Separator();
+            }
+        });
+        ImGui::TreePop();
+        ImGui::Separator();
+    }
+    ImGui::EndChild();
+#endif
 }
 void Engine::priv::EditorWindowSceneFunctions::internal_render_profiler(Scene& currentScene) {
     auto& debugging = Engine::priv::Core::m_Engine->m_DebugManager;

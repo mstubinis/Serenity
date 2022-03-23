@@ -10,16 +10,17 @@
 #include <execution>
 
 namespace Engine::priv {
-	struct no_args_t {};
+	template<class T> struct no_args_t {};
 
 	namespace detail {
 		using ssize_t = std::make_signed_t<std::size_t>;
+
 
 		template<std::size_t I = 0, class TUPLE_TYPE, class ... DATA_TYPES>
 		constexpr void insertion_sort_assignment_part_1(std::tuple<DATA_TYPES...>& data, auto& key, const auto index) {
 			if constexpr (I < sizeof...(DATA_TYPES)) {
 				using TYPE = typename std::tuple_element<I, TUPLE_TYPE>::type::VAL_TYPE;
-				std::memmove(&std::get<I>(key)[0], &std::get<I>(data)[index], sizeof(TYPE));
+				std::memcpy(&std::get<I>(key)[0], &std::get<I>(data)[index], sizeof(TYPE));
 				insertion_sort_assignment_part_1<I + 1, TUPLE_TYPE, DATA_TYPES...>(data, key, index);
 			}
 		}
@@ -27,7 +28,7 @@ namespace Engine::priv {
 		constexpr void insertion_sort_assignment_part_2(std::tuple<DATA_TYPES...>& data, auto& key, const auto index) {
 			if constexpr(I < sizeof...(DATA_TYPES)) {
 				using TYPE = typename std::tuple_element<I, TUPLE_TYPE>::type::VAL_TYPE;
-				std::memmove(&std::get<I>(data)[index], &std::get<I>(key)[0], sizeof(TYPE));
+				std::memcpy(&std::get<I>(data)[index], &std::get<I>(key)[0], sizeof(TYPE));
 				insertion_sort_assignment_part_2<I + 1, TUPLE_TYPE, DATA_TYPES...>(data, key, index);
 			}
 		}
@@ -94,7 +95,7 @@ namespace Engine::priv {
 	}
 }
 namespace Engine {
-	constexpr Engine::priv::no_args_t no_args{};
+	constexpr Engine::priv::no_args_t<void> no_args{};
 }
 
 
@@ -122,14 +123,33 @@ namespace Engine {
 				inline constexpr T& operator[](size_t index) noexcept { return data[index]; }
 				inline constexpr const T& operator[](size_t index) const noexcept { return data[index]; }
 
-				constexpr void moveMemory(size_t oldCapacity, size_t newCapacity) {
-					void* newMemoryDst = malloc(sizeof(T) * newCapacity);
-					std::memmove(newMemoryDst, (void*)data, sizeof(T) * oldCapacity);
-					free(data);
-					data = reinterpret_cast<T*>(newMemoryDst);
+				/*
+				*    0 1 2 3 4 5 6 7   size=8, cap=8
+				*   [][][][][][][][]
+				*   [][][][]           size=4, cap=4
+				* 
+				*/
+
+
+				constexpr void moveMemory(size_t oldCapacity, size_t newCapacity, size_t oldSize) {
+					if (oldCapacity != newCapacity) {
+						const auto oldCapInBytes = sizeof(T) * oldCapacity;
+						const auto newCapInBytes = sizeof(T) * newCapacity;
+						void* newMemoryDst       = malloc(newCapInBytes);
+						if (newCapInBytes > oldCapInBytes) {
+							std::memcpy(newMemoryDst, (void*)data, oldCapInBytes);
+						} else {
+							std::memcpy(newMemoryDst, (void*)data, newCapInBytes);
+							if (oldSize > 0) {
+								destructMemory(newCapacity, oldSize);
+							}
+						}
+						free(data);
+						data = reinterpret_cast<T*>(newMemoryDst);
+					}
 				}
-				constexpr void destructMemory(size_t size) {
-					for (size_t i = 0; i < size; ++i) {
+				constexpr void destructMemory(size_t firstIndex, size_t lastIndexPlusOne) {
+					for (size_t i = firstIndex; i < lastIndexPlusOne; ++i) {
 						T* object = &data[i];
 						object->~T();
 					}
@@ -145,7 +165,7 @@ namespace Engine {
 #endif
 				template<class ... ARGS>
 				constexpr void constructEmplace(size_t location, ARGS&&... args) {
-					if constexpr (std::is_placeholder_v<ARGS...> || std::is_same_v<ARGS..., Engine::priv::no_args_t>) {
+					if constexpr (std::is_placeholder_v<ARGS...> || std::is_same_v<ARGS..., Engine::priv::no_args_t<T>> || std::is_same_v<ARGS..., Engine::priv::no_args_t<void>>) {
 						new (data + location) T{};
 					} else {
 						new (data + location) T(std::forward<ARGS>(args)...);
@@ -157,19 +177,20 @@ namespace Engine {
 						return;
 					}
 					char tempBuffer[sizeof(T)];
-					std::memmove(&tempBuffer[0], &data[index1], sizeof(T));
-					std::memmove(&data[index1], &data[index2], sizeof(T));
-					std::memmove(&data[index2], &tempBuffer[0], sizeof(T));
+					std::memcpy(&tempBuffer[0], &data[index1], sizeof(T));
+					std::memcpy(&data[index1], &data[index2], sizeof(T));
+					std::memcpy(&data[index2], &tempBuffer[0], sizeof(T));
 				}
 				void move(size_t indexSrc, size_t indexDest) {
-					std::memmove(&data[indexDest], &data[indexSrc], sizeof(T));
+					std::memcpy(&data[indexDest], &data[indexSrc], sizeof(T));
 				}
 				void move(void* srcData, size_t indexDest) {
-					std::memmove(&data[indexDest], srcData, sizeof(T));
+					std::memcpy(&data[indexDest], srcData, sizeof(T));
 				}
 			};
 		public:
 			using TUPLE_TYPE        = std::tuple<ARRAY_WRAPPER<TYPES>...>;
+			using TUPLE_TYPE_ONE    = std::tuple<TYPES...>;
 		private:
 			TUPLE_TYPE  m_Data;
 			size_t      m_Size = 0;
@@ -207,7 +228,7 @@ namespace Engine {
 
 					difference_type operator-(const CRTP& r) const { return m_I - r.m_I; }
 			};
-		public:
+       public:
 
 			template<size_t ... INDICES>
 			class Iterator : public IteratorBase<Iterator<INDICES...>> {
@@ -310,16 +331,48 @@ namespace Engine {
 			}
 
 			constexpr void clear() {
-				std::apply([this](auto&&... args) { (args.destructMemory(m_Size), ...); }, m_Data);
+				std::apply([this](auto&&... args) { (args.destructMemory(0, m_Size), ...); }, m_Data);
 				m_Size = 0;
 			}
 
+			//Increase the capacity of the vector to a value that's greater or equal to newCapacity.
+			//If newCapacity is greater than the current capacity(), new storage is allocated, otherwise the function does nothing.
 			constexpr void reserve(size_t newCapacity) {
 				if (newCapacity > m_Capacity) {
-					std::apply([this, newCapacity](auto&&... args) {( args.moveMemory(m_Capacity, newCapacity), ...); }, m_Data);
+					std::apply([this, newCapacity](auto&&... args) {( args.moveMemory(m_Capacity, newCapacity, m_Size), ...); }, m_Data);
 					m_Capacity = newCapacity;
 				}
 			}
+
+			//Resizes the container to contain newSize elements.
+			//If the current size is greater than newSize, the container is reduced to its first count elements.
+			//	If the current size is less than newSize,
+			//	    additional copies of value are appended.
+			template<class ... ARGS>
+			constexpr void resize(size_t newSize, ARGS&&... args) {
+				if (newSize > m_Size) {
+					//append more
+					std::apply([this, newSize](auto&&... args) { (args.moveMemory(m_Capacity, newSize, m_Size), ...); }, m_Data);
+					for (size_t i = m_Size; i < newSize; ++i) {
+						auto lambda = [i, this, ... Args = args](auto&&... data) mutable {
+							(data.constructEmplace(i, std::forward<std::decay_t<ARGS>>(Args)), ...);
+						};
+						std::apply(std::move(lambda), m_Data);
+					}
+					m_Size = newSize;
+					m_Capacity = newSize;
+				} else if (newSize < m_Size) {
+					//reduce
+					std::apply([this, newSize](auto&&... args) { (args.moveMemory(m_Capacity, newSize, m_Size), ...); }, m_Data);
+					m_Size = newSize;
+					m_Capacity = newSize;
+				}
+			}
+			constexpr void resize(size_t newSize) {
+				resize(newSize, Engine::priv::no_args_t<TYPES>()...);
+			}
+
+
 #if 0
 			constexpr size_t push_back(TYPES&&... args) {
 				if (m_Size == m_Capacity) {
@@ -350,11 +403,21 @@ namespace Engine {
 			inline constexpr auto& get(size_t index) noexcept {
 				return std::get<MEMBER_INDEX>(m_Data).data[index];
 			}
+			template<size_t MEMBER_INDEX>
+			inline constexpr const auto& get(size_t index) const noexcept {
+				return std::get<MEMBER_INDEX>(m_Data).data[index];
+			}
 
 			constexpr void shrink_to_fit() {
 				if (m_Capacity > m_Size) {
-					std::apply([this](auto&&... args) {( args.moveMemory(m_Size, m_Size), ...); }, m_Data);
+					std::apply([this](auto&&... args) {( args.moveMemory(m_Size, m_Size, m_Size), ...); }, m_Data);
 					m_Capacity = m_Size;
+				}
+			}
+			constexpr void pop_back() {
+				if (m_Size > 0) {
+					std::apply([this](auto&&... args) { (args.destructMemory(m_Size - 1, m_Size), ...); }, m_Data);
+					--m_Size;
 				}
 			}
 
@@ -379,12 +442,18 @@ namespace Engine {
 
 			template<size_t INDEX>
 			void swap(size_t index1, size_t index2) {
-				auto& arrayData = std::get<INDEX>(m_Data);
 				assert(index1 >= 0 && index1 < size());
 				assert(index2 >= 0 && index2 < size());
+				auto& arrayData = std::get<INDEX>(m_Data);
 				arrayData.swap(index1, index2);
 			}
-
+			void swap(size_t index1, size_t index2) {
+				assert(index1 >= 0 && index1 < size());
+				assert(index2 >= 0 && index2 < size());
+				std::apply([this, index1, index2](auto&&... args) {
+					(args.swap(index1, index2), ...);
+				}, m_Data);
+			}
 
 			template<size_t INDEX, class ExecPol = std::execution::sequenced_policy>
 			void sort_insertion(const auto sorter, size_t firstIndex, size_t lastIndex, size_t parallelThreshold = 300) {
@@ -393,7 +462,7 @@ namespace Engine {
 				ssize_t i = firstIndex + 1;
 				TUPLE_TYPE key;
 
-				std::apply([this](auto&&... args) { (args.moveMemory(0, 1), ...); }, key); //build memory for one element per type in key
+				std::apply([this](auto&&... args) { (args.moveMemory(0, 1, 0), ...); }, key); //build memory for one element per type in key
 				while (i <= ssize_t(lastIndex)) {
 					Engine::priv::detail::insertion_sort_assignment_part_1<0, TUPLE_TYPE>(m_Data, key, i); //key = data[i]
 					ssize_t j = i - 1;

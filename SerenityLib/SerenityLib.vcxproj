@@ -713,6 +713,8 @@
     <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\TaskScheduler\btTaskScheduler.cpp" />
     <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\TaskScheduler\btThreadSupportPosix.cpp" />
     <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\TaskScheduler\btThreadSupportWin32.cpp" />
+    <ClCompile Include="include\serenity\renderer\particles\ParticleContainer.cpp" />
+    <ClCompile Include="include\serenity\renderer\particles\ParticleRendererOpenGL.cpp" />
     <ClCompile Include="include\serenity\resources\mesh\animation\Skeleton.cpp" />
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp" />
     <ClCompile Include="src\serenity\algorithms\RadixSort.cpp" />
@@ -1436,8 +1438,11 @@
     <ClInclude Include="include\serenity\renderer\opengl\State.h" />
     <ClInclude Include="include\serenity\renderer\opengl\UniformBufferObject.h" />
     <ClInclude Include="include\serenity\renderer\particles\Particle.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleContainer.h" />
     <ClInclude Include="include\serenity\renderer\particles\ParticleEmissionProperties.h" />
     <ClInclude Include="include\serenity\renderer\particles\ParticleEmitter.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleIncludes.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleRendererOpenGL.h" />
     <ClInclude Include="include\serenity\renderer\particles\ParticleSystem.h" />
     <ClInclude Include="include\serenity\renderer\pipelines\DeferredPipeline.h" />
     <ClInclude Include="include\serenity\renderer\pipelines\DeferredShadowCasters.h" />
@@ -1544,9 +1549,6 @@
     <ClInclude Include="include\serenity\utils\Logger.h" />
     <ClInclude Include="include\serenity\utils\Random.h" />
     <ClInclude Include="include\serenity\utils\Utils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="include\serenity\ecs\systems\SystemBaseClass.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

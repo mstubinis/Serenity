@@ -25,6 +25,10 @@ namespace Engine::Compression {
     [[nodiscard]] float     pack2FloatsInto1Float(float val1, float val2);
     [[nodiscard]] float     pack2FloatsInto1Float(const glm::vec2& values);
     [[nodiscard]] glm::vec2 unpack2FloatsInto1Float(float compressedValue);
+
+    [[nodiscard]] uint16_t pack4ColorsInto16Int(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+    [[nodiscard]] glm::u8vec4 unpackFour16IntColorInto4Chars(uint16_t i) noexcept;
+    [[nodiscard]] glm::vec4 unpackFour16IntColorInto4Floats(uint16_t i) noexcept;
 };
 
 #endif

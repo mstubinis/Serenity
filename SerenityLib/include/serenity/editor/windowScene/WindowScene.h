@@ -23,6 +23,7 @@ namespace Engine::priv {
                 public: 
                     enum Type : uint32_t {
                         Entities = 0,
+                        Systems,
                         Renderer,
                         Resources,
                         Profiler,

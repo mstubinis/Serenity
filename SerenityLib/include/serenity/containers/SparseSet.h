@@ -40,6 +40,10 @@ namespace Engine {
                 virtual void clear() {
                     m_Sparse.clear();
                 }
+#ifndef ENGINE_PRODUCTION
+                virtual const char* getComponentDebugName() const { return ""; }
+#endif
+
             };
     };
     template <class T>
@@ -125,6 +129,9 @@ namespace Engine {
                 const auto retIndex = super::m_Sparse[id];
                 return retIndex < m_Dense.size() ? &m_Dense[retIndex].comp : nullptr;
             }
+#ifndef ENGINE_PRODUCTION
+            const char* getComponentDebugName() const override { return typeid(T).name(); }
+#endif
 
             inline T& operator[](size_t index) { return m_Dense[index].comp; }
             inline const T& operator[](size_t index) const noexcept { return m_Dense[index].comp; }

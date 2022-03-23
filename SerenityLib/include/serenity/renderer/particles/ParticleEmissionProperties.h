@@ -40,10 +40,10 @@ class ParticleEmissionProperties final {
         std::vector<Material*>  m_ParticleMaterials;
         float                   m_Lifetime             = 4.0f;
         float                   m_SpawnRate            = 0.4f;
-        uint32_t                m_ParticlesPerSpawn    = 0;
+        uint8_t                 m_ParticlesPerSpawn    = 0;
     public:
         ParticleEmissionProperties() = default;
-        ParticleEmissionProperties(Handle materialHandle, float lifeTime, float spawnRate, uint32_t ParticlesPerSpawn = 1, float drag = 1.0f);
+        ParticleEmissionProperties(Handle materialHandle, float lifeTime, float spawnRate, uint8_t ParticlesPerSpawn = 1, float drag = 1.0f);
 
         ParticleEmissionProperties(const ParticleEmissionProperties&)                = delete;
         ParticleEmissionProperties& operator=(const ParticleEmissionProperties&)     = delete;

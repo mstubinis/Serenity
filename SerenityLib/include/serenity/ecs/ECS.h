@@ -47,6 +47,7 @@ namespace Engine::priv {
             void destruct();
 
             [[nodiscard]] inline const ECSEntityPool& getEntityPool() const noexcept { return m_EntityPool; }
+            [[nodiscard]] inline ECSSystemPool& getSystemPool() noexcept { return m_SystemPool; }
             [[nodiscard]] Entity createEntity(Scene&);
             [[nodiscard]] std::vector<Entity> createEntity(Scene&, uint32_t amount);
             [[nodiscard]] std::vector<Entity> createEntities(Scene&, uint32_t amount);

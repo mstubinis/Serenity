@@ -13,6 +13,7 @@ namespace Engine::priv {
     class RenderModule;
 };
 
+#include <serenity/renderer/particles/ParticleIncludes.h>
 #include <serenity/renderer/particles/Particle.h>
 #include <serenity/renderer/particles/ParticleEmitter.h>
 #include <serenity/math/Engine_Math.h>
@@ -26,17 +27,7 @@ namespace Engine::priv {
 
 constexpr uint32_t MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME = 12U;
 
-#define ENGINE_PARTICLES_HALF_SIZE //use this to reduce particle data size at the cost of precision. this small size uses 16 bytes per particle
-
 namespace Engine::priv {
-#if defined(ENGINE_PARTICLES_HALF_SIZE)
-    using ParticleFloatType = uint16_t;
-    using ParticleIDType    = uint16_t;
-#else
-    using ParticleFloatType = float;
-    using ParticleIDType    = uint32_t;
-#endif
-
     struct ParticleDOD final {
         ParticleFloatType PositionX;
         ParticleFloatType PositionY;
@@ -51,29 +42,19 @@ namespace Engine::priv {
 
         ParticleDOD() = default;
         ParticleDOD(float X, float Y, float Z, float ScaleX_, float ScaleY_, float Angle_, ParticleIDType MatID_, ParticleIDType PackedColor_)
-#if defined(ENGINE_PARTICLES_HALF_SIZE)
-            : PositionX{ Engine::Math::Float16From32(X) }
-            , PositionY{ Engine::Math::Float16From32(Y) }
-            , PositionZ{ Engine::Math::Float16From32(Z) }
-            , ScaleX{ Engine::Math::Float16From32(ScaleX_) }
-            , ScaleY{ Engine::Math::Float16From32(ScaleY_) }
-            , Angle{ Engine::Math::Float16From32(Angle_) }
-#else
-            : PositionX{ X }
-            , PositionY{ Y }
-            , PositionZ{ Z }
-            , ScaleX{ ScaleX_ }
-            , ScaleY{ ScaleY_ }
-            , Angle{ Angle_ }
-#endif
+            : PositionX{ Engine::Math::PackFloat<ParticleIDType>(X) }
+            , PositionY{ Engine::Math::PackFloat<ParticleIDType>(Y) }
+            , PositionZ{ Engine::Math::PackFloat<ParticleIDType>(Z) }
+            , ScaleX{ Engine::Math::PackFloat<ParticleIDType>(ScaleX_) }
+            , ScaleY{ Engine::Math::PackFloat<ParticleIDType>(ScaleY_) }
+            , Angle{ Engine::Math::PackFloat<ParticleIDType>(Angle_) }
             , MatID{ MatID_ }
             , PackedColor{ PackedColor_ }
         {}
-        ParticleDOD(const ParticleDOD&) = delete;
-        ParticleDOD& operator=(const ParticleDOD&) = delete;
-        ParticleDOD(ParticleDOD&&) noexcept = default;
+        ParticleDOD(const ParticleDOD&)                = delete;
+        ParticleDOD& operator=(const ParticleDOD&)     = delete;
+        ParticleDOD(ParticleDOD&&) noexcept            = default;
         ParticleDOD& operator=(ParticleDOD&&) noexcept = default;
-        ~ParticleDOD() = default;
     };
 }
 
@@ -93,13 +74,13 @@ namespace Engine::priv {
             void internal_update_emitters(const float dt);
             void internal_update_particles(const float dt, Camera&);
         public:
-            Engine::partial_vector_pod<ParticleDOD>                    ParticlesDOD;
+            Engine::partial_vector_pod<Engine::priv::ParticleDOD>      ParticlesDOD;
 
             Engine::unordered_bimap<Material*, uint32_t>               Bimap;
             std::unordered_map<uint32_t, uint32_t>                     MaterialIDToIndex;
 
             //for the threads...
-            std::vector<std::vector<ParticleDOD>>                      THREAD_PART_1;
+            std::vector<std::vector<Engine::priv::ParticleDOD>>        THREAD_PART_1;
             std::vector<Engine::unordered_bimap<Material*, uint32_t>>  THREAD_PART_4;
 
 

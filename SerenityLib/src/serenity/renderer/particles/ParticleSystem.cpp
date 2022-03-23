@@ -80,11 +80,11 @@ Engine::view_ptr<ParticleEmitter> Engine::priv::ParticleSystem::add_emitter(Part
         if (freeindex >= m_ParticleEmitters.size() && !m_ParticleEmitterFreelist.empty()) {
             continue;
         }
-        if (!m_ParticleEmitters[freeindex].isActive()) {
+        //if (!m_ParticleEmitters[freeindex].isActive()) {
             m_ParticleEmitters[freeindex].init(properties, scene, lifetime, parent);
             m_ParticleEmitters[freeindex].activate();
             return &m_ParticleEmitters[freeindex];
-        }
+        //}
     }
     if (m_ParticleEmitters.size() < m_ParticleEmitters.capacity()) {
         auto& emitter = m_ParticleEmitters.emplace_back(properties, scene, lifetime, parent);
@@ -100,10 +100,10 @@ bool Engine::priv::ParticleSystem::add_particle(ParticleEmitter& emitter, const 
         if (freeindex >= m_Particles.size() && !m_ParticleFreelist.empty()) {
             continue;
         }
-        if (!m_Particles[freeindex].isActive()) {
+        //if (!m_Particles[freeindex].isActive()) {
             m_Particles[freeindex].init(emitterPosition, emitterRotation, emitter);
             return true;
-        }
+        //}
     }
     if (m_Particles.size() < m_Particles.capacity()) {
         m_Particles.emplace_back(emitterPosition, emitterRotation, emitter);
@@ -126,7 +126,6 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
     if (particles_size == 0 || !viewport.getRenderFlags().has(ViewportRenderingFlag::Particles)) {
         return;
     }
-
     //now cull, sort, and populate their render lists
     auto& planeMesh = *priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getPlaneMesh().get<Mesh>();
     ParticlesDOD.clear();
@@ -138,13 +137,11 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
     if (ParticlesDOD.capacity() < particles_size) {
         ParticlesDOD.resize(particles_size);
     }
-    //auto start = chrono::high_resolution_clock::now();
 
     const auto reserve_size = particles_size / Engine::hardware_concurrency();
 
     for (auto& _1 : THREAD_PART_1) _1.clear();
     for (auto& _4 : THREAD_PART_4) _4.clear();
-
     for (auto& _1 : THREAD_PART_1) _1.reserve(reserve_size);
 
     glm::vec3 camPos           = glm::vec3{ camera.getPosition() };
@@ -156,24 +153,14 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
         if (particle.isActive() && (glm::distance2(pos, camPos) <= (comparison * comparison)) && sphereTest > 0) {
             //its just pretty expensive in general...
             if (!THREAD_PART_4[k].contains_key(particle.m_Material)) {
-                THREAD_PART_4[k].emplace(particle.m_Material,          particle.m_Material->getID());
-                //THREAD_PART_5[k].try_emplace(particle.m_Material->getID(), particle.m_Material);
+                THREAD_PART_4[k].emplace(particle.m_Material, particle.m_Material->getID());
             }
             ///////////////////////////////////////////
-
-            THREAD_PART_1[k].emplace_back(
-                pos.x - camPos.x,
-                pos.y - camPos.y,
-                pos.z - camPos.z,
-                particle.m_Scale.x, 
-                particle.m_Scale.y, 
+            THREAD_PART_1[k].emplace_back(pos.x - camPos.x, pos.y - camPos.y, pos.z - camPos.z,
+                particle.m_Scale.x, particle.m_Scale.y, 
                 particle.m_Angle,
-                static_cast<ParticleIDType>(THREAD_PART_4[k].at(particle.m_Material)), 
-#if defined(ENGINE_PARTICLES_HALF_SIZE)
-                particle.m_Color.toPackedShort()
-#else
-                particle.m_Color.toPackedInt()
-#endif
+                ParticleIDType(THREAD_PART_4[k].at(particle.m_Material)), 
+                particle.m_Color.toPacked<ParticlePackedColorType>()
             );
         }
     };
@@ -188,20 +175,10 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
     for (auto& _4 : THREAD_PART_4) { 
         Bimap.merge(_4);
     }
-
-    //auto z = (chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now() - start));
-    //float f = static_cast<float>(z.count()) / 1000000.0f;
-    //Core::m_Engine->m_DebugManager.addDebugLine(to_string(f));
-
     //sorting
     auto lambda = [](const ParticleDOD& l, const ParticleDOD& r) {
-#if defined(ENGINE_PARTICLES_HALF_SIZE)
-        glm::vec3 lPos{ Math::Float32From16(l.PositionX), Math::Float32From16(l.PositionY), Math::Float32From16(l.PositionZ) };
-        glm::vec3 rPos{ Math::Float32From16(r.PositionX), Math::Float32From16(r.PositionY), Math::Float32From16(r.PositionZ) };
-#else
-        glm::vec3 lPos{ l.PositionX, l.PositionY, l.PositionZ };
-        glm::vec3 rPos{ r.PositionX, r.PositionY, r.PositionZ };
-#endif
+        glm::vec3 lPos{ Math::ToFloat(l.PositionX), Math::ToFloat(l.PositionY), Math::ToFloat(l.PositionZ) };
+        glm::vec3 rPos{ Math::ToFloat(r.PositionX), Math::ToFloat(r.PositionY), Math::ToFloat(r.PositionZ) };
         return glm::length2(lPos) > glm::length2(rPos);
     };
     Engine::sort(std::execution::par_unseq, ParticlesDOD, lambda);

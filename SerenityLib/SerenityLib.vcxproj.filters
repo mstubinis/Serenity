@@ -1604,6 +1604,12 @@
     <ClCompile Include="src\serenity\lua\bindings\SoundBindings.cpp">
       <Filter>Source Files\Engine\Core\LUA\Bindings</Filter>
     </ClCompile>
+    <ClCompile Include="include\serenity\renderer\particles\ParticleContainer.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
+    </ClCompile>
+    <ClCompile Include="include\serenity\renderer\particles\ParticleRendererOpenGL.cpp">
+      <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -3292,10 +3298,14 @@
     <ClInclude Include="include\serenity\containers\BimapUnordered.h">
       <Filter>Header Files\Engine\Core\Containers</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="include\serenity\ecs\systems\SystemBaseClass.inl">
-      <Filter>Header Files\Engine\Core\ECS\Systems</Filter>
-    </None>
+    <ClInclude Include="include\serenity\renderer\particles\ParticleContainer.h">
+      <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\particles\ParticleIncludes.h">
+      <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\particles\ParticleRendererOpenGL.h">
+      <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -38,6 +38,27 @@ namespace Engine::Math {
     [[nodiscard]] inline float Float32From16(const uint16_t in) noexcept { return glm::unpackHalf1x16(in); }
     [[nodiscard]] inline uint16_t Float16From32(const float in) noexcept { return glm::packHalf1x16(in); }
 
+    template<class T>
+    [[nodiscard]] inline float ToFloat(const T in) noexcept { 
+        if constexpr (std::is_same_v<T, uint16_t> || sizeof(uint16_t) == sizeof(T)) {
+            return glm::unpackHalf1x16(in);
+        } else {
+            return in;
+        }
+    }
+
+    template<class T = uint16_t>
+    [[nodiscard]] inline T PackFloat(const float in) noexcept {
+        if constexpr (std::is_same_v<T, uint16_t> || sizeof(uint16_t) == sizeof(T)) {
+            return glm::packHalf1x16(in);
+        } else {
+            return in;
+        }
+    }
+
+
+
+
     void Float32From16(float*    out, const uint16_t* in, uint32_t arraySize) noexcept;
     void Float16From32(uint16_t* out, const float*    in, uint32_t arraySize) noexcept;
 

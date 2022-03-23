@@ -7,18 +7,17 @@
 #include <string>
 #include <serenity/renderer/text/TextRendererIncludes.h>
 
-
 class TextStringBuilderColor {
     private:
-        glm::u8vec4 m_Color = glm::u8vec4{ static_cast<uint8_t>(255) };
+        glm::u8vec4 m_Color = glm::u8vec4{ uint8_t(255) };
         std::string m_Msg;
     public:
         template<class STRING>
         explicit constexpr TextStringBuilderColor(STRING&& msg, float r, float g, float b, float a)
-            : m_Color{ static_cast<uint8_t>(glm::clamp(r, 0.0f, 1.0f) * 255.0f),
-                       static_cast<uint8_t>(glm::clamp(g, 0.0f, 1.0f) * 255.0f),
-                       static_cast<uint8_t>(glm::clamp(b, 0.0f, 1.0f) * 255.0f),
-                       static_cast<uint8_t>(glm::clamp(a, 0.0f, 1.0f) * 255.0f) }
+            : m_Color{ uint8_t(glm::clamp(r, 0.0f, 1.0f) * 255.0f),
+                       uint8_t(glm::clamp(g, 0.0f, 1.0f) * 255.0f),
+                       uint8_t(glm::clamp(b, 0.0f, 1.0f) * 255.0f),
+                       uint8_t(glm::clamp(a, 0.0f, 1.0f) * 255.0f) }
             , m_Msg{ std::forward<STRING>(msg) }
         {}
         template<class STRING>
@@ -32,7 +31,7 @@ class TextStringBuilderColor {
         {}
         template<class STRING>
         explicit constexpr TextStringBuilderColor(STRING&& msg, uint8_t r, uint8_t g, uint8_t b)
-            : TextStringBuilderColor{ std::forward<STRING>(msg), r, g, b, static_cast<uint8_t>(255) }
+            : TextStringBuilderColor{ std::forward<STRING>(msg), r, g, b, uint8_t(255) }
         {}
         template<class STRING>
         explicit constexpr TextStringBuilderColor(STRING&& msg, float fillColorFloat)
@@ -56,7 +55,7 @@ class TextStringBuilderColor {
         {}
         template<class STRING>
         explicit constexpr TextStringBuilderColor(STRING&& msg, const glm::u8vec3& color)
-            : TextStringBuilderColor{ std::forward<STRING>(msg), color.r, color.g, color.b, static_cast<uint8_t>(255) }
+            : TextStringBuilderColor{ std::forward<STRING>(msg), color.r, color.g, color.b, uint8_t(255) }
         {}
 
         operator std::string() const;

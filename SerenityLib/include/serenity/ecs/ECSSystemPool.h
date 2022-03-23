@@ -114,6 +114,14 @@ namespace Engine::priv {
             inline SystemBaseClass& operator[](const uint32_t idx) noexcept { return *m_Systems[idx]; }
             inline const SystemBaseClass& operator[](const uint32_t idx) const noexcept { return *m_Systems[idx]; }
 
+            //SystemBaseClass* should be the function argument
+            template<class FUNC>
+            void forEachOrdered(FUNC&& func) {
+                for (size_t i = 0; i < m_Order.size(); ++i) {
+                    func(m_Systems[m_Order[i].typeID]);
+                }
+            }
+
             BUILD_BEGIN_END_ITR_CLASS_MEMBERS(SystemMainContainer, m_Systems)
     };
 }
