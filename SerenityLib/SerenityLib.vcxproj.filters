@@ -417,6 +417,18 @@
     <Filter Include="Source Files\Engine\Core\LUA\Bindings">
       <UniqueIdentifier>{fa87e4d4-f7a9-45cb-b0fa-d4713a3c1480}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources\Mesh\gl">
+      <UniqueIdentifier>{a8b1d6f8-eeb0-4b64-a528-08869a2e34d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Core\Resources\Mesh\directx">
+      <UniqueIdentifier>{75576ca8-5aa6-419b-8525-43606955a672}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources\Mesh\gl">
+      <UniqueIdentifier>{b292072b-734c-42ae-beee-07615233735b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Engine\Core\Resources\Mesh\directx">
+      <UniqueIdentifier>{4ff04334-dccf-4e8c-bbe2-f6dc74147774}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\serenity\algorithms\MergeSort.cpp">
@@ -1609,6 +1621,9 @@
     </ClCompile>
     <ClCompile Include="include\serenity\renderer\particles\ParticleRendererOpenGL.cpp">
       <Filter>Source Files\Engine\Core\Renderer\particles</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\mesh\gl\VertexArrayObject.cpp">
+      <Filter>Source Files\Engine\Core\Resources\Mesh\gl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3306,6 +3321,9 @@
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\particles\ParticleRendererOpenGL.h">
       <Filter>Header Files\Engine\Core\Renderer\particles</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\resources\mesh\gl\VertexArrayObject.h">
+      <Filter>Header Files\Engine\Core\Resources\Mesh\gl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

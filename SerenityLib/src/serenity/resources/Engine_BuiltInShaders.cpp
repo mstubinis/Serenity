@@ -1,4 +1,4 @@
-
+    
 #include <serenity/resources/Engine_BuiltInShaders.h>
 #include <serenity/renderer/particles/ParticleSystem.h>
 #include <serenity/resources/material/MaterialEnums.h>
@@ -261,7 +261,7 @@ Engine::priv::EShaders::particle_vertex =
     "const float ScaleX = ParticlePositionAndScaleX.w;\n"
     "const float ScaleY = ParticleScaleYAndRotation.x;\n"
 
-    "void main(){\n"
+    "void main() {\n"
     "    float sine = sin(ParticleScaleYAndRotation.y);\n"
     "    float cose = cos(ParticleScaleYAndRotation.y);\n"
 

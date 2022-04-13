@@ -97,9 +97,7 @@ protected:
 	void* m_userObjectPointer;
 
 	int m_userIndex2;
-
 	int m_userIndex;
-
 	int m_userIndex3;
 
 	///time of impact calculation

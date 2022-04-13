@@ -2,12 +2,16 @@
 #include <serenity/scene/Camera.h>
 #include <serenity/math/MathCompression.h>
 
+namespace {
+
+}
+
 Engine::priv::ParticleContainer::ParticleContainer(uint32_t maxParticles) {
 	m_ParticlesData.reserve(maxParticles);
 
 	const auto packedZero = Engine::Math::PackFloat<ParticleFloatType>(0.0f);
 	const auto packedOne = Engine::Math::PackFloat<ParticleFloatType>(1.0f);
-	for (size_t id = 0; id < m_ParticlesData.capacity(); ++id) {
+	for (size_t particleID = 0; particleID < m_ParticlesData.capacity(); ++particleID) {
 		m_ParticlesData.emplace_back(
 			glm::vec<3, ParticleFloatType, glm::packed_highp>{packedZero, packedZero, packedZero}
 		  , glm::vec<2, ParticleFloatType, glm::packed_highp>{packedOne, packedOne}
@@ -17,8 +21,8 @@ Engine::priv::ParticleContainer::ParticleContainer(uint32_t maxParticles) {
 		  , glm::vec3{0.0f, 0.0f, 0.0f}
 		  , 0.0f
 		  , 0.0f
-		  , ParticleID(id)
-		  , ParticleID(id)
+		  , ParticleID(particleID)
+		  , ParticleID(particleID)
 		);
 	}
 }
@@ -27,7 +31,7 @@ ParticleID Engine::priv::ParticleContainer::addParticle(float x, float y, float 
 	if (m_ActiveEnd >= m_ParticlesData.size()) {
 		return std::numeric_limits<ParticleIDType>().max();
 	}
-	ParticleID freeID = m_ParticlesData.get<8>(m_ActiveEnd);
+	ParticleID freeID = m_ParticlesData.get<ParticleMember::ID>(m_ActiveEnd);
 
 	const auto packedZero = Engine::Math::PackFloat<ParticleFloatType>(0.0f);
 	const auto packedOne = Engine::Math::PackFloat<ParticleFloatType>(1.0f);
@@ -41,13 +45,13 @@ ParticleID Engine::priv::ParticleContainer::addParticle(float x, float y, float 
 	++m_ActiveEnd;
 	return freeID;
 }
-bool Engine::priv::ParticleContainer::recycleParticle(ParticleID id) {
+bool Engine::priv::ParticleContainer::recycleParticle(ParticleID particleID) {
 	if (m_ActiveEnd == 0) {
 		return false;
 	}
-	if (m_ParticlesData.size() > 1) {
-		const auto& index = getDataMember<8>(id);
-		setTimer(id, 0.0f);
+	if (m_ParticlesData.size() >= 2) {
+		const size_t index = size_t(getDataMember<ParticleMember::ID>(particleID));
+		setTimer(particleID, 0.0f); //is this needed?
 		m_ParticlesData.swap(index, m_ActiveEnd - 1);
 		remapIndex(index);
 	}
@@ -80,11 +84,11 @@ void Engine::priv::ParticleContainer::sort_particles(const glm::vec3& cameraPosi
 }
 
 
-void Engine::priv::ParticleContainer::translate(ParticleID id, const glm::vec3& translation) noexcept {
-	setPosition(id, translation.x, translation.y, translation.z);
+void Engine::priv::ParticleContainer::translate(ParticleID particleID, const glm::vec3& translation) noexcept {
+	setPosition(particleID, translation.x, translation.y, translation.z);
 }
-void Engine::priv::ParticleContainer::translate(ParticleID id, float x, float y, float z) noexcept {
-	auto& item = getDataMember<0>(id);
+void Engine::priv::ParticleContainer::translate(ParticleID particleID, float x, float y, float z) noexcept {
+	auto& item = getDataMember<ParticleMember::Position>(particleID);
 	const glm::vec3 translation{ x, y, z };
 	const glm::vec3 position{
 		 Engine::Math::ToFloat<ParticleFloatType>(item.x)
@@ -98,59 +102,59 @@ void Engine::priv::ParticleContainer::translate(ParticleID id, float x, float y,
 	};
 }
 
-void Engine::priv::ParticleContainer::setScale(ParticleID id, const glm::vec2& newScale) noexcept {
-	setScale(id, newScale.x, newScale.y);
+void Engine::priv::ParticleContainer::setScale(ParticleID particleID, const glm::vec2& newScale) noexcept {
+	setScale(particleID, newScale.x, newScale.y);
 }
-void Engine::priv::ParticleContainer::setScale(ParticleID id, float x, float y) noexcept {
-	auto& item = getDataMember<1>(id);
-	item = glm::vec<2, ParticleFloatType, glm::packed_highp>{
+void Engine::priv::ParticleContainer::setScale(ParticleID particleID, float x, float y) noexcept {
+	auto& scale = getDataMember<ParticleMember::Scale>(particleID);
+	scale = glm::vec<2, ParticleFloatType, glm::packed_highp>{
 		 Engine::Math::PackFloat<ParticleFloatType>(x)
 		,Engine::Math::PackFloat<ParticleFloatType>(y)
 	};
 }
 
-void Engine::priv::ParticleContainer::setPosition(ParticleID id, const glm::vec3& newPosition) noexcept {
-	setPosition(id, newPosition.x, newPosition.y, newPosition.z);
+void Engine::priv::ParticleContainer::setPosition(ParticleID particleID, const glm::vec3& newPosition) noexcept {
+	setPosition(particleID, newPosition.x, newPosition.y, newPosition.z);
 }
-void Engine::priv::ParticleContainer::setPosition(ParticleID id, float x, float y, float z) noexcept {
-	auto& item = getDataMember<0>(id);
-	item = glm::vec<3, ParticleFloatType, glm::packed_highp>{
+void Engine::priv::ParticleContainer::setPosition(ParticleID particleID, float x, float y, float z) noexcept {
+	auto& position = getDataMember<ParticleMember::Position>(particleID);
+	position = glm::vec<3, ParticleFloatType, glm::packed_highp>{
 		 Engine::Math::PackFloat<ParticleFloatType>(x)
 		,Engine::Math::PackFloat<ParticleFloatType>(y)
 		,Engine::Math::PackFloat<ParticleFloatType>(z)
 	};
 }
-glm::vec3 Engine::priv::ParticleContainer::getPosition(ParticleID id) const noexcept {
-	const auto& item = getDataMember<0>(id);
+glm::vec3 Engine::priv::ParticleContainer::getPosition(ParticleID particleID) const noexcept {
+	const auto& position = getDataMember<ParticleMember::Position>(particleID);
 	return glm::vec3{
-		Engine::Math::ToFloat<ParticleFloatType>(item.x)
-		, Engine::Math::ToFloat<ParticleFloatType>(item.y)
-		, Engine::Math::ToFloat<ParticleFloatType>(item.z)
+		Engine::Math::ToFloat<ParticleFloatType>(position.x)
+		, Engine::Math::ToFloat<ParticleFloatType>(position.y)
+		, Engine::Math::ToFloat<ParticleFloatType>(position.z)
 	};
 }
 /*
 glm::vec3 Engine::priv::ParticleContainer::getPositionFromIndex(size_t index) const noexcept {
-	const auto& item = m_ParticlesData.get<0>(index);
+	const auto& position = m_ParticlesData.get<ParticleMember::Position>(index);
 	return glm::vec3{
-		Engine::Math::ToFloat<ParticleFloatType>(item.x)
-		, Engine::Math::ToFloat<ParticleFloatType>(item.y)
-		, Engine::Math::ToFloat<ParticleFloatType>(item.z)
+		Engine::Math::ToFloat<ParticleFloatType>(position.x)
+		, Engine::Math::ToFloat<ParticleFloatType>(position.y)
+		, Engine::Math::ToFloat<ParticleFloatType>(position.z)
 	};
 }
 */
-void Engine::priv::ParticleContainer::setColor(ParticleID id, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-	auto& item = getDataMember<4>(id);
-	item = Engine::Compression::pack4ColorsInto16Int(r, g, b, a);
+void Engine::priv::ParticleContainer::setColor(ParticleID particleID, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+	auto& color = getDataMember<ParticleMember::Color>(particleID);
+	color = Engine::Compression::pack4ColorsInto16Int(r, g, b, a);
 }
-void Engine::priv::ParticleContainer::setVelocity(ParticleID id, float vx, float vy, float vz) {
-	auto& item = getDataMember<5>(id);
-	item = glm::vec3{ vx, vy, vz };
+void Engine::priv::ParticleContainer::setVelocity(ParticleID particleID, float vx, float vy, float vz) {
+	auto& velocity = getDataMember<ParticleMember::Velocity>(particleID);
+	velocity = glm::vec3{ vx, vy, vz };
 }
-void Engine::priv::ParticleContainer::setAngularVelocity(ParticleID id, float av) {
-	auto& item = getDataMember<6>(id);
-	item = av;
+void Engine::priv::ParticleContainer::setAngularVelocity(ParticleID particleID, float av) {
+	auto& angularVelocity = getDataMember<ParticleMember::AngularVelocity>(particleID);
+	angularVelocity = av;
 }
-void Engine::priv::ParticleContainer::setTimer(ParticleID id, float time) {
-	auto& timer = getDataMember<7>(id);
+void Engine::priv::ParticleContainer::setTimer(ParticleID particleID, float time) {
+	auto& timer = getDataMember<ParticleMember::Timer>(particleID);
 	timer = time;
 }

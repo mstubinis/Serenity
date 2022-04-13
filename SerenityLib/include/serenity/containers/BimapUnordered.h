@@ -55,8 +55,16 @@ namespace Engine {
 
 			[[nodiscard]] inline std::unordered_map<KEY, VALUE>::iterator begin() { return m_KeyToValue.begin(); }
 			[[nodiscard]] inline std::unordered_map<KEY, VALUE>::iterator end() { return m_KeyToValue.end(); }
+			[[nodiscard]] inline const std::unordered_map<KEY, VALUE>::const_iterator begin() const { return m_KeyToValue.begin(); }
+			[[nodiscard]] inline const std::unordered_map<KEY, VALUE>::const_iterator end() const { return m_KeyToValue.end(); }
+			[[nodiscard]] inline const std::unordered_map<KEY, VALUE>::const_iterator cbegin() const { return m_KeyToValue.begin(); }
+			[[nodiscard]] inline const std::unordered_map<KEY, VALUE>::const_iterator cend() const { return m_KeyToValue.end(); }
 			[[nodiscard]] inline std::unordered_map<VALUE, KEY>::iterator rbegin() { return m_ValueToKey.begin(); }
 			[[nodiscard]] inline std::unordered_map<VALUE, KEY>::iterator rend() { return m_ValueToKey.end(); }
+			[[nodiscard]] inline const std::unordered_map<VALUE, KEY>::const_iterator rbegin() const { return m_ValueToKey.begin(); }
+			[[nodiscard]] inline const std::unordered_map<VALUE, KEY>::const_iterator rend() const { return m_ValueToKey.end(); }
+			[[nodiscard]] inline const std::unordered_map<VALUE, KEY>::const_iterator rcbegin() const { return m_ValueToKey.begin(); }
+			[[nodiscard]] inline const std::unordered_map<VALUE, KEY>::const_iterator rcend() const { return m_ValueToKey.end(); }
 	};
 }
 

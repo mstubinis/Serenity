@@ -176,9 +176,9 @@ void Engine::priv::TextRenderer::renderText(Mesh& fontPlane, RenderModule& rende
     } else if (textAlignment == TextAlignment::Center) {
         internal_render_text_center(text, font, -newLineGlyphHeight, x, y, z);
     }
-    fontPlane.modifyVertices(0, m_Text_Points.data(), m_Text_Points.size(),  MeshModifyFlags::None); //prevent gpu upload until after all the data is collected
-    fontPlane.modifyVertices(1, m_Text_UVs.data(),    m_Text_UVs.size(),     MeshModifyFlags::None); //prevent gpu upload until after all the data is collected
-    fontPlane.modifyVertices(2, m_Text_Colors.data(), m_Text_Colors.size(),  MeshModifyFlags::UploadToGPU);
+    fontPlane.modifyVertices(0, m_Text_Points,  MeshModifyFlags::None); //prevent gpu upload until after all the data is collected
+    fontPlane.modifyVertices(1, m_Text_UVs,     MeshModifyFlags::None); //prevent gpu upload until after all the data is collected
+    fontPlane.modifyVertices(2, m_Text_Colors,  MeshModifyFlags::UploadToGPU);
     fontPlane.modifyIndices(   m_Text_Indices.data(), m_Text_Indices.size(), MeshModifyFlags::UploadToGPU);
 
     BUFFER_COLOR_STACK.pop_back();

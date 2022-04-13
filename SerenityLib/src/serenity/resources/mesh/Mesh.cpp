@@ -196,12 +196,12 @@ void Engine::priv::PublicMesh::FinalizeVertexData(MeshCPUData& cpuData, MeshImpo
         for (size_t i = 0; i < data.m_Tangents.size(); ++i) {
             normals[2].emplace_back(Engine::Compression::pack3NormalsInto32Int(data.m_Tangents[i]));
         }
-        vertexData.setData(0, data.m_Points.data(), data.m_Points.size(), MeshModifyFlags::None);
-        vertexData.setData(1, data.m_UVs.data(), data.m_UVs.size(), MeshModifyFlags::None);
-        vertexData.setData(2, normals[0].data(), normals[0].size(), MeshModifyFlags::None);
-        vertexData.setData(3, normals[1].data(), normals[1].size(), MeshModifyFlags::None);
-        vertexData.setData(4, normals[2].data(), normals[2].size(), MeshModifyFlags::None);
-        vertexData.setIndices(data.m_Indices.data(), data.m_Indices.size(), MeshModifyFlags::RecalculateTriangles);
+        vertexData.setData(0, data.m_Points, MeshModifyFlags::None);
+        vertexData.setData(1, data.m_UVs, MeshModifyFlags::None);
+        vertexData.setData(2, normals[0], MeshModifyFlags::None);
+        vertexData.setData(3, normals[1], MeshModifyFlags::None);
+        vertexData.setData(4, normals[2], MeshModifyFlags::None);
+        vertexData.setIndices(data.m_Indices, MeshModifyFlags::RecalculateTriangles);
         #pragma endregion
     } else {
         #pragma region Some Threshold
@@ -250,16 +250,16 @@ void Engine::priv::PublicMesh::FinalizeVertexData(MeshCPUData& cpuData, MeshImpo
             normals[2].emplace_back(Engine::Compression::pack3NormalsInto32Int(temp_tangents[i]));
         }
 
-        vertexData.setData(0, temp_pos.data(), temp_pos.size(), MeshModifyFlags::None);
-        vertexData.setData(1, temp_uvs.data(), temp_uvs.size(), MeshModifyFlags::None);
-        vertexData.setData(2, normals[0].data(), normals[0].size(), MeshModifyFlags::None);
-        vertexData.setData(3, normals[1].data(), normals[1].size(), MeshModifyFlags::None);
-        vertexData.setData(4, normals[2].data(), normals[2].size(), MeshModifyFlags::None);
+        vertexData.setData(0, temp_pos, MeshModifyFlags::None);
+        vertexData.setData(1, temp_uvs, MeshModifyFlags::None);
+        vertexData.setData(2, normals[0], MeshModifyFlags::None);
+        vertexData.setData(3, normals[1], MeshModifyFlags::None);
+        vertexData.setData(4, normals[2], MeshModifyFlags::None);
         if (boneIDs.size() > 0) {
-            vertexData.setData(5, boneIDs.data(), boneIDs.size(), MeshModifyFlags::None);
-            vertexData.setData(6, boneWeights.data(), boneWeights.size(), MeshModifyFlags::None);
+            vertexData.setData(5, boneIDs, MeshModifyFlags::None);
+            vertexData.setData(6, boneWeights, MeshModifyFlags::None);
         }
-        vertexData.setIndices(indices.data(), indices.size(), MeshModifyFlags::RecalculateTriangles);
+        vertexData.setIndices(indices, MeshModifyFlags::RecalculateTriangles);
         #pragma endregion
     }
 }
@@ -440,7 +440,7 @@ void Mesh::internal_recalc_indices_from_terrain(const Terrain& terrain) {
         }
     }
     m_CPUData.m_VertexData->bind();
-    modifyIndices(data.m_Indices.data(), data.m_Indices.size());
+    modifyIndices(data.m_Indices);
     m_CPUData.m_VertexData->unbind();
 }
 Mesh::Mesh(std::string_view name, const Terrain& terrain, float threshold)
@@ -487,14 +487,12 @@ Mesh::Mesh(std::string_view name, float width, float height, float threshold, co
     indices.push_back(0);
 
     m_CPUData.m_VertexData = NEW VertexData{ vertexDataFormat };
-    m_CPUData.m_VertexData->clearData();
-    m_CPUData.m_VertexData->bind();
-    m_CPUData.m_VertexData->setData(0, positions.data(), positions.size(), MeshModifyFlags::None);
-    m_CPUData.m_VertexData->setData(1, uvs.data(), uvs.size(), MeshModifyFlags::None);
-    if (m_CPUData.m_VertexData->m_Format.m_Attributes.size() > 2 && m_CPUData.m_VertexData->m_Format.m_Attributes[2].type == GL_UNSIGNED_BYTE) {
-        m_CPUData.m_VertexData->setData(2, colors.data(), colors.size(), MeshModifyFlags::None);
+    m_CPUData.m_VertexData->setData(0, positions, MeshModifyFlags::None);
+    m_CPUData.m_VertexData->setData(1, uvs, MeshModifyFlags::None);
+    if (m_CPUData.m_VertexData->m_Format.getAttributes().size() > 2 && m_CPUData.m_VertexData->m_Format.getAttributes()[2].type == GL_UNSIGNED_BYTE) {
+        m_CPUData.m_VertexData->setData(2, colors, MeshModifyFlags::None);
     }
-    m_CPUData.m_VertexData->setIndices(indices.data(), indices.size(), MeshModifyFlags::RecalculateTriangles);
+    m_CPUData.m_VertexData->setIndices(indices, MeshModifyFlags::RecalculateTriangles);
 
     m_CPUData.internal_calculate_radius();
     m_CPUData.m_CollisionFactory = NEW Engine::priv::MeshCollisionFactory{ m_CPUData };
@@ -651,6 +649,6 @@ void Mesh::sortTriangles(const Camera& camera, ModelInstance& instance, const gl
             newIndices.emplace_back(triangle.index2);
             newIndices.emplace_back(triangle.index3);
         }
-        Mesh::modifyIndices(newIndices.data(), newIndices.size());
+        Mesh::modifyIndices(newIndices);
     #endif
 }

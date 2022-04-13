@@ -7,7 +7,7 @@ class  Texture;
 class  TextureCubemap;
 class  Font;
 class  Decal;
-struct BufferObject;
+class  BufferObject;
 struct EngineOptions;
 class  ModelInstance;
 namespace Engine::priv {

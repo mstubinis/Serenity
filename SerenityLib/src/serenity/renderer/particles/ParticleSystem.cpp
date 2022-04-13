@@ -121,7 +121,7 @@ void Engine::priv::ParticleSystem::update(const float dt, Camera& camera) {
     internal_update_particles(dt, camera);
 }
 
-void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Handle program, RenderModule& renderer) {
+void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Handle program, RenderModule& renderModule) {
     const auto particles_size = m_Particles.size();
     if (particles_size == 0 || !viewport.getRenderFlags().has(ViewportRenderingFlag::Particles)) {
         return;
@@ -183,5 +183,5 @@ void Engine::priv::ParticleSystem::render(Viewport& viewport, Camera& camera, Ha
     };
     Engine::sort(std::execution::par_unseq, ParticlesDOD, lambda);
 
-    renderer.m_Pipeline->renderParticles(*this, camera, program);
+    renderModule.m_Pipeline->renderParticles(*this, camera, program);
 }

@@ -96,9 +96,9 @@ inline int btIsDoublePrecision()
 //			#pragma warning(disable:4786) // Disable the "debug name too long" warning
 
 		#define SIMD_FORCE_INLINE __forceinline
-		#define ATTRIBUTE_ALIGNED16(a) __declspec(align(16)) a
-		#define ATTRIBUTE_ALIGNED64(a) __declspec(align(64)) a
-		#define ATTRIBUTE_ALIGNED128(a) __declspec (align(128)) a
+		#define ATTRIBUTE_ALIGNED16(NAME) __declspec(align(16)) NAME
+		#define ATTRIBUTE_ALIGNED64(NAME) __declspec(align(64)) NAME
+		#define ATTRIBUTE_ALIGNED128(NAME) __declspec (align(128)) NAME
 		#ifdef _XBOX
 			#define BT_USE_VMX128
 

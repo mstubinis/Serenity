@@ -41,9 +41,9 @@ namespace Engine::Math {
     template<class T>
     [[nodiscard]] inline float ToFloat(const T in) noexcept { 
         if constexpr (std::is_same_v<T, uint16_t> || sizeof(uint16_t) == sizeof(T)) {
-            return glm::unpackHalf1x16(in);
+            return float(glm::unpackHalf1x16(in));
         } else {
-            return in;
+            return float(in);
         }
     }
 

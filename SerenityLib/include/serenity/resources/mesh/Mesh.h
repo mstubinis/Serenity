@@ -143,8 +143,15 @@ class Mesh final: public Resource<Mesh>, public Observer {
         inline void modifyVertices(uint32_t attrIdx, const T* modifications, size_t bufferCount, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
             m_CPUData.m_VertexData->setData<T>(attrIdx, modifications, bufferCount, (MeshModifyFlags::Flag)MeshModifyFlags);
         }
+        template<class CONTAINER>
+        inline void modifyVertices(uint32_t attrIdx, const CONTAINER& container, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
+            m_CPUData.m_VertexData->setData<CONTAINER>(attrIdx, container, (MeshModifyFlags::Flag)MeshModifyFlags);
+        }
         inline void modifyIndices(const uint32_t* modifiedIndices, size_t bufferCount, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
             m_CPUData.m_VertexData->setIndices(modifiedIndices, bufferCount, (MeshModifyFlags::Flag)MeshModifyFlags);
+        }
+        inline void modifyIndices(const std::vector<uint32_t>& indices, uint32_t MeshModifyFlags = MESH_DEFAULT_MODIFICATION_FLAGS) {
+            m_CPUData.m_VertexData->setIndices(indices, (MeshModifyFlags::Flag)MeshModifyFlags);
         }
 
         void sortTriangles(const Camera& camera, ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode sortMode);

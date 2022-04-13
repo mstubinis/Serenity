@@ -13,7 +13,7 @@ SMSH_Fileheader::SMSH_Fileheader(MeshCPUData& cpuData) {
     auto* vertexData   = cpuData.m_VertexData;
     auto* skeleton     = cpuData.m_Skeleton;
     m_InterleavingType = SMSH_InterleavingType::Interleaved;
-    m_AttributeCount   = vertexData->m_Format.m_Attributes.size();
+    m_AttributeCount   = vertexData->m_Format.getAttributes().size();
     m_IndiceCount      = vertexData->m_Indices.size();
 
     if (m_IndiceCount <= 255) {
@@ -38,9 +38,7 @@ void SMSH_File::LoadFile(const char* filename, MeshCPUData& cpuData) {
     for (size_t i = 0; i < smsh_header.m_UserDataCount; ++i) {
         readBigEndian(userData[i], streamDataBuffer, 4, blockStart);
     }
-    VertexDataFormat vertexDataFormat;
-    vertexDataFormat.m_InterleavingType = (VertexAttributeLayout)smsh_header.m_InterleavingType;
-
+    VertexDataFormat vertexDataFormat{ (VertexAttributeLayout)smsh_header.m_InterleavingType };
     auto attr_data = Engine::create_and_reserve<std::vector<std::tuple<SMSH_AttributeNoBuffer, uint8_t*, uint32_t>>>(smsh_header.m_AttributeCount);
     for (size_t i = 0; i < smsh_header.m_AttributeCount; ++i) {
         auto& [attr, buff, idx] = attr_data.emplace_back(SMSH_AttributeNoBuffer{}, nullptr, 0U);

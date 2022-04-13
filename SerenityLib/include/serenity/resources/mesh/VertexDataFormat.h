@@ -27,28 +27,31 @@ struct VertexAttributeInfo final {
         , stride{ stride_ }
         , normalized{ normalized_ }
     {}
-    VertexAttributeInfo(const VertexAttributeInfo&)                = default;
-    VertexAttributeInfo& operator=(const VertexAttributeInfo&)     = default;
-    VertexAttributeInfo(VertexAttributeInfo&&) noexcept            = default;
-    VertexAttributeInfo& operator=(VertexAttributeInfo&&) noexcept = default;
 };
 
 //information about a vertex structure ( a list of all its attributes and the way the attributes are weaved into memory)
-struct VertexDataFormat {
-    std::vector<VertexAttributeInfo>  m_Attributes;
-    VertexAttributeLayout             m_InterleavingType = VertexAttributeLayout::Interleaved;
+class VertexDataFormat {
+    private:
+        std::vector<VertexAttributeInfo>  m_Attributes;
+        VertexAttributeLayout             m_InterleavingType = VertexAttributeLayout::Interleaved;
+    public:
+        VertexDataFormat() = default;
+        VertexDataFormat(VertexAttributeLayout layout)
+            : m_InterleavingType{ layout }
+        {}
 
-    inline void add(int numComponents, int type, bool normalized, int stride, size_t offset, size_t typeSize) {
-        m_Attributes.emplace_back(numComponents, type, normalized, stride, offset, typeSize);
-    }
-    void bind(const VertexData&) const noexcept;
-    void unbind() const noexcept;
+        void add(int numComponents, int type, bool normalized, int stride, size_t offset, size_t typeSize);
+        void bind(const VertexData&) const noexcept;
+        void unbind() const noexcept;
 
-    static VertexDataFormat   VertexDataPositionsOnly, 
-                              VertexData2D,
-                              VertexDataNoLighting,
-                              VertexDataBasic,
-                              VertexDataAnimated;
+        [[nodiscard]] inline const std::vector<VertexAttributeInfo>& getAttributes() const noexcept { return m_Attributes; }
+        [[nodiscard]] inline VertexAttributeLayout getLayoutType() const noexcept { return m_InterleavingType; }
+    public:
+        static VertexDataFormat   VertexDataPositionsOnly, 
+                                  VertexData2D,
+                                  VertexDataNoLighting,
+                                  VertexDataBasic,
+                                  VertexDataAnimated;
 };
 
 #endif

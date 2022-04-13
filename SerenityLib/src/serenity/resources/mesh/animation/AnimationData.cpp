@@ -25,8 +25,9 @@ AnimationData::AnimationData( const aiAnimation& assimpAnim, MeshRequest& reques
     m_Channels.resize(request.m_NodeData.m_Nodes.size());
     for (uint32_t i = 0; i < m_Channels.size(); ++i) {
         auto& nodeName = request.m_NodeStrVector[i];
-        if (hashedChannels.contains(nodeName)) {
-            m_Channels[i] = std::move(hashedChannels.at(nodeName));
+        auto itr       = hashedChannels.find(nodeName);
+        if (itr != hashedChannels.end()) {
+            m_Channels[i] = std::move(itr->second);
         }
     }
 }

@@ -882,6 +882,7 @@
     <ClCompile Include="src\serenity\resources\mesh\animation\AnimationData.cpp" />
     <ClCompile Include="src\serenity\resources\mesh\animation\AnimationIncludes.cpp" />
     <ClCompile Include="src\serenity\resources\mesh\BuiltInMeshes.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\gl\VertexArrayObject.cpp" />
     <ClCompile Include="src\serenity\resources\mesh\Mesh.cpp" />
     <ClCompile Include="src\serenity\resources\mesh\MeshCollisionFactory.cpp" />
     <ClCompile Include="src\serenity\resources\mesh\MeshLoading.cpp" />
@@ -1478,6 +1479,7 @@
     <ClInclude Include="include\serenity\resources\mesh\animation\AnimationIncludes.h" />
     <ClInclude Include="include\serenity\resources\mesh\animation\Skeleton.h" />
     <ClInclude Include="include\serenity\resources\mesh\BuiltInMeshes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\gl\VertexArrayObject.h" />
     <ClInclude Include="include\serenity\resources\mesh\Mesh.h" />
     <ClInclude Include="include\serenity\resources\mesh\MeshCollisionFactory.h" />
     <ClInclude Include="include\serenity\resources\mesh\MeshImportedData.h" />

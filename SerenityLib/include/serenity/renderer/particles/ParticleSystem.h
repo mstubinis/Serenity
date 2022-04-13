@@ -82,8 +82,6 @@ namespace Engine::priv {
             //for the threads...
             std::vector<std::vector<Engine::priv::ParticleDOD>>        THREAD_PART_1;
             std::vector<Engine::unordered_bimap<Material*, uint32_t>>  THREAD_PART_4;
-
-
         public:
             ParticleSystem(uint32_t maxEmitters, uint32_t maxParticles);
             ParticleSystem(const ParticleSystem&)                = delete;

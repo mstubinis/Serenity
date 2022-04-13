@@ -123,14 +123,6 @@ namespace Engine {
 				inline constexpr T& operator[](size_t index) noexcept { return data[index]; }
 				inline constexpr const T& operator[](size_t index) const noexcept { return data[index]; }
 
-				/*
-				*    0 1 2 3 4 5 6 7   size=8, cap=8
-				*   [][][][][][][][]
-				*   [][][][]           size=4, cap=4
-				* 
-				*/
-
-
 				constexpr void moveMemory(size_t oldCapacity, size_t newCapacity, size_t oldSize) {
 					if (oldCapacity != newCapacity) {
 						const auto oldCapInBytes = sizeof(T) * oldCapacity;
@@ -149,9 +141,11 @@ namespace Engine {
 					}
 				}
 				constexpr void destructMemory(size_t firstIndex, size_t lastIndexPlusOne) {
-					for (size_t i = firstIndex; i < lastIndexPlusOne; ++i) {
-						T* object = &data[i];
-						object->~T();
+					if constexpr(!std::is_trivially_destructible_v<T>) {
+						for (size_t i = firstIndex; i < lastIndexPlusOne; ++i) {
+							T* object = &data[i];
+							object->~T();
+						}
 					}
 				}
 #if 0
@@ -399,6 +393,10 @@ namespace Engine {
 				return m_Size;
 			}
 
+			template<size_t MEMBER_INDEX>
+			inline constexpr auto& getDataPtr() noexcept {
+				return std::get<MEMBER_INDEX>(m_Data).data;
+			}
 			template<size_t MEMBER_INDEX>
 			inline constexpr auto& get(size_t index) noexcept {
 				return std::get<MEMBER_INDEX>(m_Data).data[index];

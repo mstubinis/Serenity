@@ -99,7 +99,7 @@ size_t ComponentModel_Functions::GetTotalVertexCount(ComponentModel& modelCompon
         if (!mesh.isLoaded()) {
             continue;
         }
-        totalCapacity += mesh.getVertexData().m_Data[0].m_Size;
+        totalCapacity += mesh.getVertexData().m_Data[0].getSize();
     }
     return totalCapacity;
 }

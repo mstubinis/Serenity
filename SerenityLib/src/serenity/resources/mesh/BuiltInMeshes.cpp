@@ -1004,11 +1004,9 @@ bool Engine::priv::BuiltInMeshses::build_triangle_mesh() {
     indices.push_back(1);
     indices.push_back(2);
 
-    vertexData.clearData();
-    vertexData.bind();
     vertexData.setData(0, positions.data(), positions.size(), MeshModifyFlags::None);
     vertexData.setData(1, uvs.data(), uvs.size(), MeshModifyFlags::None);
-    if (vertexData.m_Format.m_Attributes[2].type == GL_UNSIGNED_BYTE) {
+    if (vertexData.m_Format.getAttributes()[2].type == GL_UNSIGNED_BYTE) {
         vertexData.setData(2, colors.data(), colors.size(), MeshModifyFlags::None);
     }
     vertexData.setIndices(indices.data(), indices.size(), MeshModifyFlags::RecalculateTriangles);

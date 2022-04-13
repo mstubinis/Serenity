@@ -149,6 +149,27 @@ namespace {
             mainContainer.resize(sceneID + 1);
         }
     }
+    template<class SHADOW_INFO>
+    bool internal_build_shadow_caster(auto& hashed, auto& continguous, auto& light, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
+        const auto itr = hashed.find(&light);
+        if (itr != hashed.end()) {
+            auto& data = *itr->second;
+            data.setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
+        } else {
+            auto& data = continguous.emplace_back( &light,
+                SHADOW_INFO{
+                    shadowMapWidth,
+                    shadowMapHeight,
+                    frustumType,
+                    nearFactor,
+                    farFactor
+                }
+            );
+            hashed.emplace(&light, &std::get<1>(data));
+            return true;
+        }
+        return false;
+    }
 }
 
 struct ShaderEnum final { enum Shader : uint32_t {
@@ -388,7 +409,7 @@ void DeferredPipeline::init() {
     internal_generate_brdf_lut(m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance], 512, 256);
 
     //particle instancing
-    Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().get<Mesh>()->getVertexData().bind();
+    Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().get<Mesh>()->getVertexData().bind(); //binds (through the vao) attributes 0 and 1
     glGenBuffers(1, &m_Particle_Instance_VBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
     glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STREAM_DRAW);
@@ -397,12 +418,13 @@ void DeferredPipeline::init() {
     auto sizeofTwo = sizeof(ParticleFloatType) * 2;
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, PARTICLE_FLOAT_TYPE, GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)0  );
+    glVertexAttribPointer(2, 4, PARTICLE_FLOAT_TYPE, GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)0  ); //positons and scale.x
     glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 2, PARTICLE_FLOAT_TYPE, GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)sizeofOne);
+    glVertexAttribPointer(3, 2, PARTICLE_FLOAT_TYPE, GL_FALSE, sizeof(Engine::priv::ParticleDOD),  (void*)sizeofOne); //scale.y and angularRotation
     glEnableVertexAttribArray(4);
-    glVertexAttribIPointer(4, 2, GL_UNSIGNED_SHORT, sizeof(Engine::priv::ParticleDOD), (void*)(sizeofOne + sizeofTwo));
+    glVertexAttribIPointer(4, 2, GL_UNSIGNED_SHORT, sizeof(Engine::priv::ParticleDOD), (void*)(sizeofOne + sizeofTwo)); //matIndex and packedColor
 
+    //advances these per instance. attributes 0 and 1 remain constant
     glVertexAttribDivisor(2, 1);
     glVertexAttribDivisor(3, 1);
     glVertexAttribDivisor(4, 1);
@@ -438,7 +460,8 @@ void DeferredPipeline::onPipelineChanged() {
 }
 uint32_t DeferredPipeline::getUniformLocation(const char* location) {
     const auto& uniforms = m_RendererState.current_bound_shader_program->uniforms();
-    return (!uniforms.contains(location)) ? -1 : uniforms.at(location);
+    auto itr = uniforms.find(location);
+    return (itr != uniforms.end()) ? itr->second : -1;
 }
 uint32_t DeferredPipeline::getUniformLocationUnsafe(const char* location) {
     return m_RendererState.current_bound_shader_program->uniforms().at(location);
@@ -815,25 +838,16 @@ void DeferredPipeline::toggleShadowCaster(ProjectionLight& projectionLight, bool
 bool DeferredPipeline::buildShadowCaster(SunLight& sunLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
     const auto sceneID = sunLight.sceneID();
     resize_shadow_containers(sunLight, m_ShadowCasters.m_ShadowCastersSunHashed, m_ShadowCasters.m_ShadowCastersSun);
-
-    if (!m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].contains(&sunLight)) {
-        auto& data = m_ShadowCasters.m_ShadowCastersSun[sceneID].emplace_back(
-            &sunLight,
-            GLDeferredSunLightShadowInfo{ 
-                shadowMapWidth, 
-                shadowMapHeight,
-                frustumType, 
-                nearFactor, 
-                farFactor 
-            }
-        );
-        m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].emplace(&sunLight, &std::get<1>(data));
-        return true;
-    } else {
-        auto& data = m_ShadowCasters.m_ShadowCastersSunHashed[sceneID].at(&sunLight);
-        data->setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
-    }
-    return false;
+    return internal_build_shadow_caster<GLDeferredSunLightShadowInfo>(
+        m_ShadowCasters.m_ShadowCastersSunHashed[sceneID],
+        m_ShadowCasters.m_ShadowCastersSun[sceneID],
+        sunLight,
+        shadowMapWidth,
+        shadowMapHeight,
+        frustumType,
+        nearFactor,
+        farFactor
+    );
 }
 bool DeferredPipeline::buildShadowCaster(PointLight& pointLight) {
     return false;
@@ -841,25 +855,16 @@ bool DeferredPipeline::buildShadowCaster(PointLight& pointLight) {
 bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
     const auto sceneID = directionalLight.sceneID();
     resize_shadow_containers(directionalLight, m_ShadowCasters.m_ShadowCastersDirectionalHashed, m_ShadowCasters.m_ShadowCastersDirectional);
-
-    if (!m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].contains(&directionalLight)) {
-        auto& data = m_ShadowCasters.m_ShadowCastersDirectional[sceneID].emplace_back(
-            &directionalLight, 
-            GLDeferredDirectionalLightShadowInfo{
-                shadowMapWidth,
-                shadowMapHeight,
-                frustumType, 
-                nearFactor, 
-                farFactor 
-            }
-        );
-        m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].emplace(&directionalLight, &std::get<1>(data));
-        return true;
-    } else {
-        auto& data = m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID].at(&directionalLight);
-        data->setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
-    }
-    return false;
+    return internal_build_shadow_caster<GLDeferredDirectionalLightShadowInfo>(
+        m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID],
+        m_ShadowCasters.m_ShadowCastersDirectional[sceneID],
+        directionalLight,
+        shadowMapWidth,
+        shadowMapHeight,
+        frustumType,
+        nearFactor,
+        farFactor
+    );
 }
 bool DeferredPipeline::buildShadowCaster(SpotLight& spotLight) {
     return false;
@@ -911,17 +916,18 @@ void DeferredPipeline::sendGPUDataGI(Skybox* skybox) {
     Engine::Renderer::sendTextureSafe( "brdfLUT", *Texture::BRDF.get<Texture>(), maxTextures );
 }
 void DeferredPipeline::sendGPUDataLight(const Camera& camera, const SunLight& sunLight, const std::string& start) {
-    auto transform   = sunLight.getComponent<ComponentTransform>();
-    auto pos         = glm::vec3{ transform->getPosition() };
-    const auto& col  = sunLight.getColor();
+    const auto transform = sunLight.getComponent<ComponentTransform>();
+    const auto pos       = glm::vec3{ transform->getPosition() };
+    const auto& col      = sunLight.getColor();
     sendUniform4Safe((start + "DataA").c_str(), 0.0f, sunLight.getDiffuseIntensity(), sunLight.getSpecularIntensity(), 0.0f);
     sendUniform4Safe((start + "DataC").c_str(), 0.0f, pos.x, pos.y, pos.z);
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(sunLight.getType()));
     sendUniform1Safe("Type", 0.0f);
     sendUniform1Safe("uShadowEnabled", 0);
     if (m_Renderer.m_Lighting) {
-        if (m_ShadowCasters.m_ShadowCastersSunHashed[sunLight.sceneID()].contains(&sunLight)) {
-            auto& data = *m_ShadowCasters.m_ShadowCastersSunHashed[sunLight.sceneID()].at(&sunLight);
+        const auto itr = m_ShadowCasters.m_ShadowCastersSunHashed[sunLight.sceneID()].find(&sunLight);
+        if (itr != m_ShadowCasters.m_ShadowCastersSunHashed[sunLight.sceneID()].end()) {
+            auto& data = *itr->second;
             if (data.m_Enabled) {
                 //startingSpot - start from the maxSlot minus the 3 textures used in the GI portion. TODO: better do this without hardcoding
                 const auto startingSpot = getMaxNumTextureUnits() - 1U - 3 - DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS;
@@ -931,12 +937,11 @@ void DeferredPipeline::sendGPUDataLight(const Camera& camera, const SunLight& su
     }
 }
 int DeferredPipeline::sendGPUDataLight(const Camera& camera, const PointLight& pointLight, const std::string& start) {
-    auto transform  = pointLight.getComponent<ComponentTransform>();
-    auto pos        = glm::vec3{ transform->getPosition() };
-    auto cull       = pointLight.getCullingRadius();
-    auto factor     = 1100.0f * cull;
-    auto distSq     = (float)camera.getDistanceSquared(pos);
-
+    const auto transform  = pointLight.getComponent<ComponentTransform>();
+    const auto pos        = glm::vec3{ transform->getPosition() };
+    const auto cull       = pointLight.getCullingRadius();
+    const auto factor     = 1100.0f * cull;
+    const auto distSq     = float(camera.getDistanceSquared(pos));
     if ((!Engine::priv::Culling::sphereIntersectTest(pos, cull, camera)) || (distSq > factor * factor)) {
         return 0;
     }
@@ -954,17 +959,18 @@ int DeferredPipeline::sendGPUDataLight(const Camera& camera, const PointLight& p
     return 2;
 }
 void DeferredPipeline::sendGPUDataLight(const Camera& camera, const DirectionalLight& directionalLight, const std::string& start) {
-    auto transform  = directionalLight.getComponent<ComponentTransform>();
-    auto forward    = transform->getForward();
-    const auto& col = directionalLight.getColor();
+    const auto transform = directionalLight.getComponent<ComponentTransform>();
+    const auto forward   = transform->getForward();
+    const auto& col      = directionalLight.getColor();
     sendUniform4Safe((start + "DataA").c_str(), 0.0f, directionalLight.getDiffuseIntensity(), directionalLight.getSpecularIntensity(), forward.x);
     sendUniform4Safe((start + "DataB").c_str(), forward.y, forward.z, 0.0f, 0.0f);
     sendUniform4Safe((start + "DataD").c_str(), col.x, col.y, col.z, float(directionalLight.getType()));
     sendUniform1Safe("Type", 0.0f);
     sendUniform1Safe("uShadowEnabled", 0);
     if (m_Renderer.m_Lighting) {
-        if (m_ShadowCasters.m_ShadowCastersDirectionalHashed[directionalLight.sceneID()].contains(&directionalLight)) {
-            auto& data = *m_ShadowCasters.m_ShadowCastersDirectionalHashed[directionalLight.sceneID()].at(&directionalLight);
+        const auto itr = m_ShadowCasters.m_ShadowCastersDirectionalHashed[directionalLight.sceneID()].find(&directionalLight);
+        if (itr != m_ShadowCasters.m_ShadowCastersDirectionalHashed[directionalLight.sceneID()].end()) {
+            auto& data = *itr->second;
             if (data.m_Enabled) {
                 //startingSpot - start from the maxSlot minus the 3 textures used in the GI portion. TODO: better do this without hardcoding
                 const auto startingSpot = getMaxNumTextureUnits() - 1U - 3 - DIRECTIONAL_LIGHT_NUM_CASCADING_SHADOW_MAPS;
@@ -1178,26 +1184,30 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera, H
     const size_t particle_count = system.ParticlesDOD.size();
     if (particle_count > 0) {
         m_Renderer.bind(program.get<ShaderProgram>());
-        for (auto it = system.Bimap.rbegin(); it != system.Bimap.rend(); ++it) {
-            system.MaterialIDToIndex.try_emplace(it->first, (uint32_t)system.MaterialIDToIndex.size());
+
+        ////////////// converts particlePOD.MatID to the numerical index used in the shader
+        for (auto it = system.Bimap.rcbegin(); it != system.Bimap.rcend(); ++it) {
+            system.MaterialIDToIndex.try_emplace(it->first, uint32_t(system.MaterialIDToIndex.size()));
         }
         for (auto& particlePOD : system.ParticlesDOD) {
             particlePOD.MatID = system.MaterialIDToIndex.at(particlePOD.MatID);
         }
-        for (const auto& [id, index] : system.MaterialIDToIndex) {
-            Material* mat              = system.Bimap.at(id);
-            Texture& texture           = *mat->getComponent(MaterialComponentType::Diffuse).getTexture(0).get<Texture>();
-            const std::string location = "Tex" + std::to_string(index);
-            Engine::Renderer::sendTextureSafe(location.c_str(), texture, index);
+        ///////////////
+
+        for (const auto& [materialID, textureIndex] : system.MaterialIDToIndex) {
+            Texture& texture           = *system.Bimap.at(materialID)->getComponent(MaterialComponentType::Diffuse).getTexture(0).get<Texture>();
+            const std::string location = "Tex" + std::to_string(textureIndex);
+            Engine::Renderer::sendTextureSafe(location.c_str(), texture, textureIndex);
         }
         const auto maxTextures = getMaxNumTextureUnits() - 1U;
         Engine::Renderer::sendTextureSafe("gDepthMap", m_GBuffer.getTexture(GBufferType::Depth), maxTextures);
 
+        auto& particleMesh = *Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().get<Mesh>();
+        m_Renderer.bind(&particleMesh);
+
         glBindBuffer(GL_ARRAY_BUFFER, m_Particle_Instance_VBO);
         glBufferData(GL_ARRAY_BUFFER, particle_count * sizeof(Engine::priv::ParticleDOD), system.ParticlesDOD.data(), GL_STREAM_DRAW);
 
-        auto& particleMesh = *Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getParticleMesh().get<Mesh>();
-        m_Renderer.bind(&particleMesh);
         glDrawElementsInstanced(GL_TRIANGLES, GLsizei(particleMesh.getVertexData().m_Indices.size()), GL_UNSIGNED_INT, 0, GLsizei(particle_count));
         m_Renderer.unbind(&particleMesh);
     }

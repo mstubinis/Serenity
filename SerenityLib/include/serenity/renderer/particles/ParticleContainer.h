@@ -11,11 +11,24 @@ class ParticleEmitter;
 
 using ParticleID = size_t;
 
+enum ParticleMember : int {
+	Position = 0,
+	Scale,
+	Angle,
+	MaterialID,
+	Color,
+	Velocity,
+	AngularVelocity,
+	Timer,
+	ID,
+	IDMap,
+};
+
 namespace Engine::priv {
 	class ParticleContainer {
-		private:
-			Engine::DODMembers<
-				  glm::vec<3, ParticleFloatType, glm::packed_highp> //positions        [0]
+		public:
+			using Container = Engine::DODMembers<
+				glm::vec<3, ParticleFloatType, glm::packed_highp>   //positions        [0]
 				, glm::vec<2, ParticleFloatType, glm::packed_highp> //scaleXY          [1]
 				, ParticleFloatType                                 //angle            [2]
 				, ParticleIDType                                    //matID            [3]
@@ -27,16 +40,23 @@ namespace Engine::priv {
 				, ParticleID                                        //particle id map  [9]
 				//, Material*                                                          [10]
 				//, ParticleEmitter*                                                   [11]
-			> m_ParticlesData;
-
-			size_t m_ActiveEnd = 0;
+			>;
+		private:
+			Container  m_ParticlesData;
+			size_t     m_ActiveEnd = 0;
 	    private:
 			template<size_t INDEX>
-			[[nodiscard]] inline auto& getDataMember(ParticleID id) noexcept { return m_ParticlesData.get<INDEX>(m_ParticlesData.get<9>(id)); }
+			[[nodiscard]] inline auto& getDataMember(ParticleID particleID) noexcept {
+				return m_ParticlesData.get<INDEX>(m_ParticlesData.get<ParticleMember::IDMap>(particleID));
+			}
 			template<size_t INDEX>
-			[[nodiscard]] inline const auto& getDataMember(ParticleID id) const noexcept { return m_ParticlesData.get<INDEX>(m_ParticlesData.get<9>(id)); }
+			[[nodiscard]] inline const auto& getDataMember(ParticleID particleID) const noexcept {
+				return m_ParticlesData.get<INDEX>(m_ParticlesData.get<ParticleMember::IDMap>(particleID));
+			}
 
-			inline void remapIndex(size_t index) noexcept { m_ParticlesData.get<9>(m_ParticlesData.get<8>(index)) = index; }
+			inline void remapIndex(size_t index) noexcept {
+				m_ParticlesData.get<ParticleMember::IDMap>(m_ParticlesData.get<ParticleMember::ID>(index)) = index; 
+			}
 		public:
 			ParticleContainer() = delete;
 			ParticleContainer(uint32_t maxParticles);
@@ -84,6 +104,9 @@ namespace Engine::priv {
 
 			[[nodiscard]] inline size_t getNumParticles() const noexcept { return m_ParticlesData.size(); }
 			[[nodiscard]] inline size_t getActiveEnd() const noexcept { return m_ActiveEnd; }
+
+			template<size_t MEMBER_INDEX>
+			[[nodiscard]] inline auto getDataPtr() noexcept { return m_ParticlesData.getDataPtr<MEMBER_INDEX>(); }
 
 			/*
 		void init(const glm::vec3& emitterPosition, const glm::quat& emitterRotation, ParticleEmitter& parent) noexcept;

@@ -25,9 +25,10 @@ bool Cursor::internal_load_from_pixels(const uint8_t* pixels, uint32_t width, ui
 
     m_ColorMultiplier = colorMultiplier;
     m_PixelsColored.resize(numBytes);
+    using idxType = glm::vec4::length_type;
     for (size_t i = 0; i < numBytes; i += 4) {
         for (size_t j = 0; j < 4; ++j) {
-            m_PixelsColored[i + j] = uint8_t(float(pixels[i + j] * colorMultiplier[j]));
+            m_PixelsColored[i + j] = uint8_t(float(pixels[i + j] * colorMultiplier[idxType(j)]));
         }
     }
     Engine::priv::TextureLoader::MirrorPixelsVertically(m_PixelsColored.data(), width, height);
@@ -57,9 +58,10 @@ bool Cursor::internal_rotate(int64_t startIndex, int64_t increment1, int64_t inc
     //color the pixels
     m_PixelsColored.clear();
     m_PixelsColored.reserve(numBytes);
+    using idxType = glm::vec4::length_type;
     for (size_t i = 0; i < m_Pixels.size(); i += 4) {
         for (size_t j = 0; j < 4; ++j) {
-            m_PixelsColored.emplace_back(uint8_t(float(m_Pixels[i + j] * m_ColorMultiplier[j])));
+            m_PixelsColored.emplace_back(uint8_t(float(m_Pixels[i + j] * m_ColorMultiplier[idxType(j)])));
         }
     }
     const bool result = m_SFMLCursor.loadFromPixels(m_PixelsColored.data(), sf::Vector2u(m_Width, m_Height), sf::Vector2u(m_Hotspot.x, m_Hotspot.y));
