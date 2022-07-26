@@ -1,0 +1,1574 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Production|Win32">
+      <Configuration>Production</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Production|x64">
+      <Configuration>Production</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="UnitTests|Win32">
+      <Configuration>UnitTests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="UnitTests|x64">
+      <Configuration>UnitTests</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{CB117FEE-0B28-4982-BB5F-1E1F95C614B8}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>SerenityLib</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
+    <VCToolsVersion>
+    </VCToolsVersion>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
+    <VCToolsVersion>
+    </VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
+    <VCToolsVersion>
+    </VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x86</PreferredToolArchitecture>
+    <VCToolsVersion>
+    </VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <VCToolsVersion>
+    </VCToolsVersion>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <VCToolsVersion>
+    </VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <VCToolsVersion>
+    </VCToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <VCToolsVersion>
+    </VCToolsVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IntDir>$(SolutionDir)Builds\Serenity\$(Configuration)\objs\</IntDir>
+    <OutDir>$(SolutionDir)Builds\Serenity\$(Configuration)\</OutDir>
+    <TargetName>Serenity-d</TargetName>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\objs\</IntDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64;$(LibraryPath)</LibraryPath>
+    <TargetName>Serenity-d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(SolutionDir)Builds\Serenity\$(Configuration)\objs\</IntDir>
+    <OutDir>$(SolutionDir)Builds\Serenity\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;$(LibraryPath)</LibraryPath>
+    <TargetName>Serenity</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(SolutionDir)Builds\Serenity\$(Configuration)\objs\</IntDir>
+    <OutDir>$(SolutionDir)Builds\Serenity\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;$(LibraryPath)</LibraryPath>
+    <TargetName>SerenityUnitTests</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(SolutionDir)Builds\Serenity\$(Configuration)\objs\</IntDir>
+    <OutDir>$(SolutionDir)Builds\Serenity\$(Configuration)\</OutDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x86;$(LibraryPath)</LibraryPath>
+    <TargetName>Serenity</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\objs\</IntDir>
+    <TargetName>Serenity</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\objs\</IntDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.17134.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17134.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\ucrt\x64;$(LibraryPath)</LibraryPath>
+    <TargetName>SerenityUnitTests</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Builds\Serenity64\$(Configuration)\objs\</IntDir>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\cppwinrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\winrt;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\um\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.18362.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\lib\10.0.17134.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17134.0\ucrt\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\um\x64;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\ucrt\x64;$(LibraryPath)</LibraryPath>
+    <TargetName>Serenity</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>BT_DEBUG_MEMORY_ALLOCATIONS;BT_THREADSAFE=1;BT_USE_PPL=1;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;_CRTDBG_MAP_ALLOC;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;_ENGINE_HIGH_PRECISION;ENGINE_RIGID_BODY_ENHANCED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <AdditionalOptions>/Zm1000 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <BasicRuntimeChecks>StackFrameRuntimeCheck</BasicRuntimeChecks>
+      <StringPooling>true</StringPooling>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>26812;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+      <Message>Copying binary (Debug) ...</Message>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>assimp-d.lib;IrrXML-d.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Debug;D:\dev\discord_game_sdk\lib\x86;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/verbose %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>ENGINE_HIGH_PRECISION;BT_USE_DOUBLE_PRECISION;BT_DEBUG_MEMORY_ALLOCATIONS;BT_THREADSAFE=1;BT_USE_PPL=1;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;_ENGINE_THREAD_WINDOW_EVENTS;_CRTDBG_MAP_ALLOC;NDEBUG;_NO_DEBUG_HEAP;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_RIGID_BODY_ENHANCED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;$(SolutionDir)include\serenity\dependencies\bullet;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <StringPooling>true</StringPooling>
+      <BasicRuntimeChecks>StackFrameRuntimeCheck</BasicRuntimeChecks>
+      <DisableSpecificWarnings>26812;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>D:\dev\freetype\lib\64\Debug;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib\64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew64s.lib;IrrXML-d.lib;zlibstatic.lib;lua.lib;assimp-d.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;flac.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/verbose %(AdditionalOptions)</AdditionalOptions>
+      <Verbose>true</Verbose>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_PPL=1;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;_ENGINE_HIGH_PRECISION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying Binary (Release) ...</Message>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;psapi.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLM_CONFIG_DEFAULTED_FUNCTIONS;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;ENGINE_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying Binary (Release) ...</Message>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_PPL=1;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;_ENGINE_HIGH_PRECISION;ENGINE_USE_LIKELY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;$(SolutionDir)include\serenity\dependencies\bullet;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying Binary (Release) ...</Message>
+    </PostBuildEvent>
+    <Lib>
+      <AdditionalDependencies>assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;psapi.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_PPL=1;ENGINE_HIGH_PRECISION;BT_USE_DOUBLE_PRECISION;_ENGINE_RIGID_BODY_ENHANCED;_ENGINE_FORCE_NO_LOG_DEPTH;_ENGINE_FORCE_PHYSICS_DEBUG_DRAW;ENGINE_THREAD_WINDOW_EVENTS;_ENGINE_FORCE_NO_THEAD_POOL;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;$(SolutionDir)include\serenity\dependencies\bullet;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLM_CONFIG_DEFAULTED_FUNCTIONS;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;ENGINE_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\lib\64\Release;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Production|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>ENGINE_HIGH_PRECISION;BT_USE_DOUBLE_PRECISION;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_USE_LIKELY;ENGINE_PRODUCTION;ENGINE_THREAD_WINDOW_EVENTS;_ENGINE_FORCE_NO_THEAD_POOL;BT_THREADSAFE=1;BT_USE_PPL=1;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\freetype\include;$(SolutionDir)include\serenity\dependencies\bullet;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <AssemblerOutput>All</AssemblerOutput>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /NODEFAULTLIB %(AdditionalOptions)</AdditionalOptions>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="include\serenity\dependencies\bullet\btBulletCollisionAll.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\btBulletDynamicsAll.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\btLinearMathAll.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btAxisSweep3.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btBroadphaseProxy.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btDbvt.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btDbvtBroadphase.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btDispatcher.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btOverlappingPairCache.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btQuantizedBvh.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btSimpleBroadphase.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btActivatingCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btBox2dBox2dCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btBoxBoxCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btBoxBoxDetector.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionDispatcher.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionDispatcherMt.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionObject.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionWorld.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionWorldImporter.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCompoundCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCompoundCompoundCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btConvex2dConvex2dAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btConvexConcaveCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btConvexConvexAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btConvexPlaneCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btDefaultCollisionConfiguration.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btEmptyCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btGhostObject.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btHashedSimplePairCache.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btInternalEdgeUtility.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btManifoldResult.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btSimulationIslandManager.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btSphereBoxCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btSphereSphereCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btSphereTriangleCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btUnionFind.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\SphereTriangleDetector.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btBox2dShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btBoxShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btBvhTriangleMeshShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btCapsuleShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btCollisionShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btCompoundShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConcaveShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConeShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvex2dShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexHullShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexInternalShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexPointCloudShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexPolyhedron.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexTriangleMeshShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btCylinderShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btEmptyShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btHeightfieldTerrainShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btMiniSDF.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btMinkowskiSumShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btMultimaterialTriangleMeshShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btMultiSphereShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btOptimizedBvh.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btPolyhedralConvexShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btScaledBvhTriangleMeshShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btSdfCollisionShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btShapeHull.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btSphereShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btStaticPlaneShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btStridingMeshInterface.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTetrahedronShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleBuffer.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleCallback.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleIndexVertexArray.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleIndexVertexMaterialArray.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleMesh.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleMeshShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btUniformScalingShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btContactProcessing.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGenericPoolAllocator.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactBvh.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactQuantizedBvh.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactShape.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btTriangleShapeEx.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_box_set.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_contact.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_memory.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_tri_collision.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btContinuousConvexCollision.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btConvexCast.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkConvexCast.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkEpa2.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkEpaPenetrationDepthSolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkPairDetector.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btMinkowskiPenetrationDepthSolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btPersistentManifold.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btPolyhedralContactClipping.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btRaycastCallback.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btSubSimplexConvexCast.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btVoronoiSimplexSolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Character\btKinematicCharacterController.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btBatchedConstraints.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btConeTwistConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btContactConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btFixedConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btGearConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btGeneric6DofConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btGeneric6DofSpring2Constraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btGeneric6DofSpringConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btHinge2Constraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btHingeConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btNNCGConstraintSolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btPoint2PointConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSequentialImpulseConstraintSolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSequentialImpulseConstraintSolverMt.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSliderConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSolve2LinearConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btTypedConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btUniversalConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btDiscreteDynamicsWorld.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btDiscreteDynamicsWorldMt.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btRigidBody.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btSimpleDynamicsWorld.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btSimulationIslandManagerMt.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBody.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyConstraintSolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyDynamicsWorld.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyFixedConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyGearConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyJointLimitConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyJointMotor.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyMLCPConstraintSolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyPoint2Point.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodySliderConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodySphericalJointMotor.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btDantzigLCP.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btLemkeAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btMLCPSolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Vehicle\btRaycastVehicle.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletDynamics\Vehicle\btWheelInfo.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletInverseDynamics\details\MultiBodyTreeImpl.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletInverseDynamics\details\MultiBodyTreeInitCache.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletInverseDynamics\IDMath.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletInverseDynamics\MultiBodyTree.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btDefaultSoftBodySolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableBackwardEulerObjective.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableBodySolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableContactConstraint.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableContactProjection.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableMultiBodyConstraintSolver.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableMultiBodyDynamicsWorld.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBody.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodyConcaveCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodyHelpers.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodyRigidBodyCollisionConfiguration.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftMultiBodyDynamicsWorld.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftRigidCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftRigidDynamicsWorld.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftSoftCollisionAlgorithm.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\BulletSoftBody\poly34.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\clew\clew.c" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btAlignedAllocator.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btConvexHull.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btConvexHullComputer.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btGeometryUtil.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btPolarDecomposition.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btQuickprof.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btReducedVector.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btSerializer.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btSerializer64.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btThreads.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\btVector3.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\TaskScheduler\btTaskScheduler.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\TaskScheduler\btThreadSupportPosix.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\LinearMath\TaskScheduler\btThreadSupportWin32.cpp" />
+    <ClCompile Include="include\serenity\renderer\particles\ParticleContainer.cpp" />
+    <ClCompile Include="include\serenity\renderer\particles\ParticleRendererOpenGL.cpp" />
+    <ClCompile Include="include\serenity\resources\mesh\animation\Skeleton.cpp" />
+    <ClCompile Include="src\serenity\algorithms\MergeSort.cpp" />
+    <ClCompile Include="src\serenity\algorithms\RadixSort.cpp" />
+    <ClCompile Include="src\serenity\Constraint.cpp" />
+    <ClCompile Include="src\serenity\discord\DiscordActivityEvent.cpp" />
+    <ClCompile Include="src\serenity\discord\DiscordModule.cpp" />
+    <ClCompile Include="src\serenity\discord\src\achievement_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\activity_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\application_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\core.cpp" />
+    <ClCompile Include="src\serenity\discord\src\image_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\lobby_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\network_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\overlay_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\relationship_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\storage_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\store_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\types.cpp" />
+    <ClCompile Include="src\serenity\discord\src\user_manager.cpp" />
+    <ClCompile Include="src\serenity\discord\src\voice_manager.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentScript.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentTransform.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentRigidBody.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentCamera.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentCollisionShape.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentLogic.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentModel.cpp" />
+    <ClCompile Include="src\serenity\ecs\components\ComponentName.cpp" />
+    <ClCompile Include="src\serenity\ecs\ECS.cpp" />
+    <ClCompile Include="src\serenity\ecs\ECSEntityPool.cpp" />
+    <ClCompile Include="src\serenity\ecs\ECSSystemPool.cpp" />
+    <ClCompile Include="src\serenity\ecs\entity\Entity.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemBaseClass.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentScript.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransform.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentTransformDebugDraw.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentRigidBody.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentCamera.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentLogic.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemComponentModel.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemCompoundChildTransforms.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemGameUpdate.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemSceneChanging.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemSceneUpdate.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemStepPhysics.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemSyncRigidToTransform.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemSyncTransformToRigid.cpp" />
+    <ClCompile Include="src\serenity\ecs\systems\SystemTransformParentChild.cpp" />
+    <ClCompile Include="src\serenity\editor\core\EditorCore.cpp" />
+    <ClCompile Include="src\serenity\editor\embeddedImages\PointLightImage.cpp" />
+    <ClCompile Include="src\serenity\editor\embeddedImages\RodLightImage.cpp" />
+    <ClCompile Include="src\serenity\editor\embeddedImages\SpotLightImage.cpp" />
+    <ClCompile Include="src\serenity\editor\embeddedImages\SunLightImage.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui-SFML.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\serenity\editor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\serenity\editor\windowScene\WindowScene.cpp" />
+    <ClCompile Include="src\serenity\events\EventDispatcher.cpp" />
+    <ClCompile Include="src\serenity\events\EventModule.cpp" />
+    <ClCompile Include="src\serenity\events\Observer.cpp" />
+    <ClCompile Include="src\serenity\input\InputModule.cpp" />
+    <ClCompile Include="src\serenity\input\Joystick\JoystickAxises.cpp" />
+    <ClCompile Include="src\serenity\input\Joystick\JoystickModule.cpp" />
+    <ClCompile Include="src\serenity\input\Keyboard\KeyboardKeys.cpp" />
+    <ClCompile Include="src\serenity\input\Keyboard\KeyboardModule.cpp" />
+    <ClCompile Include="src\serenity\input\Mouse\MouseButtons.cpp" />
+    <ClCompile Include="src\serenity\input\Mouse\MouseModule.cpp" />
+    <ClCompile Include="src\serenity\lights\DirectionalLight.cpp" />
+    <ClCompile Include="src\serenity\lights\LightIncludes.cpp" />
+    <ClCompile Include="src\serenity\lights\LightProbe.cpp" />
+    <ClCompile Include="src\serenity\lights\PointLight.cpp" />
+    <ClCompile Include="src\serenity\lights\ProjectionLight.cpp" />
+    <ClCompile Include="src\serenity\lights\RodLight.cpp" />
+    <ClCompile Include="src\serenity\lights\SpotLight.cpp" />
+    <ClCompile Include="src\serenity\lights\SunLight.cpp" />
+    <ClCompile Include="src\serenity\lua\bindings\EventBindings.cpp" />
+    <ClCompile Include="src\serenity\lua\bindings\InputBindings.cpp" />
+    <ClCompile Include="src\serenity\lua\bindings\MathBindings.cpp" />
+    <ClCompile Include="src\serenity\lua\bindings\SoundBindings.cpp" />
+    <ClCompile Include="src\serenity\lua\LuaBinder.cpp" />
+    <ClCompile Include="src\serenity\lua\LuaModule.cpp" />
+    <ClCompile Include="src\serenity\lua\LuaScript.cpp" />
+    <ClCompile Include="src\serenity\lua\LuaState.cpp" />
+    <ClCompile Include="src\serenity\math\Engine_Math.cpp" />
+    <ClCompile Include="src\serenity\math\MathCompression.cpp" />
+    <ClCompile Include="src\serenity\math\shapes\Plane.cpp" />
+    <ClCompile Include="src\serenity\math\shapes\Pyramid.cpp" />
+    <ClCompile Include="src\serenity\math\SimplexNoise.cpp" />
+    <ClCompile Include="src\serenity\model\ModelInstance.cpp" />
+    <ClCompile Include="src\serenity\model\ModelInstanceAnimation.cpp" />
+    <ClCompile Include="src\serenity\model\ModelInstanceHandle.cpp" />
+    <ClCompile Include="src\serenity\networking\ListenerTCP.cpp" />
+    <ClCompile Include="src\serenity\networking\NetworkingModule.cpp" />
+    <ClCompile Include="src\serenity\networking\Packet.cpp" />
+    <ClCompile Include="src\serenity\networking\server\Server.cpp" />
+    <ClCompile Include="src\serenity\networking\server\ServerClient.cpp" />
+    <ClCompile Include="src\serenity\networking\server\ServerClientsContainer.cpp" />
+    <ClCompile Include="src\serenity\networking\server\ServerThread.cpp" />
+    <ClCompile Include="src\serenity\networking\server\ServerThreadCollection.cpp" />
+    <ClCompile Include="src\serenity\networking\SocketManager.cpp" />
+    <ClCompile Include="src\serenity\networking\SocketTCP.cpp" />
+    <ClCompile Include="src\serenity\networking\SocketUDP.cpp" />
+    <ClCompile Include="src\serenity\physics\btRigidBodyEnhanced.cpp" />
+    <ClCompile Include="src\serenity\physics\DebugDrawer.cpp" />
+    <ClCompile Include="src\serenity\physics\PhysicsModule.cpp" />
+    <ClCompile Include="src\serenity\physics\PhysicsPipeline.cpp" />
+    <ClCompile Include="src\serenity\physics\PhysicsTaskScheduler.cpp" />
+    <ClCompile Include="src\serenity\physics\Raycast.cpp" />
+    <ClCompile Include="src\serenity\renderer\culling\Culling.cpp" />
+    <ClCompile Include="src\serenity\renderer\culling\DistanceTest.cpp" />
+    <ClCompile Include="src\serenity\renderer\culling\PointIntersectTest.cpp" />
+    <ClCompile Include="src\serenity\renderer\culling\SphereIntersectTest.cpp" />
+    <ClCompile Include="src\serenity\renderer\Decal.cpp" />
+    <ClCompile Include="src\serenity\renderer\FramebufferObject.cpp" />
+    <ClCompile Include="src\serenity\renderer\FullscreenItems.cpp" />
+    <ClCompile Include="src\serenity\renderer\GBuffer.cpp" />
+    <ClCompile Include="src\serenity\renderer\GLImageConstants.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\BindTextureRAII.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\Extensions.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Common.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Compression.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\DeferredFunctions.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\DepthOfFieldCode.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Lighting.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Materials.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\Shadows.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\glsl\VersionConversion.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\State.cpp" />
+    <ClCompile Include="src\serenity\renderer\opengl\UniformBufferObject.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\Particle.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleEmissionProperties.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleEmissionPropertiesContainer.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleEmissionPropertiesHandle.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleEmitter.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleEmitterHandle.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleSystem.cpp" />
+    <ClCompile Include="src\serenity\renderer\particles\ParticleSystemNew.cpp" />
+    <ClCompile Include="src\serenity\renderer\pipelines\DeferredPipeline.cpp" />
+    <ClCompile Include="src\serenity\renderer\pipelines\DeferredShadowCasters.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\Bloom.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\DepthOfField.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\Fog.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\FXAA.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\GodRays.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\HDR.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\SMAA.cpp" />
+    <ClCompile Include="src\serenity\renderer\postprocess\SSAO.cpp" />
+    <ClCompile Include="src\serenity\renderer\Renderer.cpp" />
+    <ClCompile Include="src\serenity\renderer\RendererIncludes.cpp" />
+    <ClCompile Include="src\serenity\renderer\RenderGraph.cpp" />
+    <ClCompile Include="src\serenity\renderer\text\TextRenderer.cpp" />
+    <ClCompile Include="src\serenity\renderer\text\TextStringBuilderColor.cpp" />
+    <ClCompile Include="src\serenity\resources\Engine_BuiltInShaders.cpp" />
+    <ClCompile Include="src\serenity\resources\Engine_Resources.cpp" />
+    <ClCompile Include="src\serenity\resources\font\Font.cpp" />
+    <ClCompile Include="src\serenity\resources\Handle.cpp" />
+    <ClCompile Include="src\serenity\resources\material\Material.cpp" />
+    <ClCompile Include="src\serenity\resources\material\MaterialComponent.cpp" />
+    <ClCompile Include="src\serenity\resources\material\MaterialLayer.cpp" />
+    <ClCompile Include="src\serenity\resources\material\MaterialLoader.cpp" />
+    <ClCompile Include="src\serenity\resources\material\MaterialRequest.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\animation\AnimationData.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\animation\AnimationIncludes.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\BuiltInMeshes.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\gl\IndexBufferObject.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\gl\VertexArrayObject.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\gl\VertexBufferObject.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\Mesh.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\MeshCollisionFactory.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\MeshLoading.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\MeshRequest.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\smsh.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\VertexData.cpp" />
+    <ClCompile Include="src\serenity\resources\mesh\VertexDataFormat.cpp" />
+    <ClCompile Include="src\serenity\resources\Resource.cpp" />
+    <ClCompile Include="src\serenity\resources\ResourceModule.cpp" />
+    <ClCompile Include="src\serenity\resources\shader\Shader.cpp" />
+    <ClCompile Include="src\serenity\resources\shader\ShaderHelper.cpp" />
+    <ClCompile Include="src\serenity\resources\shader\ShaderProgram.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundData.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundEffect.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundModule.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundMusic.cpp" />
+    <ClCompile Include="src\serenity\resources\sound\SoundQueue.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\Texture.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureBaseClass.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureCubemap.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureIncludes.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureLoader.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureLoaderCubemap.cpp" />
+    <ClCompile Include="src\serenity\resources\texture\TextureRequest.cpp" />
+    <ClCompile Include="src\serenity\scene\Camera.cpp" />
+    <ClCompile Include="src\serenity\scene\Scene.cpp" />
+    <ClCompile Include="src\serenity\scene\SceneOptions.cpp" />
+    <ClCompile Include="src\serenity\scene\Skybox.cpp" />
+    <ClCompile Include="src\serenity\scene\Viewport.cpp" />
+    <ClCompile Include="src\serenity\system\cursor\Cursor.cpp" />
+    <ClCompile Include="src\serenity\system\Engine.cpp" />
+    <ClCompile Include="src\serenity\system\EngineEventHandler.cpp" />
+    <ClCompile Include="src\serenity\system\EngineMisc.cpp" />
+    <ClCompile Include="src\serenity\system\window\Window.cpp" />
+    <ClCompile Include="src\serenity\system\window\WindowData.cpp" />
+    <ClCompile Include="src\serenity\Terrain.cpp" />
+    <ClCompile Include="src\serenity\tests\main.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestEntities.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestGLTypes.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestOpenGLRenderableProperties.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestSystemParentChild.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\tests\TestTextureTypes.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\serenity\threading\SpinLock.cpp" />
+    <ClCompile Include="src\serenity\threading\SpinLockGuard.cpp" />
+    <ClCompile Include="src\serenity\threading\ThreadingHelpers.cpp" />
+    <ClCompile Include="src\serenity\threading\ThreadingModule.cpp" />
+    <ClCompile Include="src\serenity\threading\ThreadPool.cpp" />
+    <ClCompile Include="src\serenity\threading\WorkerThreadContainer.cpp" />
+    <ClCompile Include="src\serenity\types\Timer.cpp" />
+    <ClCompile Include="src\serenity\utils\Engine_Debugging.cpp" />
+    <ClCompile Include="src\serenity\utils\Random.cpp" />
+    <ClCompile Include="src\serenity\utils\Utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\serenity\algorithms\EngineSort.h" />
+    <ClInclude Include="include\serenity\algorithms\MergeSort.h" />
+    <ClInclude Include="include\serenity\algorithms\RadixSort.h" />
+    <ClInclude Include="include\serenity\Constraint.h" />
+    <ClInclude Include="include\serenity\containers\BimapUnordered.h" />
+    <ClInclude Include="include\serenity\containers\CircularBuffer.h" />
+    <ClInclude Include="include\serenity\containers\DODMembers.h" />
+    <ClInclude Include="include\serenity\containers\Freelist.h" />
+    <ClInclude Include="include\serenity\containers\Heap.h" />
+    <ClInclude Include="include\serenity\containers\PartialArray.h" />
+    <ClInclude Include="include\serenity\containers\PartialVectorPOD.h" />
+    <ClInclude Include="include\serenity\containers\Queue_ts.h" />
+    <ClInclude Include="include\serenity\containers\SparseSet.h" />
+    <ClInclude Include="include\serenity\containers\TypeRegistry.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\btBulletCollisionCommon.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\btBulletDynamicsCommon.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btAxisSweep3.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btAxisSweep3Internal.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btBroadphaseInterface.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btBroadphaseProxy.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btDbvt.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btDbvtBroadphase.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btDispatcher.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btOverlappingPairCache.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btOverlappingPairCallback.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btQuantizedBvh.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btSimpleBroadphase.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btActivatingCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btBox2dBox2dCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btBoxBoxCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btBoxBoxDetector.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionConfiguration.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionCreateFunc.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionDispatcher.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionDispatcherMt.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionObject.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionObjectWrapper.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionWorld.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCollisionWorldImporter.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCompoundCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btCompoundCompoundCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btConvex2dConvex2dAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btConvexConcaveCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btConvexConvexAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btConvexPlaneCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btDefaultCollisionConfiguration.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btEmptyCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btGhostObject.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btHashedSimplePairCache.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btInternalEdgeUtility.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btManifoldResult.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btSimulationIslandManager.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btSphereBoxCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btSphereSphereCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btSphereTriangleCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\btUnionFind.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionDispatch\SphereTriangleDetector.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btBox2dShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btBoxShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btBvhTriangleMeshShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btCapsuleShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btCollisionMargin.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btCollisionShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btCompoundShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConcaveShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConeShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvex2dShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexHullShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexInternalShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexPointCloudShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexPolyhedron.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btConvexTriangleMeshShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btCylinderShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btEmptyShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btHeightfieldTerrainShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btMaterial.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btMiniSDF.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btMinkowskiSumShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btMultimaterialTriangleMeshShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btMultiSphereShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btOptimizedBvh.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btPolyhedralConvexShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btScaledBvhTriangleMeshShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btSdfCollisionShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btShapeHull.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btSphereShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btStaticPlaneShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btStridingMeshInterface.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTetrahedronShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleBuffer.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleCallback.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleIndexVertexArray.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleIndexVertexMaterialArray.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleInfoMap.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleMesh.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleMeshShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btTriangleShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\CollisionShapes\btUniformScalingShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btBoxCollision.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btClipPolygon.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btCompoundFromGimpact.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btContactProcessing.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btContactProcessingStructs.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGenericPoolAllocator.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGeometryOperations.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactBvh.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactBvhStructs.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactMassUtil.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactQuantizedBvh.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactQuantizedBvhStructs.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btGImpactShape.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btQuantization.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\btTriangleShapeEx.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_array.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_basic_geometry_operations.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_bitset.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_box_collision.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_box_set.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_clip_polygon.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_contact.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_geometry.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_geom_types.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_hash_table.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_linear_math.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_math.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_memory.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_pair.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_radixsort.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\Gimpact\gim_tri_collision.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btComputeGjkEpaPenetration.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btContinuousConvexCollision.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btConvexCast.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btConvexPenetrationDepthSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btDiscreteCollisionDetectorInterface.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkCollisionDescription.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkConvexCast.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkEpa2.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkEpa3.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkEpaPenetrationDepthSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btGjkPairDetector.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btManifoldPoint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btMinkowskiPenetrationDepthSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btMprPenetration.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btPersistentManifold.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btPointCollector.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btPolyhedralContactClipping.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btRaycastCallback.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btSimplexSolverInterface.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btSubSimplexConvexCast.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\NarrowPhaseCollision\btVoronoiSimplexSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Character\btCharacterControllerInterface.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Character\btKinematicCharacterController.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btBatchedConstraints.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btConeTwistConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btConstraintSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btContactConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btContactSolverInfo.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btFixedConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btGearConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btGeneric6DofConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btGeneric6DofSpring2Constraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btGeneric6DofSpringConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btHinge2Constraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btHingeConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btJacobianEntry.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btNNCGConstraintSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btPoint2PointConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSequentialImpulseConstraintSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSequentialImpulseConstraintSolverMt.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSliderConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSolve2LinearConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSolverBody.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btSolverConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btTypedConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\ConstraintSolver\btUniversalConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btActionInterface.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btDiscreteDynamicsWorld.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btDiscreteDynamicsWorldMt.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btDynamicsWorld.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btRigidBody.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btSimpleDynamicsWorld.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Dynamics\btSimulationIslandManagerMt.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBody.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyConstraintSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyDynamicsWorld.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyFixedConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyGearConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyInplaceSolverIslandCallback.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyJointFeedback.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyJointLimitConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyJointMotor.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyLink.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyLinkCollider.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyMLCPConstraintSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodyPoint2Point.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodySliderConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodySolverConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Featherstone\btMultiBodySphericalJointMotor.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btDantzigLCP.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btDantzigSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btLemkeAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btLemkeSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btMLCPSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btMLCPSolverInterface.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btPATHSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\MLCPSolvers\btSolveProjectedGaussSeidel.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Vehicle\btRaycastVehicle.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Vehicle\btVehicleRaycaster.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletDynamics\Vehicle\btWheelInfo.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\details\IDEigenInterface.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\details\IDLinearMathInterface.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\details\IDMatVec.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\details\MultiBodyTreeImpl.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\details\MultiBodyTreeInitCache.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\IDConfig.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\IDConfigBuiltin.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\IDConfigEigen.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\IDErrorMessages.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\IDMath.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletInverseDynamics\MultiBodyTree.hpp" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btCGProjection.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btConjugateGradient.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btConjugateResidual.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDefaultSoftBodySolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableBackwardEulerObjective.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableBodySolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableContactConstraint.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableContactProjection.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableCorotatedForce.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableGravityForce.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableLagrangianForce.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableLinearElasticityForce.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableMassSpringForce.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableMousePickingForce.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableMultiBodyConstraintSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableMultiBodyDynamicsWorld.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btDeformableNeoHookeanForce.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btKrylovSolver.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btPreconditioner.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBody.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodyConcaveCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodyData.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodyHelpers.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodyInternals.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodyRigidBodyCollisionConfiguration.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodySolvers.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftBodySolverVertexBuffer.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftMultiBodyDynamicsWorld.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftRigidCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftRigidDynamicsWorld.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSoftSoftCollisionAlgorithm.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\btSparseSDF.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\DeformableBodyInplaceSolverIslandCallback.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\BulletSoftBody\poly34.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\clew\clew.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btAabbUtil2.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btAlignedAllocator.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btAlignedObjectArray.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btConvexHull.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btConvexHullComputer.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btCpuFeatureUtility.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btDefaultMotionState.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btGeometryUtil.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btGrahamScan2dConvexHull.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btHashMap.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btIDebugDraw.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btImplicitQRSVD.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btList.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btMatrix3x3.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btMatrixX.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btMinMax.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btModifiedGramSchmidt.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btMotionState.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btPolarDecomposition.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btPoolAllocator.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btQuadWord.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btQuaternion.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btQuickprof.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btRandom.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btReducedVector.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btScalar.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btSerializer.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btSpatialAlgebra.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btStackAlloc.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btThreads.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btTransform.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btTransformUtil.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\btVector3.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\LinearMath\TaskScheduler\btThreadSupportInterface.h" />
+    <ClInclude Include="include\serenity\dependencies\glm.h" />
+    <ClInclude Include="include\serenity\discord\Discord.h" />
+    <ClInclude Include="include\serenity\discord\DiscordActivityEvent.h" />
+    <ClInclude Include="include\serenity\discord\DiscordModule.h" />
+    <ClInclude Include="include\serenity\discord\src\achievement_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\activity_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\application_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\core.h" />
+    <ClInclude Include="include\serenity\discord\src\discord.h" />
+    <ClInclude Include="include\serenity\discord\src\event.h" />
+    <ClInclude Include="include\serenity\discord\src\ffi.h" />
+    <ClInclude Include="include\serenity\discord\src\image_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\lobby_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\network_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\overlay_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\relationship_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\storage_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\store_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\types.h" />
+    <ClInclude Include="include\serenity\discord\src\user_manager.h" />
+    <ClInclude Include="include\serenity\discord\src\voice_manager.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentBaseClass.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentScript.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentTransform.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentRigidBody.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentCamera.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentCollisionShape.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentLogic.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentModel.h" />
+    <ClInclude Include="include\serenity\ecs\components\ComponentName.h" />
+    <ClInclude Include="include\serenity\ecs\components\Components.h" />
+    <ClInclude Include="include\serenity\ecs\ECS.h" />
+    <ClInclude Include="include\serenity\ecs\ECSComponentPool.h" />
+    <ClInclude Include="include\serenity\ecs\ECSEntityPool.h" />
+    <ClInclude Include="include\serenity\ecs\ECSIncludes.h" />
+    <ClInclude Include="include\serenity\ecs\ECSSystemPool.h" />
+    <ClInclude Include="include\serenity\ecs\entity\Entity.h" />
+    <ClInclude Include="include\serenity\ecs\entity\EntityRAII.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemBaseClass.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentScript.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransform.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentTransformDebugDraw.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentRigidBody.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentCamera.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentLogic.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemComponentModel.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemCompoundChildTransforms.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemGameUpdate.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemSceneChanging.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemSceneUpdate.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemStepPhysics.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemSyncRigidToTransform.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemSyncTransformToRigid.h" />
+    <ClInclude Include="include\serenity\ecs\systems\SystemTransformParentChild.h" />
+    <ClInclude Include="include\serenity\editor\core\EditorCore.h" />
+    <ClInclude Include="include\serenity\editor\embeddedImages\PointLightImage.h" />
+    <ClInclude Include="include\serenity\editor\embeddedImages\RodLightImage.h" />
+    <ClInclude Include="include\serenity\editor\embeddedImages\SpotLightImage.h" />
+    <ClInclude Include="include\serenity\editor\embeddedImages\SunLightImage.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imconfig-SFML.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imconfig.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui-SFML.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui-SFML_export.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imgui_internal.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imstb_rectpack.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imstb_textedit.h" />
+    <ClInclude Include="include\serenity\editor\imgui\imstb_truetype.h" />
+    <ClInclude Include="include\serenity\editor\windowScene\WindowScene.h" />
+    <ClInclude Include="include\serenity\events\Event.h" />
+    <ClInclude Include="include\serenity\events\EventDispatcher.h" />
+    <ClInclude Include="include\serenity\events\EventIncludes.h" />
+    <ClInclude Include="include\serenity\events\EventModule.h" />
+    <ClInclude Include="include\serenity\events\Observer.h" />
+    <ClInclude Include="include\serenity\input\InputModule.h" />
+    <ClInclude Include="include\serenity\input\Joystick\JoystickAxises.h" />
+    <ClInclude Include="include\serenity\input\Joystick\JoystickModule.h" />
+    <ClInclude Include="include\serenity\input\Keyboard\KeyboardKeys.h" />
+    <ClInclude Include="include\serenity\input\Keyboard\KeyboardModule.h" />
+    <ClInclude Include="include\serenity\input\Mouse\MouseButtons.h" />
+    <ClInclude Include="include\serenity\input\Mouse\MouseModule.h" />
+    <ClInclude Include="include\serenity\lights\DirectionalLight.h" />
+    <ClInclude Include="include\serenity\lights\LightIncludes.h" />
+    <ClInclude Include="include\serenity\lights\LightProbe.h" />
+    <ClInclude Include="include\serenity\lights\Lights.h" />
+    <ClInclude Include="include\serenity\lights\PointLight.h" />
+    <ClInclude Include="include\serenity\lights\ProjectionLight.h" />
+    <ClInclude Include="include\serenity\lights\RodLight.h" />
+    <ClInclude Include="include\serenity\lights\SpotLight.h" />
+    <ClInclude Include="include\serenity\lights\SunLight.h" />
+    <ClInclude Include="include\serenity\lua\bindings\EventBindings.h" />
+    <ClInclude Include="include\serenity\lua\bindings\InputBindings.h" />
+    <ClInclude Include="include\serenity\lua\bindings\MathBindings.h" />
+    <ClInclude Include="include\serenity\lua\bindings\SoundBindings.h" />
+    <ClInclude Include="include\serenity\lua\Lua.h" />
+    <ClInclude Include="include\serenity\lua\LuaBinder.h" />
+    <ClInclude Include="include\serenity\lua\LuaCallable.h" />
+    <ClInclude Include="include\serenity\lua\LuaIncludes.h" />
+    <ClInclude Include="include\serenity\lua\LuaModule.h" />
+    <ClInclude Include="include\serenity\lua\LuaScript.h" />
+    <ClInclude Include="include\serenity\lua\LuaState.h" />
+    <ClInclude Include="include\serenity\math\BigNumbers.h" />
+    <ClInclude Include="include\serenity\math\Engine_Math.h" />
+    <ClInclude Include="include\serenity\math\MathCompression.h" />
+    <ClInclude Include="include\serenity\math\shapes\Plane.h" />
+    <ClInclude Include="include\serenity\math\shapes\Pyramid.h" />
+    <ClInclude Include="include\serenity\math\SimplexNoise.h" />
+    <ClInclude Include="include\serenity\model\ModelInstance.h" />
+    <ClInclude Include="include\serenity\model\ModelInstanceAnimation.h" />
+    <ClInclude Include="include\serenity\model\ModelInstanceHandle.h" />
+    <ClInclude Include="include\serenity\model\ModelInstanceIncludes.h" />
+    <ClInclude Include="include\serenity\networking\ISocket.h" />
+    <ClInclude Include="include\serenity\networking\ListenerTCP.h" />
+    <ClInclude Include="include\serenity\networking\Networking.h" />
+    <ClInclude Include="include\serenity\networking\NetworkingIncludes.h" />
+    <ClInclude Include="include\serenity\networking\NetworkingModule.h" />
+    <ClInclude Include="include\serenity\networking\Packet.h" />
+    <ClInclude Include="include\serenity\networking\server\Server.h" />
+    <ClInclude Include="include\serenity\networking\server\ServerClient.h" />
+    <ClInclude Include="include\serenity\networking\server\ServerClientsContainer.h" />
+    <ClInclude Include="include\serenity\networking\server\ServerThread.h" />
+    <ClInclude Include="include\serenity\networking\server\ServerThreadCollection.h" />
+    <ClInclude Include="include\serenity\networking\SocketManager.h" />
+    <ClInclude Include="include\serenity\networking\SocketTCP.h" />
+    <ClInclude Include="include\serenity\networking\SocketUDP.h" />
+    <ClInclude Include="include\serenity\physics\btRigidBodyEnhanced.h" />
+    <ClInclude Include="include\serenity\physics\DebugDrawer.h" />
+    <ClInclude Include="include\serenity\physics\PhysicsIncludes.h" />
+    <ClInclude Include="include\serenity\physics\PhysicsModule.h" />
+    <ClInclude Include="include\serenity\physics\PhysicsPipeline.h" />
+    <ClInclude Include="include\serenity\physics\PhysicsTaskScheduler.h" />
+    <ClInclude Include="include\serenity\physics\Raycast.h" />
+    <ClInclude Include="include\serenity\renderer\culling\Culling.h" />
+    <ClInclude Include="include\serenity\renderer\culling\DistanceTest.h" />
+    <ClInclude Include="include\serenity\renderer\culling\PointIntersectTest.h" />
+    <ClInclude Include="include\serenity\renderer\culling\SphereIntersectTest.h" />
+    <ClInclude Include="include\serenity\renderer\Decal.h" />
+    <ClInclude Include="include\serenity\renderer\FramebufferObject.h" />
+    <ClInclude Include="include\serenity\renderer\FullscreenItems.h" />
+    <ClInclude Include="include\serenity\renderer\GBuffer.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\BindTextureRAII.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\Extensions.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\GLImageConstants.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Common.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Compression.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\DeferredFunctions.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\DepthOfFieldCode.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Lighting.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Materials.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\Shadows.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\glsl\VersionConversion.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\OpenGL.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\OpenGLRenderableProperties.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\State.h" />
+    <ClInclude Include="include\serenity\renderer\opengl\UniformBufferObject.h" />
+    <ClInclude Include="include\serenity\renderer\particles\Particle.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleContainer.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmissionProperties.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmissionPropertiesContainer.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmissionPropertiesHandle.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmitter.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmitterContainer.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleEmitterHandle.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleHandle.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleIncludes.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleRendererOpenGL.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleSystem.h" />
+    <ClInclude Include="include\serenity\renderer\particles\ParticleSystemNew.h" />
+    <ClInclude Include="include\serenity\renderer\pipelines\DeferredPipeline.h" />
+    <ClInclude Include="include\serenity\renderer\pipelines\DeferredShadowCasters.h" />
+    <ClInclude Include="include\serenity\renderer\pipelines\IRenderingPipeline.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\Bloom.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\DepthOfField.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\Fog.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\FXAA.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\GodRays.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\HDR.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\SMAA.h" />
+    <ClInclude Include="include\serenity\renderer\postprocess\SSAO.h" />
+    <ClInclude Include="include\serenity\renderer\Renderer.h" />
+    <ClInclude Include="include\serenity\renderer\RendererIncludes.h" />
+    <ClInclude Include="include\serenity\renderer\RendererState.h" />
+    <ClInclude Include="include\serenity\renderer\RenderGraph.h" />
+    <ClInclude Include="include\serenity\renderer\SMAA_LUT.h" />
+    <ClInclude Include="include\serenity\renderer\text\TextRenderer.h" />
+    <ClInclude Include="include\serenity\renderer\text\TextRendererIncludes.h" />
+    <ClInclude Include="include\serenity\renderer\text\TextStringBuilderColor.h" />
+    <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h" />
+    <ClInclude Include="include\serenity\resources\Engine_Resources.h" />
+    <ClInclude Include="include\serenity\resources\font\Font.h" />
+    <ClInclude Include="include\serenity\resources\font\FontIncludes.h" />
+    <ClInclude Include="include\serenity\resources\Handle.h" />
+    <ClInclude Include="include\serenity\resources\material\Material.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialComponent.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialEnums.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialLayer.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialLoader.h" />
+    <ClInclude Include="include\serenity\resources\material\MaterialRequest.h" />
+    <ClInclude Include="include\serenity\resources\mesh\animation\AnimationData.h" />
+    <ClInclude Include="include\serenity\resources\mesh\animation\AnimationIncludes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\animation\Skeleton.h" />
+    <ClInclude Include="include\serenity\resources\mesh\BuiltInMeshes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\gl\MeshGLIncludes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\gl\IndexBufferObject.h" />
+    <ClInclude Include="include\serenity\resources\mesh\gl\VertexArrayObject.h" />
+    <ClInclude Include="include\serenity\resources\mesh\gl\VertexBufferObject.h" />
+    <ClInclude Include="include\serenity\resources\mesh\Mesh.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshCollisionFactory.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshImportedData.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshIncludes.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshLoading.h" />
+    <ClInclude Include="include\serenity\resources\mesh\MeshRequest.h" />
+    <ClInclude Include="include\serenity\resources\mesh\smsh.h" />
+    <ClInclude Include="include\serenity\resources\mesh\VertexData.h" />
+    <ClInclude Include="include\serenity\resources\mesh\VertexDataFormat.h" />
+    <ClInclude Include="include\serenity\resources\Resource.h" />
+    <ClInclude Include="include\serenity\resources\ResourceModule.h" />
+    <ClInclude Include="include\serenity\resources\ResourcesIncludes.h" />
+    <ClInclude Include="include\serenity\resources\ResourceVector.h" />
+    <ClInclude Include="include\serenity\resources\shader\Shader.h" />
+    <ClInclude Include="include\serenity\resources\shader\ShaderHelper.h" />
+    <ClInclude Include="include\serenity\resources\shader\ShaderIncludes.h" />
+    <ClInclude Include="include\serenity\resources\shader\ShaderProgram.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundData.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundEffect.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundIncludes.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundModule.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundMusic.h" />
+    <ClInclude Include="include\serenity\resources\sound\SoundQueue.h" />
+    <ClInclude Include="include\serenity\resources\sound\Sounds.h" />
+    <ClInclude Include="include\serenity\resources\texture\DDS.h" />
+    <ClInclude Include="include\serenity\resources\texture\Texture.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureBaseClass.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureCubemap.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureIncludes.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureLoader.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureLoaderCubemap.h" />
+    <ClInclude Include="include\serenity\resources\texture\TextureRequest.h" />
+    <ClInclude Include="include\serenity\scene\Camera.h" />
+    <ClInclude Include="include\serenity\scene\LightContainer.h" />
+    <ClInclude Include="include\serenity\scene\LightsModule.h" />
+    <ClInclude Include="include\serenity\scene\Scene.h" />
+    <ClInclude Include="include\serenity\scene\SceneOptions.h" />
+    <ClInclude Include="include\serenity\scene\Skybox.h" />
+    <ClInclude Include="include\serenity\scene\Viewport.h" />
+    <ClInclude Include="include\serenity\scene\ViewportIncludes.h" />
+    <ClInclude Include="include\serenity\system\App.h" />
+    <ClInclude Include="include\serenity\system\cursor\Cursor.h" />
+    <ClInclude Include="include\serenity\system\Engine.h" />
+    <ClInclude Include="include\serenity\system\EngineEventHandler.h" />
+    <ClInclude Include="include\serenity\system\EngineGameFunctions.h" />
+    <ClInclude Include="include\serenity\system\EngineMisc.h" />
+    <ClInclude Include="include\serenity\system\EngineOptions.h" />
+    <ClInclude Include="include\serenity\system\Macros.h" />
+    <ClInclude Include="include\serenity\system\Time.h" />
+    <ClInclude Include="include\serenity\system\TypeDefs.h" />
+    <ClInclude Include="include\serenity\system\window\Window.h" />
+    <ClInclude Include="include\serenity\system\window\WindowData.h" />
+    <ClInclude Include="include\serenity\system\window\WindowIncludes.h" />
+    <ClInclude Include="include\serenity\Terrain.h" />
+    <ClInclude Include="include\serenity\threading\SpinLock.h" />
+    <ClInclude Include="include\serenity\threading\SpinLockGuard.h" />
+    <ClInclude Include="include\serenity\threading\ThreadingHelpers.h" />
+    <ClInclude Include="include\serenity\threading\ThreadingModule.h" />
+    <ClInclude Include="include\serenity\threading\ThreadPool.h" />
+    <ClInclude Include="include\serenity\threading\WorkerThreadContainer.h" />
+    <ClInclude Include="include\serenity\types\ColorVector.h" />
+    <ClInclude Include="include\serenity\types\Flag.h" />
+    <ClInclude Include="include\serenity\types\SmallMap.h" />
+    <ClInclude Include="include\serenity\types\StaticString.h" />
+    <ClInclude Include="include\serenity\types\Timer.h" />
+    <ClInclude Include="include\serenity\types\Types.h" />
+    <ClInclude Include="include\serenity\types\ViewPointer.h" />
+    <ClInclude Include="include\serenity\utils\BlockProfiler.h" />
+    <ClInclude Include="include\serenity\utils\Engine_Debugging.h" />
+    <ClInclude Include="include\serenity\utils\Logger.h" />
+    <ClInclude Include="include\serenity\utils\Random.h" />
+    <ClInclude Include="include\serenity\utils\Utils.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
