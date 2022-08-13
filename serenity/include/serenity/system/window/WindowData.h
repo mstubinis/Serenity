@@ -11,7 +11,7 @@ namespace Engine::priv {
 };
 
 #include <SFML/Window/VideoMode.hpp>
-#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Window/WindowBase.hpp>
 #include <SFML/Window/Event.hpp>
 #include <serenity/types/Flag.h>
 #include <serenity/system/window/WindowIncludes.h>
@@ -19,9 +19,21 @@ namespace Engine::priv {
 #include <serenity/dependencies/glm.h>
 #include <atomic>
 #include <latch>
+#include <serenity/types/ViewPointer.h>
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 namespace Engine::priv {
     class WindowData final {
+#ifdef _WIN32
+        using WindowPosition = WINDOWPLACEMENT;
+#else
+        using WindowPosition = glm::vec2;
+#endif
+
+
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
         using WindowEventType         = std::optional<sf::Event>;
         using WindowEventQueue        = Engine::queue_ts<sf::Event>;
@@ -36,7 +48,7 @@ namespace Engine::priv {
         friend class Engine::priv::EngineEventHandler;
         friend class ::Window;
         private:
-            sf::ContextSettings                m_SFContextSettings;
+            WindowPosition                     m_OldWindowPosition      = { sizeof(m_OldWindowPosition) };
             glm::vec2                          m_MousePosition          = glm::vec2{ 0.0f };
             glm::vec2                          m_MousePosition_Previous = glm::vec2{ 0.0f };
             glm::vec2                          m_MouseDifference        = glm::vec2{ 0.0f };
@@ -44,7 +56,7 @@ namespace Engine::priv {
             sf::VideoMode                      m_VideoMode;
             std::string                        m_IconFile;
             std::string                        m_WindowTitle;
-            std::unique_ptr<sf::RenderWindow>  m_SFMLWindow             = std::make_unique<sf::RenderWindow>(); // Needs to be a pointer to enable move semantics for WindowData
+            std::unique_ptr<sf::WindowBase>    m_SFMLWindow             = std::make_unique<sf::WindowBase>(); // Needs to be a pointer to enable move semantics for WindowData
             double                             m_MouseDelta             = 0.0;
             uint32_t                           m_Style                  = static_cast<uint32_t>(sf::Style::Default);
             uint32_t                           m_FramerateLimit         = 0U;
@@ -56,11 +68,11 @@ namespace Engine::priv {
             WindowEventQueue                   m_SFEventQueue;
             WindowEventCommandQueue            m_MainThreadToEventThreadQueue;
             std::unique_ptr<std::jthread>      m_EventThread = nullptr;
-            std::latch                         m_Latch{1};
+            std::unique_ptr<std::latch>        m_Latch;
 
             void internal_populate_sf_event_queue();
             void internal_process_command_queue();
-            void internal_thread_startup(Window&, const std::string& name, std::latch*);
+            void internal_thread_startup(Window&, const std::string& name, std::latch& waitForThread);
             void internal_push(WindowEventThreadOnlyCommands);
             WindowEventType internal_try_pop() noexcept;
             /////////////////////////////////
@@ -68,7 +80,7 @@ namespace Engine::priv {
 
             void internal_on_resize(uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize);
             void internal_restore_state(Window&);
-            const sf::ContextSettings internal_create(Window&, const std::string& windowTitle);
+            void internal_create(Window&, const std::string& windowTitle);
             void internal_update_mouse_position(Window&, float x, float y, bool resetDifference, bool resetPrevious);
             void internal_on_fullscreen(Window&, bool isToBeFullscreen, bool isMaximized, bool isMinimized);
             [[nodiscard]] sf::VideoMode internal_get_default_desktop_video_mode();
@@ -76,8 +88,8 @@ namespace Engine::priv {
             void internal_update_on_reset_events(const float dt);
             void internal_on_close(bool useLatch);
         public:
-            WindowData() = default;
-            WindowData(sf::ContextSettings, sf::ContextSettings::Attribute, int bitsPerPixel);
+            WindowData() = default; //TODO: change to = delete ?
+            WindowData(int bitsPerPixel);
 
             WindowData(const WindowData&)                = delete;
             WindowData& operator=(const WindowData&)     = delete;

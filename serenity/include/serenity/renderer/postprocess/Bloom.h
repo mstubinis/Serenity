@@ -7,7 +7,6 @@ class  Shader;
 class  Viewport;
 
 #include <serenity/resources/Handle.h>
-#include <string>
 #include <serenity/system/TypeDefs.h>
 
 namespace Engine::priv {
@@ -29,7 +28,7 @@ namespace Engine::priv {
             bool      m_Bloom_Active     = true;
             bool      m_Init             = false;
 
-            void init();
+            static void init();
             void pass(const GBuffer&, const Viewport&, uint32_t sceneTexture, const Engine::priv::RenderModule&);
 
             static Bloom STATIC_BLOOM;

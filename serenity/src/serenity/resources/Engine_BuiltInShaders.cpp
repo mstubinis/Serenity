@@ -2,7 +2,7 @@
 #include <serenity/resources/Engine_BuiltInShaders.h>
 #include <serenity/renderer/particles/ParticleSystem.h>
 #include <serenity/resources/material/MaterialEnums.h>
-#include <serenity/renderer/opengl/State.h>
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
 #include <serenity/lights/Lights.h>
 
 /*
@@ -450,7 +450,7 @@ varying vec3 TangentFragPos;
 
 void main(){
     mat4 BoneTransform = mat4(1.0);
-    if(AnimationPlaying == 1){
+    if (AnimationPlaying == 1) {
         BoneTransform  = gBones[int(BoneIDs[0])] * Weights[0];
         BoneTransform += gBones[int(BoneIDs[1])] * Weights[1];
         BoneTransform += gBones[int(BoneIDs[2])] * Weights[2];
@@ -461,9 +461,9 @@ void main(){
     vec3 BinormalTrans =  (BoneTransform * vec4(binormal.xyz, 0.0)).xyz;
     vec3 TangentTrans  =  (BoneTransform * vec4(tangent.xyz,  0.0)).xyz;
 
-         Normals       = (NormalMatrix * NormalTrans).xyz;
-    vec3 Binormals     = (NormalMatrix * BinormalTrans).xyz;
-    vec3 Tangents      = (NormalMatrix * TangentTrans).xyz;
+         Normals       = NormalMatrix * NormalTrans;
+    vec3 Binormals     = NormalMatrix * BinormalTrans;
+    vec3 Tangents      = NormalMatrix * TangentTrans;
     TBN = mat3(Tangents, Binormals, Normals);
 
     mat4 ModelMatrix   = Model;
@@ -875,7 +875,7 @@ Engine::priv::EShaders::particle_frag =
 
 "uniform SAMPLER_TYPE_2D Tex0;\n";
 
-for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+for (uint32_t i = 1; i < std::min(Engine::priv::APIState<Engine::priv::OpenGL>::getConstants().MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
 "uniform SAMPLER_TYPE_2D Tex" + std::to_string(i) + ";\n";
 }
@@ -900,7 +900,7 @@ priv::EShaders::particle_frag +=
 "    vec4 finalColor = ParticleColor;\n"
 "    if(MaterialIndex == 0U)\n"
 "        finalColor *= texture2D(Tex0, UV); \n";
-for (uint32_t i = 1; i < std::min(priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
+for (uint32_t i = 1; i < std::min(Engine::priv::APIState<Engine::priv::OpenGL>::getConstants().MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME); ++i) {
     priv::EShaders::particle_frag +=
 "    else if (MaterialIndex == " + std::to_string(i) + "U)\n"
 "        finalColor *= texture2D(Tex" + std::to_string(i) + ", UV); \n";

@@ -1,6 +1,7 @@
 #include <serenity/editor/core/EditorCore.h>
 #include <serenity/system/EngineOptions.h>
 #include <serenity/resources/Engine_Resources.h>
+#include <serenity/resources/texture/Texture.h>
 #include <serenity/editor/imgui/imgui.h>
 #include <serenity/editor/imgui/imgui-SFML.h>
 #include <serenity/editor/imgui/imgui_impl_opengl3.h>
@@ -43,7 +44,9 @@ namespace {
                 }
             }
         }
-        return Engine::Resources::loadTexture(pixels.data(), width, height, textureName, ImageInternalFormat::SRGB8_ALPHA8, false, false);
+        Handle textureHandle = Engine::Resources::loadTexture(pixels.data(), width, height, textureName, ImageInternalFormat::SRGB8_ALPHA8, false, false);
+        textureHandle.get<Texture>()->setFilter(TextureFilter::Nearest);
+        return textureHandle;
     }
 }
 
@@ -51,7 +54,6 @@ Engine::priv::EditorCore::EditorCore(const EngineOptions& options, Window& windo
     m_Enabled = options.editor_enabled;
     if (m_Enabled) {
         m_WindowScene = NEW Engine::priv::EditorWindowScene{};
-
         ImGui::SFML::Init(window.getSFMLHandle(), static_cast<sf::Vector2f>(window.getSFMLHandle().getSize()));
         ImGui_ImplOpenGL3_Init();
         m_RegisteredWindows.insert(&window);
@@ -61,7 +63,6 @@ Engine::priv::EditorCore::EditorCore(const EngineOptions& options, Window& windo
         m_SpotLightTexture  = internal_load_embedded_image(SPOT_LIGHT_IMAGE_DATA, 32, 32, "SpotLightEditorTexture");
         m_RodLightTexture   = internal_load_embedded_image(ROD_LIGHT_IMAGE_DATA, 32, 32, "RodLightEditorTexture");
     }
-
     EDITOR = this;
 }
 Engine::priv::EditorCore::~EditorCore() {
@@ -89,7 +90,6 @@ void Engine::priv::EditorCore::processEvent(const sf::Event& e) {
 void Engine::priv::EditorCore::update(Window& window, const float dt) {
     if (m_Enabled && m_Shown && isWindowRegistered(window)) {
         ImGui::SFML::Update(window.getSFMLHandle(), sf::seconds(dt));
-
         ImGui::NewFrame();
         m_WindowScene->update();
         ImGui::EndFrame();

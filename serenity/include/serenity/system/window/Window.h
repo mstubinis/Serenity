@@ -11,6 +11,7 @@ namespace Engine::priv {
     class  WindowData;
     class  ResourceManager;
     class  EngineEventHandler;
+    class  IContext;
 };
 class  Texture;
 struct EngineOptions;
@@ -29,6 +30,7 @@ class Window final {
     friend class Engine::priv::EngineEventHandler;
     private:
         Engine::priv::WindowData m_Data;
+        Engine::view_ptr<Engine::priv::IContext>         m_RenderingContext = nullptr;
 
         // Whenever the window's size changes, this function executes. Different from SFML's onResize Event, 
         // this fires constantly if you are changing the size of the window via mouse dragging.
@@ -46,19 +48,16 @@ class Window final {
         Window& operator=(const Window&) = delete;
         Window(Window&&) noexcept;
         Window& operator=(Window&&) noexcept;
+        ~Window();
+
+        void setRenderContext(Engine::view_ptr<Engine::priv::IContext>);
 
         [[nodiscard]] inline const std::string& getTitle() const noexcept { return m_Data.m_WindowTitle; }
 
-        [[nodiscard]] glm::uvec2 getSize();
-        [[nodiscard]] glm::uvec2 getPosition();
+        [[nodiscard]] glm::ivec2 getSize();
+        [[nodiscard]] glm::ivec2 getPosition();
 
         void setMouseCursor(const Cursor&) noexcept;
-
-        // enables or disables joystick processing. Joystick processing is quite expensive and some games don't use them, thus disabling it can make sense in some use cases
-        inline void setJoystickProcessingActive(bool active) noexcept { m_Data.m_SFMLWindow->setJoystickManagerActive(active); }
-
-        [[nodiscard]] inline bool isJoystickProcessingActive() const noexcept { return m_Data.m_SFMLWindow->isJoystickManagerActive(); }
-
 
         [[nodiscard]] inline const glm::vec2& getMousePositionDifference() const noexcept { return m_Data.m_MouseDifference; }
         [[nodiscard]] inline const glm::vec2& getMousePositionPrevious() const noexcept { return m_Data.m_MousePosition_Previous; }
@@ -66,7 +65,7 @@ class Window final {
         [[nodiscard]] inline double getMouseWheelDelta() const noexcept { return m_Data.m_MouseDelta; }
         [[nodiscard]] inline std::thread::id getOpenglThreadID() const noexcept { return m_Data.m_OpenGLThreadID; }
         [[nodiscard]] inline sf::WindowHandle getSystemHandle() const noexcept { return m_Data.m_SFMLWindow->getSystemHandle(); }
-        [[nodiscard]] inline sf::RenderWindow& getSFMLHandle() noexcept { return *m_Data.m_SFMLWindow; }
+        [[nodiscard]] inline sf::WindowBase& getSFMLHandle() noexcept { return *m_Data.m_SFMLWindow; }
         [[nodiscard]] inline uint32_t getFramerateLimit() const noexcept { return m_Data.m_FramerateLimit; }
 
         bool pollEvents(sf::Event&);
@@ -91,13 +90,13 @@ class Window final {
         void updateMousePosition(const glm::vec2& position, bool resetDifference = false, bool resetPreviousPosition = false);
 
         void setTitle(std::string_view title);
-        void setSize(uint32_t width, uint32_t height);
+        void setSize(int32_t width, int32_t height);
 
         bool setIcon(const Texture&);
         bool setIcon(std::string_view file);
 
         void setMouseCursorVisible(bool);
-        void setPosition(uint32_t x, uint32_t y);
+        void setPosition(int32_t x, int32_t y);
 
         // TODO: currently specific to windows os only
         bool maximize() noexcept;
@@ -130,7 +129,7 @@ class Window final {
         // if you want to make it active on another thread you have to deactivate it on the previous thread first if it was active.
         // Only one window can be active on a thread at a time, thus the window previously active (if any) automatically gets deactivated.
         // This is not to be confused with requestFocus().
-        bool setActive(bool active = true);
+        //bool setActive(bool active = true);
 
 
         // Sets the window to various different modes, like windowed, fullscreen, windowed fullscreen, etc. returns true if the mode was changed, false if it was not

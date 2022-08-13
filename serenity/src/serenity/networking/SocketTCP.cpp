@@ -1,6 +1,6 @@
 
 #include <serenity/networking/SocketTCP.h>
-#include <serenity/events/EventModule.h>
+#include <serenity/events/EventDispatcher.h>
 #include <serenity/events/EventIncludes.h>
 #include <serenity/events/Event.h>
 #include <serenity/system/Engine.h>
@@ -70,7 +70,7 @@ void Engine::Networking::SocketTCP::disconnect() {
 
         m_SocketTCP.disconnect();
 
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+        Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     }
 }
 SocketStatus::Status Engine::Networking::SocketTCP::connect(uint16_t timeout) {
@@ -78,7 +78,7 @@ SocketStatus::Status Engine::Networking::SocketTCP::connect(uint16_t timeout) {
     if (status == sf::Socket::Status::Done) {
         Event ev(EventType::SocketConnected);
         ev.eventSocket = Engine::priv::EventSocket(m_SocketTCP.getLocalPort(), m_SocketTCP.getRemotePort(), m_SocketTCP.getRemoteAddress(), SocketType::TCP);
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+        Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     }
     return SocketStatus::map_status(status);
 }

@@ -11,8 +11,9 @@
 #include <array>
 #include <filesystem>
 
-using namespace Engine;
-using namespace Engine::priv;
+#include <serenity/threading/ThreadingModule.h>
+
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
 
 Handle ShaderProgram::Deferred = {};
 Handle ShaderProgram::Forward  = {};
@@ -24,6 +25,15 @@ struct ShaderTypeInfo {
     const char*  extension;
     GLuint       glType;
 };
+struct ShaderProgramParameters {
+    Handle vertexShaderHandle;
+    Handle fragmentShaderHandle;
+    Handle geometryShaderHandle;
+    Handle computeShaderHandle;
+    Handle tesselationControlShaderHandle;
+    Handle tesselationEvaluationShaderHandle;
+};
+
 namespace {
     constexpr std::array<ShaderTypeInfo, ShaderType::_TOTAL> SHADER_TYPE_INFO{ {
         { ".vert", GL_VERTEX_SHADER },
@@ -33,18 +43,13 @@ namespace {
         { ".tess", GL_TESS_CONTROL_SHADER },    // (requires GL 4.0 or ARB_tessellation_shader)
         { ".tess", GL_TESS_EVALUATION_SHADER }, // (requires GL 4.0 or ARB_tessellation_shader)
     } };
-    constexpr ShaderProgram::BindFunc DEFAULT_SHADER_BIND_FUNC = [](ShaderProgram* shaderProgram) {
+    constexpr auto DEFAULT_SHADER_BIND_FUNC = [](ShaderProgram* shaderProgram) {
         Scene* scene = Engine::Resources::getCurrentScene();
-        if (!scene) {
-            return;
-        }
-        Camera* camera = scene->getActiveCamera();
-        if (!camera) {
-            return;
-        }
         //yes this is needed. TODO: remove backwards support for opengl versions not supporting UBO's?
-        if (!Engine::priv::OpenGLState::constants.supportsUBO()) {
-            Engine::Renderer::sendUniformMatrix4Safe("CameraViewProj", camera->getViewProjection());
+        if (!Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO()) {
+            if (scene && scene->getActiveCamera()) {
+                Engine::Renderer::sendUniformMatrix4Safe("CameraViewProj", scene->getActiveCamera()->getViewProjection());
+            }
         }
     };
 
@@ -81,7 +86,7 @@ namespace {
 
         }
     }
-    void populate_uniform_table(GLuint shaderProgramID, ShaderProgram::UniformsContainer& uniformContainer) {
+    void populate_uniform_table(GLuint shaderProgramID, Engine::unordered_string_map<std::string, int32_t>& uniformContainer) {
         GLint                   uniformCount;
         GLint                   uniformSize;
         GLenum                  uniformType;
@@ -115,7 +120,7 @@ namespace {
             glGetIntegerv(GL_MAX_DRAW_BUFFERS, &MAX_DRAW_BUFFERS);
             for (GLint i = 0; i < MAX_DRAW_BUFFERS; ++i) {
                 std::string outFragCol = "out vec4 FRAG_COL_" + std::to_string(i) + ";";
-                if (ShaderHelper::sfind(fragmentSourceCode, outFragCol)) {
+                if (Engine::priv::ShaderHelper::sfind(fragmentSourceCode, outFragCol)) {
                     glBindFragDataLocation(shaderProgramID, i, std::string{ "FRAG_COL_" + std::to_string(i) }.c_str());
                 }
             }
@@ -153,13 +158,44 @@ namespace {
     }
 }
 
+
+class ShaderProgram::Impl {
+    public:
+        static void Load(ShaderProgram& program, bool dispatchEventLoaded) {
+            if (!program.isLoaded()) {
+                Engine::priv::PublicShaderProgram::LoadCPU(program);
+                Engine::priv::PublicShaderProgram::LoadGPU(program, dispatchEventLoaded);
+            }
+        }
+        static void Unload(ShaderProgram& program, bool dispatchEventUnloaded) {
+            if (program.isLoaded()) {
+                Engine::priv::PublicShaderProgram::UnloadGPU(program);
+                Engine::priv::PublicShaderProgram::UnloadCPU(program, dispatchEventUnloaded);
+            }
+        }
+        static void internal_init(ShaderProgram& program, std::string_view inName, const ShaderProgramParameters& parameters) {
+            emplace_shader(program.m_Shaders, parameters.vertexShaderHandle, ShaderType::Vertex);
+            emplace_shader(program.m_Shaders, parameters.fragmentShaderHandle, ShaderType::Fragment);
+            emplace_shader(program.m_Shaders, parameters.geometryShaderHandle, ShaderType::Geometry);
+            emplace_shader(program.m_Shaders, parameters.computeShaderHandle, ShaderType::Compute);
+            emplace_shader(program.m_Shaders, parameters.tesselationControlShaderHandle, ShaderType::TessellationControl);
+            emplace_shader(program.m_Shaders, parameters.tesselationEvaluationShaderHandle, ShaderType::TessellationEvaluation);
+
+            program.setName(std::string{ inName });
+            program.setCustomBindFunctor(DEFAULT_SHADER_BIND_FUNC);
+            Impl::Load(program, true);
+        }
+};
+
+#pragma region ShaderProgram
+
 ShaderProgram::ShaderProgram(std::string_view shaderProgramName, Handle vertexShaderHandle, Handle fragmentShaderHandle)
     : Resource{ ResourceType::ShaderProgram, shaderProgramName }
 {
     ShaderProgramParameters parameters;
     parameters.vertexShaderHandle   = vertexShaderHandle;
     parameters.fragmentShaderHandle = fragmentShaderHandle;
-    internal_init(shaderProgramName, parameters);
+    Impl::internal_init(*this, shaderProgramName, parameters);
 }
 ShaderProgram::ShaderProgram(std::string_view shaderProgramName, Handle vertexShaderHandle, Handle fragmentShaderHandle, Handle geometryShaderHandle)
     : Resource{ ResourceType::ShaderProgram, shaderProgramName }
@@ -168,7 +204,7 @@ ShaderProgram::ShaderProgram(std::string_view shaderProgramName, Handle vertexSh
     parameters.vertexShaderHandle   = vertexShaderHandle;
     parameters.fragmentShaderHandle = fragmentShaderHandle;
     parameters.geometryShaderHandle = geometryShaderHandle;
-    internal_init(shaderProgramName, parameters);
+    Impl::internal_init(*this, shaderProgramName, parameters);
 }
 ShaderProgram::ShaderProgram(std::string_view shaderProgramName, std::string_view vertexShaderFileOrContent, std::string_view fragmentShaderFileOrContent) 
     : Resource{ ResourceType::ShaderProgram, shaderProgramName }
@@ -176,24 +212,12 @@ ShaderProgram::ShaderProgram(std::string_view shaderProgramName, std::string_vie
     ShaderProgramParameters parameters;
     parameters.vertexShaderHandle   = Engine::Resources::loadShader(vertexShaderFileOrContent, ShaderType::Vertex);
     parameters.fragmentShaderHandle = Engine::Resources::loadShader(fragmentShaderFileOrContent, ShaderType::Fragment);
-    internal_init(shaderProgramName, parameters);
+    Impl::internal_init(*this, shaderProgramName, parameters);
 }
 ShaderProgram::ShaderProgram(std::string_view shaderProgramName, const ShaderProgramParameters& parameters)
     : Resource{ ResourceType::ShaderProgram, shaderProgramName }
 {
-    internal_init(shaderProgramName, parameters);
-}
-void ShaderProgram::internal_init(std::string_view inName, const ShaderProgramParameters& parameters) {
-    emplace_shader(m_Shaders, parameters.vertexShaderHandle, ShaderType::Vertex);
-    emplace_shader(m_Shaders, parameters.fragmentShaderHandle, ShaderType::Fragment);
-    emplace_shader(m_Shaders, parameters.geometryShaderHandle, ShaderType::Geometry);
-    emplace_shader(m_Shaders, parameters.computeShaderHandle, ShaderType::Compute);
-    emplace_shader(m_Shaders, parameters.tesselationControlShaderHandle, ShaderType::TessellationControl);
-    emplace_shader(m_Shaders, parameters.tesselationEvaluationShaderHandle, ShaderType::TessellationEvaluation);
-
-    setName(inName);
-    setCustomBindFunctor(DEFAULT_SHADER_BIND_FUNC);
-    load();
+    Impl::internal_init(*this, shaderProgramName, parameters);
 }
 ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept 
     : Resource{ std::move(other) }
@@ -219,15 +243,21 @@ ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept {
     return *this;
 }
 ShaderProgram::~ShaderProgram(){ 
-    unload(); 
+    Impl::Unload(*this, true);
 }
-void PublicShaderProgram::LoadCPU(ShaderProgram& shaderProgram){
+
+#pragma endregion
+
+
+#pragma region PublicShaderProgram
+
+void Engine::priv::PublicShaderProgram::LoadCPU(ShaderProgram& shaderProgram){
     PublicShaderProgram::UnloadCPU(shaderProgram);
     if (!shaderProgram.m_LoadedCPU) {
         shaderProgram.m_LoadedCPU = true;
     }
 }
-void PublicShaderProgram::LoadGPU(ShaderProgram& shaderProgram, bool dispatchEventUnloaded){
+void Engine::priv::PublicShaderProgram::LoadGPU(ShaderProgram& shaderProgram, bool dispatchEventUnloaded){
     PublicShaderProgram::UnloadGPU(shaderProgram);
     if (!shaderProgram.m_LoadedGPU) {
         const char* FragmentCode = "";
@@ -253,13 +283,13 @@ void PublicShaderProgram::LoadGPU(ShaderProgram& shaderProgram, bool dispatchEve
     }
     shaderProgram.Resource::load(dispatchEventUnloaded);
 }
-void PublicShaderProgram::UnloadCPU(ShaderProgram& shaderProgram, bool dispatchEventLoaded) {
+void Engine::priv::PublicShaderProgram::UnloadCPU(ShaderProgram& shaderProgram, bool dispatchEventLoaded) {
     if (shaderProgram.m_LoadedCPU) {
         shaderProgram.m_LoadedCPU = false;
     }
     shaderProgram.Resource::unload(dispatchEventLoaded);
 }
-void PublicShaderProgram::UnloadGPU(ShaderProgram& shaderProgram) {
+void Engine::priv::PublicShaderProgram::UnloadGPU(ShaderProgram& shaderProgram) {
     if (shaderProgram.m_LoadedGPU) {
         shaderProgram.m_UniformLocations.clear();
         shaderProgram.m_AttachedUBOs.clear();
@@ -270,19 +300,5 @@ void PublicShaderProgram::UnloadGPU(ShaderProgram& shaderProgram) {
         shaderProgram.m_LoadedGPU = false;
     }
 }
-void ShaderProgram::load(bool dispatchEventLoaded) {
-    if(!isLoaded()){
-        PublicShaderProgram::LoadCPU(*this);
-        PublicShaderProgram::LoadGPU(*this, dispatchEventLoaded);
 
-        //Resource::load(dispatchEventLoaded);
-    }
-}
-void ShaderProgram::unload(bool dispatchEventUnloaded) {
-    if(isLoaded()){
-        PublicShaderProgram::UnloadGPU(*this);
-        PublicShaderProgram::UnloadCPU(*this, dispatchEventUnloaded);
-
-        //Resource::unload(dispatchEventUnloaded);
-    }
-}
+#pragma endregion

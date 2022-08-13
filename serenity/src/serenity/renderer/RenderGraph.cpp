@@ -8,6 +8,8 @@
 #include <serenity/resources/material/Material.h>
 #include <serenity/renderer/culling/Culling.h>
 
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
+
 namespace {
     std::vector<ModelInstance*> KEPT_NODES_TOTAL_BUFFER(10, nullptr);
     std::vector<ModelInstance*> KEPT_NODES_PER_INSTANCE_BUFFER(4, nullptr);
@@ -208,7 +210,7 @@ void Engine::priv::RenderGraph::render(Engine::priv::RenderModule& renderer, Cam
     if (useDefaultShaders) {
         renderer.bind(shaderProgram);
     }
-    for (auto& materialNode : m_MaterialNodes) {
+    for (const auto& materialNode : m_MaterialNodes) {
         if (materialNode.meshNodes.size() > 0) {
             auto material = materialNode.materialHandle.get<Material>();
             renderer.bind(material);
@@ -216,22 +218,28 @@ void Engine::priv::RenderGraph::render(Engine::priv::RenderModule& renderer, Cam
                 if (meshNode.instanceNodes.size() > 0) {
                     auto mesh = meshNode.meshHandle.get<Mesh>();
                     renderer.bind(mesh);
-                    for (auto& modelInstance : meshNode.instanceNodes) {
-                        auto transform       = modelInstance->getOwner().getComponent<ComponentTransform>();
-                        auto renderingMatrix = transform->getWorldMatrixRendering();
-                        if (modelInstance->hasPassedRenderCheck()) {
-                            if (sortingMode != SortingMode::None) {
-                                if (camera) {
-                                    mesh->sortTriangles(*camera, *modelInstance, renderingMatrix, sortingMode);
-                                }
-                            }
-                            renderer.bind(modelInstance);
-                            renderer.m_Pipeline->renderMesh(*mesh, modelInstance->getDrawingMode());
-                            renderer.unbind(modelInstance);
-                        } else {
 
+                    //if (Engine::opengl::supportsInstancing() && mesh->getSkeleton() == nullptr) {
+
+                    //} else {
+                        for (auto& modelInstance : meshNode.instanceNodes) {
+                            auto transform = modelInstance->getOwner().getComponent<ComponentTransform>();
+                            auto renderingMatrix = transform->getWorldMatrixRendering();
+                            if (modelInstance->hasPassedRenderCheck()) {
+                                if (sortingMode != SortingMode::None) {
+                                    if (camera) {
+                                        mesh->sortTriangles(*camera, *modelInstance, renderingMatrix, sortingMode);
+                                    }
+                                }
+                                renderer.bind(modelInstance);
+                                renderer.m_Pipeline->renderMesh(*mesh, modelInstance->getDrawingMode());
+                                renderer.unbind(modelInstance);
+                            } else {
+
+                            }
                         }
-                    }
+                    //}
+
                     // protect against any custom changes by restoring to the regular shader and material
                     if (useDefaultShaders && renderer.m_Pipeline->getCurrentBoundShaderProgram() != shaderProgram) {
                         renderer.bind(shaderProgram);
@@ -253,7 +261,7 @@ void Engine::priv::RenderGraph::render_bruteforce(Engine::priv::RenderModule& re
         auto mesh            = modelInstance->getMesh().get<Mesh>();
         auto material        = modelInstance->getMaterial().get<Material>();
         auto transform       = modelInstance->getOwner().getComponent<ComponentTransform>();
-        auto renderingMatrix = transform->getWorldMatrixRendering();
+        auto renderingMatrix = transform->getWorldMatrixRendering() * modelInstance->getModelMatrix();
         if (modelInstance->hasPassedRenderCheck()) {
             if (sortingMode != SortingMode::None) {
                 if (camera) {

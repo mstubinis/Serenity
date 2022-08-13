@@ -23,6 +23,9 @@
 #include <BulletCollision/Gimpact/btGImpactShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
+#include <serenity/renderer/opengl/OpenGLContext.h>
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <iomanip>
@@ -37,7 +40,7 @@ constexpr auto DefaultMeshUnbindFunctor = [](Mesh* mesh, const Engine::priv::Ren
 
 namespace {
     void internal_init_blank_mesh(Mesh& mesh) {
-        mesh.registerEvent(EventType::WindowFullscreenChanged);
+        //mesh.registerEvent(EventType::WindowFullscreenChanged);
         mesh.setCustomBindFunctor(DefaultMeshBindFunctor);
         mesh.setCustomUnbindFunctor(DefaultMeshUnbindFunctor);
     }
@@ -128,9 +131,6 @@ void Engine::priv::PublicMesh::UnloadCPU(Mesh& mesh) {
 }
 void Engine::priv::PublicMesh::UnloadGPU(Mesh& mesh) {
     SAFE_DELETE(mesh.m_CPUData.m_VertexData);
-}
-bool Engine::priv::PublicMesh::SupportsInstancing() {
-    return (Engine::priv::OpenGLState::constants.supportsInstancing() || OpenGLExtensions::supported(OpenGLExtensions::EXT_draw_instanced) || OpenGLExtensions::supported(OpenGLExtensions::ARB_draw_instanced));
 }
 btCollisionShape* Engine::priv::PublicMesh::internal_build_collision(Handle meshHandle, ModelInstance* modelInstance, CollisionType collisionType, bool isCompoundChild) noexcept {
     Engine::priv::MeshCollisionFactory* factory = nullptr;
@@ -597,7 +597,7 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     return *this;
 }
 Mesh::~Mesh() {
-    unregisterEvent(EventType::WindowFullscreenChanged);
+    //unregisterEvent(EventType::WindowFullscreenChanged);
     unload();
 }
 Engine::priv::MeshSkeleton::AnimationDataMap& Mesh::getAnimationData() {
@@ -617,9 +617,9 @@ void Mesh::unload(bool dispatchEventUnloaded) {
     }
 }
 void Mesh::onEvent(const Event& e) {
-    if (e.type == EventType::WindowFullscreenChanged) {
-        m_CPUData.m_VertexData->finalize();
-    }
+    //if (e.type == EventType::WindowFullscreenChanged) {
+    //    m_CPUData.m_VertexData->finalize();
+    //}
 }
 //TODO: optimize this a bit more
 void Mesh::sortTriangles(const Camera& camera,  const ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode sortMode) {

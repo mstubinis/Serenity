@@ -18,6 +18,23 @@ namespace Engine::priv {
 #include <serenity/system/TypeDefs.h>
 #include <SFML/Graphics/Image.hpp>
 
+class TextureUsage final {
+    public:
+        enum Type : uint32_t {
+            Unspecified = std::numeric_limits<uint32_t>().max(),
+            Diffuse = 0,
+            Normal,
+            Glow,
+            Specular,
+            AO,
+            Metalness,
+            Smoothness,
+            RenderTarget,
+            _TOTAL,
+        };
+        BUILD_ENUM_CLASS_MEMBERS(TextureUsage, Type)
+};
+
 class TextureWrap final {
     public: 
         enum Type : uint32_t {
@@ -25,6 +42,7 @@ class TextureWrap final {
             RepeatMirrored,
             ClampToEdge,
             ClampToBorder,
+            MirrorClampToEdge,
             _TOTAL,
         };
         BUILD_ENUM_CLASS_MEMBERS(TextureWrap, Type)
@@ -34,6 +52,7 @@ class TextureWrap final {
             GL_MIRRORED_REPEAT,
             GL_CLAMP_TO_EDGE,
             GL_CLAMP_TO_BORDER,
+            GL_MIRROR_CLAMP_TO_EDGE,
         } };
     public:
         [[nodiscard]] inline constexpr GLuint toGLType() const noexcept {
@@ -117,7 +136,7 @@ namespace Engine::priv {
         int                    height         = 0;
         int                    level          = 0;
 
-        [[nodiscard]] inline bool isNull() const noexcept { return pixels.size() == 0; }
+        [[nodiscard]] inline bool isNull() const noexcept { return pixels.empty(); }
         void assignPixels(const uint8_t* inData, int inWidth, int inHeight) {
             width = inWidth;
             height = inHeight;
@@ -136,7 +155,6 @@ namespace Engine::priv {
 
         void setInternalFormat(ImageInternalFormat);
         void load(int width, int height, ImagePixelType, ImagePixelFormat, ImageInternalFormat);
-        //void load(const sf::Image& sfImage, const std::string& filename = {});
         void load(const uint8_t* inPixels, int inWidth, int inHeight, const std::string& filename = {});
 
         [[nodiscard]] bool hasBlankMipmap() const noexcept {
@@ -179,5 +197,26 @@ class sfImageLoader {
         [[nodiscard]] inline uint32_t getWidth() const noexcept { return m_SFImage.getSize().x; }
         [[nodiscard]] inline uint32_t getHeight() const noexcept { return m_SFImage.getSize().y; }
 };
+
+struct TextureConstructorInfo {
+    std::string         filename;
+    std::string         name;
+    int32_t             width                 = 0;
+    int32_t             height                = 0;
+    //TextureUsage        usageType             = TextureUsage::Unspecified;
+    TextureType         type                  = TextureType::Texture2D;
+    TextureFilter       minFilter             = TextureFilter::Linear;
+    TextureFilter       maxFilter             = TextureFilter::Linear;
+    TextureWrap         xWrapping             = TextureWrap::ClampToEdge;
+    TextureWrap         yWrapping             = TextureWrap::ClampToEdge;
+    TextureWrap         zWrapping             = TextureWrap::ClampToEdge;
+    ImageInternalFormat internalFormat        = ImageInternalFormat::RGB8;
+    ImagePixelFormat    pixelFormat           = ImagePixelFormat::RGB;
+    ImagePixelType      pixelType             = ImagePixelType::UNSIGNED_BYTE;
+    bool                mipmapped             = true;
+    uint8_t*            pixels                = nullptr;
+    uint8_t             numComponentsPerPixel = 4;
+};
+
 
 #endif

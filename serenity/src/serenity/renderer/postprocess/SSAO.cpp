@@ -1,5 +1,4 @@
 #include <serenity/renderer/postprocess/SSAO.h>
-#include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/renderer/GBuffer.h>
 #include <serenity/renderer/FramebufferObject.h>
 #include <serenity/renderer/Renderer.h>
@@ -13,6 +12,7 @@
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/resources/texture/Texture.h>
 #include <serenity/renderer/opengl/BindTextureRAII.h>
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
 
 using namespace Engine::priv;
 
@@ -65,8 +65,10 @@ namespace {
         const TextureType textureType = TextureType::Texture2D;
         Engine::Renderer::genAndBindTexture(textureType, GL_NOISE_TEXTURE);
         glTexImage2D(textureType.toGLType(), 0, GL_RGB16F, SSAO_NORMALMAP_SIZE, SSAO_NORMALMAP_SIZE, 0, GL_RGB, GL_FLOAT, ssaoNoise.data());
-        Texture::setFilter(textureType, TextureFilter::Nearest);
-        TextureBaseClass::setWrapping(textureType, TextureWrap::Repeat);
+        Engine::opengl::setFilter(textureType, TextureFilter::Nearest);
+        TextureWrap wrap = TextureWrap::Repeat;
+        glTexParameteri(textureType.toGLType(), GL_TEXTURE_WRAP_S, wrap.toGLType());
+        glTexParameteri(textureType.toGLType(), GL_TEXTURE_WRAP_T, wrap.toGLType());
     }
     void internal_init_blur_fragment_code() {
         GLSL_FRAG_CODE_BLUR = R"(

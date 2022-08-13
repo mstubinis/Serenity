@@ -127,10 +127,12 @@ class MaterialLayer final {
         void setMask(std::string_view maskFile) noexcept;
         void setCubemap(std::string_view cubemapFile) noexcept;
 
-        inline void setTextureData(float x, float y, float z, float w) noexcept { m_MaterialLayerTextureData = { x, y, z, w }; }
-        inline void setMiscData(float r, float g, float b, float a) noexcept { m_MaterialLayerMiscData = { r, g, b, a }; }
-        inline void setTextureData(const glm::vec4& data) noexcept { setTextureData(data.r, data.g, data.b, data.a); }
-        inline void setMiscData(const glm::vec4& data) noexcept { setMiscData(data.r, data.g, data.b, data.a); }
+        inline void setTextureData(float blendMode, float textureEnabled, float maskEnabled, float cubemapEnabled) noexcept {
+            m_MaterialLayerTextureData = { blendMode, textureEnabled, maskEnabled, cubemapEnabled }; 
+        }
+        inline void setMiscData(float rMultiplier, float gMultiplier, float bMultiplier, float aMultiplier) noexcept {
+            m_MaterialLayerMiscData = { rMultiplier, gMultiplier, bMultiplier, aMultiplier };
+        }
 
         void sendDataToGPU(const std::string& uniform_component_string, size_t layer_index, int& textureUnit) const;
 

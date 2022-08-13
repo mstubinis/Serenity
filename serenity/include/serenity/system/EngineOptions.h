@@ -2,6 +2,7 @@
 #ifndef ENGINE_ENGINE_OPTIONS_H
 #define ENGINE_ENGINE_OPTIONS_H
 
+#include <serenity/renderer/APIManager.h>
 #include <serenity/renderer/RendererIncludes.h>
 #include <serenity/system/window/WindowIncludes.h>
 #include <serenity/renderer/postprocess/HDR.h>
@@ -10,6 +11,7 @@
 struct EngineOptions final {
     std::string                        window_title       = "Engine";
     std::string                        icon;
+    RenderingAPI::Type                 renderingAPI       = RenderingAPI::OpenGL;
     uint32_t                           width              = 1024;
     uint32_t                           height             = 768;
     AntiAliasingAlgorithm              aa_algorithm       = AntiAliasingAlgorithm::None;

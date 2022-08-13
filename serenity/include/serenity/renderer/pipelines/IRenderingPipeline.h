@@ -49,12 +49,12 @@ namespace Engine::priv {
             };
             virtual ~IRenderingPipeline(){}
 
-            virtual void init() = 0;
+            virtual void postConstructor(uint32_t width, uint32_t height) = 0;
+            virtual void init(uint32_t width, uint32_t height) = 0;
             virtual void onPipelineChanged() = 0;
-            virtual void onFullscreen() = 0;
             virtual void onResize(uint32_t newWidth, uint32_t newHeight) = 0;
-            virtual void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight) = 0;
-            virtual void restoreDefaultState() = 0;
+            //virtual void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight) = 0;
+            //virtual void restoreDefaultState() = 0;
             virtual void restoreCurrentState() = 0;
             virtual void clear2DAPI() = 0;
             virtual void sort2DAPI() = 0;

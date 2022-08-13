@@ -34,11 +34,6 @@ void ImageData::load(int width, int height, ImagePixelType pixelType, ImagePixel
         mipmap->height         = height;
     }
 }
-/*
-void ImageData::load(const sf::Image& sfImage, const std::string& filename) {
-    load(sfImage.getPixelsPtr(), sfImage.getSize().x, sfImage.getSize().y, filename);
-}
-*/
 void ImageData::load(const uint8_t* inPixels, int inWidth, int inHeight, const std::string& filename) {
     m_Filename  = filename;
     auto mipmap = get_next_mipmap(m_Mipmaps);

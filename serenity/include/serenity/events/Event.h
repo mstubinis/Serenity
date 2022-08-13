@@ -16,7 +16,7 @@ namespace Engine::Networking {
 #include <SFML/Network/IpAddress.hpp>
 #include <serenity/networking/ISocket.h>
 #include <serenity/networking/Packet.h>
-#include <serenity/events/EventModule.h>
+#include <serenity/events/EventIncludes.h>
 #include <serenity/input/InputModule.h>
 
 namespace Engine::priv {

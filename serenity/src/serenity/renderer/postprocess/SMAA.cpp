@@ -10,6 +10,7 @@
 #include <serenity/threading/ThreadingModule.h>
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/renderer/opengl/BindTextureRAII.h>
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
 
 Engine::priv::SMAA Engine::priv::SMAA::STATIC_SMAA;
 
@@ -573,14 +574,20 @@ void main() {
     const TextureType textureType = TextureType::Texture2D;
     Engine::Renderer::genAndBindTexture(textureType, STATIC_SMAA.AreaTexture);
     glTexImage2D(textureType.toGLType(), 0, GL_RG8, 160, 560, 0, GL_RG, GL_UNSIGNED_BYTE, Engine::priv::SMAA_AreaTextureBytes);
-    Texture::setFilter(textureType, TextureFilter::Linear);
-    TextureBaseClass::setWrapping(textureType, TextureWrap::ClampToBorder);
+    Engine::opengl::setFilter(textureType, TextureFilter::Linear);
+
+
+    TextureWrap wrap = TextureWrap::ClampToBorder;
+    glTexParameteri(textureType.toGLType(), GL_TEXTURE_WRAP_S, wrap.toGLType());
+    glTexParameteri(textureType.toGLType(), GL_TEXTURE_WRAP_T, wrap.toGLType());
 
     Engine::Renderer::genAndBindTexture(textureType, STATIC_SMAA.SearchTexture);
     glTexImage2D(textureType.toGLType(), 0, GL_R8, 64, 16, 0, GL_RED, GL_UNSIGNED_BYTE, Engine::priv::SMAA_SearchTextureBytes);
-    Texture::setFilter(textureType, TextureFilter::Linear);
-    TextureBaseClass::setWrapping(textureType, TextureWrap::ClampToBorder);
+    Engine::opengl::setFilter(textureType, TextureFilter::Linear);
 
+
+    glTexParameteri(textureType.toGLType(), GL_TEXTURE_WRAP_S, wrap.toGLType());
+    glTexParameteri(textureType.toGLType(), GL_TEXTURE_WRAP_T, wrap.toGLType());
     return true;
 }
 

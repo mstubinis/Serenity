@@ -26,6 +26,25 @@ class Handle final {
             : m_Index{ index }
             , m_Type { type }
         {}
+        Handle(const Handle&) = default;
+        Handle& operator=(const Handle&) = default;
+        Handle(Handle&& other) noexcept
+            : m_Index{ other.m_Index }
+            , m_Type{ other.m_Type }
+        {
+            other.m_Index = 0;
+            other.m_Type  = 0;
+        }
+        Handle& operator=(Handle&& other) noexcept {
+            if (this != &other) {
+                m_Index = other.m_Index;
+                m_Type  = other.m_Type;
+                other.m_Index = 0;
+                other.m_Type  = 0;
+            }
+            return *this;
+        }
+
 
         [[nodiscard]] inline constexpr uint32_t index() const { return m_Index; }
         [[nodiscard]] inline constexpr uint32_t type() const { return m_Type; }

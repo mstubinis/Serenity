@@ -45,7 +45,7 @@ namespace Engine::priv {
             static void LoadGPU(Mesh&);
             static void UnloadCPU(Mesh&);
             static void UnloadGPU(Mesh&);
-            static bool SupportsInstancing();
+
             static btCollisionShape* BuildCollision(ModelInstance*, CollisionType, bool isCompoundChild = false);
             static btCollisionShape* BuildCollision(Handle meshHandle, CollisionType, bool isCompoundChild = false);
 

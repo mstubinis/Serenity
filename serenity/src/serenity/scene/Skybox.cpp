@@ -7,6 +7,8 @@
 #include <serenity/resources/mesh/gl/VertexArrayObject.h>
 #include <serenity/resources/mesh/gl/VertexBufferObject.h>
 
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
+
 namespace {
     VertexBufferObject m_VBO;
     VertexArrayObject  m_VAO;
@@ -56,7 +58,7 @@ namespace {
     }
     void buildVAO() noexcept {
         m_VAO.deleteVAO();
-        if (Engine::priv::OpenGLState::constants.supportsVAO()) {
+        if (Engine::priv::APIState<Engine::priv::OpenGL>::supportsVAO()) {
             m_VAO.generateVAO();
             m_VAO.bindVAO();
             bindDataToGPU();
@@ -94,7 +96,7 @@ Skybox::Skybox(const std::array<std::string_view, 6>& files) {
     m_TextureCubemap = Engine::Resources::addResource<TextureCubemap>(files, std::string(files[0]) + "Cubemap", false, ImageInternalFormat::SRGB8_ALPHA8);
     Engine::priv::TextureLoaderCubemap::GeneratePBRData(*m_TextureCubemap.get<TextureCubemap>(), 32, m_TextureCubemap.get<TextureCubemap>()->width() / 4);
 
-    registerEvent(EventType::WindowFullscreenChanged);
+    //registerEvent(EventType::WindowFullscreenChanged);
 }
 Skybox::Skybox(std::string_view filename) {
     initMesh();
@@ -104,10 +106,10 @@ Skybox::Skybox(std::string_view filename) {
         m_TextureCubemap = Engine::Resources::addResource<TextureCubemap>(filename, false, ImageInternalFormat::SRGB8_ALPHA8);
         Engine::priv::TextureLoaderCubemap::GeneratePBRData(*m_TextureCubemap.get<TextureCubemap>(), 32, m_TextureCubemap.get<TextureCubemap>()->width() / 4);
     }
-    registerEvent(EventType::WindowFullscreenChanged);
+    //registerEvent(EventType::WindowFullscreenChanged);
 }
 Skybox::~Skybox() {
-    unregisterEvent(EventType::WindowFullscreenChanged);
+    //unregisterEvent(EventType::WindowFullscreenChanged);
 }
 
 void Skybox::bindMesh() {
@@ -123,7 +125,7 @@ void Skybox::bindMesh() {
     }
 }
 void Skybox::onEvent(const Event& e) {
-    if (e.type == EventType::WindowFullscreenChanged) {
-        buildVAO();
-    }
+    //if (e.type == EventType::WindowFullscreenChanged) {
+    //    buildVAO();
+    //}
 }

@@ -3,7 +3,7 @@
 #include <serenity/system/EngineGameFunctions.h>
 #include <serenity/system/window/Window.h>
 #include <serenity/events/Event.h>
-#include <serenity/events/EventModule.h>
+#include <serenity/events/EventDispatcher.h>
 #include <serenity/input/InputModule.h>
 
 #include <serenity/resources/Engine_Resources.h>
@@ -17,16 +17,16 @@ namespace {
 
 }
 
-Engine::priv::EngineEventHandler::EngineEventHandler(EditorCore& editorCore, InputModule& inputModule, RenderModule& renderModule, ResourceManager& resourceManager, EventModule& eventModule)
+Engine::priv::EngineEventHandler::EngineEventHandler(EditorCore& editorCore, InputModule& inputModule, RenderModule& renderModule, ResourceManager& resourceManager, EventDispatcher& eventDispatcher)
     : m_EditorCore      { editorCore }
     , m_InputModule     { inputModule }
     , m_RenderModule    { renderModule }
     , m_ResourceManager { resourceManager }
-    , m_EventModule     { eventModule }
+    , m_EventDispatcher { eventDispatcher }
 {}
 
 void Engine::priv::EngineEventHandler::internal_dispatch_event(const Event& inEvent) noexcept {
-    m_EventModule.m_EventDispatcher.dispatchEvent(inEvent);
+    m_EventDispatcher.dispatchEvent(inEvent);
 }
 
 void Engine::priv::EngineEventHandler::internal_on_event_resize(Window& window, uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize, GameCore& gameCore) {
@@ -49,26 +49,25 @@ void Engine::priv::EngineEventHandler::internal_on_event_resize(Window& window, 
 }
 void Engine::priv::EngineEventHandler::internal_on_event_game_ended() {
     Game::cleanup();
-    m_EventModule.m_EventDispatcher.dispatchEvent(EventType::GameEnded);
+    m_EventDispatcher.dispatchEvent(EventType::GameEnded);
     Engine::stop();
-    Engine::getWindow().close();
 }
 void Engine::priv::EngineEventHandler::internal_on_event_window_closed(Window& window) {
     Game::onWindowClosed(window);
-    m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowHasClosed);
-    Engine::stop();
+    m_EventDispatcher.dispatchEvent(EventType::WindowHasClosed);
+    Engine::stop(); //TODO: remove this? technically we could have a window close without stopping the engine...
     window.close();
 }
 void Engine::priv::EngineEventHandler::internal_on_event_lost_focus(Window& window, GameCore& gameCore) {
     m_InputModule.onWindowLostFocus();
     Game::onLostFocus(window, gameCore);
-    m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowLostFocus);
+    m_EventDispatcher.dispatchEvent(EventType::WindowLostFocus);
 }
 void Engine::priv::EngineEventHandler::internal_on_event_gained_focus(Window& window, GameCore& gameCore) {
     m_InputModule.onWindowGainedFocus();
     Game::onGainedFocus(window, gameCore);
     window.m_Data.internal_update_on_reset_events(0.0f);
-    m_EventModule.m_EventDispatcher.dispatchEvent(EventType::WindowGainedFocus);
+    m_EventDispatcher.dispatchEvent(EventType::WindowGainedFocus);
 }
 void Engine::priv::EngineEventHandler::internal_on_event_text_entered(Window& window, uint32_t unicode) {
     Game::onTextEntered(window, unicode);

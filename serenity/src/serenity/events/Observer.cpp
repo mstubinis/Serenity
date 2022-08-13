@@ -3,16 +3,16 @@
 #include <serenity/events/EventDispatcher.h>
 
 void Observer::registerEvent(EventType type) noexcept {
-    registerEvent(type, Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher);
+    registerEvent(type, Engine::priv::Core::m_Engine->m_EventDispatcher);
 }
 void Observer::unregisterEvent(EventType type) noexcept {
-    unregisterEvent(type, Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher);
+    unregisterEvent(type, Engine::priv::Core::m_Engine->m_EventDispatcher);
 }
 void Observer::unregisterEventImmediate(EventType type) noexcept {
-    unregisterEventImmediate(type, Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher);
+    unregisterEventImmediate(type, Engine::priv::Core::m_Engine->m_EventDispatcher);
 }
 bool Observer::isRegistered(EventType type) const noexcept {
-    return isRegistered(type, Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher);
+    return isRegistered(type, Engine::priv::Core::m_Engine->m_EventDispatcher);
 }
 
 

@@ -21,12 +21,37 @@
 #include <cstring> // memcpy
 
 #if __cplusplus >= 201103L // C++11 and above
-static_assert(sizeof(GLuint) <= sizeof(ImTextureID),
-    "ImTextureID is not large enough to fit GLuint.");
+    static_assert(sizeof(GLuint) <= sizeof(ImTextureID), "ImTextureID is not large enough to fit GLuint.");
 #endif
 
+struct SFEditorFontImage {
+    sf::Image m_FontTexture;
+    GLuint m_GLTextureHandle = 0;
+
+    ~SFEditorFontImage() {
+        if (m_GLTextureHandle != 0) {
+            glDeleteTextures(1, &m_GLTextureHandle);
+        }
+    }
+
+    void createTexture() {
+        if (m_GLTextureHandle != 0) {
+            glDeleteTextures(1, &m_GLTextureHandle);
+        }
+        glGenTextures(1, &m_GLTextureHandle);
+        glBindTexture(GL_TEXTURE_2D, m_GLTextureHandle);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_FontTexture.getSize().x, m_FontTexture.getSize().y, 0, GL_RGB, GL_UNSIGNED_BYTE, m_FontTexture.getPixelsPtr());
+        //glGenerateMipmap(GL_TEXTURE_2D);
+    }
+
+};
+
 namespace {
-    static sf::Texture* s_fontTexture = NULL; // owning pointer to internal font atlas which is used if user doesn't set custom sf::Texture.
+    static SFEditorFontImage* s_fontTexture = NULL; // owning pointer to internal font atlas which is used if user doesn't set custom sf::Texture.
 
     // data
     static bool s_windowHasFocus = false;
@@ -76,7 +101,7 @@ namespace {
 
     // mouse cursors
     void loadMouseCursor(ImGuiMouseCursor imguiCursorType, sf::Cursor::Type sfmlCursorType);
-    void updateMouseCursor(sf::Window& window);
+    void updateMouseCursor(sf::WindowBase& window);
 
     sf::Cursor* s_mouseCursors[ImGuiMouseCursor_COUNT];
     bool s_mouseCursorLoaded[ImGuiMouseCursor_COUNT];
@@ -92,13 +117,13 @@ namespace {
         int width, height;
 
         io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-        sf::Texture& texture = *s_fontTexture;
-        texture.create(width, height);
-        texture.update(pixels);
-
-        io.Fonts->TexID = convertGLTextureHandleToImTextureID(texture.getNativeHandle());
+        auto& texture = *s_fontTexture;
+        texture.m_FontTexture.create(width, height, pixels);
+        texture.createTexture();
+        //texture.update(pixels);
+        io.Fonts->TexID = convertGLTextureHandleToImTextureID(texture.m_GLTextureHandle);
     }
-    sf::Texture& GetFontTexture() {
+    SFEditorFontImage& GetFontTexture() {
         return *s_fontTexture;
     }
 
@@ -108,16 +133,14 @@ namespace {
 namespace ImGui {
     namespace SFML {
 
-        void Init(sf::Window& window, const sf::Vector2f& displaySize, bool loadDefaultFont) {
+        void Init(sf::WindowBase& window, const sf::Vector2f& displaySize, bool loadDefaultFont) {
 #if __cplusplus < 201103L // runtime assert when using earlier than C++11 as no
             // static_assert support
             assert(sizeof(GLuint) <= sizeof(ImTextureID)); // ImTextureID is not large enough to fit
                                                            // GLuint.
 #endif
-
             ImGui::CreateContext();
             ImGuiIO& io = ImGui::GetIO();
-
             // tell ImGui which features we support
             io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
             io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
@@ -167,7 +190,6 @@ namespace ImGui {
             for (int i = 0; i < ImGuiMouseCursor_COUNT; ++i) {
                 s_mouseCursorLoaded[i] = false;
             }
-
             loadMouseCursor(ImGuiMouseCursor_Arrow, sf::Cursor::Arrow);
             loadMouseCursor(ImGuiMouseCursor_TextInput, sf::Cursor::Text);
             loadMouseCursor(ImGuiMouseCursor_ResizeAll, sf::Cursor::SizeAll);
@@ -176,21 +198,17 @@ namespace ImGui {
             loadMouseCursor(ImGuiMouseCursor_ResizeNESW, sf::Cursor::SizeBottomLeftTopRight);
             loadMouseCursor(ImGuiMouseCursor_ResizeNWSE, sf::Cursor::SizeTopLeftBottomRight);
             loadMouseCursor(ImGuiMouseCursor_Hand, sf::Cursor::Hand);
-
             if (s_fontTexture) { // delete previously created texture
                 delete s_fontTexture;
             }
-            s_fontTexture = new sf::Texture;
-
+            s_fontTexture = new SFEditorFontImage{};
 
             if (loadDefaultFont) {
                 // this will load default font automatically
                 // No need to call AddDefaultFont
                 UpdateFontTexture();
             }
-
             s_windowHasFocus = window.hasFocus();
-
             io.DisplaySize = ImVec2(displaySize.x, displaySize.y);
         }
 
@@ -265,7 +283,7 @@ namespace ImGui {
             }
         }
 
-        void Update(sf::Window& window, sf::Time dt) {
+        void Update(sf::WindowBase& window, sf::Time dt) {
             // Update OS/hardware mouse cursor if imgui isn't drawing a software cursor
             updateMouseCursor(window);
 
@@ -292,16 +310,14 @@ namespace ImGui {
 
             if (s_windowHasFocus) {
                 if (io.WantSetMousePos) {
-                    sf::Vector2i newMousePos(static_cast<int>(io.MousePos.x),
-                        static_cast<int>(io.MousePos.y));
+                    sf::Vector2i newMousePos(static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
                     sf::Mouse::setPosition(newMousePos);
                 }
                 else {
                     io.MousePos = ImVec2(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
                 }
                 for (unsigned int i = 0; i < 3; i++) {
-                    io.MouseDown[i] = s_touchDown[i] || sf::Touch::isDown(i) || s_mousePressed[i] ||
-                        sf::Mouse::isButtonPressed((sf::Mouse::Button)i);
+                    io.MouseDown[i] = s_touchDown[i] || sf::Touch::isDown(i) || s_mousePressed[i] || sf::Mouse::isButtonPressed((sf::Mouse::Button)i);
                     s_mousePressed[i] = false;
                     s_touchDown[i] = false;
                 }
@@ -335,12 +351,12 @@ namespace ImGui {
             ImGui::GetIO().Fonts->TexID = (ImTextureID)NULL;
             if (s_fontTexture) { // if internal texture was created, we delete it
                 delete s_fontTexture;
-                s_fontTexture = NULL;
+                s_fontTexture = nullptr;
             }
             for (int i = 0; i < ImGuiMouseCursor_COUNT; ++i) {
                 if (s_mouseCursorLoaded[i]) {
                     delete s_mouseCursors[i];
-                    s_mouseCursors[i] = NULL;
+                    s_mouseCursors[i] = nullptr;
 
                     s_mouseCursorLoaded[i] = false;
                 }
@@ -396,8 +412,7 @@ namespace ImGui {
 
 namespace {
     ImColor toImColor(sf::Color c) {
-        return ImColor(static_cast<int>(c.r), static_cast<int>(c.g), static_cast<int>(c.b),
-            static_cast<int>(c.a));
+        return ImColor(static_cast<int>(c.r), static_cast<int>(c.g), static_cast<int>(c.b), static_cast<int>(c.a));
     }
     ImVec2 getTopLeftAbsolute(const sf::FloatRect& rect) {
         ImVec2 pos = ImGui::GetCursorScreenPos();
@@ -496,22 +511,19 @@ namespace {
 
     void loadMouseCursor(ImGuiMouseCursor imguiCursorType, sf::Cursor::Type sfmlCursorType) {
         s_mouseCursors[imguiCursorType] = new sf::Cursor();
-        s_mouseCursorLoaded[imguiCursorType] =
-            s_mouseCursors[imguiCursorType]->loadFromSystem(sfmlCursorType);
+        s_mouseCursorLoaded[imguiCursorType] = s_mouseCursors[imguiCursorType]->loadFromSystem(sfmlCursorType);
     }
 
-    void updateMouseCursor(sf::Window& window) {
+    void updateMouseCursor(sf::WindowBase& window) {
         ImGuiIO& io = ImGui::GetIO();
         if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) == 0) {
             ImGuiMouseCursor cursor = ImGui::GetMouseCursor();
             if (io.MouseDrawCursor || cursor == ImGuiMouseCursor_None) {
                 window.setMouseCursorVisible(false);
-            }
-            else {
+            } else {
                 window.setMouseCursorVisible(true);
 
-                sf::Cursor& c = s_mouseCursorLoaded[cursor] ? *s_mouseCursors[cursor] :
-                    *s_mouseCursors[ImGuiMouseCursor_Arrow];
+                sf::Cursor& c = s_mouseCursorLoaded[cursor] ? *s_mouseCursors[cursor] : *s_mouseCursors[ImGuiMouseCursor_Arrow];
                 window.setMouseCursor(c);
             }
         }

@@ -55,7 +55,7 @@ bool SoundMusic::play(unsigned int numLoops) {
 
     Event ev(EventType::SoundStatusChanged);
     ev.eventSoundStatusChanged = EventSoundStatusChanged((unsigned int)m_Status);
-    Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+    Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 bool SoundMusic::pause() {
@@ -78,7 +78,7 @@ bool SoundMusic::pause() {
 
     Event ev(EventType::SoundStatusChanged);
     ev.eventSoundStatusChanged = EventSoundStatusChanged((unsigned int)m_Status);
-    Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+    Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 bool SoundMusic::stop(bool stopAllLoops) {
@@ -113,7 +113,7 @@ bool SoundMusic::stop(bool stopAllLoops) {
 
     Event ev(EventType::SoundStatusChanged);
     ev.eventSoundStatusChanged = EventSoundStatusChanged((unsigned int)m_Status);
-    Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+    Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 bool SoundMusic::restart() {
@@ -138,7 +138,7 @@ bool SoundMusic::restart() {
 
     Event ev(EventType::SoundStatusChanged);
     ev.eventSoundStatusChanged = EventSoundStatusChanged((unsigned int)m_Status);;
-    Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+    Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     return true;
 }
 float SoundMusic::getAttenuation() const {

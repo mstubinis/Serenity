@@ -6,7 +6,7 @@
 #include <glm/gtx/euler_angles.hpp>
 
 namespace {
-    CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_FUNCTION = [](const CameraLogicComponent* component, const float dt) {
+    constexpr CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_FUNCTION = [](const ComponentLogic* component, const float dt) {
         auto& camera           = *static_cast<Camera*>(component->getUserPointer());
         auto cameraComponent   = camera.getComponent<ComponentCamera>();
         auto transform         = camera.getComponent<ComponentTransform>();
@@ -56,7 +56,7 @@ namespace {
         transform->setRotation(orientation);
         cameraComponent->setViewMatrix(viewMatrix);
     };
-    CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_NO_GIMBLE_LOCK_FUNCTION = [](const CameraLogicComponent* component, const float dt) {
+    constexpr CameraLogicFunctionPtr CAMERA_DEFAULT_MOUSELOOK_NO_GIMBLE_LOCK_FUNCTION = [](const ComponentLogic* component, const float dt) {
         auto& camera           = *static_cast<Camera*>(component->getUserPointer());
         auto cameraComponent   = camera.getComponent<ComponentCamera>();
         auto transform         = camera.getComponent<ComponentTransform>();
@@ -108,11 +108,11 @@ Camera::Camera(Scene* scene, float angle, float aspectRatio, float Near, float F
         scene = Engine::Resources::getCurrentScene();
     }
     addComponent<ComponentCamera>(angle, aspectRatio, Near, Far);
-    addComponent<CameraLogicComponent>();
+    addComponent<ComponentLogic>();
     addComponent<ComponentTransform>();
 
     auto camera    = getComponent<ComponentCamera>();
-    auto logic     = getComponent<CameraLogicComponent>();
+    auto logic     = getComponent<ComponentLogic>();
     auto transform = getComponent<ComponentTransform>();
 
     camera->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + transform->getForward(), transform->getUp());
@@ -125,11 +125,11 @@ Camera::Camera(Scene* scene, float left, float right, float bottom, float top, f
         scene = Engine::Resources::getCurrentScene();
     }
     addComponent<ComponentCamera>(left, right, bottom, top, Near, Far);
-    addComponent<CameraLogicComponent>();
+    addComponent<ComponentLogic>();
     addComponent<ComponentTransform>();
 
     auto camera     = getComponent<ComponentCamera>();
-    auto logic      = getComponent<CameraLogicComponent>();
+    auto logic      = getComponent<ComponentLogic>();
 
     camera->lookAt(glm::vec3{ 0.0f }, glm::vec3{ 0.0f } + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3{ 0.0f, 1.0f, 0.0f });
     logic->setUserPointer(this);
@@ -234,22 +234,22 @@ glm::vec3 Camera::getForward() const noexcept {
     return getComponent<ComponentTransform>()->getForward();
 }
 decimal Camera::getDistance(Entity otherEntity) const noexcept {
-    auto otherEntityBody = otherEntity.getComponent<ComponentTransform>();
-    return glm::distance(otherEntityBody->getPosition(), getPosition());
+    auto otherTransform = otherEntity.getComponent<ComponentTransform>();
+    return glm::distance(otherTransform->getPosition(), getPosition());
 }
 decimal Camera::getDistance(const glm_vec3& otherPosition) const noexcept {
     return glm::distance(otherPosition, getPosition());
 }
 decimal Camera::getDistanceSquared(Entity otherEntity) const noexcept {
-    auto otherEntityBody = otherEntity.getComponent<ComponentTransform>();
-    return glm::distance2(otherEntityBody->getPosition(), getPosition());
+    auto otherTransform = otherEntity.getComponent<ComponentTransform>();
+    return glm::distance2(otherTransform->getPosition(), getPosition());
 }
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition) const noexcept {
     return glm::distance2(otherPosition, getPosition());
 }
 decimal Camera::getDistanceSquared(Entity otherEntity, const glm_vec3& thisPosition) const noexcept {
-    auto otherEntityBody = otherEntity.getComponent<ComponentTransform>();
-    return glm::distance2(otherEntityBody->getPosition(), thisPosition);
+    auto otherTransform = otherEntity.getComponent<ComponentTransform>();
+    return glm::distance2(otherTransform->getPosition(), thisPosition);
 }
 decimal Camera::getDistanceSquared(const glm_vec3& otherPosition, const glm_vec3& thisPosition) const noexcept {
     return glm::distance2(otherPosition, thisPosition);

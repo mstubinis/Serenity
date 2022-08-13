@@ -6,9 +6,7 @@ class  Handle;
 class  Shader;
 class  ShaderProgram;
 class  UniformBufferObject;
-
-#include <cstdint>
-#include <vector>
+struct ShaderProgramParameters;
 
 namespace Engine::priv {
     class RenderModule;
@@ -25,47 +23,35 @@ namespace Engine::priv {
 #include <serenity/resources/Resource.h>
 #include <serenity/resources/Handle.h>
 #include <serenity/renderer/opengl/UniformBufferObject.h>
-#include <GL/glew.h>
-#include <SFML/OpenGL.hpp>
 #include <serenity/utils/Utils.h>
 #include <serenity/resources/shader/ShaderIncludes.h>
-#include <functional>
-
-struct ShaderProgramParameters final {
-    Handle vertexShaderHandle;
-    Handle fragmentShaderHandle;
-    Handle geometryShaderHandle;
-    Handle computeShaderHandle;
-    Handle tesselationControlShaderHandle;
-    Handle tesselationEvaluationShaderHandle;
-};
 
 class ShaderProgram final : public Resource<ShaderProgram> {
+    public:
+        class Impl;
     friend class  ::UniformBufferObject;
     friend class  ::Shader;
     friend class  Engine::priv::PublicShaderProgram;
     friend class  Engine::priv::RenderModule;
     friend class  Engine::priv::IRenderingPipeline;
+    friend class  ShaderProgram::Impl;
     public:
-        using UniformsContainer = Engine::unordered_string_map<std::string, GLint>;
         using BindFunc = void(*)(ShaderProgram*);
     public:
         static Handle Deferred, Forward, Decal; //loaded in renderer
     private:
-        BindFunc                                   m_CustomBindFunctor  = [](ShaderProgram*) {};
-        UniformsContainer                          m_UniformLocations;
-        std::unordered_set<GLuint>                 m_AttachedUBOs;
-        std::vector<std::pair<Handle, ShaderType>> m_Shaders;
-        GLuint                                     m_ShaderProgram      = 0;
-		bool                                       m_LoadedCPU          = false;
-		bool                                       m_LoadedGPU          = false;
-
-        void internal_init(std::string_view inName, const ShaderProgramParameters&);
+        BindFunc                                            m_CustomBindFunctor  = [](ShaderProgram*) {};
+        Engine::unordered_string_map<std::string, int32_t>  m_UniformLocations;
+        std::unordered_set<uint32_t>                        m_AttachedUBOs;
+        std::vector<std::pair<Handle, ShaderType>>          m_Shaders;
+        uint32_t                                            m_ShaderProgram      = 0;
+		bool                                                m_LoadedCPU          = false;
+		bool                                                m_LoadedGPU          = false;
     public:
         ShaderProgram() = default;
+        ShaderProgram(std::string_view shaderProgramName, const ShaderProgramParameters&);
         ShaderProgram(std::string_view shaderProgramName, Handle vertexShader, Handle fragmentShader);
         ShaderProgram(std::string_view shaderProgramName, Handle vertexShader, Handle fragmentShader, Handle geometryShader);
-        ShaderProgram(std::string_view shaderProgramName, const ShaderProgramParameters&);
         ShaderProgram(std::string_view shaderProgramName, std::string_view vertexShaderFileOrContent, std::string_view fragmentShaderFileOrContent);
 
         ShaderProgram(const ShaderProgram&)            = delete;
@@ -74,14 +60,11 @@ class ShaderProgram final : public Resource<ShaderProgram> {
         ShaderProgram& operator=(ShaderProgram&&) noexcept;
         ~ShaderProgram();
 
-        inline void setCustomBindFunctor(const BindFunc& function) noexcept { m_CustomBindFunctor = function; }
-        inline void setCustomBindFunctor(BindFunc&& function) noexcept { m_CustomBindFunctor = std::move(function); }
-
-        void load(bool dispatchEventLoaded = true) override;
-        void unload(bool dispatchEventUnloaded = true) override;
+        template<class FUNC>
+        inline void setCustomBindFunctor(FUNC&& function) noexcept { m_CustomBindFunctor = std::forward<FUNC>(function); }
 
         [[nodiscard]] inline const std::vector<std::pair<Handle, ShaderType>>& getShaders() const noexcept { return m_Shaders; }
-        [[nodiscard]] inline constexpr GLuint program() const noexcept { return m_ShaderProgram; }
-        [[nodiscard]] inline const UniformsContainer& uniforms() const noexcept { return m_UniformLocations; }
+        [[nodiscard]] inline constexpr uint32_t program() const noexcept { return m_ShaderProgram; }
+        [[nodiscard]] inline const Engine::unordered_string_map<std::string, int32_t>& uniforms() const noexcept { return m_UniformLocations; }
 };
 #endif

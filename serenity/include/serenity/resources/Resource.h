@@ -25,7 +25,7 @@ class ResourceBaseClass {
         [[nodiscard]] inline constexpr const std::string& name() const noexcept { return m_Name; }
         [[nodiscard]] inline constexpr bool isLoaded() const noexcept { return m_IsLoaded; }
 
-        inline void setName(std::string_view name) noexcept { m_Name = name; }
+        inline void setName(std::string name) noexcept { m_Name = std::move(name); }
 
         virtual void load(bool dispatchEventLoaded = true);
         virtual void unload(bool dispatchEventLoaded = true);

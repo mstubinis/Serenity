@@ -10,14 +10,12 @@ namespace {
 
 }
 
-Engine::priv::WindowData::WindowData(sf::ContextSettings ctxSettings, sf::ContextSettings::Attribute attr, int bitsPerPixel)
-    : m_SFContextSettings{ std::move(ctxSettings) }
+Engine::priv::WindowData::WindowData(int bitsPerPixel)
 {
-    m_SFContextSettings.attributeFlags = attr;
     m_VideoMode.bitsPerPixel           = bitsPerPixel;
 }
 Engine::priv::WindowData::WindowData(WindowData&& other) noexcept 
-    : m_SFContextSettings{ std::move(other.m_SFContextSettings) }
+    : m_OldWindowPosition{ std::move(other.m_OldWindowPosition) }
     , m_MousePosition{ std::move(other.m_MousePosition) }
     , m_MousePosition_Previous{ std::move(other.m_MousePosition_Previous) }
     , m_MouseDifference{ std::move(other.m_MouseDifference) }
@@ -35,11 +33,12 @@ Engine::priv::WindowData::WindowData(WindowData&& other) noexcept
     , m_SFEventQueue{ std::move(other.m_SFEventQueue) }
     , m_MainThreadToEventThreadQueue{ std::move(other.m_MainThreadToEventThreadQueue) }
     , m_EventThread{ std::move(other.m_EventThread) }
+    , m_Latch{ std::move(other.m_Latch) }
 {
 }
 Engine::priv::WindowData& Engine::priv::WindowData::operator=(WindowData&& other) noexcept {
     if (this != &other) {
-        m_SFContextSettings            = std::move(other.m_SFContextSettings);
+        m_OldWindowPosition            = std::move(other.m_OldWindowPosition);
         m_MousePosition                = std::move(other.m_MousePosition);
         m_MousePosition_Previous       = std::move(other.m_MousePosition_Previous);
         m_MouseDifference              = std::move(other.m_MouseDifference);
@@ -57,22 +56,26 @@ Engine::priv::WindowData& Engine::priv::WindowData::operator=(WindowData&& other
         m_SFEventQueue                 = std::move(other.m_SFEventQueue);
         m_MainThreadToEventThreadQueue = std::move(other.m_MainThreadToEventThreadQueue);
         m_EventThread                  = std::move(other.m_EventThread);
+        m_Latch                        = std::move(other.m_Latch);
     }
     return *this;
 }
 Engine::priv::WindowData::~WindowData() {
-    internal_on_close(true);
+    m_UndergoingClosing = true;
+#if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
+        m_Latch->wait();
+#endif
 }
 void Engine::priv::WindowData::internal_on_close(bool useLatch) {
     m_UndergoingClosing = true;
-    if (useLatch) {
+    if (m_Latch && useLatch) {
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
-        m_Latch.wait();
+        m_Latch->wait();
 #endif
     }
-    //sf::Event dummyEvent;
-    //while (m_SFMLWindow->pollEvent(dummyEvent)); //clear all queued events
-    m_SFMLWindow->close();
+    if (m_SFMLWindow && m_SFMLWindow->isOpen()) {
+        m_SFMLWindow->close();
+    }
 }
 void Engine::priv::WindowData::internal_on_resize(uint32_t newWindowWidth, uint32_t newWindowHeight, bool saveSize) {
     if (saveSize) {
@@ -84,22 +87,19 @@ void Engine::priv::WindowData::internal_on_mouse_wheel_scrolled(float delta, int
     m_MouseDelta += double(delta) * 10.0;
 }
 void Engine::priv::WindowData::internal_restore_state(Window& super) {
-    m_SFMLWindow->setFramerateLimit(m_FramerateLimit);
-    m_SFContextSettings = m_SFMLWindow->getSettings();
+    super.setFramerateLimit(m_FramerateLimit);
     super.setMouseCursorVisible(m_Flags & Window_Flags::MouseVisible);
-    super.setActive(m_Flags & Window_Flags::Active);
     super.setVerticalSyncEnabled(m_Flags & Window_Flags::Vsync);
     super.keepMouseInWindow(m_Flags & Window_Flags::MouseGrabbed);
     super.setKeyRepeatEnabled(m_Flags & Window_Flags::KeyRepeat);
 }
-const sf::ContextSettings Engine::priv::WindowData::internal_create(Window& super, const std::string& windowTitle) {
-    internal_on_close(false);
-    std::latch waitForContext{ 1 };
-    internal_thread_startup(super, windowTitle, &waitForContext); //calls window.setActive(false) on the created event thread, so we call setActive(true) below
-    waitForContext.wait();
-    super.setActive(true);
+void Engine::priv::WindowData::internal_create(Window& super, const std::string& windowTitle) {
+    internal_on_close(true);
+    std::latch waitForThread{ 1 };
+    internal_thread_startup(super, windowTitle, waitForThread);
+    waitForThread.wait();
+    m_SFMLWindow->requestFocus();
     super.m_Data.m_OpenGLThreadID = std::this_thread::get_id();
-    return m_SFMLWindow->getSettings();
 }
 void Engine::priv::WindowData::internal_update_mouse_position(Window& super, float x, float y, bool resetDifference, bool resetPrevious) {
     const auto sfml_size     = m_SFMLWindow->getSize();
@@ -120,25 +120,51 @@ void Engine::priv::WindowData::internal_on_fullscreen(Window& super, bool isToBe
         m_VideoMode.width  = m_OldWindowSize.x;
         m_VideoMode.height = m_OldWindowSize.y;
     }
-    internal_create(super, m_WindowTitle);
-    m_SFMLWindow->requestFocus();
-    super.setVisible(false);
-    Engine::getRenderer()._onFullscreen(m_VideoMode.width, m_VideoMode.height);
 
-    const auto winSize = super.getSize();
+   auto winSize = super.getSize();
+
+#ifdef _WIN32
+    auto hwnd = super.getSystemHandle();
+    DWORD dwStyle = GetWindowLong(hwnd, GWL_STYLE);
+    if (isToBeFullscreen) {
+        if (dwStyle & WS_OVERLAPPEDWINDOW) {
+            MONITORINFO mi = { sizeof(mi) };
+            if (GetWindowPlacement(hwnd, &m_OldWindowPosition) && GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
+                SetWindowLong(hwnd, GWL_STYLE, dwStyle & ~WS_OVERLAPPEDWINDOW);
+                SetWindowPos(hwnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top, mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+            }
+        }
+    } else {
+        SetWindowLong(hwnd, GWL_STYLE, dwStyle | WS_OVERLAPPEDWINDOW);
+        SetWindowPlacement(hwnd, &m_OldWindowPosition);
+        SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    }
+
+    RECT rect;
+    GetClientRect(hwnd, &rect);
+    winSize.x = static_cast<uint32_t>(std::abs(rect.right - rect.left));
+    winSize.y = static_cast<uint32_t>(std::abs(rect.bottom - rect.top));
+#else
+    if (super.m_RenderingContext) {
+        super.m_RenderingContext->detatch(super);
+    }
+    internal_create(super, m_WindowTitle);
+    if (super.m_RenderingContext) {
+        super.m_RenderingContext->init(super);
+    }
+    internal_restore_state(super);
+    winSize = super.getSize(); //this does not trigger the sfml event resize method automatically so we must call it here
+#endif
 
     //this does not trigger the sfml event resize method automatically so we must call it here
-    Engine::priv::Core::m_Engine->m_Modules->m_EngineEventHandler.internal_on_event_resize(super, winSize.x, winSize.y, false, *Engine::priv::Core::m_Engine->m_GameCore);
+    Engine::priv::Core::m_Engine->m_Modules->m_EngineEventHandler.internal_on_event_resize(super, winSize.x, winSize.y, false, *Engine::getGameCore());
 
-    internal_restore_state(super);
     if (isMaximized) {
         super.maximize();
-    } 
-    super.setVisible(true);
-
+    }
     Event ev{ ::EventType::WindowFullscreenChanged };
     ev.eventWindowFullscreenChanged = Engine::priv::EventWindowFullscreenChanged{ isToBeFullscreen };
-    Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+    Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
 }
 sf::VideoMode Engine::priv::WindowData::internal_get_default_desktop_video_mode() {
     return sf::VideoMode::getFullscreenModes().size() > 0 ? sf::VideoMode::getFullscreenModes()[0] : sf::VideoMode::getDesktopMode();
@@ -209,8 +235,8 @@ Engine::priv::WindowData::WindowEventType Engine::priv::WindowData::internal_try
     return {};
 #endif
 }
-
-void Engine::priv::WindowData::internal_thread_startup(Window& super, const std::string& name, std::latch* waitForContext) {
+void Engine::priv::WindowData::internal_thread_startup(Window& super, const std::string& name, std::latch& waitForThread) {
+    m_Latch.reset(NEW std::latch{1});
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
     if (m_EventThread && !m_UndergoingClosing) {
         m_UndergoingClosing = true;
@@ -219,28 +245,23 @@ void Engine::priv::WindowData::internal_thread_startup(Window& super, const std:
         }
     }
 #endif
-    auto thread_event_loop = [this, &super, &name, &waitForContext]() {
-        m_SFMLWindow->create(m_VideoMode, name, m_Style, m_SFContextSettings);
+    auto thread_event_loop = [this, &super, &name, &waitForThread]() {
+        m_SFMLWindow->create(m_VideoMode, name, m_Style);
         super.setIcon(m_IconFile);
-#if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
-        m_SFMLWindow->setActive(false);
-#endif
         m_UndergoingClosing = false;
-        if (waitForContext) {
-            waitForContext->count_down();
-        }
+        waitForThread.count_down();
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
         while (!m_UndergoingClosing) {
             internal_populate_sf_event_queue();
             internal_process_command_queue();
         }
-        m_Latch.count_down();
+        m_Latch->count_down();
 #endif
     };
 
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
-    m_EventThread = std::make_unique<std::jthread>(std::move(thread_event_loop));
-    //m_EventThread.reset(NEW std::jthread{ std::move(thread_event_loop) });
+    //m_EventThread = std::make_unique<std::jthread>(std::move(thread_event_loop));
+    m_EventThread.reset(NEW std::jthread{ std::move(thread_event_loop) });
 #else
     thread_event_loop();
 #endif

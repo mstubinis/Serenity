@@ -1,14 +1,15 @@
 #pragma once
-#ifndef ENGINE_RENDERER_OPENGL_EXTENSIONS_H
-#define ENGINE_RENDERER_OPENGL_EXTENSIONS_H
+#ifndef ENGINE_RENDERER_OPENGL_CONTEXT_H
+#define ENGINE_RENDERER_OPENGL_CONTEXT_H
 
-//#define ENGINE_PRINT_OPENGL_EXTENSIONS
+class Window;
 
-#include <serenity/system/Macros.h>
+#include <memory>
+#include <serenity/renderer/APIContext.h>
 
 namespace Engine::priv {
-    class OpenGLExtensions final {
-        public: 
+	class OpenGLContext : public IContext {
+        public: struct Extensions {
             enum Type : uint32_t {
                 EXT_texture_filter_anisotropic,
                 ARB_texture_filter_anisotropic,
@@ -30,24 +31,31 @@ namespace Engine::priv {
                 ARB_gpu_shader_int64,
                 NV_gpu_shader5,
                 ARB_clip_control,
+                ARB_seamless_cube_map,
 
                 _TOTAL,
             };
-            BUILD_ENUM_CLASS_MEMBERS(OpenGLExtensions, Type)
-        private:
+		};
 
-        public:
-            void       INIT() noexcept;
-            bool       checkOpenGLExtension(const char* e) noexcept;
-            void       printAllAvailableExtensions() noexcept;
+		private:
+			struct impl;
+			std::unique_ptr<impl> m_i;
+		public:
+			OpenGLContext();
 
-            OpenGLExtensions() = default;
-            ~OpenGLExtensions() = default;
+			bool init(Window&) override;
+			void destroy(Window&) override;
+			bool detatch(Window&) override;
 
-            static bool supported(OpenGLExtensions) noexcept;
+			void setFramerateLimit(int limit) override;
+			bool setVerticalSyncEnabled(bool enabled) override;
+			bool display() override;
 
+            static bool checkOpenGLExtension(const char* e) noexcept;
+            static void printAllAvailableExtensions() noexcept;
+            static bool supported(Extensions::Type extension) noexcept;
             static bool isBindlessTexturesSupported() noexcept;
-    };
-};
+	};
+}
 
 #endif

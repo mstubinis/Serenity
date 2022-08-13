@@ -18,12 +18,9 @@ namespace Engine::priv {
     class  RenderModule;
 };
 
-#include <serenity/renderer/opengl/OpenGL.h>
 #include <serenity/renderer/RendererState.h>
 #include <serenity/utils/Utils.h>
 #include <serenity/renderer/RendererIncludes.h>
-#include <serenity/renderer/opengl/State.h>
-#include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/resources/font/FontIncludes.h>
 #include <serenity/renderer/pipelines/IRenderingPipeline.h>
 #include <serenity/resources/texture/TextureIncludes.h>
@@ -60,11 +57,9 @@ namespace Engine::priv {
         public:
             RenderModule(const EngineOptions&, uint32_t windowWidth, uint32_t windowHeight);
 
-            void init();
+            void init(uint32_t windowWidth, uint32_t windowHeight);
 
-            void _onOpenGLContextCreation(uint32_t width, uint32_t height);
             void _resize(uint32_t width, uint32_t height);
-            void _onFullscreen(uint32_t width, uint32_t height);
 
             static void render(RenderModule&, Viewport&, bool mainRenderFunc = true);
             static void render2DAPI(RenderModule&, Viewport&, bool mainRenderFunc = true);
@@ -98,7 +93,7 @@ namespace Engine::Renderer {
     namespace Settings {
 
         void setGamma(const float gamma);
-        const float getGamma();
+        float getGamma();
         void clear(bool color = true, bool depth = true, bool stencil = true);
         void applyGlobalAnisotropicFiltering(float filtering);
         bool setAntiAliasingAlgorithm(AntiAliasingAlgorithm);
@@ -121,8 +116,7 @@ namespace Engine::Renderer {
             bool setLightingAlgorithm(LightingAlgorithm);
         }
     }
-    void restoreDefaultOpenGLState();
-    void restoreCurrentOpenGLState();
+    void restoreCurrentState();
 
     //set width and height to be <= 0.0f to use the window's dimensions automatically
     void renderFullscreenQuad(float width = 0.0f, float height = 0.0f, float depth = 0.0f, float inNear = 0.0f, float inFar = 1.0f);

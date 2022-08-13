@@ -3,6 +3,8 @@
 #include <serenity/math/Engine_Math.h>
 #include <serenity/renderer/Renderer.h>
 
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
+
 #pragma region VertexAttrDataBuffer
 
 void VertexAttrDataBuffer::clear() noexcept {
@@ -56,7 +58,7 @@ void VertexData::clearData() {
 }
 void VertexData::finalize() {
     m_VAO.deleteVAO();
-    if (Engine::priv::OpenGLState::constants.supportsVAO()) {
+    if (Engine::priv::APIState<Engine::priv::OpenGL>::supportsVAO()) {
         //build the vao itself
         const bool success = m_VAO.generateVAO();
         m_VAO.bindVAO();

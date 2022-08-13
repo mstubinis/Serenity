@@ -15,7 +15,7 @@ SystemSceneChanging::SystemSceneChanging(Engine::priv::ECS& ecs)
         }
         Event ev{ EventType::SceneChanged };
         ev.eventSceneChanged = Engine::priv::EventSceneChanged{ oldScene, newScene };
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+        Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
 
         ENGINE_PRODUCTION_LOG("---- Scene Change started (" << ((oldScene) ? (oldScene->name()) : "initial") << ") to (" << newScene->name() << ") ----");
         if (oldScene) {

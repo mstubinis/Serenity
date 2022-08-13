@@ -1,6 +1,7 @@
 #include <serenity/lua/LuaModule.h>
 #include <serenity/system/Macros.h>
 #include <serenity/events/Event.h>
+
 #include <serenity/utils/Utils.h>
 
 namespace {

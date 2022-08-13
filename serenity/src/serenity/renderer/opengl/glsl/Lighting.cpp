@@ -1,7 +1,6 @@
 
 #include <serenity/renderer/opengl/glsl/Lighting.h>
 
-#include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/resources/shader/ShaderHelper.h>
 #include <serenity/resources/material/MaterialEnums.h>
 

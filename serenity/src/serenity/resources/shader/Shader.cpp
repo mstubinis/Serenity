@@ -1,7 +1,7 @@
 #include <serenity/resources/shader/Shader.h>
 #include <serenity/resources/shader/ShaderHelper.h>
 
-#include <serenity/renderer/opengl/State.h>
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
 
 #include <serenity/renderer/opengl/glsl/Common.h>
 #include <serenity/renderer/opengl/glsl/Compression.h>
@@ -23,7 +23,7 @@ namespace {
     uint32_t CREATED_SHADER_COUNT = 0;
 
     void load_code_from_file(const std::string& filename, std::string& code) {
-        ASSERT(std::filesystem::is_regular_file(filename), "");
+        assert(std::filesystem::is_regular_file(filename));
         std::ifstream filestream(filename);
         filestream.seekg(0, std::ios::end);
         size_t size = filestream.tellg();
@@ -44,10 +44,10 @@ namespace {
         } else {
             //generate one
             std::string core;
-            if (Engine::priv::OpenGLState::constants.GLSL_VERSION >= 330 && Engine::priv::OpenGLState::constants.GLSL_VERSION < 440) {
+            if (Engine::priv::APIState<Engine::priv::OpenGL>::getConstants().GLSL_VERSION >= 330 && Engine::priv::APIState<Engine::priv::OpenGL>::getConstants().GLSL_VERSION < 440) {
                 core = " core";
             }
-            versionLine = "#version " + std::to_string(Engine::priv::OpenGLState::constants.GLSL_VERSION) + core + "\n";
+            versionLine = "#version " + std::to_string(Engine::priv::APIState<Engine::priv::OpenGL>::getConstants().GLSL_VERSION) + core + "\n";
         }
         return versionLine;
     }
@@ -131,7 +131,7 @@ void Shader::load(bool dispatchEventLoaded) {
             //load initial code from file
             load_code_from_file(m_FileName, m_Code);
         } else {
-            ASSERT(!m_FileName.empty(), "");
+            assert(!m_FileName.empty());
             m_Code = std::move(m_FileName);
             m_FileName.clear();
         }

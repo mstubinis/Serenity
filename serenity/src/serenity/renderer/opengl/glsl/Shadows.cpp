@@ -2,7 +2,6 @@
 #include <serenity/renderer/opengl/glsl/Shadows.h>
 #include <serenity/lights/Lights.h>
 
-#include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/resources/shader/ShaderHelper.h>
 
 #include <boost/algorithm/string/replace.hpp>

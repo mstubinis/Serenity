@@ -32,7 +32,6 @@ class UniformBufferObject final : public Observer, public Resource<UniformBuffer
     friend class  Shader;
     friend class  UniformBufferObjectMapper;
     public:
-        static GLint     MAX_UBO_BINDINGS;
         static uint32_t  CUSTOM_UBO_AUTOMATIC_COUNT;
     private:
         uint32_t      m_SizeOfStruct              = 0;

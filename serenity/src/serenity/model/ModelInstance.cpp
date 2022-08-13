@@ -21,42 +21,43 @@ using namespace Engine;
 uint32_t ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 decimal ModelInstance::m_GlobalDistanceFactor = decimal(1100.0);
 
-constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
-    const auto stage                   = i->getStage();
-    auto& scene                        = *Engine::Resources::getCurrentScene();
-    auto* camera                       = scene.getActiveCamera();
-    const Entity parent                = i->getOwner();
-    const auto transform               = parent.getComponent<ComponentTransform>();
-    const auto& animationContainer     = i->getRunningAnimations();
+namespace {
+    constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* modelInstance, const Engine::priv::RenderModule* renderer) {
+        const auto stage               = modelInstance->getStage();
+        auto& scene                    = *Engine::Resources::getCurrentScene();
+        auto* camera                   = scene.getActiveCamera();
+        const Entity parent            = modelInstance->getOwner();
+        const auto transform           = parent.getComponent<ComponentTransform>();
+        const auto& animationContainer = modelInstance->getRunningAnimations();
 
-    Engine::Renderer::sendUniform1Safe("Object_Color", i->getColor().toPackedInt());
-    Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", i->getGodRaysColor().toPackedInt());
+        Engine::Renderer::sendUniform1Safe("Object_Color", modelInstance->getColor().toPackedInt());
+        Engine::Renderer::sendUniform1Safe("Gods_Rays_Color", modelInstance->getGodRaysColor().toPackedInt());
 
-    if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
-        renderer->m_Pipeline->sendGPUDataAllLights(scene, *camera);
-        renderer->m_Pipeline->sendGPUDataGI(scene.skybox());
-    }
-    if (animationContainer.size() > 0) {
-        Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
-        Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getTransforms());
-    } else {
-        Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
-    }
-    const glm::mat4 renderingMatrix = transform->getWorldMatrixRendering() * i->getModelMatrix();
+        if (stage == RenderStage::ForwardTransparentTrianglesSorted || stage == RenderStage::ForwardTransparent || stage == RenderStage::ForwardOpaque) {
+            renderer->m_Pipeline->sendGPUDataAllLights(scene, *camera);
+            renderer->m_Pipeline->sendGPUDataGI(scene.skybox());
+        }
+        if (animationContainer.size() > 0) {
+            Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
+            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getTransforms());
+        } else {
+            Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
+        }
+        const glm::mat4 modelMatrix = transform->getWorldMatrixRendering() * modelInstance->getModelMatrix();
 
-    //world space normals
-    const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ renderingMatrix }));
+        //world space normals
+        const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ modelMatrix }));
 
-    //view space normals
-    //const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ cam.getView() * model }));
+        //view space normals
+        //const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ cam.getView() * model }));
 
-    Engine::Renderer::sendUniformMatrix4("Model", renderingMatrix);
-    Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
-};
-constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* i, const Engine::priv::RenderModule* renderer) {
-    //auto& i = *static_cast<ModelInstance*>(r);
-};
+        Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
+        Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
+    };
+    constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* modelInstance, const Engine::priv::RenderModule* renderer) {
 
+    };
+}
 bool priv::PublicModelInstance::IsViewportValid(const ModelInstance& modelInstance, const Viewport& viewport) {
     const auto flags = modelInstance.getViewportFlags();
     return flags == 0 || flags & (1 << viewport.getId());

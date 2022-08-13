@@ -2,6 +2,8 @@
 #ifndef ENGINE_TYPES_VIEW_POINTER_H
 #define ENGINE_TYPES_VIEW_POINTER_H
 
+#include <memory>
+
 namespace Engine {
     //a simple wrapper around a raw pointer that prevents explicit deletion by the user.
     template<class T>
@@ -10,6 +12,15 @@ namespace Engine {
             T* m_Ptr = nullptr;
         public:
             view_ptr() = default;
+            view_ptr(T& ptr)
+                : m_Ptr{ std::addressof(ptr) }
+            {}
+            view_ptr(T* ptr)
+                : m_Ptr{ ptr }
+            {}
+            view_ptr(const std::unique_ptr<T>& ptr)
+                : m_Ptr{ ptr.get() }
+            {}
 
             inline T* operator->() const noexcept { return m_Ptr; }
             inline T& operator* () noexcept { return *m_Ptr; }
@@ -27,12 +38,6 @@ namespace Engine {
 
             //returns the static_cast of the underlying pointer to the templated type
             template<class U> inline U* cast() noexcept { return static_cast<U*>(m_Ptr); }
-
-            view_ptr(T* ptr)
-                : m_Ptr{ ptr }
-            {}
-
-
     };
 }
 

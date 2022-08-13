@@ -26,6 +26,9 @@ enum class CursorType : uint8_t {
 };
 
 class Cursor {
+    public:
+        class Impl;
+    friend class Cursor::Impl;
     private:
         sf::Cursor                m_SFMLCursor;
         std::vector<uint8_t>      m_Pixels;
@@ -34,11 +37,6 @@ class Cursor {
         uint32_t                  m_Height          = 0;
         glm::vec4                 m_ColorMultiplier = glm::vec4(1.0f);
         glm::uvec2                m_Hotspot         = glm::uvec2(0, 0);
-
-        //pixels must be an array of width by height pixels in 32 - bit RGBA format.If not, this will cause undefined behavior.
-        bool internal_load_from_pixels(const uint8_t* pixels, uint32_t width, uint32_t height, uint32_t hotspotX, uint32_t hotspotY, const glm::vec4& colorMultiplier) noexcept;
-
-        bool internal_rotate(int64_t startIndex, int64_t increment, int64_t increment2, bool left) noexcept;
     protected:
 
     public:

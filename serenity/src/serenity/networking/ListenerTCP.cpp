@@ -1,7 +1,7 @@
 
 #include <serenity/networking/ListenerTCP.h>
 #include <serenity/networking/SocketTCP.h>
-#include <serenity/events/EventModule.h>
+#include <serenity/events/EventDispatcher.h>
 #include <serenity/events/EventIncludes.h>
 #include <serenity/events/Event.h>
 #include <serenity/system/Engine.h>
@@ -29,7 +29,7 @@ void Engine::Networking::ListenerTCP::close() {
         Event ev(EventType::SocketDisconnected);
         ev.eventSocket = std::move(e);
         m_Listener.close();
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+        Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     }
 }
 SocketStatus::Status Engine::Networking::ListenerTCP::accept(sf::TcpSocket& sfSocketTCP) {
@@ -45,7 +45,7 @@ SocketStatus::Status Engine::Networking::ListenerTCP::listen() {
         Engine::priv::EventSocket e = Engine::priv::EventSocket(m_Listener.getLocalPort(), 0, m_IP, SocketType::TCPListener);
         Event ev(EventType::SocketConnected);
         ev.eventSocket = std::move(e);
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+        Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     }
     return SocketStatus::map_status(status);
 }

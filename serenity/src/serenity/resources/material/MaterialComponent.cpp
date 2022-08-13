@@ -77,7 +77,8 @@ MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHand
     layer.setTexture(textureHandle);
     layer.setMask(maskHandle);
     layer.setCubemap(cubemapHandle);
-    layer.setMiscData(MISC_DATA_INFO[m_ComponentType]);
+    auto& data = MISC_DATA_INFO[m_ComponentType];
+    layer.setMiscData(data.x, data.y, data.z, data.w);
     ++m_NumLayers;
     return &layer;
 }

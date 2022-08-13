@@ -2,7 +2,6 @@
 #include <serenity/renderer/postprocess/Bloom.h>
 #include <serenity/renderer/Renderer.h>
 #include <serenity/renderer/GBuffer.h>
-#include <serenity/renderer/FramebufferObject.h>
 #include <serenity/resources/shader/ShaderProgram.h>
 #include <serenity/resources/shader/Shader.h>
 #include <serenity/resources/Engine_BuiltInShaders.h>
@@ -35,12 +34,12 @@ void main() {
 }
 
 void Engine::priv::Bloom::init() {
-    auto lambda_part_a = [this]() {
-        m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex);
-        m_Fragment_Shader = Engine::Resources::addResource<Shader>(internal_get_fragment_code(), ShaderType::Fragment);
+    auto lambda_part_a = []() {
+        STATIC_BLOOM.m_Vertex_Shader   = Engine::Resources::addResource<Shader>(Engine::priv::EShaders::fullscreen_quad_vertex, ShaderType::Vertex);
+        STATIC_BLOOM.m_Fragment_Shader = Engine::Resources::addResource<Shader>(internal_get_fragment_code(), ShaderType::Fragment);
     };
-    auto lambda_part_b = [this]() {
-        m_Shader_Program  = Engine::Resources::addResource<ShaderProgram>("Bloom", m_Vertex_Shader, m_Fragment_Shader);
+    auto lambda_part_b = []() {
+        STATIC_BLOOM.m_Shader_Program  = Engine::Resources::addResource<ShaderProgram>("Bloom", STATIC_BLOOM.m_Vertex_Shader, STATIC_BLOOM.m_Fragment_Shader);
     };
     Engine::priv::threading::addJobWithPostCallback(lambda_part_a, lambda_part_b);
 }

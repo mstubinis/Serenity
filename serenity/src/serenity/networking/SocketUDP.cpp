@@ -1,6 +1,6 @@
 
 #include <serenity/networking/SocketUDP.h>
-#include <serenity/events/EventModule.h>
+#include <serenity/events/EventDispatcher.h>
 #include <serenity/events/EventIncludes.h>
 #include <serenity/events/Event.h>
 #include <serenity/system/Engine.h>
@@ -86,7 +86,7 @@ SocketStatus::Status Engine::Networking::SocketUDP::bind(sf::IpAddress ip) {
     if (status == sf::Socket::Status::Done) {
         Event ev(EventType::SocketConnected);
         ev.eventSocket = Engine::priv::EventSocket{ m_SocketUDP.getLocalPort(), 0, ip, SocketType::UDP };
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+        Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     }
     return SocketStatus::map_status(status);
 }
@@ -98,7 +98,7 @@ void Engine::Networking::SocketUDP::unbind() {
 
         m_SocketUDP.unbind();
 
-        Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(ev);
+        Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(ev);
     }
 }
 SocketStatus::Status Engine::Networking::SocketUDP::receive(Engine::Networking::Packet& packet, sf::IpAddress& ip, uint16_t& port) {

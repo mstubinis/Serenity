@@ -3,6 +3,8 @@
 #include <serenity/events/Event.h>
 #include <serenity/renderer/Renderer.h>
 
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
+
 namespace {
     constexpr const GLuint C_MAX_POINTS = 2'097'152;
 }
@@ -50,7 +52,7 @@ void Engine::priv::GLDebugDrawer::init() {
     //support vao's
     buildVAO();
 
-    registerEvent(EventType::WindowFullscreenChanged);
+    //registerEvent(EventType::WindowFullscreenChanged);
 }
 void Engine::priv::GLDebugDrawer::bindDataToGPU() {
     m_VBO.bind();
@@ -70,7 +72,7 @@ void Engine::priv::GLDebugDrawer::render() {
     }
 }
 void Engine::priv::GLDebugDrawer::buildVAO() {
-    if (Engine::priv::OpenGLState::constants.supportsVAO()) {
+    if (Engine::priv::APIState<Engine::priv::OpenGL>::supportsVAO()) {
         m_VAO.generateVAO();
         m_VAO.bindVAO();
         bindDataToGPU();
@@ -88,9 +90,9 @@ void Engine::priv::GLDebugDrawer::drawAccumulatedLines() {
     }
 }
 void Engine::priv::GLDebugDrawer::onEvent(const Event& e) {
-    if (e.type == EventType::WindowFullscreenChanged) {
-        buildVAO();
-    }
+    //if (e.type == EventType::WindowFullscreenChanged) {
+    //    buildVAO();
+    //}
 }
 void Engine::priv::GLDebugDrawer::drawTriangle(const btVector3& v0, const btVector3& v1, const btVector3& v2, const btVector3&, const btVector3&, const btVector3&, const btVector3& color, btScalar alpha) {
     GLDebugDrawer::drawTriangle(v0, v1, v2, color, alpha);

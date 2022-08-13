@@ -16,8 +16,7 @@ namespace Engine::priv {
 #include <serenity/renderer/pipelines/IRenderingPipeline.h>
 #include <serenity/renderer/pipelines/DeferredShadowCasters.h>
 #include <serenity/model/ModelInstanceIncludes.h>
-#include <serenity/renderer/opengl/State.h>
-#include <serenity/renderer/opengl/Extensions.h>
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
 #include <serenity/renderer/GBuffer.h>
 #include <serenity/renderer/FullscreenItems.h>
 #include <serenity/containers/PartialArray.h>
@@ -52,8 +51,6 @@ namespace Engine::priv {
             float                                              m_CurrentScissorDepth = 0.0f;
 
             RendererState                                      m_RendererState;
-            OpenGLState                                        m_OpenGLStateMachine;
-            OpenGLExtensions                                   m_OpenGLExtensionsManager;
 
             FullscreenQuad                                     m_FullscreenQuad;
             FullscreenTriangle                                 m_FullscreenTriangle;
@@ -113,15 +110,15 @@ namespace Engine::priv {
 
             DeferredPipeline() = delete;
         public:
-            DeferredPipeline(Engine::priv::RenderModule&);
+            DeferredPipeline(Engine::priv::RenderModule&, uint32_t width, uint32_t height);
             ~DeferredPipeline();
 
-            void init() override;
+            void postConstructor(uint32_t width, uint32_t height) override;
+            void init(uint32_t width, uint32_t height) override;
             void onPipelineChanged() override;
-            void onFullscreen() override;
             void onResize(uint32_t newWidth, uint32_t newHeight) override;
-            void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight) override;
-            void restoreDefaultState() override;
+            //void onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight) override;
+            //void restoreDefaultState() override;
             void restoreCurrentState() override;
             void clear2DAPI() override;
             void sort2DAPI() override;

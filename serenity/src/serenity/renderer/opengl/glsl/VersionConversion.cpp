@@ -1,12 +1,12 @@
 ﻿
 #include <serenity/renderer/opengl/glsl/VersionConversion.h>
-#include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/resources/shader/ShaderHelper.h>
 #include <serenity/resources/material/MaterialEnums.h>
 #include <boost/algorithm/string/replace.hpp>
+#include <serenity/renderer/opengl/OpenGLContext.h>
 #include <array>
 
-#include <serenity/renderer/opengl/State.h>
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
 
 //TODO: change from [const char* const] to [string] in c++20?
 namespace {
@@ -51,7 +51,7 @@ void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, u
         }
     }
     if (versionNumber >= 130) {
-        for (GLint i = 0; i < Engine::priv::OpenGLState::constants.MAX_DRAW_BUFFERS; ++i) {
+        for (GLint i = 0; i < Engine::priv::APIState<Engine::priv::OpenGL>::getConstants().MAX_DRAW_BUFFERS; ++i) {
             const std::string fragDataStr = "gl_FragData[" + std::to_string(i) + "]";
             if (ShaderHelper::sfind(code, fragDataStr)) {
                 const std::string outFragData = "FRAG_COL_" + std::to_string(i);
@@ -133,13 +133,13 @@ void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, u
         if (shaderType == ShaderType::Vertex) {
             if (ShaderHelper::sfind(code, "layout") && ShaderHelper::sfind(code, "location") && ShaderHelper::sfind(code, "=")) {
                 if (versionNumber > 130) {
-                    if (OpenGLExtensions::supported(OpenGLExtensions::EXT_separate_shader_objects)) {
+                    if (OpenGLContext::supported(OpenGLContext::Extensions::EXT_separate_shader_objects)) {
                         code = "#extension GL_EXT_separate_shader_objects : enable\n" + code;
-                    } else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_separate_shader_objects)) {
+                    } else if (OpenGLContext::supported(OpenGLContext::Extensions::ARB_separate_shader_objects)) {
                         code = "#extension GL_ARB_separate_shader_objects : enable\n" + code;
-                    }if (OpenGLExtensions::supported(OpenGLExtensions::EXT_explicit_attrib_location)) {
+                    }if (OpenGLContext::supported(OpenGLContext::Extensions::EXT_explicit_attrib_location)) {
                         code = "#extension GL_EXT_explicit_attrib_location : enable\n" + code;
-                    } else if (OpenGLExtensions::supported(OpenGLExtensions::ARB_explicit_attrib_location)) {
+                    } else if (OpenGLContext::supported(OpenGLContext::Extensions::ARB_explicit_attrib_location)) {
                         code = "#extension GL_ARB_explicit_attrib_location : enable\n" + code;
                     }
                 } else {
@@ -168,19 +168,19 @@ void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, u
         }
     }
     //deal with bindless textures
-    if (OpenGLExtensions::isBindlessTexturesSupported()) {
+    if (OpenGLContext::isBindlessTexturesSupported()) {
         if (shaderType == ShaderType::Fragment) {
             //         ShaderHelper::insertStringAtLine(code, "layout(bindless_sampler) uniform", 1);
 
-            if (OpenGLExtensions::supported(OpenGLExtensions::ARB_bindless_texture)) {
+            if (OpenGLContext::supported(OpenGLContext::Extensions::ARB_bindless_texture)) {
                 code = "#extension GL_ARB_bindless_texture : require\n" + code; //yes this is very much needed
-            } else if (OpenGLExtensions::supported(OpenGLExtensions::NV_bindless_texture)) {
+            } else if (OpenGLContext::supported(OpenGLContext::Extensions::NV_bindless_texture)) {
                 code = "#extension GL_NV_bindless_texture : require\n" + code; //yes this is very much needed
             }
 
-            if (OpenGLExtensions::supported(OpenGLExtensions::ARB_gpu_shader_int64)) {
+            if (OpenGLContext::supported(OpenGLContext::Extensions::ARB_gpu_shader_int64)) {
                 code = "#extension GL_ARB_gpu_shader_int64 : require\n" + code; // for uint64_t
-            } else if (OpenGLExtensions::supported(OpenGLExtensions::NV_gpu_shader5)) {
+            } else if (OpenGLContext::supported(OpenGLContext::Extensions::NV_gpu_shader5)) {
                 code = "#extension GL_NV_gpu_shader5 : require\n" + code; // for uint64_t
             }
         }

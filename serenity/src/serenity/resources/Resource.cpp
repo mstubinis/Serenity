@@ -30,7 +30,7 @@ void ResourceBaseClass::load(bool dispatchEventLoaded) {
         if (dispatchEventLoaded && Engine::priv::Core::m_Engine) {
             Event e{ EventType::ResourceLoaded };
             e.eventResource = Engine::priv::EventResource{ this };
-            Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(std::move(e));
+            Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(std::move(e));
         }
         //ENGINE_PRODUCTION_LOG(typeid(*this).name() << ": " << m_Name << " - loaded.");
     }
@@ -41,7 +41,7 @@ void ResourceBaseClass::unload(bool dispatchEventUnloaded) {
         if (dispatchEventUnloaded && Engine::priv::Core::m_Engine) {
             Event e{ EventType::ResourceUnloaded };
             e.eventResource = Engine::priv::EventResource{ this };
-            Engine::priv::Core::m_Engine->m_EventModule.m_EventDispatcher.dispatchEvent(std::move(e));
+            Engine::priv::Core::m_Engine->m_EventDispatcher.dispatchEvent(std::move(e));
         }
         //ENGINE_PRODUCTION_LOG(typeid(*this).name() << ": " << m_Name << " - unloaded.");
     }

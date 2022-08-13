@@ -136,11 +136,27 @@ RenderModule::RenderModule(const EngineOptions& options, uint32_t windowWidth, u
     : m_GI_Pack{ Engine::Compression::pack3FloatsInto1FloatUnsigned(m_GI_Diffuse, m_GI_Specular, m_GI_Global) }
 {
     RENDER_MODULE = this;
-    m_Pipeline    = std::make_unique<Engine::priv::DeferredPipeline>(*this);
 
-    //m_Pipeline->init();
+    switch (options.renderingAPI) {
+        case RenderingAPI::OpenGL: {
+            m_Pipeline = std::make_unique<Engine::priv::DeferredPipeline>(*this, windowWidth, windowHeight);
+            break;
+        }
+        case RenderingAPI::DirectX: {
+            break;
+        }
+        case RenderingAPI::Vulkan: {
+            break;
+        }
+        case RenderingAPI::Metal: {
+            break;
+        }
+    }
+    //TODO: replace with assert?
+    if (m_Pipeline) {
+        m_Pipeline->postConstructor(windowWidth, windowHeight);
+    }
 
-    _onOpenGLContextCreation(windowWidth, windowHeight);
 
     Engine::Renderer::ssao::setLevel(options.ssao_level);
     Engine::Renderer::godRays::enable(options.god_rays_enabled);
@@ -148,8 +164,8 @@ RenderModule::RenderModule(const EngineOptions& options, uint32_t windowWidth, u
     Engine::Renderer::fog::enable(options.fog_enabled);
     Engine::Renderer::Settings::setAntiAliasingAlgorithm(options.aa_algorithm);
 }
-void RenderModule::init() {
-    m_Pipeline->init();
+void RenderModule::init(uint32_t windowWidth, uint32_t windowHeight) {
+    m_Pipeline->init(windowWidth, windowHeight);
 }
 void RenderModule::render(RenderModule& renderModule, Viewport& viewport, bool mainFunc){
     renderModule.m_Pipeline->render(renderModule, viewport, mainFunc);
@@ -158,14 +174,8 @@ void RenderModule::render2DAPI(RenderModule& renderModule, Viewport& viewport, b
     renderModule.m_Pipeline->render2DAPI(renderModule, viewport, mainFunc);
 }
 
-void RenderModule::_resize(uint32_t w, uint32_t h){
-    m_Pipeline->onResize(w, h);
-}
-void RenderModule::_onFullscreen(uint32_t width, uint32_t height) {
-    m_Pipeline->onFullscreen();
-}
-void RenderModule::_onOpenGLContextCreation(uint32_t windowWidth, uint32_t windowHeight){
-    m_Pipeline->onOpenGLContextCreation(windowWidth, windowHeight);
+void RenderModule::_resize(uint32_t width, uint32_t height){
+    m_Pipeline->onResize(width, height);
 }
 void RenderModule::_clear2DAPICommands() {
     m_Pipeline->clear2DAPI();
@@ -274,10 +284,7 @@ bool RenderModule::unbind(Material* material) const {
 void RenderModule::_genPBREnvMapData(TextureCubemap& cubemap, Handle convolutionTexture, Handle preEnvTexture, uint32_t size1, uint32_t size2){
     return m_Pipeline->generatePBRData(cubemap, convolutionTexture, preEnvTexture, size1, size2);
 }
-void Engine::Renderer::restoreDefaultOpenGLState() {
-    RENDER_MODULE->m_Pipeline->restoreDefaultState();
-}
-void Engine::Renderer::restoreCurrentOpenGLState() {
+void Engine::Renderer::restoreCurrentState() {
     RENDER_MODULE->m_Pipeline->restoreCurrentState();
 }
 void Engine::Renderer::Settings::Lighting::enable(bool lighting){
@@ -398,7 +405,7 @@ void Engine::Renderer::Settings::disableDrawPhysicsInfo(){
 void Engine::Renderer::Settings::setGamma(float gamma){
     RENDER_MODULE->m_Gamma = gamma;
 }
-const float Engine::Renderer::Settings::getGamma(){
+float Engine::Renderer::Settings::getGamma(){
     return RENDER_MODULE->m_Gamma;
 }
 bool Engine::Renderer::setDepthFunc(GLenum func){

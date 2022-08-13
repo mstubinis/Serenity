@@ -2,7 +2,16 @@
 #ifndef ENGINE_TEXTURES_DDS_H
 #define ENGINE_TEXTURES_DDS_H
 
-namespace Engine::priv::textures {
+namespace Engine::priv {
+    struct TextureCPUData;
+    struct TextureCubemapCPUData;
+    struct ImageData;
+}
+
+#include <cstdint>
+#include <array>
+
+namespace Engine::priv {
     enum class DXGI_FORMAT : uint32_t {
         DXGI_FORMAT_UNKNOWN,
         DXGI_FORMAT_R32G32B32A32_TYPELESS,
@@ -198,16 +207,16 @@ namespace Engine::priv::textures {
             }
         };
         struct DDS_Header_DX10 final {
-            textures::DXGI_FORMAT             dxgiFormat        = textures::DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-            textures::D3D_RESOURCE_DIMENSION  resourceDimension = textures::D3D_RESOURCE_DIMENSION::D3D_RESOURCE_DIMENSION_UNKNOWN;
+            DXGI_FORMAT             dxgiFormat        = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+            D3D_RESOURCE_DIMENSION  resourceDimension = D3D_RESOURCE_DIMENSION::D3D_RESOURCE_DIMENSION_UNKNOWN;
             uint32_t                          miscFlag          = 0U;
             uint32_t                          arraySize         = 0U;
             uint32_t                          miscFlags2        = 0U;
 
             constexpr DDS_Header_DX10() = default;
             constexpr void fill(const std::array<uint8_t, 20>& headerDX10) {
-                dxgiFormat        = static_cast<textures::DXGI_FORMAT>(*(uint32_t*)&headerDX10[0]);
-                resourceDimension = static_cast<textures::D3D_RESOURCE_DIMENSION>(*(uint32_t*)&headerDX10[4]);
+                dxgiFormat        = static_cast<DXGI_FORMAT>(*(uint32_t*)&headerDX10[0]);
+                resourceDimension = static_cast<D3D_RESOURCE_DIMENSION>(*(uint32_t*)&headerDX10[4]);
                 miscFlag          = *(uint32_t*)&headerDX10[8];
                 arraySize         = *(uint32_t*)&headerDX10[12];
                 miscFlags2        = *(uint32_t*)&headerDX10[16];
@@ -328,6 +337,9 @@ namespace Engine::priv::textures {
         static constexpr DDS_PixelFormat DDSPF_Q8W8V8U8  = { sizeof(DDS_PixelFormat), DDPF_BUMPDUDV, 0, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 };
         static constexpr DDS_PixelFormat DDSPF_V16U16    = { sizeof(DDS_PixelFormat), DDPF_BUMPDUDV, 0, 32, 0x0000ffff, 0xffff0000, 0x00000000, 0x00000000 };
     };
+
+    bool LoadDDSFile(Engine::priv::TextureCPUData&, Engine::priv::ImageData&);
+    bool LoadDDSFile(Engine::priv::TextureCubemapCPUData&, Engine::priv::ImageData&);
 };
 
 #endif

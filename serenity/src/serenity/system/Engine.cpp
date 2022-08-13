@@ -18,6 +18,9 @@
 #include <unordered_set>
 
 
+#include <serenity/renderer/opengl/OpenGLContext.h>
+#include <serenity/renderer/direct3d/DirectXContext.h>
+
 namespace {
     void internal_cleanup_os_specific() {
         /*
@@ -93,46 +96,67 @@ namespace {
 #endif
 
 
+
+Engine::priv::EngineRenderingContexts::EngineRenderingContexts(const EngineOptions& options) {
+    switch (options.renderingAPI) {
+        case RenderingAPI::OpenGL: {
+            auto glContext = m_APIContexts.emplace_back(std::make_unique<Engine::priv::OpenGLContext>()).get();
+            break;
+        }
+        case RenderingAPI::DirectX: {
+            auto dXContext = m_APIContexts.emplace_back(std::make_unique<Engine::priv::DirectXContext>()).get();
+            break;
+        }
+        case RenderingAPI::Vulkan: {
+            break;
+        }
+        case RenderingAPI::Metal: {
+            break;
+        }
+    }
+}
+
+
 Engine::priv::EngineWindows::EngineWindows(const EngineOptions& options) {
-    m_WindowsVector.emplace_back(options);
+    auto& window = m_WindowsVector.emplace_back(options);
+}
+Engine::priv::EngineWindows::~EngineWindows() {
 }
 
 
 
 
-Engine::priv::EngineCore::Modules::Modules(const EngineOptions& options, EventModule& eventModule, ResourceManager& resourceManager, InputModule& inputModule)
+Engine::priv::EngineCore::Modules::Modules(const EngineOptions& options, EventDispatcher& eventDispatcher, ResourceManager& resourceManager, InputModule& inputModule)
     : m_RenderModule{ options, Engine::getWindowSize().x, Engine::getWindowSize().y }
     , m_Editor{ options, Engine::getWindow() }
-    , m_EngineEventHandler{ m_Editor, inputModule, m_RenderModule, resourceManager, eventModule }
+    , m_EngineEventHandler{ m_Editor, inputModule, m_RenderModule, resourceManager, eventDispatcher }
 {
 
 }
 
 
 
-Engine::priv::EngineCore::EngineCore(const EngineOptions& options)
-    : m_ResourceManager{ options }
-{
+Engine::priv::EngineCore::EngineCore(const EngineOptions& options, Window& window)
+    : m_RenderingAPIManager{ options, window }
+    , m_ResourceManager{ options }
+{ 
     std::srand(static_cast<uint32_t>(std::time(nullptr)));
     m_Misc.m_MainThreadID = std::this_thread::get_id();
 }
 Engine::priv::EngineCore::~EngineCore() {
     internal_cleanup_os_specific();
 }
-void Engine::priv::EngineCore::init(const EngineOptions& options, GameCore* gameCore) {
+void Engine::priv::EngineCore::init(const EngineOptions& options, Engine::view_ptr<GameCore> gameCore) {
     m_GameCore = gameCore;
     internal_init_os_specific(options);
-
-    m_Modules  = std::make_unique<Modules>(options, m_EventModule, m_ResourceManager, m_InputModule);
+    m_Modules  = std::make_unique<Modules>(options, m_EventDispatcher, m_ResourceManager, m_InputModule);
     m_Misc.m_BuiltInMeshes.init();
-    m_Modules->m_RenderModule.init();
-
+    m_Modules->m_RenderModule.init(Engine::getWindowSize().x, Engine::getWindowSize().y);
     Game::initResources(options, *m_GameCore);
     Game::initLogic(options, *m_GameCore);
-
     if (m_ResourceManager.m_Scenes.empty()) {
         Scene& defaultScene = Engine::Resources::addScene<Scene>("Default");
-        /*auto default_camera = */defaultScene.addCamera<Camera>(60.0f, float(options.width) / float(options.height), 0.01f, 1000.0f);
+        defaultScene.addCamera<Camera>(60.0f, float(options.width) / float(options.height), 0.01f, 1000.0f);
         Engine::Resources::setCurrentScene(std::addressof(defaultScene));
     }
 }
@@ -172,7 +196,7 @@ void Engine::priv::EngineCore::internal_pre_update(GameCore& gameCore, int frame
     scene.preUpdate(dt);
 }
 void Engine::priv::EngineCore::internal_post_update(Scene& scene, Window& window, const float dt) {
-    m_EventModule.postUpdate();
+    m_EventDispatcher.postUpdate();
     window.m_Data.internal_update_on_reset_events(dt);
 }
 void Engine::priv::EngineCore::internal_render(GameCore& gameCore, Scene& scene, Window& window, const float dt, const double alpha) {
@@ -207,7 +231,7 @@ void Engine::priv::EngineCore::internal_render(GameCore& gameCore, Scene& scene,
 void Engine::priv::EngineCore::internal_cleanup() {
     m_ResourceManager.postUpdate();
 }
-void Engine::priv::EngineCore::run(const EngineOptions& options, GameCore* gameCore) {
+void Engine::priv::EngineCore::run(const EngineOptions& options, Engine::view_ptr<GameCore> gameCore) {
     init(options, gameCore);
 
 

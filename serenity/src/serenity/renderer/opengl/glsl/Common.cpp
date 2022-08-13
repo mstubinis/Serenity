@@ -1,11 +1,14 @@
 
 #include <serenity/renderer/opengl/glsl/Common.h>
-#include <serenity/renderer/opengl/Extensions.h>
 #include <serenity/resources/shader/ShaderHelper.h>
 #include <serenity/resources/material/MaterialEnums.h>
-#include <serenity/renderer/opengl/State.h>
+
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
+#include <serenity/renderer/opengl/OpenGLContext.h>
 
 #include <boost/algorithm/string/replace.hpp>
+
+#include <array>
 
 void Engine::priv::opengl::glsl::Common::convert(std::string& code, uint32_t versionNumber, ShaderType shaderType) {
 
@@ -34,7 +37,7 @@ void Engine::priv::opengl::glsl::Common::convert(std::string& code, uint32_t ver
 #pragma endregion
 
 #pragma region use sampler
-    const bool is_bindless_supported = Engine::priv::OpenGLExtensions::isBindlessTexturesSupported();
+    const bool is_bindless_supported = Engine::priv::OpenGLContext::isBindlessTexturesSupported();
 
     const std::array<const std::string, 4> types {
         "1D",
@@ -107,9 +110,9 @@ vec2 HammersleySequence(int i, int N) {
 #pragma region VanDerCorpus
     if (ShaderHelper::lacksDefinition(code, "VanDerCorpus(", "float VanDerCorpus(")){
         //2.3283064365386963e-10 = 0x100000000
-        const auto version = Engine::priv::OpenGLState::getHighestGLSLVersion();
+        const auto version = Engine::priv::APIState<Engine::priv::OpenGL>::getConstants().GLSL_VERSION;
         std::string vanDerCorpus;
-        if (!version.empty() && std::stoi(version) >= 130) {
+        if (version >= 130) {
             vanDerCorpus = R"(
 float VanDerCorpus(uint bits) {
     bits = (bits << 16u) | (bits >> 16u);

@@ -19,6 +19,7 @@
 
 
 #include <serenity/utils/BlockProfiler.h>
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
 
 namespace {
     constexpr const float PLANE_RADIUS = 0.5f;
@@ -79,7 +80,7 @@ Engine::priv::ParticleSystem::ParticleSystem(uint32_t maxEmitters, uint32_t maxP
     ParticlesDOD.resize(std::min(maxParticles, 300U));
 
     const auto num_cores        = Engine::hardware_concurrency();
-    const auto maxMaterialSlots = std::min(Engine::priv::OpenGLState::constants.MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME);
+    const auto maxMaterialSlots = std::min(Engine::priv::APIState<Engine::priv::OpenGL>::getConstants().MAX_TEXTURE_IMAGE_UNITS - 1U, MAX_UNIQUE_PARTICLE_TEXTURES_PER_FRAME);
 
     Bimap.reserve(maxMaterialSlots);
 

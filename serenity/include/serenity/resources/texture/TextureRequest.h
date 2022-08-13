@@ -12,7 +12,7 @@ class Texture;
 struct TextureRequestPart final {
     Engine::priv::TextureCPUData  m_CPUData;
     Engine::ResourceCallback      m_Callback    = [](Handle) {};
-    Handle                        m_Handle      = Handle{};
+    Handle                        m_Handle;
     bool                          m_Async       = false;
 
     TextureRequestPart() = default;
@@ -40,7 +40,6 @@ struct TextureRequest final {
     uint32_t                  m_Height         = 0;
     uint32_t                  m_Width          = 0;
     uint32_t                  m_ColorsPerPixel = 4;
-    //sf::Image                 m_SFMLImage;
 
     TextureRequest() = delete;
     TextureRequest(std::string_view filenameOrData, bool genMipMaps, ImageInternalFormat, TextureType, Engine::ResourceCallback&& callback);

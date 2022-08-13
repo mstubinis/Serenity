@@ -12,12 +12,18 @@
 #include <serenity/renderer/postprocess/SMAA.h>
 #include <serenity/renderer/postprocess/FXAA.h>
 #include <serenity/renderer/postprocess/Bloom.h>
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
 
 #include <serenity/resources/material/Material.h>
 #include <serenity/resources/shader/ShaderProgram.h>
 #include <serenity/resources/shader/Shader.h>
 
+#include <serenity/resources/texture/Texture.h>
+#include <serenity/resources/texture/TextureCubemap.h>
+
 #include <serenity/networking/Networking.h>
+
+#include <serenity/renderer/opengl/OpenGLContext.h>
 
 #include <iomanip>
 #include <fstream>
@@ -40,10 +46,15 @@ struct ScriptContent {
     std::string  data;
     bool         fromFile = false;
 };
+struct TextureContent {
+    float asiotropicFiltering = 1.0f;
+};
 namespace {
     std::stringstream                               STR_STREAM;
     std::unordered_map<uint32_t, ScriptContent>     COMPONENT_SCRIPT_CONTENT; //entity id => ScriptContent(string, bool)
     std::unordered_map<std::string, ScriptContent>  SHADER_CONTENT; //shader name => ScriptContent(string, bool)
+
+    std::unordered_map<Texture*, TextureContent>     TEXTURE_CONTENT;
 }
 namespace Engine::priv {
     class EditorWindowSceneFunctions {
@@ -85,14 +96,22 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) 
         if (transform && ImGui::TreeNode("ComponentTransform")) {
             ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Position"); ImGui::SameLine(); 
 #ifdef ENGINE_HIGH_PRECISION
-            ImGui::InputDouble3("##trans_pos", &transform->m_Position[0]);
+            if (ImGui::InputDouble3("##trans_pos", &transform->m_Position[0])) {
+                transform->setPosition(transform->m_Position);
+            }
 #else
-            ImGui::InputFloat3("##trans_pos", &transform->m_Position[0]);
+            if (ImGui::InputFloat3("##trans_pos", &transform->m_Position[0])) {
+                transform->setPosition(transform->m_Position);
+            }
 #endif
             ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Rotation"); ImGui::SameLine(); 
-            ImGui::InputFloat4("##trans_rot", &transform->m_Rotation[0]);
+            if (ImGui::InputFloat4("##trans_rot", &transform->m_Rotation[0])) {
+                transform->setRotation(transform->m_Rotation);
+            }
             ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Scale   "); ImGui::SameLine(); 
-            ImGui::InputFloat3("##trans_scl", &transform->m_Scale[0]);
+            if (ImGui::InputFloat3("##trans_scl", &transform->m_Scale[0])) {
+                transform->setScale(transform->m_Scale);
+            }
 
             //getChildren() is somewhat expensive, 0(N) N = num max entities in scene
             const auto& children = e.getChildren();
@@ -144,9 +163,12 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) 
                     if (ImGui::InputFloat3("position", &pos[0])) {
                         instance.setPosition(pos);
                     }
-
-                    ImGui::InputFloat4("rotation", &instance.m_Orientation[0]);
-                    ImGui::InputFloat3("scale", &instance.m_Scale[0]);
+                    if (ImGui::InputFloat4("rotation", &instance.m_Orientation[0])) {
+                        instance.setOrientation(instance.m_Orientation);
+                    }
+                    if (ImGui::InputFloat3("scale", &instance.m_Scale[0])) {
+                        instance.setScale(instance.m_Scale);
+                    }
                     ImGui::Text(std::string("Radius: " + std::to_string(instance.m_Radius)).c_str());
                     ImGui::Separator();
                     const std::string a = instance.m_MeshHandle.null() ? "N/A" : instance.m_MeshHandle.get<Mesh>()->name();
@@ -168,20 +190,39 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) 
         if (camera && ImGui::TreeNode("ComponentCamera")) {
             if (camera->getType() == ComponentCamera::CameraType::Perspective) {
                 ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Perspective Camera");
-                ImGui::SliderFloat("Angle", &camera->m_AngleOrLeft, 0.0f, glm::radians(180.0f));
-                ImGui::InputFloat("AspectRatio", &camera->m_AspectRatioOrRight);
-                ImGui::InputFloat("Near", &camera->m_NearPlane);
-                ImGui::InputFloat("Far", &camera->m_FarPlane);
-            }
-            else {
+                if (ImGui::SliderFloat("Angle", &camera->m_AngleOrLeft, 0.0f, glm::radians(180.0f))) {
+                    camera->setAngle(camera->m_AngleOrLeft);
+                }
+                if (ImGui::InputFloat("AspectRatio", &camera->m_AspectRatioOrRight)) {
+                    camera->setAspectRatio(camera->m_AspectRatioOrRight);
+                }
+            } else {
                 ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Orthographic Camera");
-                ImGui::InputFloat("Left", &camera->m_AngleOrLeft);
-                ImGui::InputFloat("Right", &camera->m_AspectRatioOrRight);
-                ImGui::InputFloat("Top", &camera->m_Top);
-                ImGui::InputFloat("Bottom", &camera->m_Bottom);
-                ImGui::InputFloat("Near", &camera->m_NearPlane);
-                ImGui::InputFloat("Far", &camera->m_FarPlane);
+                if (ImGui::InputFloat("Left", &camera->m_AngleOrLeft)) {
+
+                }
+                if (ImGui::InputFloat("Right", &camera->m_AspectRatioOrRight)) {
+
+                }
+                if (ImGui::InputFloat("Top", &camera->m_Top)) {
+
+                }
+                if (ImGui::InputFloat("Bottom", &camera->m_Bottom)) {
+
+                }
             }
+            if (ImGui::InputFloat("Near", &camera->m_NearPlane)) {
+                camera->setNear(camera->m_NearPlane);
+            }
+            if (ImGui::InputFloat("Far", &camera->m_FarPlane)) {
+                camera->setFar(camera->m_FarPlane);
+            }
+
+            auto viewVec  = camera->getViewVector();
+            auto rightVec = camera->getRight();
+            ImGui::Text(std::string("View Vector: " + std::to_string(viewVec[0]) + ", " + std::to_string(viewVec[1]) + ", " + std::to_string(viewVec[2])).c_str());
+            ImGui::Text(std::string("Right Vector: " + std::to_string(rightVec[0]) + ", " + std::to_string(rightVec[1]) + ", " + std::to_string(rightVec[2])).c_str());
+
             Engine::priv::ComponentCamera_Functions::RebuildProjectionMatrix(*camera);
             ImGui::TreePop();
         }
@@ -522,19 +563,79 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
             Engine::getWindow().setVerticalSyncEnabled(vsync);
         }
     }
+    //opengl / directx / etc...
+    {
+        auto checkbox = [](const std::string& title, uint32_t capability, ImVec4 color = ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }) {
+            ImGui::TextColored(color, title.c_str()); ImGui::SameLine();
+            bool enabled = glIsEnabled(capability);
+            if (ImGui::Checkbox(("##" + title).c_str(), &enabled)) {
+                enabled ? glEnable(capability) : glDisable(capability);
+            }
+        };
+        switch (Engine::priv::Core::m_APIManager->getAPI()) {
+            case RenderingAPI::OpenGL: {
+                auto& openglManager = Engine::priv::Core::m_APIManager->getOpenGL();
+                ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "OpenGL");
+                if (openglManager.isVersionGreaterOrEqualTo(4, 6) || Engine::priv::OpenGLContext::supported(OpenGLContext::Extensions::ARB_seamless_cube_map)) {
+                    checkbox("Seamless Cubemaps", GL_TEXTURE_CUBE_MAP_SEAMLESS);
+                    ImGui::SameLine();
+                }
+                /*
+                GL_PRIMITIVE_RESTART_FIXED_INDEX are available only if the GL version is 4.3 or greater.
+                GL_DEBUG_OUTPUT and GL_DEBUG_OUTPUT_SYNCHRONOUS are available only if the GL version is 4.3 or greater.
+                */
+
+                checkbox("Line Smooth", GL_LINE_SMOOTH);
+                ImGui::SameLine();
+                checkbox("Blending", GL_BLEND);
+
+                checkbox("Face Culling", GL_CULL_FACE);
+                ImGui::SameLine();
+                checkbox("Depth Test", GL_DEPTH_TEST);
+                ImGui::SameLine();
+                checkbox("Stencil Test", GL_STENCIL_TEST);
+                
+                checkbox("Scissor Test", GL_SCISSOR_TEST);
+                ImGui::SameLine();
+                checkbox("Multisample", GL_MULTISAMPLE);
+                ImGui::SameLine();
+                checkbox("Dithering", GL_DITHER);
+                break;
+            }
+            case RenderingAPI::DirectX: {
+                break;
+            }
+            case RenderingAPI::Vulkan: {
+                break;
+            }
+            case RenderingAPI::Metal: {
+                break;
+            }
+        }
+    }
     //skybox
     {
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Skybox");
-        ImGui::Checkbox("Skybox Enabled ", &renderer.m_DrawSkybox);
+        if (ImGui::Checkbox("Skybox Enabled ", &renderer.m_DrawSkybox)) {
+
+        }
     }
     //lighting
     {
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Lighting");
         constexpr std::array<const char*, 2> LightingModels = { "Basic", "Physical" };
-        ImGui::Checkbox("Lighting Enabled", &renderer.m_Lighting);
-        ImGui::SliderFloat("GI Contribution Diffuse", &renderer.m_GI_Diffuse, 0.0f, 1.0f);
-        ImGui::SliderFloat("GI Contribution Specular", &renderer.m_GI_Specular, 0.0f, 1.0f);
-        ImGui::SliderFloat("GI Contribution Global", &renderer.m_GI_Global, 0.0f, 1.0f);
+        if (ImGui::Checkbox("Lighting Enabled", &renderer.m_Lighting)) {
+
+        }
+        if (ImGui::SliderFloat("GI Contribution Diffuse", &renderer.m_GI_Diffuse, 0.0f, 1.0f)) {
+
+        }
+        if (ImGui::SliderFloat("GI Contribution Specular", &renderer.m_GI_Specular, 0.0f, 1.0f)) {
+
+        }
+        if (ImGui::SliderFloat("GI Contribution Global", &renderer.m_GI_Global, 0.0f, 1.0f)) {
+
+        }
         renderer.m_GI_Pack = Engine::Compression::pack3FloatsInto1FloatUnsigned(renderer.m_GI_Diffuse, renderer.m_GI_Specular, renderer.m_GI_Global);
         static int lighting_model_current   = int(renderer.m_LightingAlgorithm);
         if (ImGui::ListBox("Lighting Model", &lighting_model_current, LightingModels.data(), int(LightingModels.size()))) {
@@ -550,8 +651,12 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
             }
         }
         ImGui::TextColored(ImVec4{ 1.0f, 1.0f, 0.0f, 1.0f }, "Shadow Settings");
-        ImGui::SliderFloat("Z Mult Factor", &renderer.m_ShadowZMultFactor, 0.0f, 10.0f);
-        ImGui::SliderFloat("Clipspace offset", &renderer.m_ShadowClipspaceOffset, 0.0f, 3.0f);
+        if (ImGui::SliderFloat("Z Mult Factor", &renderer.m_ShadowZMultFactor, 0.0f, 20.0f)) {
+
+        }
+        if (ImGui::SliderFloat("Clipspace offset", &renderer.m_ShadowClipspaceOffset, 0.0f, 9.0f)) {
+
+        }
 
         ImGui::Separator();
     }
@@ -616,6 +721,137 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
 }
 void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& currentScene) {
     ImGui::BeginChild("ChildResources");
+    if (ImGui::TreeNode("Textures")) {
+        auto textures = Engine::Resources::GetAllResourcesOfType<Texture>(); //doing this every frame is slow
+
+        auto create_ImTextureID = [](Engine::view_ptr<Texture> texture) {
+            return (void*)static_cast<intptr_t>(texture->address());
+        };
+        const float maxTextureSize = 256.0f;
+        auto& openglConstants = Engine::priv::APIState<Engine::priv::OpenGL>::getConstants();
+        std::unordered_set<std::string> uniqueNames;
+        for (auto& texture : textures) {
+            auto textureAddr = std::addressof(*texture);
+
+            std::string textureEditorName = texture->name();
+            uint32_t count = 0;
+            while (uniqueNames.contains(textureEditorName)) {
+                ++count;
+                textureEditorName = texture->name() + "_" + std::to_string(count);
+            }
+            uniqueNames.emplace(textureEditorName);
+
+            if (ImGui::TreeNode(textureEditorName.c_str())) {
+                Engine::priv::Core::m_APIManager->getOpenGL().GL_glBindTextureForModification(texture->getTextureType().toGLType(), texture->address());
+
+                if (!TEXTURE_CONTENT.contains(textureAddr)) {
+                    TEXTURE_CONTENT.emplace(std::piecewise_construct, std::forward_as_tuple(textureAddr), std::forward_as_tuple());
+                }
+                auto& textureEditorData = TEXTURE_CONTENT.at(textureAddr);
+
+                float textureWidth = float(texture->width());
+                float textureHeight = float(texture->height());
+                if (textureWidth > maxTextureSize || textureHeight > maxTextureSize) {
+                    float chosen = std::max(textureWidth, textureHeight);
+                    float scale = float(maxTextureSize) / float(chosen);
+                    textureHeight *= scale;
+                    textureWidth *= scale;
+                }
+                ImGui::Image(
+                    create_ImTextureID(texture),
+                    ImVec2(textureWidth, textureHeight),
+                    ImVec2(0,1),
+                    ImVec2(1,0),
+                    ImVec4(1,1,1,1),//tint color
+                    ImVec4(0,0,0,0) //border color
+                );
+                if (ImGui::SliderFloat("Asiotropic Filtering", &textureEditorData.asiotropicFiltering, 1.0f, openglConstants.MAX_TEXTURE_MAX_ANISOTROPY)) {
+                    texture->setAnisotropicFiltering(textureEditorData.asiotropicFiltering);
+                }
+                static constexpr const char* MinFilterings[] = { 
+                    "GL_LINEAR",
+                    "GL_NEAREST",
+                    "GL_NEAREST_MIPMAP_NEAREST",
+                    "GL_NEAREST_MIPMAP_LINEAR",
+                    "GL_LINEAR_MIPMAP_NEAREST",
+                    "GL_LINEAR_MIPMAP_LINEAR",
+                };
+                static constexpr const char* MaxFilterings[] = { 
+                    "GL_LINEAR", 
+                    "GL_NEAREST",
+                };
+                static constexpr const char* WrapSAndTAndR[] = {
+                    "GL_CLAMP_TO_EDGE",
+                    "GL_CLAMP_TO_BORDER",
+                    "GL_MIRRORED_REPEAT",
+                    "GL_REPEAT",
+                    "GL_MIRROR_CLAMP_TO_EDGE",
+                };
+                struct TextureGLParameters {
+                    GLint magFilter = 0;
+                    GLint minFilter = 0;
+                    GLint wrapS = 0;
+                    GLint wrapT = 0;
+                    GLint wrapR = 0;
+                };
+                TextureGLParameters parameters;
+                glGetTexParameteriv(texture->getTextureType().toGLType(), GL_TEXTURE_MAG_FILTER, &parameters.magFilter);
+                glGetTexParameteriv(texture->getTextureType().toGLType(), GL_TEXTURE_MIN_FILTER, &parameters.minFilter);
+                glGetTexParameteriv(texture->getTextureType().toGLType(), GL_TEXTURE_WRAP_S, &parameters.wrapS);
+                glGetTexParameteriv(texture->getTextureType().toGLType(), GL_TEXTURE_WRAP_T, &parameters.wrapT);
+                glGetTexParameteriv(texture->getTextureType().toGLType(), GL_TEXTURE_WRAP_R, &parameters.wrapR);
+
+                const static std::unordered_map<GLenum, uint32_t> paramMapping{
+                    { GL_LINEAR, TextureFilter::Linear },
+                    { GL_NEAREST, TextureFilter::Nearest },
+                    { GL_NEAREST_MIPMAP_NEAREST, TextureFilter::Nearest_Mipmap_Nearest },
+                    { GL_NEAREST_MIPMAP_LINEAR, TextureFilter::Nearest_Mipmap_Linear },
+                    { GL_LINEAR_MIPMAP_NEAREST, TextureFilter::Linear_Mipmap_Nearest },
+                    { GL_LINEAR_MIPMAP_LINEAR, TextureFilter::Linear_Mipmap_Linear },
+
+                    { GL_CLAMP_TO_EDGE, TextureWrap::ClampToEdge },
+                    { GL_CLAMP_TO_BORDER, TextureWrap::ClampToBorder },
+                    { GL_MIRRORED_REPEAT, TextureWrap::RepeatMirrored },
+                    { GL_REPEAT, TextureWrap::Repeat },
+                    { GL_MIRROR_CLAMP_TO_EDGE, TextureWrap::MirrorClampToEdge },
+                };
+                parameters.magFilter = paramMapping.at(parameters.magFilter);
+                parameters.minFilter = paramMapping.at(parameters.minFilter);
+                parameters.wrapS     = paramMapping.at(parameters.wrapS);
+                parameters.wrapT     = paramMapping.at(parameters.wrapT);
+                parameters.wrapR     = paramMapping.at(parameters.wrapR);
+
+
+                if (ImGui::ListBox("Min Filter", &parameters.minFilter, MinFilterings, IM_ARRAYSIZE(MinFilterings))) {
+                    texture->setMinFilter(parameters.minFilter);
+                }
+                if (ImGui::ListBox("Max Filter", &parameters.magFilter, MaxFilterings, IM_ARRAYSIZE(MaxFilterings))) {
+                    texture->setMaxFilter(parameters.magFilter);
+                }
+
+                if (ImGui::ListBox("Texture Wrap S", &parameters.wrapS, WrapSAndTAndR, IM_ARRAYSIZE(WrapSAndTAndR))) {
+                    texture->setXWrapping(parameters.wrapS);
+                }
+                if (ImGui::ListBox("Texture Wrap T", &parameters.wrapT, WrapSAndTAndR, IM_ARRAYSIZE(WrapSAndTAndR))) {
+                    texture->setYWrapping(parameters.wrapT);
+                }
+                /*
+                //TODO: this is for TextureCubemap only
+                if (ImGui::ListBox("Texture Wrap R", &parameters.wrapR, WrapSAndTAndR, IM_ARRAYSIZE(WrapSAndTAndR))) {
+                    texture->setMaxFilter(parameters.wrapR);
+                }
+                */
+
+                if (ImGui::Button("Generate Mipmaps", ImVec2(150.0f,30.0f))) {
+                    texture->generateMipmaps();
+                }
+                ImGui::TreePop();
+                ImGui::Separator();
+            }
+        }
+        ImGui::TreePop();
+        ImGui::Separator();
+    }
     if (ImGui::TreeNode("Materials")) {
         auto materials = Engine::Resources::GetAllResourcesOfType<Material>(); //doing this every frame is slow
         for (auto& material : materials) {
@@ -707,9 +943,13 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
 
                         }
                         if (ImGui::Button("Update", ImVec2(50, 25))) {
-                            shader->load(scriptData.data.data());
-                            shaderProgram->unload();
-                            shaderProgram->load();
+                            shader->load(scriptData.data);
+
+                            Engine::priv::PublicShaderProgram::UnloadGPU(*shaderProgram);
+                            Engine::priv::PublicShaderProgram::UnloadCPU(*shaderProgram);
+   
+                            Engine::priv::PublicShaderProgram::LoadCPU(*shaderProgram);
+                            Engine::priv::PublicShaderProgram::LoadGPU(*shaderProgram);
                         }
                         ImGui::TreePop();
                     }

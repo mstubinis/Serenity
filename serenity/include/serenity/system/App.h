@@ -4,6 +4,7 @@
 
 struct EngineOptions;
 
+#include <serenity/system/EngineOptions.h>
 #include <serenity/types/ViewPointer.h>
 #include <serenity/system/Engine.h>
 
@@ -14,12 +15,21 @@ namespace Engine {
             App() = delete;
 		public:
             App(const EngineOptions& engineOptions) {
-                Engine::priv::EngineWindows windows{ engineOptions };
-                Engine::priv::Core::m_Windows = std::addressof(windows);
-                Engine::priv::EngineCore engine{ engineOptions };
-                Engine::priv::Core::m_Engine  = std::addressof(engine);
-                GAMECORE gameCore;
-                engine.run(engineOptions, std::addressof(gameCore));
+                auto renderingContexts = std::make_unique<Engine::priv::EngineRenderingContexts>( engineOptions );
+                Engine::priv::Core::m_RenderingContexts = renderingContexts;
+
+                auto windows = std::make_unique<Engine::priv::EngineWindows>(engineOptions);
+                Engine::priv::Core::m_Windows = windows;
+                assert(!windows->empty());
+                auto& mainWindow = windows->at(0);
+                mainWindow.setRenderContext(renderingContexts->at(0));
+                mainWindow.setVerticalSyncEnabled(engineOptions.vsync);
+
+                auto engine = std::make_unique<Engine::priv::EngineCore>( engineOptions, mainWindow);
+                Engine::priv::Core::m_Engine = engine;
+
+                auto gameCore = std::make_unique<GAMECORE>();
+                engine->run(engineOptions, gameCore);
             }
             App(const App&)                = delete;
             App& operator=(const App&)     = delete;

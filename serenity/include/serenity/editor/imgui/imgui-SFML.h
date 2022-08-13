@@ -17,15 +17,16 @@ namespace sf {
     class Sprite;
     class Texture;
     class Window;
+    class WindowBase;
 }
 
 namespace ImGui {
     namespace SFML {
-        IMGUI_SFML_API void Init(sf::Window& window, const sf::Vector2f& displaySize,
+        IMGUI_SFML_API void Init(sf::WindowBase& window, const sf::Vector2f& displaySize,
             bool loadDefaultFont = true);
 
         IMGUI_SFML_API void ProcessEvent(const sf::Event& event);
-        IMGUI_SFML_API void Update(sf::Window& window, sf::Time dt);
+        IMGUI_SFML_API void Update(sf::WindowBase& window, sf::Time dt);
         IMGUI_SFML_API void Update(const sf::Vector2i& mousePos, const sf::Vector2f& displaySize,
             sf::Time dt);
 

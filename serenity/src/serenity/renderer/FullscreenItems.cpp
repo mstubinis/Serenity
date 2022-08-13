@@ -3,6 +3,8 @@
 #include <serenity/events/Event.h>
 #include <serenity/system/Engine.h>
 
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
+
 #pragma region Triangle
 
 void Engine::priv::FullscreenTriangle::init() {
@@ -21,7 +23,7 @@ void Engine::priv::FullscreenTriangle::init() {
     m_IBO.setData(m_Indices.size() * sizeof(uint16_t), m_Indices.data(), BufferDataDrawType::Static);
 
     buildVAO();
-    registerEvent(EventType::WindowFullscreenChanged);
+    //registerEvent(EventType::WindowFullscreenChanged);
 }
 void Engine::priv::FullscreenTriangle::changeDimensions(float width, float height) {
     if (m_Indices.size() == 0) {
@@ -50,7 +52,7 @@ void Engine::priv::FullscreenTriangle::changeDimensions(float width, float heigh
 }
 void Engine::priv::FullscreenTriangle::buildVAO() {
     m_VAO.deleteVAO();
-    if (Engine::priv::OpenGLState::constants.supportsVAO()) {
+    if (Engine::priv::APIState<Engine::priv::OpenGL>::supportsVAO()) {
         m_VAO.generateVAO();
         m_VAO.bindVAO();
         bindToGPU();
@@ -78,9 +80,9 @@ void Engine::priv::FullscreenTriangle::render(){
     }
 }
 void Engine::priv::FullscreenTriangle::onEvent(const Event& e) {
-    if (e.type == EventType::WindowFullscreenChanged) {
-        buildVAO();
-    }
+    //if (e.type == EventType::WindowFullscreenChanged) {
+    //    buildVAO();
+    //}
 }
 
 #pragma endregion
@@ -108,7 +110,7 @@ void Engine::priv::FullscreenQuad::init() {
     m_IBO.setData(m_Indices.size() * sizeof(uint16_t), m_Indices.data(), BufferDataDrawType::Static);
 
     buildVAO();
-    registerEvent(EventType::WindowFullscreenChanged);
+    //registerEvent(EventType::WindowFullscreenChanged);
 }
 void Engine::priv::FullscreenQuad::changeDimensions(float width, float height) {
     if (m_Indices.size() == 0) {
@@ -141,7 +143,7 @@ void Engine::priv::FullscreenQuad::changeDimensions(float width, float height) {
 }
 void Engine::priv::FullscreenQuad::buildVAO() {
     m_VAO.deleteVAO();
-    if (Engine::priv::OpenGLState::constants.supportsVAO()) {
+    if (Engine::priv::APIState<Engine::priv::OpenGL>::supportsVAO()) {
         m_VAO.generateVAO();
         m_VAO.bindVAO();
         bindToGPU();
@@ -168,9 +170,9 @@ void Engine::priv::FullscreenQuad::render(){
     }
 }
 void Engine::priv::FullscreenQuad::onEvent(const Event& e) {
-    if (e.type == EventType::WindowFullscreenChanged) {
-        buildVAO();
-    }
+    //if (e.type == EventType::WindowFullscreenChanged) {
+    //    buildVAO();
+    //}
 }
 
 #pragma endregion

@@ -3,7 +3,8 @@
 #define ENGINE_RENDERER_OPENGL_RENDERABLE_PROPERTIES_H
 
 #include <serenity/system/TypeDefs.h>
-#include <serenity/renderer/opengl/OpenGL.h>
+#include <gl/glew.h>
+#include <SFML/OpenGL.hpp>
 
 //creates a tightly packed data object that can hash fast.
 class OpenGLRenderableProperties final {

@@ -20,8 +20,8 @@ class CameraLogicType {
         BUILD_ENUM_CLASS_MEMBERS(CameraLogicType, Type)
 };
 
-using CameraLogicComponent   = ComponentLogic;
-using CameraLogicFunctionPtr = void(*)(const CameraLogicComponent*, const float);
+
+using CameraLogicFunctionPtr = void(*)(const ComponentLogic*, const float);
 
 class Camera: public Entity {
     friend struct Engine::priv::ComponentCamera_Functions;
@@ -58,7 +58,7 @@ class Camera: public Entity {
         [[nodiscard]] float getNear() const noexcept;
         [[nodiscard]] float getFar() const noexcept;
 
-        inline void setUpdateFunction(const CameraLogicFunctionPtr& func) noexcept { getComponent<CameraLogicComponent>()->setFunctor(func); };
+        inline void setUpdateFunction(const CameraLogicFunctionPtr& func) noexcept { getComponent<ComponentLogic>()->setFunctor(func); };
         void setUpdateFunction(CameraLogicType) noexcept;
 
         void setAngle(float angle) noexcept;

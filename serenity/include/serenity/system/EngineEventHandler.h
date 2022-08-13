@@ -9,7 +9,7 @@ namespace Engine::priv {
     class  WindowData;
     class  EngineCore;
     class  InputModule;
-    class  EventModule;
+    class  EventDispatcher;
     class  RenderModule;
     class  ResourceManager;
     class  EditorCore;
@@ -27,7 +27,7 @@ namespace Engine::priv {
             InputModule&      m_InputModule;
             RenderModule&     m_RenderModule;
             ResourceManager&  m_ResourceManager;
-            EventModule&      m_EventModule;
+            EventDispatcher&  m_EventDispatcher;
 
             void internal_dispatch_event(const Event&) noexcept;
 
@@ -51,7 +51,7 @@ namespace Engine::priv {
             void internal_on_event_joystick_connected(Window&, uint32_t id);
             void internal_on_event_joystick_disconnected(Window&, uint32_t id);
         public:
-            EngineEventHandler(EditorCore&, InputModule&, RenderModule&, ResourceManager&, EventModule&);
+            EngineEventHandler(EditorCore&, InputModule&, RenderModule&, ResourceManager&, EventDispatcher&);
 
             void poll_events(Window&, GameCore&);
     };

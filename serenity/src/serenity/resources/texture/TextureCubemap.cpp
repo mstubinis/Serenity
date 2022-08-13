@@ -2,161 +2,161 @@
 #include <serenity/renderer/Renderer.h>
 #include <serenity/resources/texture/TextureCubemap.h>
 #include <SFML/Graphics/Image.hpp>
+
+#include <serenity/renderer/opengl/APIStateOpenGL.h>
+#include <serenity/resources/texture/DDS.h>
+
 #include <filesystem>
 
-void Engine::priv::TextureCubemapCPUData::initFromFile() {
-    auto& image = m_ImagesDatas[0];
-    std::string extension = std::filesystem::path(image.m_Filename).extension().string();
-    if (extension == ".dds") {
-        TextureLoaderCubemap::LoadDDSFile(*this, image);
+class TextureCubemap::Impl {
+public:
+    static void Load(TextureCubemap& cubemap) {
+        if (!cubemap.isLoaded()) {
+            Engine::priv::TextureLoaderCubemap::LoadCPU(cubemap.m_CPUData, Handle{});
+            Engine::priv::TextureLoaderCubemap::LoadGPU(cubemap);
+        }
     }
-    image.setInternalFormat(image.m_InternalFormat);
-}
-void Engine::priv::TextureCubemapCPUData::initFromCubemap(const std::array<std::string_view, 6>& files, ImageInternalFormat intFmt) {
-    for (int i = 0; i < files.size(); ++i) {
-        auto& image = i >= m_ImagesDatas.size() ? m_ImagesDatas.emplace_back() : m_ImagesDatas[i];
-        image.m_Filename = files[i];
+    static void Unload(TextureCubemap& cubemap) {
+        if (cubemap.isLoaded()) {
+            Engine::priv::TextureLoaderCubemap::UnloadGPU(cubemap);
+        }
     }
-    for (auto& sideImage : m_ImagesDatas) {
-        sideImage.setInternalFormat(intFmt);
+    static bool AddToCommandQueue(TextureCubemap& cubemap, auto func, auto&&... args) {
+#ifdef TEXTURE_COMMAND_QUEUE
+        if (cubemap == false) {
+            cubemap.m_CommandQueue.emplace([&func, &cubemap, ... args = std::forward<decltype(args)>(args)]() {
+                ((std::addressof(cubemap))->*func)(args...);
+            });
+            return true;
+        }
+        return false;
+#else
+        assert(cubemap == true);
+        return false;
+#endif
+    }
+};
+
+namespace Engine::priv {
+    void TextureCubemapCPUData::initFromFile() {
+        auto& image = m_ImagesDatas[0];
+        const std::string extension = std::filesystem::path(image.m_Filename).extension().string();
+        if (extension == ".dds") {
+            Engine::priv::LoadDDSFile(*this, image);
+        }
+        image.setInternalFormat(image.m_InternalFormat);
+    }
+    void TextureCubemapCPUData::initFromCubemap(const std::array<std::string_view, 6>& files, ImageInternalFormat intFmt) {
+        for (int i = 0; i < files.size(); ++i) {
+            auto& image = i >= m_ImagesDatas.size() ? m_ImagesDatas.emplace_back() : m_ImagesDatas[i];
+            image.m_Filename = files[i];
+        }
+        for (auto& sideImage : m_ImagesDatas) {
+            sideImage.setInternalFormat(intFmt);
+        }
     }
 }
 
 TextureCubemap::TextureCubemap(std::string_view textureName, bool mipMap)
     : Resource{ ResourceType::TextureCubemap, textureName }
 {
-    setName(textureName);
+    setName(std::string{ textureName });
     m_CPUData.m_ImagesDatas[0].m_Filename = textureName;
     m_CPUData.m_Name                      = textureName;
     m_CPUData.m_IsToBeMipmapped           = mipMap;
 }
-TextureCubemap::TextureCubemap(std::string_view filename, bool genMipMaps, ImageInternalFormat intFmt)
+TextureCubemap::TextureCubemap(std::string_view filename, bool genMipMaps, ImageInternalFormat internalFormat)
     : TextureCubemap{ filename, genMipMaps }
 {
-    m_CPUData.m_ImagesDatas[0].setInternalFormat(intFmt);
+    m_CPUData.m_ImagesDatas[0].setInternalFormat(internalFormat);
     m_CPUData.initFromFile();
 
-    Engine::priv::TextureLoaderCubemap::Load(*this);
+    Impl::Load(*this);
 }
-TextureCubemap::TextureCubemap(const std::array<std::string_view, 6>& files, std::string_view name, bool genMipMaps, ImageInternalFormat intFmt)
+TextureCubemap::TextureCubemap(const std::array<std::string_view, 6>& files, std::string_view name, bool genMipMaps, ImageInternalFormat internalFormat)
     : TextureCubemap{ name, genMipMaps }
 {
-    m_CPUData.initFromCubemap(files, intFmt);
-    Engine::priv::TextureLoaderCubemap::Load(*this);
+    m_CPUData.initFromCubemap(files, internalFormat);
+    Impl::Load(*this);
 }
 TextureCubemap::TextureCubemap(TextureCubemap&& other) noexcept
     : Resource(std::move(other))
     , Engine::priv::TextureBaseClass(std::move(other))
     , m_CPUData                 { std::move(other.m_CPUData) }
-    , m_ConvolutionTextureHandle{ std::exchange(other.m_ConvolutionTextureHandle, Handle{}) }
-    , m_PreEnvTextureHandle     { std::exchange(other.m_PreEnvTextureHandle, Handle{}) }
+    , m_ConvolutionTextureHandle{ std::move(other.m_ConvolutionTextureHandle) }
+    , m_PreEnvTextureHandle     { std::move(other.m_PreEnvTextureHandle) }
 {}
 TextureCubemap& TextureCubemap::operator=(TextureCubemap&& other) noexcept {
-    Resource::operator=(std::move(other));
-    Engine::priv::TextureBaseClass::operator=(std::move(other));
-    m_CPUData                  = std::move(other.m_CPUData);
-    m_ConvolutionTextureHandle = std::exchange(other.m_ConvolutionTextureHandle, Handle{});
-    m_PreEnvTextureHandle      = std::exchange(other.m_PreEnvTextureHandle, Handle{});
+    if (this != &other) {
+        Resource::operator=(std::move(other));
+        Engine::priv::TextureBaseClass::operator=(std::move(other));
+        m_CPUData                  = std::move(other.m_CPUData);
+        m_ConvolutionTextureHandle = std::move(other.m_ConvolutionTextureHandle);
+        m_PreEnvTextureHandle      = std::move(other.m_PreEnvTextureHandle);
+    }
     return *this;
 }
 
 TextureCubemap::~TextureCubemap() {
-    Engine::priv::TextureLoaderCubemap::Unload(*this);
+    Impl::Unload(*this);
 }
 bool TextureCubemap::generateMipmaps() {
-    if (*this == false) {
-        m_CommandQueue.emplace([this]() { generateMipmaps(); });
+    if (Impl::AddToCommandQueue(*this, &TextureCubemap::generateMipmaps)) {
         return false;
     }
-    internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
-    return Engine::priv::TextureLoaderCubemap::GenerateMipmapsOpenGL(*this);
+    return Engine::opengl::generateMipmaps(*this);
 }
 void TextureCubemap::setXWrapping(TextureWrap wrap) {
-    if (*this == false) {
-        m_CommandQueue.emplace([this, wrap]() { setXWrapping(wrap); });
+    if (Impl::AddToCommandQueue(*this, &TextureCubemap::setXWrapping, wrap)) {
         return;
     }
-    internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
-    Engine::priv::TextureBaseClass::setXWrapping(TextureType::CubeMap, wrap);
+    Engine::opengl::setXWrapping(*this, wrap);
 }
 void TextureCubemap::setYWrapping(TextureWrap wrap) {
-    if (*this == false) {
-        m_CommandQueue.emplace([this, wrap]() { setYWrapping(wrap); });
+    if (Impl::AddToCommandQueue(*this, &TextureCubemap::setYWrapping, wrap)) {
         return;
     }
-    internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
-    Engine::priv::TextureBaseClass::setYWrapping(TextureType::CubeMap, wrap);
+    Engine::opengl::setYWrapping(*this, wrap);
 }
 void TextureCubemap::setZWrapping(TextureWrap wrap) {
-    if (*this == false) {
-        m_CommandQueue.emplace([this, wrap]() { setZWrapping(wrap); });
+    if (Impl::AddToCommandQueue(*this, &TextureCubemap::setZWrapping, wrap)) {
         return;
     }
-    internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, wrap.toGLType());
+    Engine::opengl::setZWrapping(*this, wrap);
 }
 void TextureCubemap::setWrapping(TextureWrap wrap) {
-    if (*this == false) {
-        m_CommandQueue.emplace([this, wrap]() { setWrapping(wrap); });
+    if (Impl::AddToCommandQueue(*this, &TextureCubemap::setWrapping, wrap)) {
         return;
     }
-    internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
-    setXWrapping(wrap);
-    setYWrapping(wrap);
-    setZWrapping(wrap);
+    Engine::opengl::setWrapping(*this, wrap);
 }
 void TextureCubemap::setMinFilter(TextureFilter filter) {
-    if (*this == false) {
-        m_CommandQueue.emplace([this, filter]() { setMinFilter(filter); });
+    if (Impl::AddToCommandQueue(*this, &TextureCubemap::setMinFilter, filter)) {
         return;
     }
-    internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
-
-    const auto glType = filter.toGLType(true);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glType);
-
-    m_CPUData.m_MinFilter = filter.toGLType(true);
+    Engine::opengl::setMinFilter(*this, filter);
 }
 void TextureCubemap::setMaxFilter(TextureFilter filter) {
-    if (*this == false) {
-        m_CommandQueue.emplace([this, filter]() { setMaxFilter(filter); });
+    if (Impl::AddToCommandQueue(*this, &TextureCubemap::setMaxFilter, filter)) {
         return;
     }
-    internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
-
-    const auto glType = filter.toGLType(false);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, glType);
+    Engine::opengl::setMaxFilter(*this, filter);
 }
 void TextureCubemap::setFilter(TextureFilter filter) {
-    if (*this == false) {
-        m_CommandQueue.emplace([this, filter]() { setFilter(filter); });
+    if (Impl::AddToCommandQueue(*this, &TextureCubemap::setFilter, filter)) {
         return;
     }
-    internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
-    TextureCubemap::setMinFilter(filter);
-    TextureCubemap::setMaxFilter(filter);
+    Engine::opengl::setFilter(*this, filter);
 }
 void TextureCubemap::setAnisotropicFiltering(float anisotropicFiltering) {
-    anisotropicFiltering = glm::clamp(anisotropicFiltering, 1.0f, Engine::priv::OpenGLState::constants.MAX_TEXTURE_MAX_ANISOTROPY);
-    if (*this == false) {
-        m_CommandQueue.emplace([this, anisotropicFiltering]() { TextureCubemap::setAnisotropicFiltering(anisotropicFiltering); });
+    if (Impl::AddToCommandQueue(*this, &TextureCubemap::setAnisotropicFiltering, anisotropicFiltering)) {
         return;
     }
-    internal_bind_if_not_bound(TextureType::CubeMap, m_TextureAddress);
-    internal_anisotropic_filtering(TextureType::CubeMap, anisotropicFiltering);
+    Engine::opengl::setAnisotropicFiltering(*this, anisotropicFiltering);
 }
-bool TextureCubemap::compressed() const {
-    ASSERT(m_CPUData.m_ImagesDatas.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas.size() is 0!");
-    ASSERT(m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() is 0!");
-    return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].compressedSize > 0;
-}
-uint8_t* TextureCubemap::pixels() {
-    Engine::priv::TextureLoaderCubemap::WithdrawPixelsFromOpenGLMemory(*this, 0, 0);
-    ASSERT(m_CPUData.m_ImagesDatas.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas.size() is 0!");
-    ASSERT(m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() > 0, __FUNCTION__ << "(): m_CPUData.m_ImagesDatas[0].m_Mipmaps.size() is 0!");
-    return &(m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].pixels)[0];
-}
-int TextureCubemap::getMaxMipmapLevelsPossible() const noexcept {
-    const auto sz = size();
-    return glm::max(0, (int)glm::floor(glm::log2(glm::max(sz.x, sz.y))));
+const uint8_t* TextureCubemap::pixels() {
+    if (!m_CPUData.m_ImagesDatas.empty() && !m_CPUData.m_ImagesDatas[0].m_Mipmaps.empty()) {
+        return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].pixels.data();
+    }
+    return Engine::opengl::getPixels(*this);
 }

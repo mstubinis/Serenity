@@ -491,9 +491,6 @@
     <ClCompile Include="src\serenity\events\EventDispatcher.cpp">
       <Filter>Source Files\Core\Events</Filter>
     </ClCompile>
-    <ClCompile Include="src\serenity\events\EventModule.cpp">
-      <Filter>Source Files\Core\Events</Filter>
-    </ClCompile>
     <ClCompile Include="src\serenity\events\Observer.cpp">
       <Filter>Source Files\Core\Events</Filter>
     </ClCompile>
@@ -625,12 +622,6 @@
     </ClCompile>
     <ClCompile Include="src\serenity\renderer\RenderGraph.cpp">
       <Filter>Source Files\Core\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\renderer\opengl\Extensions.cpp">
-      <Filter>Source Files\Core\Renderer\opengl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\renderer\opengl\State.cpp">
-      <Filter>Source Files\Core\Renderer\opengl</Filter>
     </ClCompile>
     <ClCompile Include="src\serenity\renderer\opengl\UniformBufferObject.cpp">
       <Filter>Source Files\Core\Renderer\opengl</Filter>
@@ -963,9 +954,6 @@
       <Filter>Source Files\Core\Resources\Texture</Filter>
     </ClCompile>
     <ClCompile Include="src\serenity\resources\texture\TextureLoaderCubemap.cpp">
-      <Filter>Source Files\Core\Resources\Texture</Filter>
-    </ClCompile>
-    <ClCompile Include="src\serenity\resources\texture\TextureBaseClass.cpp">
       <Filter>Source Files\Core\Resources\Texture</Filter>
     </ClCompile>
     <ClCompile Include="src\serenity\ecs\systems\SystemTransformParentChild.cpp">
@@ -1625,6 +1613,24 @@
     <ClCompile Include="src\serenity\input\InputModule.cpp">
       <Filter>Source Files\Core\Input</Filter>
     </ClCompile>
+    <ClCompile Include="src\serenity\renderer\APIManager.cpp">
+      <Filter>Source Files\Core\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\OpenGLContext.cpp">
+      <Filter>Source Files\Core\Renderer\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\opengl\APIStateOpenGL.cpp">
+      <Filter>Source Files\Core\Renderer\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\direct3d\APIStateDirectX.cpp">
+      <Filter>Source Files\Core\Renderer\direct3d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\resources\texture\DDS.cpp">
+      <Filter>Source Files\Core\Resources\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serenity\renderer\direct3d\DirectXContext.cpp">
+      <Filter>Source Files\Core\Renderer\direct3d</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\resources\Engine_BuiltInShaders.h">
@@ -1760,9 +1766,6 @@
       <Filter>Header Files\Core\Events</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\events\EventIncludes.h">
-      <Filter>Header Files\Core\Events</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\events\EventModule.h">
       <Filter>Header Files\Core\Events</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\events\Observer.h">
@@ -1941,15 +1944,6 @@
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\SMAA_LUT.h">
       <Filter>Header Files\Core\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\renderer\opengl\Extensions.h">
-      <Filter>Header Files\Core\Renderer\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\renderer\opengl\OpenGL.h">
-      <Filter>Header Files\Core\Renderer\opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="include\serenity\renderer\opengl\State.h">
-      <Filter>Header Files\Core\Renderer\opengl</Filter>
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\opengl\UniformBufferObject.h">
       <Filter>Header Files\Core\Renderer\opengl</Filter>
@@ -3342,6 +3336,24 @@
     </ClInclude>
     <ClInclude Include="include\serenity\renderer\opengl\GLImageConstants.h">
       <Filter>Header Files\Core\Renderer\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\APIManager.h">
+      <Filter>Header Files\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\APIStateOpenGL.h">
+      <Filter>Header Files\Core\Renderer\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\opengl\OpenGLContext.h">
+      <Filter>Header Files\Core\Renderer\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\APIContext.h">
+      <Filter>Header Files\Core\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\direct3d\APIStateDirectX.h">
+      <Filter>Header Files\Core\Renderer\direct3d</Filter>
+    </ClInclude>
+    <ClInclude Include="include\serenity\renderer\direct3d\DirectXContext.h">
+      <Filter>Header Files\Core\Renderer\direct3d</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
