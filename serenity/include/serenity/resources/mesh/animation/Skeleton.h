@@ -7,6 +7,7 @@ class  SMSH_File;
 struct MeshCPUData;
 struct MeshNodeData;
 struct MeshRequest;
+struct MeshRequestPart;
 namespace Engine::priv {
     class  PublicMesh;
     class  MeshImportedData;
@@ -30,30 +31,28 @@ namespace Engine::priv {
         friend class  Engine::priv::ModelInstanceAnimation;
         friend class  Engine::priv::ModelInstanceAnimationContainer;
         public:
-            using AnimationDataMap = Engine::unordered_string_map<std::string, uint16_t>;
+            using AnimationDataMap = Engine::unordered_string_map<std::string, int32_t>;
         private:
-            AnimationDataMap            m_AnimationMapping; //maps an animation name to its data
+            AnimationDataMap            m_AnimationMapping; //maps an animation name to its data Index
             glm::mat4                   m_GlobalInverseTransform = glm::mat4{ 1.0f };
-            std::vector<BoneInfo>       m_BoneInfo;
-            std::vector<AnimationData>  m_AnimationData;
+            std::vector<glm::mat4>      m_BoneOffsets;
+            std::vector<AnimationData>  m_AnimationData; //animations for this skeleton
 
-            void clear() noexcept {
-                m_GlobalInverseTransform = glm::mat4{ 1.0f };
-            }
-            template<typename ... ARGS>
+
+            template<class ... ARGS>
             int internal_add_animation_impl(std::string_view animName, ARGS&&... args) {
                 if (hasAnimation(animName)) {
                     return -1;
                 }
-                const uint16_t index = static_cast<uint16_t>(m_AnimationData.size());
+                const int32_t index = static_cast<int32_t>(m_AnimationData.size());
                 m_AnimationMapping.emplace(std::piecewise_construct, std::forward_as_tuple(animName), std::forward_as_tuple(index));
                 m_AnimationData.emplace_back(std::forward<ARGS>(args)...);
-                ENGINE_PRODUCTION_LOG("Added animation: " << animName);
+                ENGINE_LOG("Added animation: " << animName);
                 return index;
             }
         public:
             MeshSkeleton() = default;
-            MeshSkeleton(const aiMesh&, const aiScene&, MeshRequest&, Engine::priv::MeshImportedData&);
+            MeshSkeleton(const aiMesh&, const aiScene&, MeshRequestPart&, Engine::priv::MeshImportedData&);
 
             MeshSkeleton(const MeshSkeleton&)            = delete;
             MeshSkeleton& operator=(const MeshSkeleton&) = delete;
@@ -61,19 +60,16 @@ namespace Engine::priv {
             MeshSkeleton& operator=(MeshSkeleton&&)      = default;
 
             [[nodiscard]] inline AnimationDataMap& getAnimationData() noexcept { return m_AnimationMapping; }
-            [[nodiscard]] inline uint16_t numBones() const noexcept { return (uint16_t)m_BoneInfo.size(); }
-            [[nodiscard]] inline uint32_t numAnimations() const noexcept { return (uint32_t)m_AnimationData.size(); }
+            [[nodiscard]] inline size_t numBones() const noexcept { return m_BoneOffsets.size(); }
+            [[nodiscard]] inline const std::vector<glm::mat4>& getBoneOffsets() const noexcept { return m_BoneOffsets; }
+            [[nodiscard]] inline size_t numAnimations() const noexcept { return m_AnimationData.size(); }
             [[nodiscard]] inline bool hasAnimation(std::string_view animName) const noexcept { return m_AnimationMapping.contains(animName); }
-            inline void setBoneOffsetMatrix(uint16_t boneIdx, glm::mat4&& matrix) noexcept { m_BoneInfo[boneIdx].BoneOffset = std::move(matrix); }
+            [[nodiscard]] int32_t getAnimationIndex(std::string_view animName) const noexcept { auto it = m_AnimationMapping.find(animName); return (it == m_AnimationMapping.end()) ? -1 : it->second; }
 
-            inline uint16_t getAnimationIndex(std::string_view animName) const noexcept { return m_AnimationMapping.find(animName)->second; }
+            inline void setBoneOffsetMatrix(uint16_t boneIdx, glm::mat4&& matrix) noexcept { m_BoneOffsets[boneIdx] = std::move(matrix); }
 
-            int addAnimation(std::string_view animName, const aiAnimation& anim, MeshRequest& request) {
-                return internal_add_animation_impl(animName, anim, request);
-            }
-            int addAnimation(std::string_view animName, AnimationData&& animationData) {
-                return internal_add_animation_impl(animName, std::move(animationData));
-            }
+            int addAnimation(std::string_view animName, const aiAnimation& anim, MeshRequestPart& part) { return internal_add_animation_impl(animName, anim, part); }
+            int addAnimation(std::string_view animName, AnimationData&& animationData) { return internal_add_animation_impl(animName, std::move(animationData)); }
     };
 };
 #endif

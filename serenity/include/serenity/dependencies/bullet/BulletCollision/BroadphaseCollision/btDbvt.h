@@ -13,7 +13,7 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 ///btDbvt implementation by Nathanael Presson
-
+#pragma once
 #ifndef BT_DYNAMIC_BOUNDING_VOLUME_TREE_H
 #define BT_DYNAMIC_BOUNDING_VOLUME_TREE_H
 

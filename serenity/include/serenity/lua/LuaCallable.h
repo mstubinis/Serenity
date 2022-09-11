@@ -42,8 +42,10 @@ class LuaCallableFunction final {
             , m_LUAFunctor{ std::exchange(other.m_LUAFunctor, nullptr) }
         {}
         LuaCallableFunction& operator=(LuaCallableFunction&& other) noexcept {
-            m_CPPFunctor = std::exchange(other.m_CPPFunctor, nullptr);
-            m_LUAFunctor = std::exchange(other.m_LUAFunctor, nullptr);
+            if (this != &other) {
+                m_CPPFunctor = std::exchange(other.m_CPPFunctor, nullptr);
+                m_LUAFunctor = std::exchange(other.m_LUAFunctor, nullptr);
+            }
             return *this;
         }
 
@@ -70,7 +72,7 @@ class LuaCallableFunction final {
                 (*m_LUAFunctor)(owner, (args)...);
         }
     #else
-        void operator()(const OWNER* owner, ARGS... args) const noexcept {
+        void operator()(const OWNER* owner, ARGS... args) const {
             if (m_CPPFunctor) {
                 (*m_CPPFunctor)(owner, (args)...);
             }
@@ -78,11 +80,11 @@ class LuaCallableFunction final {
                 try {
                     (*m_LUAFunctor)(owner, (args)...);
                 } catch (const luabridge::LuaException& luaException) {
-                    ENGINE_PRODUCTION_LOG("LuaCallableFunction::operator() LuaException: " << luaException.what())
+                    ENGINE_LOG("LuaCallableFunction::operator() LuaException: " << luaException.what())
                 } catch (const std::exception& e) {
-                    ENGINE_PRODUCTION_LOG("LuaCallableFunction::operator() C++ Exception: " << e.what())
+                    ENGINE_LOG("LuaCallableFunction::operator() C++ Exception: " << e.what())
                 } catch (...) {
-                    ENGINE_PRODUCTION_LOG("LuaCallableFunction::operator() Unknown C++ Exception")
+                    ENGINE_LOG("LuaCallableFunction::operator() Unknown C++ Exception")
                 }
             }
         }

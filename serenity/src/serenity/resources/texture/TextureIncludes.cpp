@@ -42,9 +42,9 @@ void ImageData::load(const uint8_t* inPixels, int inWidth, int inHeight, const s
         mipmap->assignPixels(inPixels, inWidth, inHeight);
     }
 }
-void ImageData::setInternalFormat(ImageInternalFormat intFmt) {
+void ImageData::setFormats(ImageInternalFormat intFmt) {
     m_InternalFormat = intFmt;
-    m_PixelFormat    = m_InternalFormat;
+    m_PixelFormat    = m_InternalFormat; //does a nice conversion here
 }
 
 

@@ -2,10 +2,10 @@
 #ifndef ENGINE_RESOURCE_HANDLE_H
 #define ENGINE_RESOURCE_HANDLE_H
 
-#include <serenity/resources/ResourcesIncludes.h>
-#include <serenity/system/TypeDefs.h>
+#include <serenity/system/EngineIncludes.h>
 #include <serenity/types/ViewPointer.h>
-#include <serenity/system/Macros.h>
+#include <cassert>
+#include <string>
 #include <mutex>
 
 namespace Engine::priv {
@@ -15,8 +15,9 @@ namespace Engine::priv {
 class Handle final {
     friend class Engine::priv::ResourceModule;
     private:
-        void* internal_get_base() const noexcept;
-        void* internal_get_base_thread_safe() noexcept;
+        [[nodiscard]] void* internal_get_base(uint32_t resourceTypeID) const noexcept;
+        [[nodiscard]] void* internal_get_base_thread_safe(uint32_t resourceTypeID) const noexcept;
+
 
         uint32_t m_Index   : 23 = 0;
         uint32_t m_Type    : 9  = 0;
@@ -45,6 +46,15 @@ class Handle final {
             return *this;
         }
 
+        //Don't use these, they are only here to make it compatible to std locks
+        bool try_lock() const;
+
+        //Don't use these, they are only here to make it compatible to std locks
+        void lock() const;
+
+        //Don't use these, they are only here to make it compatible to std locks
+        void unlock() const noexcept;
+
 
         [[nodiscard]] inline constexpr uint32_t index() const { return m_Index; }
         [[nodiscard]] inline constexpr uint32_t type() const { return m_Type; }
@@ -67,18 +77,18 @@ class Handle final {
 
         template<class RESOURCE>
         [[nodiscard]] inline RESOURCE* get() const noexcept {
-            RESOURCE* ret = static_cast<RESOURCE*>(internal_get_base());
-            ASSERT((ret != nullptr && !null()) || (ret == nullptr && null()), __FUNCTION__ << "(): a non-null handle returned a null resource!");
+            RESOURCE* ret = static_cast<RESOURCE*>(this->internal_get_base(RESOURCE::TYPE_ID));
+            assert((ret != nullptr && !null()) || (ret == nullptr && null()));
             return ret;
         }
         template<class RESOURCE>
         [[nodiscard]] inline RESOURCE* getThreadSafe() noexcept {
-            RESOURCE* ret = static_cast<RESOURCE*>(internal_get_base_thread_safe());
-            ASSERT((ret != nullptr && !null()) || (ret == nullptr && null()), __FUNCTION__ << "(): a non-null handle returned a null resource!");
+            RESOURCE* ret = static_cast<RESOURCE*>(this->internal_get_base_thread_safe(RESOURCE::TYPE_ID));
+            assert((ret != nullptr && !null()) || (ret == nullptr && null()));
             return ret;
         }
 
-        [[nodiscard]] Engine::view_ptr<std::mutex> getMutex() noexcept;
+        [[nodiscard]] Engine::view_ptr<std::mutex> getMutex() const noexcept;
 };
 
 namespace std {

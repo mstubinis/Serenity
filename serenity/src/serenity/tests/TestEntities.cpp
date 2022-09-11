@@ -6,7 +6,9 @@
 
 TEST_CASE("Entity tests") {
     Entity entity1;
-    REQUIRE(entity1.null() == true);
+    REQUIRE(entity1.isNull() == true);
+
     Entity entity2 = Entity{ 3,1,1 };
-    REQUIRE(entity2.null() == false);
+    REQUIRE(entity2.isNull() == false);
+
 }

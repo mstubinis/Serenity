@@ -12,7 +12,7 @@ class  ComponentCamera;
 class  ModelInstanceHandle;
 class  Camera;
 namespace Engine::priv {
-    class  EditorWindowScene;
+    class EditorWindowSceneImpl;
 }
 
 #include <vector>
@@ -35,7 +35,7 @@ using ModelInstanceVector = std::vector<std::unique_ptr<ModelInstance>>;
 class ComponentModel : public Observer, public ComponentBaseClass<ComponentModel> {
     friend struct Engine::priv::ComponentModel_Functions;
     friend class  ComponentCamera;
-    friend class  Engine::priv::EditorWindowScene;
+    friend class  Engine::priv::EditorWindowSceneImpl;
     private:
         ModelInstanceVector     m_ModelInstances;
         glm::vec3               m_RadiusBox       = glm::vec3{0.0f};

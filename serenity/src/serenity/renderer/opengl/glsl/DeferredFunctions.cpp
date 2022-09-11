@@ -74,7 +74,7 @@ vec3 GetWorldNormalsFromView(vec3 viewNormals, mat4 camView) {
 
 
     //check for log depth - vertex
-    if (ShaderHelper::sfind(code, "USE_LOG_DEPTH_VERTEX") && !ShaderHelper::sfind(code, "//USE_LOG_DEPTH_VERTEX") && shaderType == ShaderType::Vertex) {
+    if (ShaderHelper::sfind(code, "USE_LOG_DEPTH_VERTEX") && shaderType == ShaderType::Vertex) {
         boost::replace_all(code, "USE_LOG_DEPTH_VERTEX", "");
 #if !defined(ENGINE_FORCE_NO_LOG_DEPTH)
         ShaderHelper::insertStringAtLine(code, R"(varying float VARYING_LOG_Z_F;)", 1);
@@ -86,7 +86,7 @@ vec3 GetWorldNormalsFromView(vec3 viewNormals, mat4 camView) {
     }
 
     //check for log depth - fragment
-    if (ShaderHelper::sfind(code, "USE_LOG_DEPTH_FRAGMENT") && !ShaderHelper::sfind(code, "//USE_LOG_DEPTH_FRAGMENT") && shaderType == ShaderType::Fragment) {
+    if (ShaderHelper::sfind(code, "USE_LOG_DEPTH_FRAGMENT") && shaderType == ShaderType::Fragment) {
         boost::replace_all(code, "USE_LOG_DEPTH_FRAGMENT", "");
 #if !defined(ENGINE_FORCE_NO_LOG_DEPTH)
         ShaderHelper::insertStringRightBeforeMainFunc(code, R"(varying float VARYING_LOG_Z_F;)");

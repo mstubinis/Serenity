@@ -13,8 +13,12 @@
 
 using PacketSequence  = uint16_t;
 using PacketBitfield  = uint32_t;
-using PacketTimestamp = uint32_t;
+using PacketTimestamp = int64_t;
 
+namespace Engine {
+    class quat32;
+    class quat64;
+}
 namespace Engine::Networking {
     class Server;
     class ServerClient;
@@ -22,6 +26,13 @@ namespace Engine::Networking {
 
 sf::Packet& operator <<(sf::Packet&, Entity) noexcept;
 sf::Packet& operator >>(sf::Packet&, Entity) noexcept;
+
+
+sf::Packet& operator <<(sf::Packet&, const Engine::quat32&) noexcept;
+sf::Packet& operator >>(sf::Packet&, Engine::quat32&) noexcept;
+
+sf::Packet& operator <<(sf::Packet&, const Engine::quat64&) noexcept;
+sf::Packet& operator >>(sf::Packet&, Engine::quat64&) noexcept;
 
 #define BUILD_GLM_VEC_PACKET_DECLS(NAME) \
     sf::Packet& operator <<(sf::Packet&, const glm::##NAME##vec2&) noexcept; \
@@ -81,7 +92,30 @@ inline sf::Packet& operator >>(sf::Packet& packet, std::vector<T>& vector) noexc
     T item;
     for (sf::Uint32 i = 0; i < vecSize; ++i) {
         packet >> item;
-        vector.push_back(item);
+        vector.push_back(std::move(item));
+    }
+    return packet;
+}
+
+
+template<class T>
+inline sf::Packet& operator <<(sf::Packet& packet, const std::optional<T>& optional_) noexcept {
+    bool hasValue = optional_.has_value();
+    T val = hasValue ? optional_.value() : T{};
+    packet << hasValue;
+    packet << val;
+    return packet;
+}
+template<class T>
+inline sf::Packet& operator >>(sf::Packet& packet, std::optional<T>& optional_) noexcept {
+    T item;
+    bool isPresent;
+    packet >> isPresent;
+    packet >> item;
+    if (isPresent) {
+        optional_.emplace(std::move(item));
+    } else {
+        optional_ = std::optional<T>{};
     }
     return packet;
 }
@@ -95,8 +129,8 @@ namespace Engine::Networking {
                 return ((s1 > s2) && (s1 - s2 <= std::numeric_limits<T>().max())) || ((s1 < s2) && (s2 - s1 > std::numeric_limits<T>().max()));
             }
         public:
-            uint32_t           m_PacketType     = 0;
             PacketTimestamp    m_Timestamp      = 0;
+            uint32_t           m_PacketType     = 0;
             PacketBitfield     m_AckBitfield    = 0;
             PacketSequence     m_SequenceNumber = 0;
             PacketSequence     m_Ack            = 0;

@@ -114,17 +114,10 @@ void VertexData::setIndices(const uint32_t* data, size_t bufferCount, MeshModify
         m_Triangles.clear();
         m_Triangles.reserve(bufferCount / size_t(3)); //do not process any extra indices that shouldn't be there to begin with
         Engine::priv::Triangle tri;
-        for (size_t i = 0; i < m_Triangles.capacity(); i += 3) {
-            tri.setPositions(
-                positions[m_Indices[i + 0]],
-                positions[m_Indices[i + 1]], 
-                positions[m_Indices[i + 2]]
-            );
-            tri.setIndices(
-                m_Indices[i + 0], 
-                m_Indices[i + 1], 
-                m_Indices[i + 2]
-            );
+        const size_t numIndicesProper = m_Triangles.capacity() * 3;
+        for (size_t i = 0; i < numIndicesProper; i += 3) {
+            tri.setPositions( positions[m_Indices[i + 0]], positions[m_Indices[i + 1]], positions[m_Indices[i + 2]] );
+            tri.setIndices( m_Indices[i + 0], m_Indices[i + 1], m_Indices[i + 2] );
             tri.recalcMidpoint();
             m_Triangles.push_back(tri);
         }

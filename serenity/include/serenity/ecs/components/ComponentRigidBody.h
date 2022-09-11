@@ -108,11 +108,9 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
         MaskType                              m_Group             = CollisionFilter::DefaultFilter;
         MaskType                              m_Mask              = CollisionFilter::AllFilter;
 
-        btVector3 internal_activate_and_get_vector(decimal x, decimal y, decimal z, bool local) noexcept;
         void internal_update_misc() noexcept;
         void internal_set_matrix(const glm_mat4&);
 
-        glm::vec3 internal_getScale() const noexcept;
         void internal_setScale(float x, float y, float z);
         inline void internal_setScale(const glm::vec3& scale) noexcept { internal_setScale(scale.x, scale.y, scale.z); }
 
@@ -203,7 +201,9 @@ class ComponentRigidBody final : public ComponentBaseClass<ComponentRigidBody> {
 
         void setDamping(decimal linear, decimal angular);
 
+        [[nodiscard]] bool isDynamic() const noexcept;
         void setDynamic(bool dynamic);
+
         void setMass(float mass);
         void setGravity(decimal x, decimal y, decimal z);
 

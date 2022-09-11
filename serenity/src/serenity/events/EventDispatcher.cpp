@@ -43,9 +43,7 @@ void Engine::priv::EventDispatcher::unregisterObjectImmediate(Observer& observer
     if (m_Observers.size() > eventType) {
         std::scoped_lock lock{ m_Mutex };
         auto& observers_with_event = m_Observers[eventType];
-        Engine::swap_and_pop_single(observers_with_event, [](const auto& item, Observer* inObserver) {
-            return inObserver == item;
-        }, std::addressof(observer));
+        std::erase_if(observers_with_event, [observer_ptr = std::addressof(observer)](Observer* item) { return item == observer_ptr; });
     }
 }
 bool Engine::priv::EventDispatcher::isObjectRegistered(const Observer& observer, EventType eventType) const noexcept {
@@ -60,12 +58,11 @@ void Engine::priv::EventDispatcher::dispatchEvent(EventType eventType) noexcept 
     dispatchEvent(Event{ eventType });
 }
 void Engine::priv::EventDispatcher::postUpdate() {
-    if (m_UnregisteredObservers.size() > 0) {
+    if (!m_UnregisteredObservers.empty()) {
         std::scoped_lock lock{ m_Mutex };
-        for (const auto& [observer_ptr, idx] : m_UnregisteredObservers) {
-            Engine::swap_and_pop(m_Observers[idx], [](const auto& item, Observer* observer) {
-                return observer == item;
-            }, observer_ptr);
+        for (const auto& [observer_ptr, eventTypeIdx] : m_UnregisteredObservers) {
+            auto& observers = m_Observers[eventTypeIdx];
+            std::erase_if(observers, [observer_ptr](Observer* item) { return item == observer_ptr; });
         }
         m_UnregisteredObservers.clear();
     }

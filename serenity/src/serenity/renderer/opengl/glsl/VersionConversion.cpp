@@ -116,9 +116,7 @@ void Engine::priv::opengl::glsl::VersionConversion::convert(std::string& code, u
                             line.erase(0, found);
                             line = part1_ + "layout (location = " + std::to_string(aCount) + ") in " + line;
                             ShaderHelper::insertStringAtAndReplaceLine(code, std::move(line), count);
-                            if (!ShaderHelper::sfind(part1_, "//") && !ShaderHelper::sfind(part1_, "/*") && !ShaderHelper::sfind(part1_, "///")) { //do we need to test for triple slashes?
-                                ++aCount;
-                            }
+                            ++aCount;
                             break;
                         }
                     }

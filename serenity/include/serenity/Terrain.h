@@ -25,7 +25,7 @@ class  Mesh;
 #include <serenity/resources/Handle.h>
 #include <array>
 
-constexpr btScalar NULL_VERTEX = btScalar(-255.0);
+inline constexpr btScalar NULL_VERTEX = btScalar(-255.0);
 
 class TerrainHeightfieldShape final : public btHeightfieldTerrainShape {
     friend class TerrainData;

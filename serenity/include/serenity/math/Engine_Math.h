@@ -6,6 +6,9 @@ class btVector3;
 class btRigidBody;
 class btQuaternion;
 class Camera;
+namespace sf {
+    class Packet;
+}
 
 #include <assimp/Importer.hpp>
 #include <GL/glew.h>
@@ -16,8 +19,59 @@ class Camera;
 #include <glm/gtc/round.hpp>
 #include <vector>
 
-namespace glm {
+namespace Engine {
+    class quat32 {
+        private:
+            int8_t x = 0;
+            int8_t y = 0;
+            int8_t z = 0;
+            int8_t w = 0;
 
+        public:
+            quat32() = default;
+            quat32(const glm::quat& q) noexcept {
+                x = int8_t(q.x * 127.0f);
+                y = int8_t(q.y * 127.0f);
+                z = int8_t(q.z * 127.0f);
+                w = int8_t(q.w * 127.0f);
+            }
+            inline operator glm::quat() const noexcept {
+                glm::quat q;
+                q.x = float(x) * 0.0078740157480315f;
+                q.y = float(y) * 0.0078740157480315f;
+                q.z = float(z) * 0.0078740157480315f;
+                q.w = float(w) * 0.0078740157480315f;
+                return q;
+            }
+            sf::Packet& serialize(sf::Packet&) const noexcept;
+            sf::Packet& deserialize(sf::Packet&) noexcept;
+    };
+    class quat64 {
+        private:
+            int16_t x = 0;
+            int16_t y = 0;
+            int16_t z = 0;
+            int16_t w = 0;
+
+        public:
+            quat64() = default;
+            quat64(const glm::quat& q) noexcept {
+                x = int16_t(q.x * 32767.0f);
+                y = int16_t(q.y * 32767.0f);
+                z = int16_t(q.z * 32767.0f);
+                w = int16_t(q.w * 32767.0f);
+            }
+            inline operator glm::quat() const noexcept {
+                glm::quat q;
+                q.x = float(x) * 3.051850947599719e-5f;
+                q.y = float(y) * 3.051850947599719e-5f;
+                q.z = float(z) * 3.051850947599719e-5f;
+                q.w = float(w) * 3.051850947599719e-5f;
+                return q;
+            }
+            sf::Packet& serialize(sf::Packet&) const noexcept;
+            sf::Packet& deserialize(sf::Packet&) noexcept;
+    };
 }
 
 namespace Engine::Math {
@@ -36,6 +90,8 @@ namespace Engine::Math {
 
     void extractViewFrustumPlanesHartmannGribbs(const glm::mat4& inViewProjection, std::array<glm::vec4, 6>& outPlanes);
     void extractViewFrustumPlanesHartmannGribbs(Camera&);
+
+    void decompose(const glm::mat4& matrix, glm::vec3& pos, glm::quat& rot, glm::vec3& scale);
 
     [[nodiscard]] inline float Float32From16(const uint16_t in) noexcept { return glm::unpackHalf1x16(in); }
     [[nodiscard]] inline uint16_t Float16From32(const float in) noexcept { return glm::packHalf1x16(in); }
@@ -171,15 +227,23 @@ namespace Engine::Math {
     [[nodiscard]] glm::vec3 getRight(const btRigidBody&);
     [[nodiscard]] glm::vec3 getUp(const btRigidBody&);
 
-    template<class F, class R, class U> void recalculateForwardRightUp(const glm::quat& quat, F& f, R& r, U& u) noexcept {
-        f = getForward(quat);
-        r = getRight(quat);
-        u = getUp(quat);
+    template<class F, class R = F, class U = F> void recalculateForwardRightUp(const glm::quat& quat, F& fwd, R& right, U& up) noexcept {
+        fwd   = getForward(quat);
+        right = getRight(quat);
+        up    = getUp(quat);
     }
-    template<class F, class R, class U> void recalculateForwardRightUp(const btRigidBody& BTRigidBody, F& f, R& r, U& u) noexcept {
-        f = getForward(BTRigidBody);
-        r = getRight(BTRigidBody);
-        u = getUp(BTRigidBody);
+    template<class F, class R = F, class U = F> void recalculateForwardRightUp(const btRigidBody& BTRigidBody, F& fwd, R& right, U& up) noexcept {
+        fwd   = getForward(BTRigidBody);
+        right = getRight(BTRigidBody);
+        up    = getUp(BTRigidBody);
+    }
+    template<class F, class U = F> void recalculateForwardUp(const glm::quat& quat, F& fwd, U& up) noexcept {
+        fwd = getForward(quat);
+        up  = getUp(quat);
+    }
+    template<class F, class U = F> void recalculateForwardUp(const btRigidBody& BTRigidBody, F& fwd, U& up) noexcept {
+        fwd = getForward(BTRigidBody);
+        up  = getUp(BTRigidBody);
     }
 
     [[nodiscard]] float getAngleBetweenTwoVectors(const glm::vec3& a, const glm::vec3& b, bool degrees = true);

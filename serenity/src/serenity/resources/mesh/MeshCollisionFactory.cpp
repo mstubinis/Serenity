@@ -12,8 +12,9 @@
 #include <BulletCollision/CollisionShapes/btUniformScalingShape.h>
 #include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
 
-constexpr btScalar DEFAULT_MARGIN = static_cast<btScalar>(0.001);
-
+namespace {
+    constexpr btScalar DEFAULT_MARGIN = static_cast<btScalar>(0.001);
+}
 Engine::priv::MeshCollisionFactory::MeshCollisionFactory(MeshCPUData& cpuData, MeshCollisionLoadingFlag::Flag flags)
     : m_CPUData{ &cpuData }
 {
@@ -125,7 +126,7 @@ btBoxShape* Engine::priv::MeshCollisionFactory::buildBoxShape(ModelInstance* mod
 }
 btUniformScalingShape* Engine::priv::MeshCollisionFactory::buildConvexHull(ModelInstance* modelInstance, bool isCompoundChild) {
     if (m_ConvesHullShape.getNumPoints() == 0) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_ConvesHullShape was empty!")
+        ENGINE_LOG(__FUNCTION__ << "(): m_ConvesHullShape was empty!")
         return nullptr;
     }
     btUniformScalingShape* uniformScalingShape = new btUniformScalingShape( &m_ConvesHullShape, (btScalar)1.0 );
@@ -138,7 +139,7 @@ btUniformScalingShape* Engine::priv::MeshCollisionFactory::buildConvexHull(Model
 }
 btScaledBvhTriangleMeshShape* Engine::priv::MeshCollisionFactory::buildTriangleShape(ModelInstance* modelInstance, bool isCompoundChild) {
     if (m_TriangleStaticData.getNumTriangles() == 0) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_TriangleStaticData was empty!")
+        ENGINE_LOG(__FUNCTION__ << "(): m_TriangleStaticData was empty!")
         return nullptr;
     }
     btScaledBvhTriangleMeshShape* scaledBVH = new btScaledBvhTriangleMeshShape( m_TriangleStaticShape.get(), btVector3{ (btScalar)1.0, (btScalar)1.0, (btScalar)1.0} );
@@ -151,7 +152,7 @@ btScaledBvhTriangleMeshShape* Engine::priv::MeshCollisionFactory::buildTriangleS
 }
 btGImpactMeshShape* Engine::priv::MeshCollisionFactory::buildTriangleShapeGImpact(ModelInstance* modelInstance, bool isCompoundChild) {
     if (m_TriangleStaticData.getNumTriangles() == 0) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_TriangleStaticData was empty!")
+        ENGINE_LOG(__FUNCTION__ << "(): m_TriangleStaticData was empty!")
         return nullptr;
     }
     btGImpactMeshShape* gImpact = new btGImpactMeshShape{ &m_TriangleStaticData };

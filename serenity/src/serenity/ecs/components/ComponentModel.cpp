@@ -184,6 +184,7 @@ void ComponentModel::setModel(Handle mesh, Handle material, size_t index, Handle
     model_instance.m_MeshHandle          = mesh;
     model_instance.m_MaterialHandle      = material;
     model_instance.m_Stage               = renderStage;
+    model_instance.getRunningAnimations().setMesh(mesh);
 
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
     ComponentModel_Functions::CalculateRadius(*this);
@@ -218,6 +219,7 @@ void ComponentModel::setModelMesh(Handle mesh, size_t index, RenderStage renderS
 
     model_instance.m_MeshHandle = mesh;
     model_instance.m_Stage      = renderStage;
+    model_instance.getRunningAnimations().setMesh(mesh);
 
     PublicScene::AddModelInstanceToPipeline(scene, model_instance, renderStage);
     ComponentModel_Functions::CalculateRadius(*this);

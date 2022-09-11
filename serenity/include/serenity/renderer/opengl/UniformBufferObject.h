@@ -9,7 +9,6 @@ class  UniformBufferObject;
 
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
-#include <serenity/events/Observer.h>
 #include <serenity/resources/Resource.h>
 
 //RAII wrapper for mapping uniform buffer block data
@@ -28,15 +27,16 @@ class UniformBufferObjectMapper final {
         inline void* getPtr() noexcept { return m_Ptr; }
 };
 
-class UniformBufferObject final : public Observer, public Resource<UniformBufferObject> {
+
+class UniformBufferObject final : public Resource<UniformBufferObject> {
     friend class  Shader;
     friend class  UniformBufferObjectMapper;
     public:
         static uint32_t  CUSTOM_UBO_AUTOMATIC_COUNT;
     private:
-        uint32_t      m_SizeOfStruct              = 0;
-        int           m_GlobalBindingPointNumber  = 0;
-        GLuint        m_UBOObject                 = 0;
+        uint32_t             m_SizeOfStruct              = 0;
+        int                  m_GlobalBindingPointNumber  = 0;
+        GLuint               m_UBO_GLHandle              = 0;
 
         void internal_load_CPU();
         void internal_unload_CPU();
@@ -46,8 +46,7 @@ class UniformBufferObject final : public Observer, public Resource<UniformBuffer
         UniformBufferObject(std::string_view nameInShader, uint32_t sizeofStruct, const int globalBindingPointIndex = -1);
         ~UniformBufferObject();
 
-        void onEvent(const Event&);
-        inline GLuint address() const noexcept { return m_UBOObject; }
+        inline GLuint address() const noexcept { return m_UBO_GLHandle; }
 
         bool attachToShaderProgram(ShaderProgram&);
 

@@ -14,7 +14,7 @@ namespace Engine::priv {
                 assert(!types.empty());
                 if (types[0] != GBufferType::BackBuffer) {
                     gBuffer.m_FBOs[fboIndex].bind(x, y, width, height);
-                    Engine::opengl::drawBuffers(types[0] != 0 ? types.size() : 0, types.data());
+                    Engine::opengl::drawBuffers(types[0] != 0 ? int32_t(types.size()) : 0, types.data());
                     Engine::opengl::colorMask(channels.contains("R"), channels.contains("G"), channels.contains("B"), channels.contains("A"));
                 } else {
                     gBuffer.bindBackbuffer(0, 0);
@@ -40,7 +40,7 @@ namespace Engine::priv {
     }
     Texture& GBuffer::createRenderTarget(size_t index, FramebufferObject& fbo, FramebufferAttatchment fbAttatch, ImageInternalFormat intFmt, ImagePixelFormat pxlFmt, ImagePixelType pxlType, std::string textureName) {
         assert(m_Width > 0 && m_Height > 0);
-        m_FramebufferTextures[index] = fbo.attatchTexture(fbAttatch, m_Width, m_Height, pxlType, pxlFmt, intFmt, fbo.divisor());
+        m_FramebufferTextures[index] = fbo.attatchTexture(fbAttatch, intFmt, pxlFmt, pxlType);
         m_FramebufferTextures[index]->texture().setName(std::move(textureName));
         Engine::opengl::bindTexture(m_FramebufferTextures[index]->texture());
         return m_FramebufferTextures[index]->texture();

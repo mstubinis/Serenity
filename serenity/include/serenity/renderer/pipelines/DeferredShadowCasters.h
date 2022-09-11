@@ -28,6 +28,8 @@ namespace Engine::priv {
 
             ~GLDeferredDirectionalLightShadowInfo();
 
+            [[nodiscard]] inline bool isReady() const noexcept { return m_FBO != 0; }
+
             void bindUniformsReading(int textureStartSlot) noexcept;
             void bindUniformsWriting(int cascadeMapIndex);
             void calculateOrthographicProjections(const Camera&, const glm::vec3& direction);
@@ -58,10 +60,11 @@ namespace Engine::priv {
 
     };
 
+    //TODO: rethink this - due to invalidation when resizing consider using handles.
     class GLDeferredLightShadowCasters final {
         public:
             template<class LIGHT, class SHADOW_DATA>
-            class CasterContainer : public std::vector<std::vector<std::tuple<LIGHT*, SHADOW_DATA>>> {};
+            class CasterContainer : public std::vector<std::vector<std::pair<LIGHT*, SHADOW_DATA>>> {};
 
             template<class LIGHT, class SHADOW_DATA>
             class CasterHashMap : public std::vector<std::unordered_map<const LIGHT*, SHADOW_DATA*>> {}; //bool is shadow casting enabled or disabled

@@ -11,10 +11,10 @@ class TextureCubemap;
 #include <serenity/resources/Handle.h>
 #include <serenity/resources/texture/TextureIncludes.h>
 
-#ifdef ENGINE_FORCE_TEXTURE_MIPMAPPING
-    #define ENGINE_MIPMAP_DEFAULT true
-#else
+#ifdef ENGINE_FORCE_TEXTURE_MIPMAPPING_DISABLED
     #define ENGINE_MIPMAP_DEFAULT false
+#else
+    #define ENGINE_MIPMAP_DEFAULT true
 #endif
 
 namespace Engine::priv {

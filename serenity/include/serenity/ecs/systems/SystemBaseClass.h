@@ -6,7 +6,7 @@ class  Scene;
 namespace Engine::priv {
     class  sparse_set_base;
     class  ECS;
-    class  EditorWindowSceneFunctions;
+    class  EditorWindowSceneImpl;
 }
 
 #include <cstdint>
@@ -24,7 +24,7 @@ enum class SystemExecutionPolicy : uint32_t {
 };
 
 class SystemBaseClass {
-    friend class Engine::priv::EditorWindowSceneFunctions;
+    friend class Engine::priv::EditorWindowSceneImpl;
     private:
         struct ComponentPoolData final {
             uint32_t                       id   = std::numeric_limits<uint32_t>().max();
@@ -112,45 +112,42 @@ class SystemCRTP : public SystemBaseClass {
     private:
         template<class COMPONENT>
         COMPONENT* buildTupleImpl(Entity entity, uint32_t& idx) {
-            auto& pool     = getComponentPool<COMPONENT>(idx);
+            auto& pool     = getComponentPool<COMPONENT>(idx++);
             COMPONENT* ret = pool.getComponent(entity);
-            ++idx;
             return ret;
         }
         template<class ARGS_STRUCT>
-        std::tuple<ARGS_STRUCT, Entity, COMPONENTS*...> buildTuple(ARGS_STRUCT args, Entity entity) noexcept {
+        std::tuple<ARGS_STRUCT, Entity, COMPONENTS*...> buildTuple(ARGS_STRUCT argsStruct, Entity entity) noexcept {
             uint32_t idx = 0; 
-            return std::tuple<ARGS_STRUCT, Entity, COMPONENTS*...>{ args, entity, buildTupleImpl<COMPONENTS>(entity, idx)... }; //this MUST use brace-initialization as it forces left to right parameter pack processing
+            return std::tuple<ARGS_STRUCT, Entity, COMPONENTS*...>{ argsStruct, entity, buildTupleImpl<COMPONENTS>(entity, idx)... }; //this MUST use brace-initialization as it forces left to right parameter pack processing
         }
         std::tuple<Entity, COMPONENTS*...> buildTuple(Entity entity) noexcept {
             uint32_t idx = 0; 
             return std::tuple<Entity, COMPONENTS*...>{ entity, buildTupleImpl<COMPONENTS>(entity, idx)... }; //this MUST use brace-initialization as it forces left to right parameter pack processing
         }
 
-        template<class ARGS_STRUCT, class F1, class FUNC_TUPLE_BUILDER>
-        void forEachImplRange(size_t start, size_t end, const ARGS_STRUCT& argStruct, F1 f1, FUNC_TUPLE_BUILDER funcTupleBuilder) {
-            for (size_t j = start; j < end; ++j) {
-                const auto tuple = (this->*funcTupleBuilder)(argStruct, m_Entities[j]);
-                std::apply(f1, std::move(tuple));
+        void forEachImplRange(size_t start, size_t end, const auto& argsStruct, auto func, auto funcTupleBuilder) {
+            for (size_t j = start; j != end; ++j) {
+                const auto tuple = (this->*funcTupleBuilder)(argsStruct, m_Entities[j]);
+                std::apply(func, std::move(tuple));
             }
         }
-        template<class F1, class FUNC_TUPLE_BUILDER>
-        void forEachImplRangeNoArgs(size_t start, size_t end, F1 f1, FUNC_TUPLE_BUILDER funcTupleBuilder) {
-            for (size_t j = start; j < end; ++j) {
+        void forEachImplRangeNoArgs(size_t start, size_t end, auto func, auto funcTupleBuilder) {
+            for (size_t j = start; j != end; ++j) {
                 const auto tuple = (this->*funcTupleBuilder)(m_Entities[j]);
-                std::apply(f1, std::move(tuple));
+                std::apply(func, std::move(tuple));
             }
         }
 
-        template<class ARGS_STRUCT, class F1, class FUNC_TUPLE_BUILDER>
-        void forEachImpl(const ARGS_STRUCT& argStruct, F1 f1, FUNC_TUPLE_BUILDER funcTupleBuilder, SystemExecutionPolicy execPolicy) {
-            if (m_Entities.size() < 100 || execPolicy == SystemExecutionPolicy::Normal) {
-                forEachImplRange(0, m_Entities.size(), argStruct, f1, funcTupleBuilder);
+        template<class FUNC_TUPLE_BUILDER>
+        void forEachImpl(const auto& argsStruct, auto func, FUNC_TUPLE_BUILDER funcTupleBuilder, SystemExecutionPolicy execPolicy) {
+            if (std::size(m_Entities) < 100 || execPolicy == SystemExecutionPolicy::Normal) {
+                forEachImplRange(0, std::size(m_Entities), argsStruct, func, funcTupleBuilder);
             } else {
-                auto pairs = Engine::splitVectorPairs(m_Entities.size());
-                for (size_t k = 0; k < pairs.size(); ++k) {
-                    Engine::priv::threading::addJob([&pairs, k, &funcTupleBuilder, &f1, &argStruct, this]() {
-                        forEachImplRange(pairs[k].first, pairs[k].second + 1, argStruct, f1, funcTupleBuilder);
+                auto pairs = Engine::splitVectorPairs(std::size(m_Entities));
+                for (size_t k = 0; k != pairs.size(); ++k) {
+                    Engine::priv::threading::addJob([a = pairs[k].first, b = pairs[k].second, k, funcTupleBuilder, func, argsStruct, this]() {
+                        forEachImplRange(a, b + 1, argsStruct, func, funcTupleBuilder);
                     });
                 }
                 if (execPolicy == SystemExecutionPolicy::ParallelWait) {
@@ -158,15 +155,15 @@ class SystemCRTP : public SystemBaseClass {
                 }
             }
         }
-        template<class F1, class FUNC_TUPLE_BUILDER>
-        void forEachImpl(F1 f1, FUNC_TUPLE_BUILDER funcTupleBuilder, SystemExecutionPolicy execPolicy) {
-            if (m_Entities.size() < 100 || execPolicy == SystemExecutionPolicy::Normal) {
-                forEachImplRangeNoArgs(0, m_Entities.size(), f1, funcTupleBuilder);
+        template<class FUNC_TUPLE_BUILDER>
+        void forEachImpl(auto func, FUNC_TUPLE_BUILDER funcTupleBuilder, SystemExecutionPolicy execPolicy) {
+            if (std::size(m_Entities) < 100 || execPolicy == SystemExecutionPolicy::Normal) {
+                forEachImplRangeNoArgs(0, std::size(m_Entities), func, funcTupleBuilder);
             } else {
-                auto pairs = Engine::splitVectorPairs(m_Entities.size());
-                for (size_t k = 0; k < pairs.size(); ++k) {
-                    Engine::priv::threading::addJob([&pairs, k, &funcTupleBuilder, &f1, this]() {
-                        forEachImplRangeNoArgs(pairs[k].first, pairs[k].second + 1, f1, funcTupleBuilder);
+                auto pairs = Engine::splitVectorPairs(std::size(m_Entities));
+                for (size_t k = 0; k != pairs.size(); ++k) {
+                    Engine::priv::threading::addJob([a = pairs[k].first, b = pairs[k].second, k, funcTupleBuilder, func, this]() {
+                        forEachImplRangeNoArgs(a, b + 1, func, funcTupleBuilder);
                     });
                 }
                 if (execPolicy == SystemExecutionPolicy::ParallelWait) {
@@ -181,15 +178,13 @@ class SystemCRTP : public SystemBaseClass {
 
 
         template<class ARGS_STRUCT>
-        inline void forEach(void(*func)(ARGS_STRUCT, Entity, COMPONENTS*...), const ARGS_STRUCT& arg, SystemExecutionPolicy policy = SystemExecutionPolicy::Normal) noexcept {
-            using TUPLE              = std::tuple<ARGS_STRUCT, Entity, COMPONENTS*...>;
-            using FUNC_TUPLE_BUILDER = TUPLE(SystemCRTP::*)(ARGS_STRUCT, Entity);
-            forEachImpl<ARGS_STRUCT, decltype(func), FUNC_TUPLE_BUILDER>(arg, func, &SystemCRTP::buildTuple, policy);
+        inline void forEach(void(*func)(ARGS_STRUCT, Entity, COMPONENTS*...), const ARGS_STRUCT& argsStruct, SystemExecutionPolicy policy = SystemExecutionPolicy::Normal) noexcept {
+            using FUNC_TUPLE_BUILDER = std::tuple<ARGS_STRUCT, Entity, COMPONENTS*...>(SystemCRTP::*)(ARGS_STRUCT, Entity);
+            forEachImpl<FUNC_TUPLE_BUILDER>(argsStruct, func, &SystemCRTP::buildTuple, policy);
         }
         inline void forEach(void(*func)(Entity, COMPONENTS*...), SystemExecutionPolicy policy = SystemExecutionPolicy::Normal) noexcept {
-            using TUPLE              = std::tuple<Entity, COMPONENTS*...>;
-            using FUNC_TUPLE_BUILDER = TUPLE(SystemCRTP::*)(Entity);
-            forEachImpl<decltype(func), FUNC_TUPLE_BUILDER>(func, &SystemCRTP::buildTuple, policy);
+            using FUNC_TUPLE_BUILDER = std::tuple<Entity, COMPONENTS*...>(SystemCRTP::*)(Entity);
+            forEachImpl<FUNC_TUPLE_BUILDER>(func, &SystemCRTP::buildTuple, policy);
         }
 };
 

@@ -7,7 +7,6 @@
 #include <serenity/system/Engine.h>
 #include <serenity/renderer/FramebufferObject.h>
 #include <serenity/events/Event.h>
-#include <serenity/resources/texture/TextureRequest.h>
 
 #include <serenity/renderer/opengl/APIStateOpenGL.h>
 #include <serenity/resources/texture/DDS.h>
@@ -24,15 +23,11 @@ namespace Engine::priv {
             Engine::opengl::createTexImage2D(texture, mipmap, texture.getTextureType());
             //TextureLoader::WithdrawPixelsFromOpenGLMemory(texture, 0, mipmap.level);
         }
-        texture.setFilter(TextureFilter::Linear);
-        texture.setWrapping(TextureWrap::Repeat);
     }
     void TextureLoader::LoadTextureFramebufferIntoOpenGL(Texture& texture) {
         Engine::Renderer::bindTextureForModification(texture.getTextureType(), texture.address());
         const auto& image = texture.m_CPUData.m_ImagesDatas[0];
         glTexImage2D(texture.getTextureType().toGLType(), 0, image.m_InternalFormat, image.m_Mipmaps[0].width, image.m_Mipmaps[0].height, 0, image.m_PixelFormat, image.m_PixelType, nullptr);
-        texture.setFilter(TextureFilter::Linear);
-        texture.setWrapping(TextureWrap::ClampToEdge);
     }
     void TextureLoader::LoadTextureCubemapIntoOpenGL(Texture& texture) {
         Engine::Renderer::bindTextureForModification(texture.getTextureType(), texture.address());
@@ -43,8 +38,6 @@ namespace Engine::priv {
             }
             ++imageIndex;
         }
-        texture.setFilter(TextureFilter::Linear);
-        texture.setWrapping(TextureWrap::ClampToEdge);
     }
     void TextureLoader::MirrorPixelsVertically(uint8_t* pixels, uint32_t width, uint32_t height, uint32_t colorsPerPixel) {
         auto swapPixels = [width, pixels, colorsPerPixel](uint32_t x, uint32_t y, uint32_t x2, uint32_t y2) {
@@ -84,7 +77,7 @@ namespace Engine::priv {
             }
         }
         if (!inHandle.null()) {
-            std::scoped_lock lock(*inHandle.getMutex());
+            //std::scoped_lock lock{ inHandle };
             inHandle.get<Texture>()->m_CPUData = std::move(cpuData);
         }
     }
@@ -131,7 +124,7 @@ namespace Engine::priv {
 
     void TextureLoader::Resize(Texture& texture, Engine::priv::FramebufferObject& fbo, int width, int height) {
         if (texture.getTextureType() != TextureType::RenderTarget) {
-            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() error: Non-framebuffer texture cannot be resized. Returning...");
+            ENGINE_LOG(__FUNCTION__ << "() error: Non-framebuffer texture cannot be resized. Returning...");
             return;
         }
         Engine::Renderer::bindTextureForModification(texture.getTextureType(), texture.address());

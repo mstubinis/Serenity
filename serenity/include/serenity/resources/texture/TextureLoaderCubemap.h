@@ -2,7 +2,6 @@
 #ifndef ENGINE_TEXTURES_TEXTURE_LOADER_CUBEMAP_H
 #define ENGINE_TEXTURES_TEXTURE_LOADER_CUBEMAP_H
 
-struct TextureRequest;
 class  Texture;
 class  TextureCubemap;
 namespace Engine::priv {

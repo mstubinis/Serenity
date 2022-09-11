@@ -3,33 +3,31 @@
 #include <serenity/resources/mesh/MeshImportedData.h>
 #include <serenity/math/Engine_Math.h>
 
-Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene& assimpScene, MeshRequest& request, Engine::priv::MeshImportedData& data) {
-    //build general information
-    m_GlobalInverseTransform = Engine::Math::toGLM(assimpScene.mRootNode->mTransformation.Inverse());
-    
+Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene& assimpScene, MeshRequestPart& part, Engine::priv::MeshImportedData& meshImportedData) 
+    : m_GlobalInverseTransform{ Engine::Math::toGLM(assimpScene.mRootNode->mTransformation.Inverse()) }
+    , m_BoneOffsets{ assimpMesh.mNumBones, glm::mat4(1.0f) }
+{
     //build bone information
     auto hashedBones = Engine::create_and_reserve<Engine::unordered_string_map<std::string, uint16_t>>(assimpMesh.mNumBones);
-    m_BoneInfo.resize(assimpMesh.mNumBones);
-    uint16_t BoneIndex = 0;
-    for (uint32_t k = 0; k < assimpMesh.mNumBones; ++k) {
-        auto boneName      = std::string{ assimpMesh.mBones[k]->mName.C_Str() };
-        //auto& assimpBone   = *assimpMesh.mBones[k];
-        hashedBones.emplace(boneName, BoneIndex);
-        ++BoneIndex;
+
+    for (uint32_t boneIdx = 0; boneIdx != assimpMesh.mNumBones; ++boneIdx) {
+        hashedBones.emplace( std::piecewise_construct,  std::forward_as_tuple(assimpMesh.mBones[boneIdx]->mName.C_Str()), std::forward_as_tuple(boneIdx) );
     }
-    int32_t k = 0;
-    data.m_Bones.resize(data.m_Points.size());
-    for (uint32_t i = 0; i < request.m_NodeData.m_Nodes.size(); ++i) {
-        auto& node           = request.m_NodeData.m_Nodes[i];
-        const auto& nodeName = request.m_NodeStrVector[i];
+
+
+    int32_t boneIndex = 0;
+    meshImportedData.m_Bones.resize(meshImportedData.m_Points.size());
+    for (size_t nodeIdx = 0; nodeIdx != part.nodesData.m_Nodes.size(); ++nodeIdx) {
+        auto node = part.nodesData.m_Nodes[nodeIdx];
+        const auto& nodeName = part.nodesNames[nodeIdx];
         if (hashedBones.contains(nodeName)) {
-            node.IsBone = true;
+            part.nodesData.m_Nodes[nodeIdx].IsBone = true;
             auto& assimpBone = *assimpMesh.mBones[hashedBones.at(nodeName)];
-            setBoneOffsetMatrix(k, Engine::Math::toGLM(assimpBone.mOffsetMatrix));
-            for (uint32_t j = 0; j < assimpBone.mNumWeights; ++j) {
-                data.addBone(assimpBone.mWeights[j].mVertexId, k, assimpBone.mWeights[j].mWeight);
+            setBoneOffsetMatrix(boneIndex, Engine::Math::toGLM(assimpBone.mOffsetMatrix));
+            for (unsigned int j = 0; j != assimpBone.mNumWeights; ++j) {
+                meshImportedData.addBone(assimpBone.mWeights[j].mVertexId, boneIndex, assimpBone.mWeights[j].mWeight);
             }
-            ++k;
+            ++boneIndex;
         }
     }
 
@@ -37,13 +35,13 @@ Engine::priv::MeshSkeleton::MeshSkeleton(const aiMesh& assimpMesh, const aiScene
     if (assimpScene.mAnimations && assimpScene.mNumAnimations > 0) {
         m_AnimationMapping.reserve(assimpScene.mNumAnimations);
         m_AnimationData.reserve(assimpScene.mNumAnimations);
-        for (auto k = 0U; k < assimpScene.mNumAnimations; ++k) {
-            const auto& Ai_Animation = *assimpScene.mAnimations[k];
+        for (unsigned int animationIdx = 0; animationIdx != assimpScene.mNumAnimations; ++animationIdx) {
+            const auto& Ai_Animation = *assimpScene.mAnimations[animationIdx];
             std::string key          = Ai_Animation.mName.C_Str();
             if (key.empty()) {
-                key = "Animation " + std::to_string(numAnimations());
+                key = "Animation " + std::to_string(m_AnimationData.size());
             }
-            /*const auto animIndex = */addAnimation(key, Ai_Animation, request);
+            const auto animIndex = addAnimation(key, Ai_Animation, part);
         }
     }
 }

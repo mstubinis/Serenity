@@ -78,7 +78,7 @@ class Alignment {
 };
 class RenderStage { 
     public: 
-        enum Type : uint32_t {
+        enum Type : uint16_t {
             GeometryOpaque = 0,
             GeometryOpaque_2,
             GeometryOpaque_3,

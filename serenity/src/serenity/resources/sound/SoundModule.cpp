@@ -120,7 +120,7 @@ SoundEffect* Engine::Sound::playEffect(Handle handle, uint32_t loops){
         SOUND_MODULE->setSoundInformation(handle, *effect);
         effect->play(loops);
     } else {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << " - returned a null sound effect for handle: " << handle.toString())
+        ENGINE_LOG(__FUNCTION__ << " - returned a null sound effect for handle: " << handle.toString())
     }
     return effect;
 }
@@ -130,7 +130,7 @@ SoundMusic* Engine::Sound::playMusic(Handle handle, uint32_t loops){
         SOUND_MODULE->setSoundInformation(handle, *music);
         music->play(loops);
     } else {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << " - returned a null sound music for handle: " << handle.toString())
+        ENGINE_LOG(__FUNCTION__ << " - returned a null sound music for handle: " << handle.toString())
     }
     return music;
 }

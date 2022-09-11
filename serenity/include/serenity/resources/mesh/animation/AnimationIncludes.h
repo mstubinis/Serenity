@@ -2,22 +2,20 @@
 #ifndef ENGINE_MESH_ANIMATION_INCLUDES_H
 #define ENGINE_MESH_ANIMATION_INCLUDES_H
 
+struct aiNodeAnim;
+struct aiNode;
+
 #include <assimp/scene.h>
 
 #include <serenity/dependencies/glm.h>
 #include <serenity/utils/Utils.h>
 #include <serenity/math/Engine_Math.h>
 
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include <memory>
-#include <array>
-
 namespace Engine::priv {
-    struct BoneInfo final {
-        glm::mat4 BoneOffset     = glm::mat4{ 0.0f };
-        glm::mat4 FinalTransform = glm::mat4{ 1.0f };
+    struct NodeSnapshot final {
+        glm::vec3 position;
+        Engine::quat32 rotation;
+        glm::vec3 scale;
     };
     struct MeshSkeletonNode final {
         glm::mat4 Transform = glm::mat4{ 1.0f };
@@ -54,10 +52,9 @@ namespace Engine::priv {
         std::vector<Vector3Key>  PositionKeys;
         std::vector<Vector3Key>  ScalingKeys;
 
-        std::array<uint16_t, 3>  CurrentKeyframes = { 0, 0, 0 }; //[0] = pos, [1] = rot, [2] = scl
-
         AnimationChannel() = default;
         AnimationChannel(const aiNodeAnim&);
+        AnimationChannel(std::vector<Vector3Key>&& positionKeys, std::vector<QuatKey>&& rotationKeys, std::vector<Vector3Key>&& scalingKeys);
 
         inline bool empty() const noexcept { return RotationKeys.empty() && PositionKeys.empty() && ScalingKeys.empty(); }
     };

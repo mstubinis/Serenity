@@ -6,6 +6,7 @@ class  Observer;
 struct Event;
 
 #include <serenity/events/EventIncludes.h>
+#include <vector>
 #include <array>
 #include <utility>
 #include <mutex>

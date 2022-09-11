@@ -1,6 +1,7 @@
 #include <serenity/ecs/entity/Entity.h>
 #include <serenity/scene/Scene.h>
-#include <serenity/system/Engine.h>
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/resources/Engine_Resources.h>
 #include <serenity/ecs/components/Components.h>
 
 #include <serenity/ecs/systems/SystemTransformParentChild.h>
@@ -202,7 +203,7 @@ luabridge::LuaRef Entity::getComponent(luabridge::LuaRef componentClassName) {
         } else if (local_name == "ComponentScript" || local_name == "Script") {
             return luabridge::LuaRef{ L, Engine::priv::ComponentScriptLUABinder{*this} };
         } else {
-            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): Component: (" + local_name + ") not found.")
+            ENGINE_LOG(__FUNCTION__ << "(): Component: (" + local_name + ") not found.")
         }
     }
     return luabridge::LuaRef{ L };

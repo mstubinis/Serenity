@@ -1,6 +1,5 @@
 
 #include <serenity/scene/Skybox.h>
-#include <serenity/system/Engine.h>
 #include <serenity/resources/texture/TextureCubemap.h>
 #include <serenity/resources/texture/TextureLoaderCubemap.h>
 #include <serenity/events/Event.h>
@@ -8,6 +7,10 @@
 #include <serenity/resources/mesh/gl/VertexBufferObject.h>
 
 #include <serenity/renderer/opengl/APIStateOpenGL.h>
+
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/renderer/Renderer.h>
+#include <serenity/resources/Engine_Resources.h>
 
 namespace {
     VertexBufferObject m_VBO;

@@ -12,9 +12,13 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-
+#pragma once
 #ifndef BT_SCALAR_H
 #define BT_SCALAR_H
+
+#ifdef new
+#error You shouldn't have new operator redefined
+#endif
 
 #ifdef BT_MANAGED_CODE
 //Aligned data types not supported in managed code

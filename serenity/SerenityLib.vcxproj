@@ -101,6 +101,8 @@
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <VCToolsVersion>
     </VCToolsVersion>
+    <EnableASAN>true</EnableASAN>
+    <EnableFuzzer>false</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -250,7 +252,8 @@
     <Lib>
       <AdditionalDependencies>assimp-d.lib;IrrXML-d.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;BulletSoftBody_Debug.lib;LinearMath_Debug.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;lua.lib;lua53.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;vcruntime.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\DirectXTK\lib\32\Debug;D:\dev\freetype\lib\32\Debug;D:\dev\discord_game_sdk\lib\x86;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Debug;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Debug;D:\dev\lua\lib\32\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalOptions>/verbose %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/VERBOSE %(AdditionalOptions)</AdditionalOptions>
+      <Verbose>true</Verbose>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -259,7 +262,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>ENGINE_WINDOW_USE_BASE;ENGINE_HIGH_PRECISION;BT_USE_DOUBLE_PRECISION;BT_DEBUG_MEMORY_ALLOCATIONS;BT_THREADSAFE=1;BT_USE_PPL=1;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;_CRTDBG_MAP_ALLOC;NDEBUG;_NO_DEBUG_HEAP;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_RIGID_BODY_ENHANCED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ENGINE_ANIMATIONS_NO_GLOBAL_INVERSE_TRANSFORM;ENGINE_WINDOW_USE_BASE;ENGINE_HIGH_PRECISION;BT_USE_DOUBLE_PRECISION;BT_DEBUG_MEMORY_ALLOCATIONS;BT_THREADSAFE=1;BT_USE_PPL=1;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;_CRTDBG_MAP_ALLOC;NDEBUG;_NO_DEBUG_HEAP;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_RIGID_BODY_ENHANCED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\DirectXTK\include;D:\dev\freetype\include;$(SolutionDir)include\serenity\dependencies\bullet;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -285,7 +288,7 @@
     <Lib>
       <AdditionalLibraryDirectories>D:\dev\DirectXTK\lib\64\Debug;D:\dev\freetype\lib\64\Debug;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib\64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Debug;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64\Debug;D:\dev\lua\lib\64\Debug;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew64s.lib;IrrXML-d.lib;zlibstatic.lib;lua.lib;assimp-d.lib;sfml-audio-s-d.lib;sfml-system-s-d.lib;sfml-window-s-d.lib;sfml-graphics-s-d.lib;sfml-network-s-d.lib;sfml-main-d.lib;flac.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;winmm.lib;discord_game_sdk.lib;freetyped.lib;psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/verbose %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/VERBOSE %(AdditionalOptions)</AdditionalOptions>
       <Verbose>true</Verbose>
     </Lib>
   </ItemDefinitionGroup>
@@ -293,7 +296,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -332,6 +335,7 @@
       <AdditionalLibraryDirectories>D:\dev\DirectXTK\lib\32\Release;D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+      <Verbose>true</Verbose>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|Win32'">
@@ -342,9 +346,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLM_CONFIG_DEFAULTED_FUNCTIONS;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;ENGINE_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_PPL=1;ENGINE_HIGH_PRECISION;BT_USE_DOUBLE_PRECISION;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\DirectXTK\include;D:\dev\freetype\include;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\DirectXTK\include;D:\dev\freetype\include;$(SolutionDir)include\serenity\dependencies\bullet;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -362,9 +366,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\dev\DirectXTK\lib\32\Release;D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;glew32s.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\assimp\install32\lib;D:\dev\DirectXTK\lib\32\Release;D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <AdditionalOptions>/VERBOSE:UNUSEDLIBS %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -374,7 +379,7 @@
       <Message>Copying Binary (Release) ...</Message>
     </PostBuildEvent>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);assimp.lib;IrrXML.lib;zlibstatic.lib;glew32s.lib;freeglut.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\lib\32\Release;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
@@ -425,6 +430,7 @@
       <AdditionalLibraryDirectories>D:\dev\DirectXTK\lib\32\Release;D:\dev\freetype\lib\32\Release;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\32\Release;D:\dev\assimp\install32\lib;D:\dev\SFML\lib\32;D:\dev\SFML\lib\32\Release;D:\dev\lua\lib\32\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;D:\dev\discord_game_sdk\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+      <Verbose>true</Verbose>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -436,9 +442,9 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_PPL=1;ENGINE_HIGH_PRECISION;BT_USE_DOUBLE_PRECISION;_ENGINE_RIGID_BODY_ENHANCED;_ENGINE_FORCE_NO_LOG_DEPTH;_ENGINE_FORCE_PHYSICS_DEBUG_DRAW;ENGINE_THREAD_WINDOW_EVENTS;_ENGINE_FORCE_NO_THEAD_POOL;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DISABLE_VECTOR_ANNOTATION;_DISABLE_STRING_ANNOTATION;BT_THREADSAFE=1;BT_USE_PPL=1;ENGINE_HIGH_PRECISION;BT_USE_DOUBLE_PRECISION;_ENGINE_RIGID_BODY_ENHANCED;_ENGINE_FORCE_NO_LOG_DEPTH;_ENGINE_FORCE_PHYSICS_DEBUG_DRAW;ENGINE_THREAD_WINDOW_EVENTS;_ENGINE_FORCE_NO_THEAD_POOL;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\DirectXTK\include;D:\dev\freetype\include;$(SolutionDir)include\serenity\dependencies\bullet;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -465,6 +471,7 @@
       <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+      <Verbose>true</Verbose>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">
@@ -475,9 +482,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLM_CONFIG_DEFAULTED_FUNCTIONS;GLEW_STATIC;SFML_STATIC;ENGINE_THREAD_WINDOW_EVENTS;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;_ENGINE_FORCE_NO_LOG_DEPTH;ENGINE_HIGH_PRECISION;ENGINE_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BT_THREADSAFE=1;BT_USE_PPL=1;ENGINE_HIGH_PRECISION;BT_USE_DOUBLE_PRECISION;_ENGINE_RIGID_BODY_ENHANCED;_ENGINE_FORCE_NO_LOG_DEPTH;_ENGINE_FORCE_PHYSICS_DEBUG_DRAW;ENGINE_THREAD_WINDOW_EVENTS;_ENGINE_FORCE_NO_THEAD_POOL;GLM_ENABLE_EXPERIMENTAL;GLM_FORCE_CTOR_INIT;GLEW_STATIC;SFML_STATIC;ASSIMP_STATIC;NDEBUG;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;ENGINE_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\DirectXTK\include;D:\dev\freetype\include;D:\dev\bullet3\src;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;D:\dev\Catch2\include;D:\dev\LuaBridge\Source;D:\dev\DirectXTK\include;D:\dev\freetype\include;$(SolutionDir)include\serenity\dependencies\bullet;D:\dev\assimp\include;D:\dev\boost;D:\dev\glm;D:\dev\SFML\include;D:\dev\lua\src;D:\dev\freeglut\include;D:\dev\GL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -494,13 +501,14 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision.lib;BulletDynamics.lib;BulletSoftBody.lib;LinearMath.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\dev\DirectXTK\lib\64\Release;D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\DirectXTK\lib\64\Release;D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <AdditionalOptions>/VERBOSE:UNUSEDLIBS %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\lib\64\Release;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;freeglut64.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;BulletCollision_d.lib;BulletDynamics_d.lib;BulletSoftBody_d.lib;LinearMath_d.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;assimp.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
@@ -539,16 +547,31 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>D:\dev\DirectXTK\lib\64\Release;D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\dev\DirectXTK\lib\64\Release;D:\dev\lua\lib\64\Release;D:\dev\freetype\lib\64\Release;D:\dev\discord_game_sdk\lib\x86_64;D:\dev\SFML\lib;D:\dev\boost\stage\lib;D:\dev\bullet3\lib\64\Release;D:\dev\assimp\install64\install64;D:\dev\SFML\lib\64;D:\dev\SFML\lib\64\Release;D:\dev\freeglut\lib;D:\dev\GL\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>legacy_stdio_definitions.lib;glew64s.lib;IrrXML.lib;zlibstatic.lib;assimp.lib;sfml-audio-s.lib;sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-network-s.lib;sfml-main.lib;%(AdditionalDependencies);flac.lib;freetype.lib;ogg.lib;openal32.lib;opengl32.lib;vorbis.lib;vorbisenc.lib;vorbisfile.lib;ws2_32.lib;psapi.lib;winmm.lib;discord_game_sdk.lib;lua.lib;lua53.lib</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /NODEFAULTLIB %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 %(AdditionalOptions)</AdditionalOptions>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+      <Verbose>true</Verbose>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="include\serenity\dependencies\bullet\btBulletCollisionAll.cpp" />
-    <ClCompile Include="include\serenity\dependencies\bullet\btBulletDynamicsAll.cpp" />
-    <ClCompile Include="include\serenity\dependencies\bullet\btLinearMathAll.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\btBulletCollisionAll.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="include\serenity\dependencies\bullet\btBulletDynamicsAll.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="include\serenity\dependencies\bullet\btLinearMathAll.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="include\serenity\dependencies\bullet\Bullet3Common\b3AlignedAllocator.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\Bullet3Common\b3Logging.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\Bullet3Common\b3Vector3.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3BulletFile.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3Chunk.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3DNA.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3File.cpp" />
+    <ClCompile Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3Serializer.cpp" />
     <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btAxisSweep3.cpp" />
     <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btBroadphaseProxy.cpp" />
     <ClCompile Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btCollisionAlgorithm.cpp" />
@@ -918,7 +941,6 @@
     <ClCompile Include="src\serenity\resources\texture\TextureIncludes.cpp" />
     <ClCompile Include="src\serenity\resources\texture\TextureLoader.cpp" />
     <ClCompile Include="src\serenity\resources\texture\TextureLoaderCubemap.cpp" />
-    <ClCompile Include="src\serenity\resources\texture\TextureRequest.cpp" />
     <ClCompile Include="src\serenity\scene\Camera.cpp" />
     <ClCompile Include="src\serenity\scene\Scene.cpp" />
     <ClCompile Include="src\serenity\scene\SceneOptions.cpp" />
@@ -948,6 +970,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\serenity\tests\TestGLTypes.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -966,6 +989,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\serenity\tests\TestSystemParentChild.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -974,6 +998,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='UnitTests|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\serenity\tests\TestTextureTypes.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -994,7 +1019,6 @@
     <ClCompile Include="src\serenity\types\Timer.cpp" />
     <ClCompile Include="src\serenity\utils\Engine_Debugging.cpp" />
     <ClCompile Include="src\serenity\utils\Random.cpp" />
-    <ClCompile Include="src\serenity\utils\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\serenity\algorithms\EngineSort.h" />
@@ -1013,6 +1037,38 @@
     <ClInclude Include="include\serenity\containers\TypeRegistry.h" />
     <ClInclude Include="include\serenity\dependencies\bullet\btBulletCollisionCommon.h" />
     <ClInclude Include="include\serenity\dependencies\bullet\btBulletDynamicsCommon.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3AlignedAllocator.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3AlignedObjectArray.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3CommandLineArgs.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3FileUtils.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3HashMap.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3Logging.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3Matrix3x3.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3MinMax.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3PoolAllocator.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3QuadWord.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3Quaternion.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3Random.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3ResizablePool.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3Scalar.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3StackAlloc.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3Transform.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3TransformUtil.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\b3Vector3.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\shared\b3Float4.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\shared\b3Int2.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\shared\b3Int4.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\shared\b3Mat3x3.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\shared\b3PlatformDefinitions.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Common\shared\b3Quat.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\autogenerated\bullet2.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3BulletFile.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3Chunk.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3Common.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3Defines.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3DNA.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3File.h" />
+    <ClInclude Include="include\serenity\dependencies\bullet\Bullet3Serialize\Bullet2FileLoader\b3Serializer.h" />
     <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btAxisSweep3.h" />
     <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btAxisSweep3Internal.h" />
     <ClInclude Include="include\serenity\dependencies\bullet\BulletCollision\BroadphaseCollision\btBroadphaseInterface.h" />
@@ -1530,7 +1586,6 @@
     <ClInclude Include="include\serenity\resources\texture\TextureIncludes.h" />
     <ClInclude Include="include\serenity\resources\texture\TextureLoader.h" />
     <ClInclude Include="include\serenity\resources\texture\TextureLoaderCubemap.h" />
-    <ClInclude Include="include\serenity\resources\texture\TextureRequest.h" />
     <ClInclude Include="include\serenity\scene\Camera.h" />
     <ClInclude Include="include\serenity\scene\LightContainer.h" />
     <ClInclude Include="include\serenity\scene\LightsModule.h" />
@@ -1544,6 +1599,7 @@
     <ClInclude Include="include\serenity\system\Engine.h" />
     <ClInclude Include="include\serenity\system\EngineEventHandler.h" />
     <ClInclude Include="include\serenity\system\EngineGameFunctions.h" />
+    <ClInclude Include="include\serenity\system\EngineIncludes.h" />
     <ClInclude Include="include\serenity\system\EngineMisc.h" />
     <ClInclude Include="include\serenity\system\EngineOptions.h" />
     <ClInclude Include="include\serenity\system\Macros.h" />
@@ -1568,7 +1624,6 @@
     <ClInclude Include="include\serenity\types\ViewPointer.h" />
     <ClInclude Include="include\serenity\utils\BlockProfiler.h" />
     <ClInclude Include="include\serenity\utils\Engine_Debugging.h" />
-    <ClInclude Include="include\serenity\utils\Logger.h" />
     <ClInclude Include="include\serenity\utils\Random.h" />
     <ClInclude Include="include\serenity\utils\Utils.h" />
   </ItemGroup>

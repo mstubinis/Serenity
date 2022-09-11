@@ -97,10 +97,10 @@ class MaterialLayer final {
         Handle                     m_CubemapHandle;
     public:
         MaterialLayer() = default;
-        MaterialLayer(const MaterialLayer&)                 = delete;
-        MaterialLayer& operator=(const MaterialLayer&)      = delete;
-        MaterialLayer(MaterialLayer&&) noexcept;
-        MaterialLayer& operator=(MaterialLayer&&) noexcept;
+        MaterialLayer(const MaterialLayer&)                = delete;
+        MaterialLayer& operator=(const MaterialLayer&)     = delete;
+        MaterialLayer(MaterialLayer&&) noexcept            = default;
+        MaterialLayer& operator=(MaterialLayer&&) noexcept = default;
 
         inline constexpr bool operator==(const bool other) const noexcept { return (other == true && !m_TextureHandle.null()); }
         inline constexpr bool operator!=(const bool other) const noexcept { return !operator==(other); }

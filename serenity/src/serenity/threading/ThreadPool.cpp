@@ -1,7 +1,9 @@
 
 #include <serenity/threading/ThreadPool.h>
+#include <serenity/threading/ThreadingModule.h>
 #include <serenity/utils/Utils.h>
 #include <numeric>
+
 
 namespace {
     [[nodiscard]] inline bool isFutureReady(const Engine::priv::FutureType& future) noexcept {
@@ -48,7 +50,7 @@ bool Engine::priv::ThreadPool::startup(int numThreads) {
     return false;
 }
 void Engine::priv::ThreadPool::internal_add_thread(int index) {
-    m_WorkerThreads.add_thread([this](std::stop_token threadStopToken) {
+    auto& workerThread = *m_WorkerThreads.add_thread([this](std::stop_token threadStopToken) {
         while (!m_Stopped && !threadStopToken.stop_requested()) {
             PoolTaskPtr job;
             {
@@ -57,15 +59,16 @@ void Engine::priv::ThreadPool::internal_add_thread(int index) {
                 if (m_Stopped) {
                     return;
                 }
-                ASSERT(!m_TaskQueue.empty(), __FUNCTION__ << "(): task queue was empty!");
+                assert(!m_TaskQueue.empty());
                 job = m_TaskQueue.front();
                 m_TaskQueue.pop();
             }
-            ASSERT(!m_Stopped && job.get() != nullptr, __FUNCTION__ << "(): job was nullptr!");
+            assert(!m_Stopped && job.get() != nullptr);
             job->operator()();
             m_WaitCounter -= 1;
         }
     }, index);
+    Engine::priv::threading::setThreadName(workerThread, "worker_thread_" + std::to_string(index));
 }
 std::optional<std::stop_token> Engine::priv::ThreadPool::getThreadStopToken() noexcept {
     return m_WorkerThreads.contains(std::this_thread::get_id()) ? m_WorkerThreads[std::this_thread::get_id()]->get_stop_token() : std::optional<std::stop_token>{};

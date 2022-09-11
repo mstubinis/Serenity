@@ -3,6 +3,8 @@
 #define ENGINE_RESOURCES_RESOURCE_VECTOR_H
 
 #include <serenity/threading/ThreadingModule.h>
+#include <serenity/resources/Handle.h>
+#include <mutex>
 
 namespace Engine::priv {
     class IResourceVector {
@@ -11,13 +13,13 @@ namespace Engine::priv {
 
             [[nodiscard]] virtual std::mutex& getMutex() noexcept = 0;
             [[nodiscard]] virtual size_t size() const noexcept = 0;
-            [[nodiscard]] virtual void* getVoid(const Handle inHandle) const noexcept = 0;
+            [[nodiscard]] virtual void* getVoid(const size_t index) const noexcept = 0;
 
             virtual void reserve(const size_t inSize) = 0;
             virtual void lock() = 0;
             virtual void unlock() = 0;
             virtual void shrink_to_fit() = 0;
-            //virtual void erase(const Handle inHandle) noexcept = 0;
+            //virtual void erase(const Handle) noexcept = 0;
     };
 };
 
@@ -28,8 +30,6 @@ namespace Engine::priv {
             std::vector<RESOURCE*>      m_Resources;
             mutable std::mutex          m_Mutex;
             bool                        m_Locked     = false;
-
-            [[nodiscard]] inline Engine::view_ptr<RESOURCE> internal_get(const Handle inHandle) const noexcept { return m_Resources[inHandle.index()]; }
 
             template<class INTEGRAL>
             requires (std::is_integral_v<INTEGRAL>)
@@ -65,7 +65,7 @@ namespace Engine::priv {
 
             [[nodiscard]] Engine::view_ptr<RESOURCE> get(const Handle inHandle) noexcept {
                 ASSERT(inHandle.index() >= 0 && inHandle.index() < m_Resources.size(), __FUNCTION__ << "(): handle index was out of bounds!");
-                return internal_get(inHandle);
+                return internal_get(inHandle.index());
             }
             template<class INTEGRAL>
             requires (std::is_integral_v<INTEGRAL>)
@@ -73,12 +73,9 @@ namespace Engine::priv {
                 ASSERT(index >= 0 && index < m_Resources.size(), __FUNCTION__ << "(): handle index was out of bounds!");
                 return internal_get(index);
             }
-            void* getVoid(const Handle inHandle) const noexcept override {
-                if (inHandle.null()) {
-                    return nullptr;
-                }
-                ASSERT(inHandle.index() >= 0 && inHandle.index() < m_Resources.size(), __FUNCTION__ << "(): handle index was out of bounds!");
-                return (void*)internal_get(inHandle);
+            void* getVoid(const size_t index) const noexcept override {
+                ASSERT(index >= 0 && index < m_Resources.size(), __FUNCTION__ << "(): handle index was out of bounds!");
+                return (void*)internal_get(index);
             }
             //O(n) linear search
             [[nodiscard]] LoadedResource<RESOURCE> get(const std::string_view sv) noexcept {
@@ -134,12 +131,13 @@ namespace Engine::priv {
             }
 
             //O(n) linked-list assembly from array
-            [[nodiscard]] std::list<Engine::view_ptr<RESOURCE>> getAsList() const {
-                std::list<Engine::view_ptr<RESOURCE>> returnedList;
+            [[nodiscard]] std::vector<Engine::view_ptr<RESOURCE>> getAsVector() const {
+                std::vector<Engine::view_ptr<RESOURCE>> returnedVector;
+                returnedVector.reserve(m_Resources.size());
                 for (const auto& entry : m_Resources) {
-                    returnedList.push_back( entry );
+                    returnedVector.push_back( entry );
                 }
-                return returnedList;
+                return returnedVector;
             }
 
     };

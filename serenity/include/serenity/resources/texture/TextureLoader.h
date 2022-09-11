@@ -2,7 +2,6 @@
 #ifndef ENGINE_TEXTURES_TEXTURE_LOADER_H
 #define ENGINE_TEXTURES_TEXTURE_LOADER_H
 
-struct TextureRequest;
 class  Texture;
 namespace Engine::priv {
     class  FramebufferObject;

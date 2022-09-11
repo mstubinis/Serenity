@@ -76,8 +76,8 @@ void LuaScript::callFunction(const char* funcName) noexcept {
     assert(m_L != nullptr);
     assert(m_ID != std::numeric_limits<uint32_t>().max());
     assert(m_Executed == true);
-
-    lua_getfield(*m_L, LUA_REGISTRYINDEX, m_FileNameOrData.c_str());
-    lua_getfield(*m_L, -1, funcName);
+    int res = -1;
+    res = lua_getfield(*m_L, LUA_REGISTRYINDEX, m_FileNameOrData.c_str());
+    res = lua_getfield(*m_L, -1, funcName);
     lua_call(*m_L, 0, 0);
 }

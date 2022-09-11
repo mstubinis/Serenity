@@ -1,13 +1,15 @@
 #include <serenity/resources/material/Material.h>
 #include <serenity/resources/material/MaterialLoader.h>
 #include <serenity/resources/material/MaterialComponent.h>
-#include <serenity/system/Engine.h>
 #include <serenity/resources/texture/Texture.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/math/MathCompression.h>
 #include <serenity/resources/shader/ShaderProgram.h>
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Skybox.h>
+
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/resources/Engine_Resources.h>
 
 std::vector<glm::vec4>   Material::m_MaterialProperities;
 Handle                   Material::Checkers                = {};
@@ -70,39 +72,6 @@ Material::Material(std::string_view name, Handle diffuse, Handle normal, Handle 
     Engine::priv::MaterialLoader::Init(*this, diffuse, normal, glow, specular, ao, metalness, smoothness);
     Engine::priv::PublicMaterial::Load(*this);
 }
-Material::Material(Material&& other) noexcept
-    : Resource{ std::move(other) }
-    , m_Components       { std::move(other.m_Components) }
-    , m_F0Color          { std::move(other.m_F0Color) }
-    , m_ID               { std::move(other.m_ID) }
-    , m_DiffuseModel     { std::move(other.m_DiffuseModel) }
-    , m_SpecularModel    { std::move(other.m_SpecularModel) }
-    , m_BaseGlow         { std::move(other.m_BaseGlow) }
-    , m_BaseMetalness    { std::move(other.m_BaseMetalness) }
-    , m_BaseSmoothness   { std::move(other.m_BaseSmoothness) }
-    , m_BaseAO           { std::move(other.m_BaseAO) }
-    , m_BaseAlpha        { std::move(other.m_BaseAlpha) }
-    , m_Shadeless        { std::move(other.m_Shadeless) }
-    , m_UpdatedThisFrame { std::move(other.m_UpdatedThisFrame) }
-{}
-Material& Material::operator=(Material&& other) noexcept {
-    if (this != &other) {
-        Resource::operator=(std::move(other));
-        m_Components       = std::move(other.m_Components);
-        m_F0Color          = std::move(other.m_F0Color);
-        m_ID               = std::move(other.m_ID);
-        m_DiffuseModel     = std::move(other.m_DiffuseModel);
-        m_SpecularModel    = std::move(other.m_SpecularModel);
-        m_BaseGlow         = std::move(other.m_BaseGlow);
-        m_BaseMetalness    = std::move(other.m_BaseMetalness);
-        m_BaseSmoothness   = std::move(other.m_BaseSmoothness);
-        m_BaseAO           = std::move(other.m_BaseAO);
-        m_BaseAlpha        = std::move(other.m_BaseAlpha);
-        m_Shadeless        = std::move(other.m_Shadeless);
-        m_UpdatedThisFrame = std::move(other.m_UpdatedThisFrame);
-    }
-    return *this;
-}
 Material::~Material() {
     Engine::priv::PublicMaterial::Unload(*this);
 }
@@ -137,7 +106,14 @@ MaterialComponent& Material::addComponent(MaterialComponentType type, std::strin
     if (!texture.m_Resource) {
         if (!textureFile.empty()) {
             ImageInternalFormat fmt = (type == MaterialComponentType::Normal || type == MaterialComponentType::ParallaxOcclusion) ? ImageInternalFormat::RGB8 : ImageInternalFormat::SRGB8_ALPHA8;
-            texture.m_Handle = Engine::Resources::addResource<Texture>(textureFile, true, fmt, TextureType::Texture2D, true);
+            
+            TextureConstructorInfo ci;
+            ci.filename       = textureFile;
+            ci.internalFormat = fmt;
+            ci.mipmapped      = true;
+            //ci.loadAsync    = true; //TODO: test this
+            
+            texture.m_Handle = Engine::Resources::addResource<Texture>(ci, true);
         } else {
             texture.m_Handle = Texture::Checkers;
         }

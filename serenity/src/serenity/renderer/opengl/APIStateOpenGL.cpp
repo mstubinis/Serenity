@@ -37,7 +37,7 @@ namespace Engine::priv::detail::opengl {
             }
             Engine::priv::Core::m_APIManager->getOpenGL().GL_glBindTextureForModification(texture.getTextureType().toGLType(), texture.address());
             glTexParameteri(texture.getTextureType().toGLType(), GL_TEXTURE_BASE_LEVEL, 0);
-            GLint minFilterGL;
+            GLint minFilterGL = 0;
             glGetTexParameteriv(texture.getTextureType().toGLType(), GL_TEXTURE_MIN_FILTER, &minFilterGL);
             if (minFilterGL == GL_LINEAR) {
                 minFilterGL = GL_LINEAR_MIPMAP_LINEAR;

@@ -1,5 +1,5 @@
 
-#include <serenity/renderer/GLImageConstants.h>
+#include <serenity/renderer/opengl/GLImageConstants.h>
 
 #include <catch.hpp>
 

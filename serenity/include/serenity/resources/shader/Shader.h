@@ -29,9 +29,7 @@ class Shader final : public Resource<Shader> {
         Shader& operator=(Shader&&) noexcept;
         ~Shader();
 
-        void load(bool dispatchEventLoaded = true) override;
-        void load(const std::string& code);
-        void unload(bool dispatchEventUnloaded = true) override;
+        void loadCode(const std::string& code);
 
         //orphans the m_Code content if loaded from file unless force = true, in which case m_Code is cleared.
         void orphan(bool force = false);

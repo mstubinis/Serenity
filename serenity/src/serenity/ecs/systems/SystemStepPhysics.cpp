@@ -1,5 +1,6 @@
 #include <serenity/ecs/systems/SystemStepPhysics.h>
-#include <serenity/system/Engine.h>
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/physics/PhysicsModule.h>
 
 SystemStepPhysics::SystemStepPhysics(Engine::priv::ECS& ecs)
     : SystemCRTP{ ecs }

@@ -87,7 +87,7 @@ namespace Engine {
     template<class CONTAINER, class FUNC, class THEN, class ... ARGS>
     bool swap_and_pop_single_then(CONTAINER& container, FUNC&& func, THEN&& then, ARGS&&... args) {
         size_t i = 0;
-        while (i < container.size()) {
+        while (i != container.size()) {
             if (func(container[i], std::forward<ARGS>(args)...)) {
                 then(container[i], std::forward<ARGS>(args)...);
                 if (container.size() >= 2) {
@@ -116,7 +116,7 @@ namespace Engine {
     size_t swap_and_pop_then(CONTAINER& container, FUNC&& func, THEN&& then, ARGS&&... args) {
         size_t i = 0;
         size_t totalRemoved = 0;
-        while (i < container.size()) {
+        while (i != container.size()) {
             if (func(container[i], std::forward<ARGS>(args)...)) {
                 then(container[i], std::forward<ARGS>(args)...);
                 if (container.size() >= 2) {
@@ -191,49 +191,55 @@ namespace Engine {
         }
         return false;
     }
-}
 
-template <class OutType, class Data> void readBigEndian(OutType& out, const Data& dataBuffer, const uint32_t inBufferSizeInBytes, uint32_t& offset) noexcept {
-    assert(inBufferSizeInBytes > 0);
-    out = OutType(dataBuffer[offset]) << 8 * (inBufferSizeInBytes - 1);
-    for (uint32_t i = 1; i < inBufferSizeInBytes; ++i) {
-        out |= OutType(dataBuffer[offset + i]) << 8 * ((inBufferSizeInBytes - i) - 1);
-    }
-    offset += inBufferSizeInBytes;
-}
-template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out, const uint32_t inBufferSizeInBytes) noexcept {
-    assert(inBufferSizeInBytes > 0);
-    std::vector<uint8_t> buffer( inBufferSizeInBytes, 0 );
-    inStream.read(reinterpret_cast<char*>(buffer.data()), inBufferSizeInBytes);
-    out = OutType(buffer[0]) << 8 * (inBufferSizeInBytes - 1);
-    for (uint32_t i = 1; i < inBufferSizeInBytes; ++i) {
-        out |= OutType(buffer[i]) << 8 * ((inBufferSizeInBytes - i) - 1);
-    }
-}
-template <class OutType, class Stream> void readBigEndian(Stream& inStream, OutType& out) noexcept {
-    readBigEndian(inStream, out, sizeof(out));
-}
-template <class InType, class Stream> void writeBigEndian(Stream& inStream, const InType& in, const uint32_t inBufferSizeInBytes) noexcept {
-    assert(inBufferSizeInBytes > 0);
-    std::vector<uint8_t> buffer( inBufferSizeInBytes, 0 );
-    uint64_t offset    = 255;
-    for (uint32_t i = inBufferSizeInBytes; i-- > 0;) {
-        uint32_t shift = (8 * ((inBufferSizeInBytes - 1) - i));
-        buffer[i]      = (in & InType(offset)) >> shift;
-        offset       <<= 8;
-    }
-    inStream.write(reinterpret_cast<char*>(buffer.data()), buffer.size());
-}
-template <class InType, class Stream> void writeBigEndian(Stream& inStream, const InType& in) noexcept {
-    writeBigEndian(inStream, in, sizeof(in));
-}
 
-//formats a number to have commas to represent thousandth places
-std::string numToCommasImpl(std::string str, int start, int end) noexcept;
+    template <class OUTTYPE, class DATA> void readBigEndian(OUTTYPE& out, const DATA& dataBuffer, const uint32_t inBufferSizeInBytes, uint32_t& offset) noexcept {
+        assert(inBufferSizeInBytes > 0);
+        out = OUTTYPE(dataBuffer[offset]) << 8 * (inBufferSizeInBytes - 1);
+        for (uint32_t i = 1; i != inBufferSizeInBytes; ++i) {
+            out |= OUTTYPE(dataBuffer[offset + i]) << 8 * ((inBufferSizeInBytes - i) - 1);
+        }
+        offset += inBufferSizeInBytes;
+    }
+    template <class OUTTYPE, class STREAM> void readBigEndian(STREAM& inStream, OUTTYPE& out, const uint32_t inBufferSizeInBytes) noexcept {
+        assert(inBufferSizeInBytes > 0);
+        std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
+        inStream.read(reinterpret_cast<char*>(buffer.data()), inBufferSizeInBytes);
+        out = OUTTYPE(buffer[0]) << 8 * (inBufferSizeInBytes - 1);
+        for (uint32_t i = 1; i != inBufferSizeInBytes; ++i) {
+            out |= OUTTYPE(buffer[i]) << 8 * ((inBufferSizeInBytes - i) - 1);
+        }
+    }
+    template <class OUTTYPE, class STREAM> void readBigEndian(STREAM& inStream, OUTTYPE& out) noexcept {
+        readBigEndian(inStream, out, sizeof(out));
+    }
+    template <class INTYPE, class STREAM> void writeBigEndian(STREAM& inStream, const INTYPE& in, const uint32_t inBufferSizeInBytes) noexcept {
+        assert(inBufferSizeInBytes > 0);
+        std::vector<uint8_t> buffer(inBufferSizeInBytes, 0);
+        uint64_t offset = 255;
+        for (uint32_t i = inBufferSizeInBytes; i-- > 0;) {
+            uint64_t shift = (8 * ((inBufferSizeInBytes - 1) - i));
+            buffer[i] = uint8_t(uint64_t(in & INTYPE(offset)) >> shift);
+            offset <<= 8;
+        }
+        inStream.write(reinterpret_cast<char*>(buffer.data()), buffer.size());
+    }
+    template <class INTYPE, class STREAM> void writeBigEndian(STREAM& inStream, const INTYPE& in) noexcept {
+        writeBigEndian(inStream, in, sizeof(in));
+    }
 
-template<class T> std::string convertNumToNumWithCommas(const T& number) noexcept {
-    std::string res = std::to_string(number);
-    return numToCommasImpl(res, 0, int(res.size()) - 1);
+    template<class INTEGRAL>
+    requires std::is_integral_v<INTEGRAL>
+    std::string convertNumToNumWithCommas(const INTEGRAL& number) noexcept {
+        std::string res = std::to_string(number);
+        res = res.substr(0, int(res.size()) - 1);
+        int p = int(res.size()) - 3;
+        while (p > 0) {
+            res.insert(p, ",");
+            p -= 3;
+        }
+        return res;
+    }
 }
 
 #endif

@@ -1,6 +1,7 @@
 #include <serenity/renderer/particles/ParticleEmitterHandle.h>
 
-#include <serenity/system/Engine.h>
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/resources/Engine_Resources.h>
 
 
 ParticleEmitterHandle::ParticleEmitterHandle(uint32_t id, uint32_t sceneID)

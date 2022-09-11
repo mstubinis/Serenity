@@ -10,8 +10,11 @@ namespace {
     template<class TEXTURE> float internal_get_texture_compression_value(Handle textureHandle) noexcept {
         if (!textureHandle.null()) {
             bool isCompressed = false;
-            std::scoped_lock lock{ *textureHandle.getMutex() };
-            isCompressed = textureHandle.get<TEXTURE>()->compressed();
+            //This can deadlock... idk why...
+            //{
+            //    std::scoped_lock lock(textureHandle);
+                isCompressed = textureHandle.get<TEXTURE>()->compressed();
+            //}
             return isCompressed ? 0.5f : 1.0f;
         }
         return 0.0f;
@@ -22,39 +25,17 @@ namespace {
     }
 }
 
-MaterialLayer::MaterialLayer(MaterialLayer&& other) noexcept 
-    : m_UVModFuncs               { std::move(other.m_UVModFuncs) }
-    , m_MaterialLayerBaseData    { std::move(other.m_MaterialLayerBaseData) }
-    , m_MaterialLayerTextureData { std::move(other.m_MaterialLayerTextureData) }
-    , m_MaterialLayerMiscData    { std::move(other.m_MaterialLayerMiscData) }
-    , m_UVModifications          { std::move(other.m_UVModifications) }
-    , m_TextureHandle            { std::move(other.m_TextureHandle) }
-    , m_MaskHandle               { std::move(other.m_MaskHandle) }
-    , m_CubemapHandle            { std::move(other.m_CubemapHandle) }
-{}
-MaterialLayer& MaterialLayer::operator=(MaterialLayer&& other) noexcept {
-    m_UVModFuncs               = std::move(other.m_UVModFuncs);
-    m_MaterialLayerBaseData    = std::move(other.m_MaterialLayerBaseData);
-    m_MaterialLayerTextureData = std::move(other.m_MaterialLayerTextureData);
-    m_MaterialLayerMiscData    = std::move(other.m_MaterialLayerMiscData);
-    m_UVModifications          = std::move(other.m_UVModifications);
-    m_TextureHandle            = std::move(other.m_TextureHandle);
-    m_MaskHandle               = std::move(other.m_MaskHandle);
-    m_CubemapHandle            = std::move(other.m_CubemapHandle);
-    return *this;
-}
-
 void MaterialLayer::addUVModificationSimpleTranslation(float translationX, float translationY) {
     m_UVModFuncs.emplace_back(translationX, translationY, [](const float x, const float y, const float dt, MaterialLayer& layer) {
         auto currentUVs           = glm::vec2{ layer.getUVModifications().x, layer.getUVModifications().y };
         auto translatedUVS        = currentUVs + glm::vec2{ x * dt, y * dt };
         layer.m_UVModifications.x = translatedUVS.x;
         layer.m_UVModifications.y = translatedUVS.y;
-        if (layer.m_UVModifications.x >= 100.0f) {
-            layer.m_UVModifications.x -= 100.0f;
+        if (layer.m_UVModifications.x >= 10000.0f) {
+            layer.m_UVModifications.x -= 10000.0f;
         }
-        if (layer.m_UVModifications.y >= 100.0f) {
-            layer.m_UVModifications.y -= 100.0f;
+        if (layer.m_UVModifications.y >= 10000.0f) {
+            layer.m_UVModifications.y -= 10000.0f;
         }
     });
 }

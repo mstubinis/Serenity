@@ -13,7 +13,7 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 ///btSoftBody implementation by Nathanael Presson
-
+#pragma once
 #ifndef _BT_SOFT_BODY_H
 #define _BT_SOFT_BODY_H
 

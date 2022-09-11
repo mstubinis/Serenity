@@ -10,7 +10,6 @@
 #include <serenity/resources/shader/Shader.h>
 #include <serenity/system/window/Window.h>
 #include <serenity/resources/mesh/MeshRequest.h>
-#include <serenity/resources/texture/TextureRequest.h>
 #include <serenity/resources/material/MaterialRequest.h>
 #include <serenity/events/Event.h>
 
@@ -123,61 +122,84 @@ std::vector<Handle> Engine::Resources::loadMeshAsync(std::string_view fileOrData
 Handle Engine::Resources::loadTexture(std::string_view file, ImageInternalFormat internalFormat, bool mipmaps) {
     auto texture = Engine::Resources::getResource<Texture>(file);
     if (!texture.m_Resource) {
-        TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D, [](Handle) {} };
-        request.request();
-        texture.m_Handle = request.m_Part.m_Handle;
+        TextureConstructorInfo ci;
+        ci.mipmapped      = mipmaps;
+        ci.internalFormat = internalFormat;
+        ci.filename       = file;
+        ci.name           = file;
+        ci.loadAsync      = false;
+
+        texture.m_Handle  = Resources::addResource<Texture>(ci);
     }
     return texture.m_Handle;
 }
 Handle Engine::Resources::loadTexture(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps, bool dispatchEventLoaded) {
     auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.m_Resource) {
-        texture.m_Handle = Engine::Resources::addResource<Texture>(pixels, width, height, texture_name, mipmaps, internalFormat, TextureType::Texture2D, dispatchEventLoaded);
+        TextureConstructorInfo ci;
+        ci.pixels         = pixels;
+        ci.width          = width;
+        ci.height         = height;
+        ci.name           = texture_name;
+        ci.mipmapped      = mipmaps;
+        ci.internalFormat = internalFormat;
+        ci.loadAsync      = false;
+
+        texture.m_Handle = Engine::Resources::addResource<Texture>(ci, dispatchEventLoaded);
     }
     return texture.m_Handle;
 }
 Handle Engine::Resources::loadTextureAsync(std::string_view file, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
     auto texture = Engine::Resources::getResource<Texture>(file);
     if (!texture.m_Resource) {
-        TextureRequest request{ file, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
-        request.request(true);
-        texture.m_Handle = request.m_Part.m_Handle;
+        TextureConstructorInfo ci;
+        ci.mipmapped      = mipmaps;
+        ci.internalFormat = internalFormat;
+        ci.filename       = file;
+        ci.name           = file;
+        ci.loadAsync      = true;
+
+        texture.m_Handle = Resources::addResource<Texture>(ci);
     }
     return texture.m_Handle;
 }
 Handle Engine::Resources::loadTextureAsync(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view texture_name, ImageInternalFormat internalFormat, bool mipmaps, Engine::ResourceCallback callback) {
     auto texture = Engine::Resources::getResource<Texture>(texture_name);
     if (!texture.m_Resource) {
-        TextureRequest request{ pixels, width, height, texture_name, mipmaps, internalFormat, TextureType::Texture2D, std::move(callback) };
-        request.request(true);
-        texture.m_Handle = request.m_Part.m_Handle;
+        TextureConstructorInfo ci;
+        ci.mipmapped      = mipmaps;
+        ci.internalFormat = internalFormat;
+        ci.name           = texture_name;
+        ci.loadAsync      = true;
+        ci.pixels         = pixels;
+        ci.width          = width;
+        ci.height         = height;
+
+        texture.m_Handle = Resources::addResource<Texture>(ci);
     }
     return texture.m_Handle;
 }
 Handle Engine::Resources::loadMaterial(std::string_view name, std::string_view diffuse, std::string_view normal, std::string_view glow, std::string_view specular, std::string_view ao, std::string_view metalness, std::string_view smoothness) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.m_Resource) {
-        MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, [](Handle) {} };
-        request.request();
-        material.m_Handle = request.m_Part.m_Handle;
+        MaterialRequest request{ false, name, diffuse, normal, glow, specular, ao, metalness, smoothness, [](Handle) {} };
+        material.m_Handle = request.m_Handle;
     }
     return material.m_Handle;
 }
 Handle Engine::Resources::loadMaterialAsync(std::string_view name, std::string_view diffuse, std::string_view normal, std::string_view glow, std::string_view specular, std::string_view ao, std::string_view metalness, std::string_view smoothness, Engine::ResourceCallback callback) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.m_Resource) {
-        MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, std::move(callback) };
-        request.request(true);
-        material.m_Handle = request.m_Part.m_Handle;
+        MaterialRequest request{ true, name, diffuse, normal, glow, specular, ao, metalness, smoothness, std::move(callback) };
+        material.m_Handle = request.m_Handle;
     }
     return material.m_Handle;
 }
 Handle Engine::Resources::loadMaterial(std::string_view name, Handle diffuse, Handle normal, Handle glow, Handle specular, Handle ao, Handle metalness, Handle smoothness) {
     auto material = Engine::Resources::getResource<Material>(name);
     if (!material.m_Resource) {
-        MaterialRequest request{ name, diffuse, normal, glow, specular, ao, metalness, smoothness, [](Handle) {} };
-        //request.request(); //the above creates the material and is immediately available for use, no need to request
-        material.m_Handle = request.m_Part.m_Handle;
+        MaterialRequest request{ false, name, diffuse, normal, glow, specular, ao, metalness, smoothness, [](Handle) {} };
+        material.m_Handle = request.m_Handle;
     }
     return material.m_Handle;
 }
@@ -240,4 +262,11 @@ Handle Engine::priv::lua::resources::getResourceLUA(const std::string& resourceT
         return Engine::Resources::getResource<Font>(resourceName);
     }
     return Handle{};
+}
+
+namespace Engine {
+    Engine::priv::ResourceManager& getResourceManager() noexcept { 
+        return *Engine::priv::ResourceManager::RESOURCE_MANAGER;
+        //return Engine::priv::Core::m_Engine->m_ResourceManager; 
+    }
 }

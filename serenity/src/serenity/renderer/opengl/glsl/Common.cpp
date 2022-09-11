@@ -261,9 +261,9 @@ vec4 RangeTo1(vec4 color){
     ShaderHelper::sfind(code, "ScreenInfo1") || ShaderHelper::sfind(code, "RendererInfo1") || ShaderHelper::sfind(code, "RendererInfo2") ||
     ShaderHelper::sfind(code, "LogFCoefficient")) {
         if (versionNumber >= 140) { //UBO only supported at 140 or above
-            if (!ShaderHelper::sfind(code, "layout (std140) uniform Camera")) {
+            if (!ShaderHelper::sfind(code, "layout (std140) uniform UBOCamera")) {
                 ShaderHelper::insertStringAtLine(code, R"(
-layout (std140) uniform Camera {
+layout (std140) uniform UBOCamera {
     mat4 CameraView;
     mat4 CameraProj;
     mat4 CameraViewProj;
@@ -315,13 +315,13 @@ float LogFCoefficient = CameraInfo3.w;
 #pragma endregion
 
 #pragma region material constants
-    if (ShaderHelper::sfind(code, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT") && !ShaderHelper::sfind(code, "//USE_MAX_MATERIAL_LAYERS_PER_COMPONENT")) {
+    if (ShaderHelper::sfind(code, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT")) {
         boost::replace_all(code, "USE_MAX_MATERIAL_LAYERS_PER_COMPONENT", "#define MAX_MATERIAL_LAYERS_PER_COMPONENT " + std::to_string(MAX_MATERIAL_LAYERS_PER_COMPONENT) + '\n');
     }
-    if (ShaderHelper::sfind(code, "USE_MAX_MATERIAL_COMPONENTS") && !ShaderHelper::sfind(code, "//USE_MAX_MATERIAL_COMPONENTS")) {
+    if (ShaderHelper::sfind(code, "USE_MAX_MATERIAL_COMPONENTS")) {
         boost::replace_all(code, "USE_MAX_MATERIAL_COMPONENTS", "#define MAX_MATERIAL_COMPONENTS " + std::to_string(MAX_MATERIAL_COMPONENTS) + '\n');
     }
-    if (ShaderHelper::sfind(code, "USE_MAX_LIGHTS_PER_PASS") && !ShaderHelper::sfind(code, "//USE_MAX_LIGHTS_PER_PASS")) {
+    if (ShaderHelper::sfind(code, "USE_MAX_LIGHTS_PER_PASS")) {
         boost::replace_all(code, "USE_MAX_LIGHTS_PER_PASS", "#define MAX_LIGHTS_PER_PASS " + std::to_string(MAX_MATERIAL_COMPONENTS) + '\n');
     }
 #pragma endregion

@@ -103,7 +103,6 @@ namespace Engine::priv {
 
             FramebufferObject() = delete;
         public:
-            //FramebufferObject() = default;
             FramebufferObject(const FramebufferObject&) = delete;
             FramebufferObject& operator=(const FramebufferObject&) = delete;
             FramebufferObject(FramebufferObject&&) noexcept;
@@ -124,25 +123,8 @@ namespace Engine::priv {
 
             void resize(const uint32_t width, const uint32_t height);
 
-            template<class ... ARGS>
-            FramebufferTexture* attatchTexture(FramebufferAttatchment attatchment, ARGS&&... args) {
-                if (m_Attatchments.contains(attatchment)) {
-                    return nullptr;
-                }
-                auto textureRenderTargetHandle = Engine::Resources::addResource<Texture>(std::forward<ARGS>(args)...);
-                auto attachmentItr = m_Attatchments.emplace(
-                    std::piecewise_construct,
-                    std::forward_as_tuple(attatchment),
-                    std::forward_as_tuple(NEW FramebufferTexture(*this, attatchment, textureRenderTargetHandle.get<Texture>()))
-                ).first;
-                FramebufferTexture& fbTexture = *static_cast<FramebufferTexture*>(attachmentItr->second);
-                for (const auto fbo : m_FBOs) {
-                    Engine::opengl::bindFBO(fbo);
-                    glFramebufferTexture2D(GL_FRAMEBUFFER, fbTexture.attatchment(), fbTexture.m_Texture->getTextureType().toGLType(), fbTexture.m_Texture->address(), 0);
-                }
-                Engine::opengl::unbindFBO();
-                return &fbTexture;
-            }
+            FramebufferTexture* attatchTexture(FramebufferAttatchment attatchment, ImageInternalFormat internalFormat, ImagePixelFormat pixelFormat, ImagePixelType pixelType);
+
             template<class ... ARGS>
             RenderbufferObject* attatchRenderBuffer(FramebufferAttatchment attachment, ARGS&&... args) {
                 if (m_Attatchments.contains(attachment)) {

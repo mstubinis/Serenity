@@ -30,6 +30,7 @@ class DebugTimerTypes {
 namespace Engine::priv {
     class DebugManager {
         private:
+            std::string m_OutputBuffer;
             sf::Clock m_Clock;
             sf::Clock m_ClockPhysics;
 
@@ -42,6 +43,11 @@ namespace Engine::priv {
 
             //general text debugging
             std::vector<std::string> m_Text_Queue;
+
+            GLuint queryID = 0;
+            GLuint queryObject = 0;
+            uint32_t m_Output_frame_delay = 4;
+            uint32_t m_Output_frame = 0;
         public:
             DebugManager();
 

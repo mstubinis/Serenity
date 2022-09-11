@@ -1,8 +1,12 @@
 #include <serenity/editor/windowScene/WindowScene.h>
+
+#include <serenity/system/Engine.h>
+#include <serenity/system/EngineIncludes.h>
+
+
 #include <serenity/editor/imgui/imgui.h>
 #include <serenity/resources/Engine_Resources.h>
 #include <serenity/ecs/components/Components.h>
-#include <serenity/system/Engine.h>
 #include <serenity/math/MathCompression.h>
 
 #include <serenity/lights/Lights.h>
@@ -37,36 +41,22 @@
 #endif
 
 struct EditorWindowSceneFunction {
-    using FunctionType = void(*)(Scene&);
+    using FunctionType = void(*)(Scene&, Engine::priv::EditorWindowScene&);
 
     const char*   title;
     FunctionType  function;
 };
-struct ScriptContent {
-    std::string  data;
-    bool         fromFile = false;
-};
-struct TextureContent {
-    float asiotropicFiltering = 1.0f;
-};
-namespace {
-    std::stringstream                               STR_STREAM;
-    std::unordered_map<uint32_t, ScriptContent>     COMPONENT_SCRIPT_CONTENT; //entity id => ScriptContent(string, bool)
-    std::unordered_map<std::string, ScriptContent>  SHADER_CONTENT; //shader name => ScriptContent(string, bool)
-
-    std::unordered_map<Texture*, TextureContent>     TEXTURE_CONTENT;
-}
 namespace Engine::priv {
-    class EditorWindowSceneFunctions {
+    class EditorWindowSceneImpl {
         public: 
-            static void internal_render_entities(Scene& currentScene);
-            static void internal_render_systems(Scene& currentScene);
-            static void internal_render_renderer(Scene& currentScene);
-            static void internal_render_resources(Scene& currentScene);
-            static void internal_render_profiler(Scene& currentScene);
-            static void internal_render_network(Scene& currentScene);
+            static void internal_render_entities(Scene& currentScene, EditorWindowScene&);
+            static void internal_render_systems(Scene& currentScene, EditorWindowScene&);
+            static void internal_render_renderer(Scene& currentScene, EditorWindowScene&);
+            static void internal_render_resources(Scene& currentScene, EditorWindowScene&);
+            static void internal_render_profiler(Scene& currentScene, EditorWindowScene&);
+            static void internal_render_network(Scene& currentScene, EditorWindowScene&);
 
-            static void internal_render_entity(Entity);
+            static void internal_render_entity(Entity, EditorWindowScene&);
 
             constexpr static std::array<EditorWindowSceneFunction, Engine::priv::EditorWindowScene::TabType::_TOTAL> TAB_TYPES_DATA { {
                 { "Entities", &internal_render_entities },
@@ -79,7 +69,7 @@ namespace Engine::priv {
     };
 }
 
-void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) {
+void Engine::priv::EditorWindowSceneImpl::internal_render_entity(Entity e, EditorWindowScene& editorWindowScene) {
     auto name = e.getComponent<ComponentName>();
     if (ImGui::TreeNode(("Entity " + std::to_string(e.id()) + (name ? (" - " + name->name()) : "")).c_str())) {
         //for each component...
@@ -112,6 +102,12 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) 
             if (ImGui::InputFloat3("##trans_scl", &transform->m_Scale[0])) {
                 transform->setScale(transform->m_Scale);
             }
+            if (transform->hasParent()) {
+                auto transformParent = transform->getParent();
+                auto parentNameComp  = transformParent.getComponent<ComponentName>();
+                std::string parentText = parentNameComp ? parentNameComp->name() : "Entity " + std::to_string(transformParent.id());
+                ImGui::Text(("Parent: " + parentText).c_str());
+            }
 
             //getChildren() is somewhat expensive, 0(N) N = num max entities in scene
             const auto& children = e.getChildren();
@@ -125,6 +121,24 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) 
             ImGui::TreePop();
         }
         if (rigid && ImGui::TreeNode("ComponentRigidBody")) {
+            float linDamp = float(rigid->getLinearDamping());
+            if (ImGui::SliderFloat("Linear Damping", &linDamp, 0.0f, 1.0f)) {
+                rigid->setDamping(linDamp, rigid->getAngularDamping());
+            }
+            float angDamp = float(rigid->getAngularDamping());
+            if (ImGui::SliderFloat("Angular Damping", &angDamp, 0.0f, 1.0f)) {
+                rigid->setDamping(rigid->getLinearDamping(), angDamp);
+            }
+            float rigidMass = rigid->getMass();
+            if (ImGui::InputFloat("Mass", &rigidMass)) {
+                rigid->setMass(rigidMass);
+            }
+            bool isDynamic = rigid->isDynamic();
+            if (ImGui::Checkbox("Dynamic", &isDynamic)) {
+                rigid->setDynamic(isDynamic);
+            }
+
+
             ImGui::TreePop();
         }
         if (shape && ImGui::TreeNode("ComponentCollisionShape")) {
@@ -139,10 +153,25 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) 
             for (size_t i = 0; i < model->getNumModels(); ++i) {
                 ModelInstance& instance = model->getModel(i);
                 if (ImGui::TreeNode(("ModelInstance " + std::to_string(i)).c_str())) {
-                    const auto& color = instance.getColor();
+
+                    auto meshes    = Engine::Resources::GetAllResourcesOfType<Mesh>();
+                    auto materials = Engine::Resources::GetAllResourcesOfType<Material>();
+                    std::vector<const char*> meshNames;
+                    meshNames.reserve(meshes.size());
+                    for (auto& mesh : meshes) {
+                        meshNames.push_back(mesh->name().c_str());
+                    }
+                    std::vector<const char*> materialNames;
+                    materialNames.reserve(materials.size());
+                    for (auto& material : materials) {
+                        materialNames.push_back(material->name().c_str());
+                    }
+
+
+                    const auto& color   = instance.getColor();
                     const auto& GRColor = instance.getGodRaysColor();
-                    float aColor[4] = { color.r(), color.g(), color.b(), color.a() };
-                    float aGodRays[3] = { GRColor.r(), GRColor.g(), GRColor.b() };
+                    float aColor[4]     = { color.r(),   color.g(),   color.b(),   color.a() };
+                    float aGodRays[3]   = { GRColor.r(), GRColor.g(), GRColor.b() };
                     if (ImGui::ColorEdit4("Color", &aColor[0])) {
                         instance.setColor(aColor[0], aColor[1], aColor[2], aColor[3]);
                     }
@@ -171,16 +200,47 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) 
                     }
                     ImGui::Text(std::string("Radius: " + std::to_string(instance.m_Radius)).c_str());
                     ImGui::Separator();
-                    const std::string a = instance.m_MeshHandle.null() ? "N/A" : instance.m_MeshHandle.get<Mesh>()->name();
-                    const std::string b = instance.m_MaterialHandle.null() ? "N/A" : instance.m_MaterialHandle.get<Material>()->name();
-                    const std::string c = instance.m_ShaderProgramHandle.null() ? "N/A" : instance.m_ShaderProgramHandle.get<ShaderProgram>()->name();
-                    ImGui::Text(std::string("Mesh: " + a).c_str());
-                    ImGui::Text(std::string("Material: " + b).c_str());
-                    ImGui::Text(std::string("Shader: " + c).c_str());
+                    const std::string meshName          = instance.m_MeshHandle.null() ? "N/A" : instance.m_MeshHandle.get<Mesh>()->name();
+                    const std::string materialName      = instance.m_MaterialHandle.null() ? "N/A" : instance.m_MaterialHandle.get<Material>()->name();
+                    const std::string shaderProgramName = instance.m_ShaderProgramHandle.null() ? "N/A" : instance.m_ShaderProgramHandle.get<ShaderProgram>()->name();
+
+                    static int currMeshIdx = instance.m_MeshHandle.index();
+                    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), std::string("Mesh: " + meshName).c_str());
+                    if (ImGui::ListBox("##mi_meshes", &currMeshIdx, meshNames.data(), meshes.size())) {
+                        instance.setMesh(Handle(currMeshIdx, ResourceType::Mesh), *model);
+                    }
+
+
+
+                    static int currMaterialIdx = instance.m_MaterialHandle.index();
+                    ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), std::string("Material: " + materialName).c_str());
+                    if (ImGui::ListBox("##mi_materials", &currMaterialIdx, materialNames.data(), materials.size())) {
+                        instance.setMaterial(Handle(currMaterialIdx, ResourceType::Material), *model);
+                    }
+
+
+                    ImGui::Text(std::string("Shader: " + shaderProgramName).c_str());
+
+
                     ImGui::Text(std::string("Stage: " + std::string(instance.m_Stage.toString())).c_str());
                     ImGui::Separator();
 
                     instance.internal_update_model_matrix(true);
+
+
+                    auto* mesh = instance.getMesh().get<Mesh>();
+                    if (mesh && mesh->getSkeleton() && !mesh->getSkeleton()->getAnimationData().empty()) {
+                        std::vector<const char*> animationNames;
+                        animationNames.reserve(mesh->getSkeleton()->getAnimationData().size());
+                        for (const auto& itr : mesh->getSkeleton()->getAnimationData()) {
+                            animationNames.push_back(itr.first.c_str());
+                        }
+                        static int currentItem = 0;
+                        if (ImGui::ListBox("Animations", std::addressof(currentItem), animationNames.data(), animationNames.size())) {
+                            instance.playAnimation(std::string(animationNames[currentItem]), 1, 0.0f);
+                        }
+
+                    }
 
                     ImGui::TreePop();
                 }
@@ -227,7 +287,7 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) 
             ImGui::TreePop();
         }
         if (script && ImGui::TreeNode("ComponentScript")) {
-            auto& scriptData = COMPONENT_SCRIPT_CONTENT.at(e.id());
+            auto& scriptData = editorWindowScene.COMPONENT_SCRIPT_CONTENT.at(e.id());
             ImVec2 ImGUIWindowSize = ImGui::GetWindowContentRegionMax();
             ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Script");
             float textboxWidth = ImGUIWindowSize.x - 120.0f;
@@ -243,7 +303,7 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entity(Entity e) 
         ImGui::TreePop();
     }
 }
-void Engine::priv::EditorWindowSceneFunctions::internal_render_network(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneImpl::internal_render_network(Scene& currentScene, Engine::priv::EditorWindowScene& editorWindowScene) {
     const ImVec4 yellow      = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     const auto& tcpSockets   = Engine::priv::Core::m_Engine->m_NetworkingModule.getSocketManager().getTCPSockets();
     const auto& tcpListeners = Engine::priv::Core::m_Engine->m_NetworkingModule.getSocketManager().getTCPListeners();
@@ -312,12 +372,12 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_network(Scene& cu
     }
     ImGui::EndChild();
 }
-void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneImpl::internal_render_entities(Scene& currentScene, Engine::priv::EditorWindowScene& editorWindowScene) {
     ImGui::BeginChild("SceneEntities");
     const auto& entities = Engine::priv::PublicScene::GetEntities(currentScene);
     if (ImGui::TreeNode("Entities")) {
         for (const Entity e : entities) {
-            internal_render_entity(e);
+            internal_render_entity(e, editorWindowScene);
         }
         ImGui::TreePop();
         ImGui::Separator();
@@ -447,13 +507,13 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_entities(Scene& c
     }
     ImGui::EndChild();
 }
-void Engine::priv::EditorWindowSceneFunctions::internal_render_systems(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneImpl::internal_render_systems(Scene& currentScene, Engine::priv::EditorWindowScene& editorWindowScene) {
 #ifndef ENGINE_PRODUCTION
     auto& systems = Engine::priv::PublicScene::GetECS(currentScene).getSystemPool();
     if (systems.getSize() > 0) {
         ImGui::BeginChild("SceneSystems");
         if (ImGui::TreeNode("Systems")) {
-            systems.forEachOrdered([&systems](SystemBaseClass* system, int& order) {
+            systems.forEachOrdered([&systems, &editorWindowScene](SystemBaseClass* system, int32_t& order) {
                 const char* systemName = typeid(*system).name();
                 if (ImGui::TreeNode(systemName)) {
                     const auto& entities = system->getEntities();
@@ -467,7 +527,7 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_systems(Scene& cu
                     }
                     if (ImGui::TreeNode(("Entities (" + std::to_string(entities.size()) + ")").c_str())) {
                         for (const Entity e : entities) {
-                            internal_render_entity(e);
+                            internal_render_entity(e, editorWindowScene);
                         }
                         ImGui::TreePop();
                         ImGui::Separator();
@@ -496,7 +556,7 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_systems(Scene& cu
     }
 #endif
 }
-void Engine::priv::EditorWindowSceneFunctions::internal_render_profiler(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneImpl::internal_render_profiler(Scene& currentScene, Engine::priv::EditorWindowScene& editorWindowScene) {
     auto& debugging = Engine::priv::Core::m_Engine->m_Modules->m_DebugManager;
     const ImVec4 yellow   = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
     ImGui::TextColored(yellow, std::string("Update Time:  " + debugging.getTimeInMs(DebugTimerTypes::Logic) + " ms").c_str());
@@ -507,10 +567,8 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_profiler(Scene& c
     ImGui::TextColored(yellow, std::string("FPS:  " + debugging.fps()).c_str());
 
 #ifdef _WIN32
-
-    STR_STREAM.str({});
-    STR_STREAM.clear();
-    STR_STREAM << std::fixed << std::setprecision(4);
+    std::stringstream strstrm;
+    strstrm << std::fixed << std::setprecision(4);
 
     auto byte_format = [](DWORDLONG input, std::stringstream& strm) {
         strm.str({});
@@ -538,22 +596,22 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_profiler(Scene& c
     DWORDLONG totalPhysMem    = memInfo.ullTotalPhys; //Total Physical Memory (RAM)
     DWORDLONG physMemUsed     = memInfo.ullTotalPhys - memInfo.ullAvailPhys; //Physical Memory currently used
 
-    ImGui::TextColored(yellow, std::string("Total Virtual Memory: " + byte_format(totalVirtualMem, STR_STREAM)).c_str());
-    ImGui::TextColored(yellow, std::string("Virtual Memory Used: " + byte_format(virtualMemUsed, STR_STREAM)).c_str());
-    ImGui::TextColored(yellow, std::string("Total Physical Memory (RAM): " + byte_format(totalPhysMem, STR_STREAM)).c_str());
-    ImGui::TextColored(yellow, std::string("Physical Memory Used: " + byte_format(physMemUsed, STR_STREAM)).c_str());
+    ImGui::TextColored(yellow, std::string("Total Virtual Memory: " + byte_format(totalVirtualMem, strstrm)).c_str());
+    ImGui::TextColored(yellow, std::string("Virtual Memory Used: " + byte_format(virtualMemUsed, strstrm)).c_str());
+    ImGui::TextColored(yellow, std::string("Total Physical Memory (RAM): " + byte_format(totalPhysMem, strstrm)).c_str());
+    ImGui::TextColored(yellow, std::string("Physical Memory Used: " + byte_format(physMemUsed, strstrm)).c_str());
 
     PROCESS_MEMORY_COUNTERS_EX pmc;
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
 
     SIZE_T virtualMemUsedByMe = pmc.PrivateUsage; //Virtual Memory currently used by current process
     SIZE_T physMemUsedByMe    = pmc.WorkingSetSize; //Physical Memory currently used by current process
-    ImGui::TextColored(yellow, std::string("Virtual Memory used by current process: " + byte_format(virtualMemUsedByMe, STR_STREAM)).c_str());
-    ImGui::TextColored(yellow, std::string("Physical Memory used by current process: " + byte_format(physMemUsedByMe, STR_STREAM)).c_str());
+    ImGui::TextColored(yellow, std::string("Virtual Memory used by current process: " + byte_format(virtualMemUsedByMe, strstrm)).c_str());
+    ImGui::TextColored(yellow, std::string("Physical Memory used by current process: " + byte_format(physMemUsedByMe, strstrm)).c_str());
 #endif
 
 }
-void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneImpl::internal_render_renderer(Scene& currentScene, Engine::priv::EditorWindowScene& editorWindowScene) {
     auto& renderer = Engine::getRenderer();
     //general
     {
@@ -719,7 +777,7 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_renderer(Scene& c
         ImGui::Separator();
     }
 }
-void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& currentScene) {
+void Engine::priv::EditorWindowSceneImpl::internal_render_resources(Scene& currentScene, Engine::priv::EditorWindowScene& editorWindowScene) {
     ImGui::BeginChild("ChildResources");
     if (ImGui::TreeNode("Textures")) {
         auto textures = Engine::Resources::GetAllResourcesOfType<Texture>(); //doing this every frame is slow
@@ -744,10 +802,10 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
             if (ImGui::TreeNode(textureEditorName.c_str())) {
                 Engine::priv::Core::m_APIManager->getOpenGL().GL_glBindTextureForModification(texture->getTextureType().toGLType(), texture->address());
 
-                if (!TEXTURE_CONTENT.contains(textureAddr)) {
-                    TEXTURE_CONTENT.emplace(std::piecewise_construct, std::forward_as_tuple(textureAddr), std::forward_as_tuple());
+                if (!editorWindowScene.TEXTURE_CONTENT.contains(textureAddr)) {
+                    editorWindowScene.TEXTURE_CONTENT.emplace(std::piecewise_construct, std::forward_as_tuple(textureAddr), std::forward_as_tuple());
                 }
-                auto& textureEditorData = TEXTURE_CONTENT.at(textureAddr);
+                auto& textureEditorData = editorWindowScene.TEXTURE_CONTENT.at(textureAddr);
 
                 float textureWidth = float(texture->width());
                 float textureHeight = float(texture->height());
@@ -760,11 +818,20 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
                 ImGui::Image(
                     create_ImTextureID(texture),
                     ImVec2(textureWidth, textureHeight),
-                    ImVec2(0,1),
-                    ImVec2(1,0),
+                    ImVec2(0,1), //uv0
+                    ImVec2(1,0), //uv1
                     ImVec4(1,1,1,1),//tint color
                     ImVec4(0,0,0,0) //border color
                 );
+
+                int w, h;
+                glGetTexLevelParameteriv(texture->getTextureType().toGLType(), 0, GL_TEXTURE_WIDTH, &w);
+                glGetTexLevelParameteriv(texture->getTextureType().toGLType(), 0, GL_TEXTURE_HEIGHT, &h);
+                std::string boolVal = texture->isLoaded() ? std::string{ "true" } : std::string{ "false" };
+                ImGui::Text(("Loaded: " + boolVal).c_str());
+                ImGui::Text((std::to_string(w) + " x " + std::to_string(h)).c_str());
+
+
                 if (ImGui::SliderFloat("Asiotropic Filtering", &textureEditorData.asiotropicFiltering, 1.0f, openglConstants.MAX_TEXTURE_MAX_ANISOTROPY)) {
                     texture->setAnisotropicFiltering(textureEditorData.asiotropicFiltering);
                 }
@@ -781,10 +848,10 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
                     "GL_NEAREST",
                 };
                 static constexpr const char* WrapSAndTAndR[] = {
+                    "GL_REPEAT",
+                    "GL_MIRRORED_REPEAT",
                     "GL_CLAMP_TO_EDGE",
                     "GL_CLAMP_TO_BORDER",
-                    "GL_MIRRORED_REPEAT",
-                    "GL_REPEAT",
                     "GL_MIRROR_CLAMP_TO_EDGE",
                 };
                 struct TextureGLParameters {
@@ -804,16 +871,17 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
                 const static std::unordered_map<GLenum, uint32_t> paramMapping{
                     { GL_LINEAR, TextureFilter::Linear },
                     { GL_NEAREST, TextureFilter::Nearest },
-                    { GL_NEAREST_MIPMAP_NEAREST, TextureFilter::Nearest_Mipmap_Nearest },
-                    { GL_NEAREST_MIPMAP_LINEAR, TextureFilter::Nearest_Mipmap_Linear },
-                    { GL_LINEAR_MIPMAP_NEAREST, TextureFilter::Linear_Mipmap_Nearest },
-                    { GL_LINEAR_MIPMAP_LINEAR, TextureFilter::Linear_Mipmap_Linear },
+                    { TextureFilter(TextureFilter::Nearest_Mipmap_Nearest).toGLType(true), TextureFilter::Nearest_Mipmap_Nearest},
+                    { TextureFilter(TextureFilter::Nearest_Mipmap_Linear).toGLType(true), TextureFilter::Nearest_Mipmap_Linear },
+                    { TextureFilter(TextureFilter::Linear_Mipmap_Nearest).toGLType(true), TextureFilter::Linear_Mipmap_Nearest },
+                    { TextureFilter(TextureFilter::Linear_Mipmap_Linear).toGLType(true), TextureFilter::Linear_Mipmap_Linear },
 
-                    { GL_CLAMP_TO_EDGE, TextureWrap::ClampToEdge },
-                    { GL_CLAMP_TO_BORDER, TextureWrap::ClampToBorder },
-                    { GL_MIRRORED_REPEAT, TextureWrap::RepeatMirrored },
-                    { GL_REPEAT, TextureWrap::Repeat },
-                    { GL_MIRROR_CLAMP_TO_EDGE, TextureWrap::MirrorClampToEdge },
+
+                    { TextureWrap(TextureWrap::Repeat).toGLType(), TextureWrap::Repeat},
+                    { TextureWrap(TextureWrap::RepeatMirrored).toGLType(), TextureWrap::RepeatMirrored },
+                    { TextureWrap(TextureWrap::ClampToEdge).toGLType(), TextureWrap::ClampToEdge },
+                    { TextureWrap(TextureWrap::ClampToBorder).toGLType(), TextureWrap::ClampToBorder },
+                    { TextureWrap(TextureWrap::MirrorClampToEdge).toGLType(), TextureWrap::MirrorClampToEdge },
                 };
                 parameters.magFilter = paramMapping.at(parameters.magFilter);
                 parameters.minFilter = paramMapping.at(parameters.minFilter);
@@ -905,6 +973,50 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
                     material->setSpecularModel(specularModel);
                 }
 
+                const float maxTextureSize = 256.0f;
+                auto create_ImTextureID = [](Engine::view_ptr<Texture> texture) {
+                    return (void*)static_cast<intptr_t>(texture->address());
+                };
+                for (auto& materialComponent : material->getComponents()) {
+                    if (materialComponent.getNumLayers() > 0) {
+                        if (ImGui::TreeNode(std::to_string(materialComponent.getType()).c_str())) {
+
+                            for (size_t layer = 0; layer < materialComponent.getNumLayers(); ++layer) {
+                                Texture* texture = materialComponent.getTexture(layer).get<Texture>();
+                                if (ImGui::TreeNode(texture->name().c_str())) {
+                                    Engine::priv::Core::m_APIManager->getOpenGL().GL_glBindTextureForModification(texture->getTextureType().toGLType(), texture->address());
+
+                                    float textureWidth = float(texture->width());
+                                    float textureHeight = float(texture->height());
+                                    if (textureWidth > maxTextureSize || textureHeight > maxTextureSize) {
+                                        float chosen = std::max(textureWidth, textureHeight);
+                                        float scale = float(maxTextureSize) / float(chosen);
+                                        textureHeight *= scale;
+                                        textureWidth *= scale;
+                                    }
+                                    ImGui::Image(
+                                        create_ImTextureID(texture),
+                                        ImVec2(textureWidth, textureHeight),
+                                        ImVec2(0, 1), //uv0
+                                        ImVec2(1, 0), //uv1
+                                        ImVec4(1, 1, 1, 1),//tint color
+                                        ImVec4(0, 0, 0, 0) //border color
+                                    );
+
+
+
+
+
+                                    ImGui::TreePop();
+                                    ImGui::Separator();
+                                }
+                            }
+                            ImGui::TreePop();
+                            ImGui::Separator();
+                        }
+                    }
+                }
+
                 ImGui::TreePop();
                 ImGui::Separator();
             }
@@ -916,8 +1028,26 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
         auto meshes = Engine::Resources::GetAllResourcesOfType<Mesh>(); //doing this every frame is slow
         for (auto& mesh : meshes) {
             if (ImGui::TreeNode(mesh->name().c_str())) {
+                auto& vertexData = mesh->getVertexData();
+                ImGui::Text(("Num vertices: " + std::to_string(vertexData.m_Data[0].getSize())).c_str());
+                ImGui::Text(("Num indices: " + std::to_string(vertexData.m_Indices.size())).c_str());
+                ImGui::Text(("Num triangles: " + std::to_string(vertexData.m_Triangles.size())).c_str());
 
+                auto* skeleton = mesh->getSkeleton();
+                if (skeleton != nullptr) {
+                    ImGui::Text(("Num bones: " + std::to_string(skeleton->numBones())).c_str());
+                    ImGui::Text(("Num animations: " + std::to_string(skeleton->numAnimations())).c_str());
 
+                    std::vector<const char*> animationNames;
+                    animationNames.reserve(skeleton->numAnimations());
+                    for (const auto& it : skeleton->getAnimationData()) {
+                        animationNames.push_back(it.first.c_str());
+                    }
+                    static int currentItem = 0;
+                    if (ImGui::ListBox("Animations", std::addressof(currentItem), animationNames.data(), animationNames.size())) {
+
+                    }
+                }
 
                 ImGui::TreePop();
                 ImGui::Separator();
@@ -934,7 +1064,7 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
                 for (const auto& [shaderHandle, shaderType] : shaderProgram->getShaders()) {
                     Shader* shader = shaderHandle.get<Shader>();
                     if (ImGui::TreeNode(shader->name().c_str())) {
-                        auto& scriptData = SHADER_CONTENT.at(shader->name());
+                        auto& scriptData = editorWindowScene.SHADER_CONTENT.at(shader->name());
                         ImVec2 ImGUIWindowSize = ImGui::GetWindowContentRegionMax();
                         ImGui::TextColored(ImVec4{ 0.7f, 0.7f, 0.7f, 1.0f }, "Shader Code");
                         float textboxWidth = ImGUIWindowSize.x - 120.0f;
@@ -943,7 +1073,7 @@ void Engine::priv::EditorWindowSceneFunctions::internal_render_resources(Scene& 
 
                         }
                         if (ImGui::Button("Update", ImVec2(50, 25))) {
-                            shader->load(scriptData.data);
+                            shader->loadCode(scriptData.data);
 
                             Engine::priv::PublicShaderProgram::UnloadGPU(*shaderProgram);
                             Engine::priv::PublicShaderProgram::UnloadCPU(*shaderProgram);
@@ -971,8 +1101,8 @@ void Engine::priv::EditorWindowScene::update() {
     ImGui::Begin(("Scene - " + sceneName).c_str(), NULL);
     ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
     if (ImGui::BeginTabBar("TabBar")) {
-        for (int i = 0; i < EditorWindowSceneFunctions::TAB_TYPES_DATA.size(); ++i) {
-            if (ImGui::BeginTabItem(EditorWindowSceneFunctions::TAB_TYPES_DATA[i].title)) {
+        for (int i = 0; i < EditorWindowSceneImpl::TAB_TYPES_DATA.size(); ++i) {
+            if (ImGui::BeginTabItem(EditorWindowSceneImpl::TAB_TYPES_DATA[i].title)) {
                 m_Tab = i;
                 ImGui::EndTabItem();
             }
@@ -980,7 +1110,7 @@ void Engine::priv::EditorWindowScene::update() {
         ImGui::EndTabBar();
     }
     ImGui::PopStyleColor();
-    EditorWindowSceneFunctions::TAB_TYPES_DATA[m_Tab].function(*currScene);
+    EditorWindowSceneImpl::TAB_TYPES_DATA[m_Tab].function(*currScene, *this);
 
     ImGui::End();
 }

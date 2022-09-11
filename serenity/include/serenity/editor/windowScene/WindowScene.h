@@ -5,9 +5,10 @@
 class  Scene;
 class  ComponentScript;
 class  Shader;
+class  Texture;
 namespace Engine::priv {
-    class  EditorCore;
-    class  EditorWindowSceneFunctions;
+    class EditorCore;
+    class EditorWindowSceneImpl;
 }
 
 #include <sstream>
@@ -15,8 +16,15 @@ namespace Engine::priv {
 #include <serenity/system/Macros.h>
 
 namespace Engine::priv {
+    struct ScriptContent {
+        std::string  data;
+        bool         fromFile = false;
+    };
+    struct TextureContent {
+        float asiotropicFiltering = 1.0f;
+    };
+
     class EditorWindowScene final {
-        friend class Engine::priv::EditorWindowSceneFunctions;
         friend class Engine::priv::EditorCore;
         public:
             class TabType {
@@ -32,7 +40,12 @@ namespace Engine::priv {
                     };
                     BUILD_ENUM_CLASS_MEMBERS(TabType, Type)
             };
+        friend class EditorWindowSceneImpl;
         private:
+            std::unordered_map<uint32_t, Engine::priv::ScriptContent>     COMPONENT_SCRIPT_CONTENT; //entity id => ScriptContent(string, bool)
+            std::unordered_map<std::string, Engine::priv::ScriptContent>  SHADER_CONTENT; //shader name => ScriptContent(string, bool)
+
+            std::unordered_map<Texture*, Engine::priv::TextureContent>     TEXTURE_CONTENT;
              int                                          m_Tab = 0;
         public:
              EditorWindowScene() = default;

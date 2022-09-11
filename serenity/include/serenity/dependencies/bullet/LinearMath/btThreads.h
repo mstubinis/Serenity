@@ -12,7 +12,7 @@ subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-
+#pragma once
 #ifndef BT_THREADS_H
 #define BT_THREADS_H
 

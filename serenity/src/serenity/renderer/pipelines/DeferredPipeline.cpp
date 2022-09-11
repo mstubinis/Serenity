@@ -2,7 +2,6 @@
 #include <serenity/renderer/pipelines/DeferredPipeline.h>
 #include <serenity/renderer/opengl/UniformBufferObject.h>
 #include <serenity/renderer/culling/SphereIntersectTest.h>
-#include <serenity/system/Engine.h>
 #include <serenity/lights/Lights.h>
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/scene/Skybox.h>
@@ -36,6 +35,9 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <SFML/Graphics/Image.hpp>
 #include <execution>
+
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/system/Engine.h>
 
 #include <serenity/utils/BlockProfiler.h>
 
@@ -124,18 +126,17 @@ namespace {
     }
     void opengl_debug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 //#ifdef _DEBUG
-        if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) {
+        if (severity == GL_DEBUG_SEVERITY_NOTIFICATION || id == 131218) {
             return;
         }
 //#endif
         std::cout << "opengl error - source: " << getDebugMsgSourceStr(source) << ", type: " << getDebugMsgTypeStr(type) << ", id: " << id << ", severity: " << getDebugMsgSeverityStr(severity) << ", message: " << message << '\n';
     }
 #endif 
-    template<class PROJECTION_MATRIX>
-    std::vector<glm::mat4> internal_gen_capture_views(PROJECTION_MATRIX&& projection) {
+    std::vector<glm::mat4> internal_gen_capture_views(const glm::mat4& projection) {
         auto captureViews = Engine::create_and_reserve<std::vector<glm::mat4>>(CAPTURE_VIEWS.size());
         for (const auto& view : CAPTURE_VIEWS) {
-            captureViews.emplace_back(std::forward<PROJECTION_MATRIX>(projection) * view);
+            captureViews.emplace_back(projection * view);
         }
         return captureViews;
     }
@@ -157,23 +158,18 @@ namespace {
         }
     }
 
-    template<class SHADOW_INFO>
     bool internal_build_shadow_caster(auto& hashed, auto& continguous, auto& light, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
         const auto itr = hashed.find(&light);
         if (itr != hashed.end()) {
             auto& data = *itr->second;
             data.setShadowInfo(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
         } else {
-            auto& data = continguous.emplace_back( &light,
-                SHADOW_INFO{
-                    shadowMapWidth,
-                    shadowMapHeight,
-                    frustumType,
-                    nearFactor,
-                    farFactor
-                }
+            auto& data = continguous.emplace_back( 
+                std::piecewise_construct,
+                std::forward_as_tuple(&light),
+                std::forward_as_tuple(shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor)
             );
-            hashed.emplace(&light, &std::get<1>(data));
+            hashed.emplace(&light, &data.second);
             return true;
         }
         return false;
@@ -317,8 +313,7 @@ void DeferredPipeline::init(uint32_t width, uint32_t height) {
     openglManager.GL_glEnable(GL_DEPTH_CLAMP);
     Engine::Renderer::setDepthFunc(GL_LEQUAL);
     glDepthRange(0.0f, 1.0f);
-
-    Handle uboCameraHandle = Engine::Resources::addResource<UniformBufferObject>("Camera", static_cast<uint32_t>(sizeof(UBOCameraDataStruct)));
+    Handle uboCameraHandle = Engine::Resources::addResource<UniformBufferObject>( "UBOCamera", (uint32_t)sizeof(UBOCameraDataStruct) );
     m_UBOCamera = uboCameraHandle.get<UniformBufferObject>();
 
     priv::EShaders::init();
@@ -424,11 +419,31 @@ void DeferredPipeline::init(uint32_t width, uint32_t height) {
         }
     }
     //"D" = default
-    Texture::White     = Engine::Resources::addResource<Texture>(ImageWhite.data(), 2, 2, "DWhiteTexture", false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D, false);
-    Texture::Black     = Engine::Resources::addResource<Texture>(ImageBlack.data(), 2, 2, "DBlackTexture", false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D, false);
+    TextureConstructorInfo ci_white;
+    ci_white.pixels         = ImageWhite.data();
+    ci_white.width          = 2;
+    ci_white.height         = 2;
+    ci_white.name           = "DWhiteTexture";
+    ci_white.mipmapped      = false;
+    ci_white.internalFormat = ImageInternalFormat::SRGB8_ALPHA8;
 
-    Texture::Checkers  = Engine::Resources::addResource<Texture>(ImageCheckers.data(), 8, 8, "DCheckersTexture", false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D, false);
-    Texture::Checkers.get<Texture>()->setFilter(TextureFilter::Nearest);
+    TextureConstructorInfo ci_black = ci_white;
+    ci_black.pixels = ImageBlack.data();
+    ci_black.name   = "DBlackTexture";
+
+    TextureConstructorInfo ci_checkers = ci_white;
+    ci_checkers.width     = 8;
+    ci_checkers.height    = 8;
+    ci_checkers.pixels    = ImageCheckers.data();
+    ci_checkers.name      = "DCheckersTexture";
+    ci_checkers.minFilter = TextureFilter::Nearest;
+    ci_checkers.maxFilter = TextureFilter::Nearest;
+
+    Texture::White     = Engine::Resources::addResource<Texture>(ci_white, false);
+    Texture::Black     = Engine::Resources::addResource<Texture>(ci_black, false);
+
+    Texture::Checkers  = Engine::Resources::addResource<Texture>(ci_checkers, false);
+
     Material::Checkers = Engine::Resources::addResource<Material>("DCheckers", Texture::Checkers);
     Material::Checkers.get<Material>()->setSpecularModel(SpecularModel::None);
     Material::Checkers.get<Material>()->setSmoothness(0_uc);
@@ -440,8 +455,22 @@ void DeferredPipeline::init(uint32_t width, uint32_t height) {
     Material::WhiteShadeless.get<Material>()->setMetalness(0_uc);
     Material::WhiteShadeless.get<Material>()->setShadeless(true);
 
-    Texture::BRDF = Engine::Resources::addResource<Texture>(512, 512, ImagePixelType::FLOAT, ImagePixelFormat::RG, ImageInternalFormat::RG16F, 1.0f, false);
-    Texture::BRDF.get<Texture>()->setWrapping(TextureWrap::ClampToEdge);
+    TextureConstructorInfo BRDF_CI;
+    BRDF_CI.width          = 512;
+    BRDF_CI.height         = 512;
+    BRDF_CI.internalFormat = ImageInternalFormat::RG16F;
+    BRDF_CI.pixelFormat    = ImagePixelFormat::RG;
+    BRDF_CI.pixelType      = ImagePixelType::FLOAT;
+    BRDF_CI.mipmapped      = false;
+    BRDF_CI.loadAsync      = false;
+    BRDF_CI.usageType      = TextureUsage::RenderTarget;
+    BRDF_CI.type           = TextureType::RenderTarget;
+    BRDF_CI.name           = "BRDF";
+    BRDF_CI.xWrapping      = TextureWrap::ClampToEdge;
+    BRDF_CI.yWrapping      = TextureWrap::ClampToEdge;
+    BRDF_CI.zWrapping      = TextureWrap::ClampToEdge;
+
+    Texture::BRDF = Engine::Resources::addResource<Texture>(BRDF_CI);
 
     internal_generate_brdf_lut(m_InternalShaderPrograms[ShaderProgramEnum::BRDFPrecomputeCookTorrance], 512, 256);
 
@@ -476,12 +505,6 @@ void DeferredPipeline::internal_generate_brdf_lut(Handle program, uint32_t brdfS
     auto brdfTexture        = Texture::BRDF.get<Texture>();
     TextureType textureType = TextureType::Texture2D;
     Engine::Renderer::bindTextureForModification(textureType, brdfTexture->address());
-    glTexImage2D(textureType.toGLType(), 0, GL_RG16F, brdfSize, brdfSize, 0, GL_RG, GL_FLOAT, 0);
-    Engine::opengl::setFilter(textureType, TextureFilter::Linear);
-
-    TextureWrap wrap = TextureWrap::ClampToEdge;
-    glTexParameteri(textureType.toGLType(), GL_TEXTURE_WRAP_S, wrap.toGLType());
-    glTexParameteri(textureType.toGLType(), GL_TEXTURE_WRAP_T, wrap.toGLType());
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureType.toGLType(), brdfTexture->address(), 0);
     fbo.checkStatus();
@@ -889,7 +912,7 @@ void DeferredPipeline::toggleShadowCaster(ProjectionLight& projectionLight, bool
 bool DeferredPipeline::buildShadowCaster(SunLight& sunLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
     const auto sceneID = sunLight.sceneID();
     resize_shadow_containers(sunLight, m_ShadowCasters.m_ShadowCastersSunHashed, m_ShadowCasters.m_ShadowCastersSun);
-    return internal_build_shadow_caster<GLDeferredSunLightShadowInfo>(
+    return internal_build_shadow_caster(
         m_ShadowCasters.m_ShadowCastersSunHashed[sceneID],
         m_ShadowCasters.m_ShadowCastersSun[sceneID],
         sunLight,
@@ -906,7 +929,7 @@ bool DeferredPipeline::buildShadowCaster(PointLight& pointLight) {
 bool DeferredPipeline::buildShadowCaster(DirectionalLight& directionalLight, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) {
     const auto sceneID = directionalLight.sceneID();
     resize_shadow_containers(directionalLight, m_ShadowCasters.m_ShadowCastersDirectionalHashed, m_ShadowCasters.m_ShadowCastersDirectional);
-    return internal_build_shadow_caster<GLDeferredDirectionalLightShadowInfo>(
+    return internal_build_shadow_caster(
         m_ShadowCasters.m_ShadowCastersDirectionalHashed[sceneID],
         m_ShadowCasters.m_ShadowCastersDirectional[sceneID],
         directionalLight,
@@ -1263,7 +1286,11 @@ void DeferredPipeline::renderParticles(ParticleSystem& system, Camera& camera) {
     }
 }
 void DeferredPipeline::renderMesh(Mesh& mesh, uint32_t mode) {
-    const auto indicesSize = mesh.getVertexData().m_Indices.size();
+    Mesh* meshPtr = std::addressof(mesh);
+    if (!meshPtr->isLoaded()) {
+        meshPtr = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>();
+    }
+    const auto indicesSize = meshPtr->getVertexData().m_Indices.size();
     if (indicesSize > 0) {
         glDrawElements(mode, (GLsizei)indicesSize, GL_UNSIGNED_INT, nullptr);
     }
@@ -1434,7 +1461,7 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     //directional lights
     if (m_ShadowCasters.m_ShadowCastersDirectional.size() > sceneID) {
         for (auto& [directionalLight, data] : m_ShadowCasters.m_ShadowCastersDirectional[sceneID]) {
-            if (data.m_Enabled) {
+            if (data.m_Enabled && data.isReady()) {
                 data.calculateOrthographicProjections(camera, directionalLight->getDirection());
                 Engine::Renderer::setViewport(0.0f, 0.0f, data.m_ShadowWidth, data.m_ShadowHeight);
                 for (int i = 0; i < int(data.m_LightSpaceMatrices.size()); ++i) {
@@ -1454,7 +1481,7 @@ void DeferredPipeline::internal_pass_shadows_depth(Viewport& viewport, Scene& sc
     //sun lights
     if (m_ShadowCasters.m_ShadowCastersSun.size() > sceneID) {
         for (auto& [sunLight, data] : m_ShadowCasters.m_ShadowCastersSun[scene.id()]) {
-            if (data.m_Enabled) {
+            if (data.m_Enabled && data.isReady()) {
                 data.calculateOrthographicProjections(camera, glm::normalize(sunLight->getPosition() - camera.getPosition()));
                 Engine::Renderer::setViewport(0.0f, 0.0f, data.m_ShadowWidth, data.m_ShadowHeight);
                 for (int i = 0; i < int(data.m_LightSpaceMatrices.size()); ++i) {

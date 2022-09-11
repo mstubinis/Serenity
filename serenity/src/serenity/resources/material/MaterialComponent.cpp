@@ -12,23 +12,20 @@
 #include <SFML/OpenGL.hpp>
 
 namespace {
-    std::string WHOLE_STR_BUFFER;
+    constexpr std::array<glm::vec4, MaterialComponentType::_TOTAL> MISC_DATA_INFO{ {
+        { 1.0f, 1.0f, 1.0f, 1.0f }, // Diffuse
+        { 1.0f, 1.0f, 1.0f, 1.0f }, // Normal
+        { 0.0f, 1.0f, 1.0f, 0.0f }, // Glow
+        { 0.0f, 1.0f, 1.0f, 0.0f }, // Specular
+        { 0.0f, 1.0f, 1.0f, 0.0f }, // Metalness
+        { 0.0f, 1.0f, 1.0f, 0.0f }, // Smoothness
+        { 0.0f, 1.0f, 1.0f, 0.0f }, // AO
+        { 1.0f, 1.0f, 1.0f, 1.0f }, // Reflection
+        { 1.0f, 1.0f, 1.0f, 1.0f }, // Refraction
+        { 1.0f, 1.0f, 1.0f, 1.0f }, // ParallaxOcclusion
+        { 0.0f, 0.0f, 0.0f, 0.0f }, // Empty
+    } };
 }
-
-constexpr std::array<glm::vec4, MaterialComponentType::_TOTAL> MISC_DATA_INFO { {
-    { 1.0f, 1.0f, 1.0f, 1.0f }, // Diffuse
-    { 1.0f, 1.0f, 1.0f, 1.0f }, // Normal
-    { 0.0f, 1.0f, 1.0f, 0.0f }, // Glow
-    { 0.0f, 1.0f, 1.0f, 0.0f }, // Specular
-    { 0.0f, 1.0f, 1.0f, 0.0f }, // Metalness
-    { 0.0f, 1.0f, 1.0f, 0.0f }, // Smoothness
-    { 0.0f, 1.0f, 1.0f, 0.0f }, // AO
-    { 1.0f, 1.0f, 1.0f, 1.0f }, // Reflection
-    { 1.0f, 1.0f, 1.0f, 1.0f }, // Refraction
-    { 1.0f, 1.0f, 1.0f, 1.0f }, // ParallaxOcclusion
-    { 0.0f, 0.0f, 0.0f, 0.0f }, // Empty
-} };
-
 MaterialComponent::MaterialComponent(MaterialComponentType type, Handle textureHandle, Handle maskHandle, Handle cubemapHandle)
     : m_ComponentType{ type }
 {
@@ -49,7 +46,7 @@ MaterialComponent& MaterialComponent::operator=(MaterialComponent&& other) noexc
 }
 MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const std::string& maskFile, const std::string& cubemapFile) {
     if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(string...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
+        ENGINE_LOG(__FUNCTION__ << "(string...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
         return nullptr;
     }
     auto texture = Engine::Resources::getResource<Texture>(textureFile);
@@ -57,10 +54,22 @@ MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const
     auto cubemap = Engine::Resources::getResource<TextureCubemap>(cubemapFile);
 
     if (!texture.m_Resource && !textureFile.empty()) {
-        texture  = Engine::Resources::addResource<Texture>(textureFile, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D, true);
+        TextureConstructorInfo ci;
+        ci.filename       = textureFile;
+        ci.internalFormat = ImageInternalFormat::SRGB8_ALPHA8;
+        ci.mipmapped      = false;
+        //ci.loadAsync    = true; //TODO: test this
+
+        texture  = Engine::Resources::addResource<Texture>(ci, true);
     }
     if (!mask.m_Resource && !maskFile.empty()) {
-        mask     = Engine::Resources::addResource<Texture>(maskFile, false, ImageInternalFormat::R8, TextureType::Texture2D, true);
+        TextureConstructorInfo ci;
+        ci.filename       = maskFile;
+        ci.internalFormat = ImageInternalFormat::R8;
+        ci.mipmapped      = false;
+        //ci.loadAsync    = true; //TODO: test this
+
+        mask     = Engine::Resources::addResource<Texture>(ci, true);
     }
     if (!cubemap.m_Resource && !cubemapFile.empty()) {
         cubemap  = Engine::Resources::addResource<TextureCubemap>(cubemapFile, false, ImageInternalFormat::SRGB8_ALPHA8);
@@ -69,7 +78,7 @@ MaterialLayer* MaterialComponent::addLayer(const std::string& textureFile, const
 }
 MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHandle, Handle cubemapHandle) {
     if (m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(Handle...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
+        ENGINE_LOG(__FUNCTION__ << "(Handle...): m_NumLayers == MAX_MATERIAL_LAYERS_PER_COMPONENT!")
         return nullptr;
     }
     auto& layer = m_Layers[m_NumLayers];
@@ -83,11 +92,11 @@ MaterialLayer* MaterialComponent::addLayer(Handle textureHandle, Handle maskHand
     return &layer;
 }
 void MaterialComponent::bind(size_t component_index, int& inTextureUnit) const {
-    WHOLE_STR_BUFFER.clear();
-    WHOLE_STR_BUFFER += "components[" + std::to_string(component_index) + "].";
-    Engine::Renderer::sendUniform2Safe((WHOLE_STR_BUFFER + "compDat").c_str(), int(m_NumLayers), int(bool(m_ComponentType != MaterialComponentType::Empty)));
+    std::string buffer;
+    buffer += "components[" + std::to_string(component_index) + "].";
+    Engine::Renderer::sendUniform2Safe((buffer + "compDat").c_str(), int(m_NumLayers), int(bool(m_ComponentType != MaterialComponentType::Empty)));
     for (uint32_t layerNumber = 0; layerNumber < MAX_MATERIAL_LAYERS_PER_COMPONENT; ++layerNumber) {
-        m_Layers[layerNumber].sendDataToGPU(WHOLE_STR_BUFFER, layerNumber, inTextureUnit);
+        m_Layers[layerNumber].sendDataToGPU(buffer, layerNumber, inTextureUnit);
     }
 }
 void MaterialComponent::update(const float dt) {

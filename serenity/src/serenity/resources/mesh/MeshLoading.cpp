@@ -15,67 +15,130 @@
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <fstream>
-#include <stack>
 
-void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(const aiScene& scene, aiNode* ai_node, MeshRequest& request) {
+namespace {
     struct Parameters final {
-        aiNode*  ai_node     = nullptr;
-        uint16_t parentIndex = 0;
-        Parameters(aiNode* ai_node_, uint16_t parentIndex_)
-            : ai_node{ ai_node_ }
-            , parentIndex{ parentIndex_ }
-        {}
+        aiNode* ai_node    = nullptr;
+        uint16_t parentIdx = 0;
     };
+}
 
-    std::stack<Parameters> stk;
+void Engine::priv::MeshLoader::LoadPopulateGlobalNodes(aiScene& aiscene, MeshRequest& meshRequest) {
+    //get mesh nodes
+    std::vector<Parameters> dfs;
     uint16_t ParentIndex = 0;
-    stk.emplace(ai_node, ParentIndex);
-    //dfs
-    while (!stk.empty()) {
-        auto data    = stk.top();
-        stk.pop();
+    dfs.emplace_back(aiscene.mRootNode, 0);
+    while (!dfs.empty()) {
+        auto data = dfs.back();
+        dfs.pop_back();
         auto& ainode = *data.ai_node;
-        request.m_NodeData.m_Nodes.emplace_back(ainode);
-        request.m_NodeData.m_NodeHeirarchy.emplace_back(data.parentIndex);
-        request.m_NodeStrVector.push_back(ainode.mName.C_Str());
-        for (uint32_t i = 0; i < ainode.mNumMeshes; ++i) {
-            const aiMesh& aimesh  = *scene.mMeshes[ainode.mMeshes[i]];
-            MeshRequestPart& part = request.m_Parts.emplace_back();
-            part.name             = request.m_FileOrData + " - " + std::string{ aimesh.mName.C_Str() };
-            part.handle           = Engine::Resources::addResource<Mesh>();
-            part.cpuData.m_File   = request.m_FileOrData;
+        std::string nodeName = std::string{ ainode.mName.C_Str() };
+        for (unsigned int i = 0; i != ainode.mNumMeshes; ++i) {
+            aiMesh& aimesh                   = *aiscene.mMeshes[ainode.mMeshes[i]];
+            MeshRequestPart& meshRequestPart = meshRequest.m_Parts.emplace_back();
+            meshRequestPart.name             = meshRequest.m_FileOrData + " - " + nodeName;
+            meshRequestPart.handle           = Engine::Resources::addResource<Mesh>();
+            meshRequestPart.cpuData.m_File   = meshRequest.m_FileOrData;
+            meshRequestPart.fileOrData       = meshRequest.m_FileOrData;
+            meshRequestPart.fileExists       = meshRequest.m_FileExists;
+            meshRequestPart.fileExtension    = meshRequest.m_FileExtension;
+            meshRequestPart.rootNode         = ainode.mParent ? ainode.mParent : &ainode;
+            meshRequestPart.aiMesh           = std::addressof(aimesh);
+            meshRequestPart.aiMeshNode       = std::addressof(ainode);
         }
         ++ParentIndex;
-        for (uint32_t i = 0; i < ainode.mNumChildren; ++i) {
-            auto* ai_child = ainode.mChildren[i];
-            stk.emplace(ai_child, ParentIndex);
+        for (unsigned int i = 0; i != ainode.mNumChildren; ++i) {
+            dfs.emplace_back(ainode.mChildren[i], ParentIndex);
         }
     }
-    request.m_NodeData.m_NodeTransforms.resize(request.m_NodeData.m_Nodes.size(), glm::mat4{1.0f});
-}
-void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& request, const aiScene& aiscene, const aiNode& rootAINode) {
-    uint32_t partIndex = 0;
+    //process each mesh's node tree
+    for (auto& part : meshRequest.m_Parts) {
+        assert(!part.nodes.empty());
 
-    std::stack<const aiNode*> stk; 
-    stk.push(&rootAINode);
-    //dfs
-    while (!stk.empty()) {
-        auto& AINode = *stk.top();
-        stk.pop();
-        for (auto i = 0U; i < AINode.mNumMeshes; ++i) {
-            const aiMesh& aimesh = *aiscene.mMeshes[AINode.mMeshes[i]];
-            auto& part           = request.m_Parts[partIndex];
-            MeshImportedData data{ aimesh };
-       
-            if (aimesh.mNumBones > 0) {
-                part.cpuData.m_Skeleton = NEW MeshSkeleton{ aimesh, aiscene, request, data };
-            }
-            MeshLoader::CalculateTBNAssimp(data);
-            MeshLoader::FinalizeData(part.cpuData, data, 0.0005f);
-            ++partIndex;
+        //build bone information
+        auto hashedBones = Engine::create_and_reserve<Engine::unordered_string_map<std::string, uint16_t>>(part.aiMesh->mNumBones);
+        for (uint32_t boneIdx = 0; boneIdx != part.aiMesh->mNumBones; ++boneIdx) {
+            hashedBones.emplace(std::piecewise_construct, std::forward_as_tuple(part.aiMesh->mBones[boneIdx]->mName.C_Str()), std::forward_as_tuple(boneIdx));
         }
-        for (uint32_t i = 0; i < AINode.mNumChildren; ++i) {
-            stk.push(AINode.mChildren[i]);
+
+        //add leaf nodes to help prune tree of unnecessary data
+        ParentIndex = 0;
+        dfs.emplace_back(part.rootNode, 0);
+        while (!dfs.empty()) {
+            auto data = dfs.back();
+            dfs.pop_back();
+            auto& ainode = *data.ai_node;
+            ++ParentIndex;
+            if (ainode.mNumChildren == 0) {
+                part.leafNodes.push_back(std::addressof(ainode));
+            }
+            for (unsigned int i = 0; i != ainode.mNumChildren; ++i) {
+                dfs.emplace_back(ainode.mChildren[i], ParentIndex);
+            }
+        }
+
+
+
+        //next, climb up the tree from leaves & mark nodes as important
+        std::unordered_set<aiNode*> importantMapping;
+        for (aiNode* leaf : part.leafNodes) {
+            aiNode* curr = leaf;
+            bool important = false;
+            while (curr) {
+                if (curr == part.rootNode || curr == part.aiMeshNode) {
+                    break;
+                }
+                if (hashedBones.contains(std::string{ curr->mName.C_Str() })) {
+                    important = true;
+                }
+                if (important) {
+                    importantMapping.insert(curr);
+                }
+                curr = curr->mParent;
+            }
+        }
+
+
+        //finally, finish up by populating only important nodes
+        ParentIndex = 0;
+        dfs.emplace_back(part.rootNode, 0);
+        while (!dfs.empty()) {
+            auto data = dfs.back();
+            dfs.pop_back();
+            auto& ainode = *data.ai_node;
+            if (importantMapping.contains(&ainode)) {
+                ++ParentIndex;
+                part.nodesData.m_Nodes.emplace_back(ainode);
+                part.nodesData.m_NodeHeirarchy.emplace_back(data.parentIdx);
+                part.nodesNames.push_back(std::string{ ainode.mName.C_Str() });
+            }
+            for (unsigned int i = 0; i != ainode.mNumChildren; ++i) {
+                dfs.emplace_back(ainode.mChildren[i], ParentIndex);
+            }
+        }
+        part.nodesData.m_NodeTransforms.resize(part.nodesData.m_Nodes.size(), glm::mat4{ 1.0f });
+    }
+}
+void Engine::priv::MeshLoader::LoadProcessNodeData(MeshRequest& meshRequest, const aiScene& aiscene, const aiNode& rootAINode) {
+    for (auto& part : meshRequest.m_Parts) {
+        std::vector<const aiNode*> dfs;
+        dfs.push_back(part.rootNode);
+        while (!dfs.empty()) {
+            auto ainode = dfs.back();
+            dfs.pop_back();
+            for (unsigned int i = 0; i != ainode->mNumMeshes; ++i) {
+                aiMesh& aimesh = *aiscene.mMeshes[ainode->mMeshes[i]];
+                MeshImportedData data{ aimesh };
+
+                if (aimesh.mNumBones > 0) {
+                    part.cpuData.m_Skeleton = NEW MeshSkeleton{ aimesh, aiscene, part, data };
+                }
+                MeshLoader::CalculateTBNAssimp(data);
+                MeshLoader::FinalizeData(part.cpuData, data, 0.0005f);
+            }
+            for (unsigned int i = 0; i != ainode->mNumChildren; ++i) {
+                dfs.push_back(ainode->mChildren[i]);
+            }
         }
     }
 }

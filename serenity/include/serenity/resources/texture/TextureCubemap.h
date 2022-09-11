@@ -2,7 +2,6 @@
 #ifndef ENGINE_TEXTURE_CUBEMAP_H
 #define ENGINE_TEXTURE_CUBEMAP_H
 
-struct TextureRequest;
 namespace Engine::priv {
     class GBuffer;
     template<typename T> class ResourceVector;
@@ -38,7 +37,6 @@ class TextureCubemap final : public Resource<TextureCubemap>, public Engine::pri
     friend class  Engine::priv::ResourceVector<TextureCubemap>;
     friend class  Engine::priv::GBuffer;
     friend class  Engine::priv::TextureLoaderCubemap;
-    friend struct TextureRequest;
     friend class  Engine::priv::detail::opengl::Impl;
     friend class  TextureCubemap::Impl;
     private:

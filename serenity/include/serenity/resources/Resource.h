@@ -15,6 +15,7 @@ class ResourceBaseClass {
         ResourceBaseClass() noexcept = default;
         ResourceBaseClass(ResourceType) noexcept;
         ResourceBaseClass(ResourceType, std::string_view name) noexcept;
+        ResourceBaseClass(ResourceType, std::string&& name) noexcept;
 
         ResourceBaseClass(const ResourceBaseClass&)                 = delete;
         ResourceBaseClass& operator=(const ResourceBaseClass&)      = delete;
@@ -27,8 +28,8 @@ class ResourceBaseClass {
 
         inline void setName(std::string name) noexcept { m_Name = std::move(name); }
 
-        virtual void load(bool dispatchEventLoaded = true);
-        virtual void unload(bool dispatchEventLoaded = true);
+        void load(bool dispatchEventLoaded = true);
+        void unload(bool dispatchEventLoaded = true);
 };
 
 template<class RESOURCE>
@@ -44,7 +45,9 @@ class Resource : public ResourceBaseClass {
         Resource(ResourceType type, std::string_view name) noexcept
             : ResourceBaseClass { type, name }
         {}
-
+        Resource(ResourceType type, std::string&& name) noexcept
+            : ResourceBaseClass{ type, std::move(name) }
+        {}
         Resource(const Resource&)                = delete;
         Resource& operator=(const Resource&)     = delete;
         Resource(Resource&&) noexcept            = default;

@@ -22,7 +22,7 @@ uint32_t ModelInstance::m_ViewportFlagDefault = ViewportFlag::All;
 decimal ModelInstance::m_GlobalDistanceFactor = decimal(1100.0);
 
 namespace {
-    constexpr auto DefaultModelInstanceBindFunctor = [](ModelInstance* modelInstance, const Engine::priv::RenderModule* renderer) {
+    constexpr auto DEFAULT_MODELINSTANCE_BIND_FUNC = [](ModelInstance* modelInstance, const Engine::priv::RenderModule* renderer) {
         const auto stage               = modelInstance->getStage();
         auto& scene                    = *Engine::Resources::getCurrentScene();
         auto* camera                   = scene.getActiveCamera();
@@ -37,9 +37,9 @@ namespace {
             renderer->m_Pipeline->sendGPUDataAllLights(scene, *camera);
             renderer->m_Pipeline->sendGPUDataGI(scene.skybox());
         }
-        if (animationContainer.size() > 0) {
+        if (animationContainer.getNumBones() > 0) {
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 1);
-            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getTransforms());
+            Engine::Renderer::sendUniformMatrix4vSafe("gBones[0]", animationContainer.getBoneVertexTransforms());
         } else {
             Engine::Renderer::sendUniform1Safe("AnimationPlaying", 0);
         }
@@ -49,12 +49,12 @@ namespace {
         const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ modelMatrix }));
 
         //view space normals
-        //const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ cam.getView() * model }));
+        //const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3{ cam.getView() * modelMatrix }));
 
         Engine::Renderer::sendUniformMatrix4("Model", modelMatrix);
         Engine::Renderer::sendUniformMatrix3Safe("NormalMatrix", normalMatrix);
     };
-    constexpr auto DefaultModelInstanceUnbindFunctor = [](ModelInstance* modelInstance, const Engine::priv::RenderModule* renderer) {
+    constexpr auto DEFAULT_MODELINSTANCE_UNBIND_FUNC = [](ModelInstance* modelInstance, const Engine::priv::RenderModule* renderer) {
 
     };
 }
@@ -63,12 +63,18 @@ bool priv::PublicModelInstance::IsViewportValid(const ModelInstance& modelInstan
     return flags == 0 || flags & (1 << viewport.getId());
 }
 
-ModelInstance::ModelInstance(Entity parent, Handle mesh, Handle material, Handle shaderProgram)
-    : m_Owner{ parent }
+ModelInstance::ModelInstance(Entity parentEntity, Handle meshHandle, Handle materialHandle, Handle shaderProgram)
+    : m_Owner{ parentEntity }
+    , m_Animations{ meshHandle.get<Mesh>()->getSkeleton(), std::addressof(meshHandle.get<Mesh>()->m_CPUData.m_NodesData) }
+    , m_ViewportFlag{ ModelInstance::m_ViewportFlagDefault }
+    , m_ShaderProgramHandle{ !shaderProgram ? ShaderProgram::Deferred : shaderProgram }
+    , m_MaterialHandle{ materialHandle }
+    , m_MeshHandle{ meshHandle }
 {
-    internal_init(mesh, material, shaderProgram);
-    setCustomBindFunctor(DefaultModelInstanceBindFunctor);
-    setCustomUnbindFunctor(DefaultModelInstanceUnbindFunctor);
+    internal_update_model_matrix(true);
+
+    setCustomBindFunctor(DEFAULT_MODELINSTANCE_BIND_FUNC);
+    setCustomUnbindFunctor(DEFAULT_MODELINSTANCE_UNBIND_FUNC);
 }
 ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     : m_ModelMatrix        { std::move(other.m_ModelMatrix) }
@@ -94,7 +100,6 @@ ModelInstance::ModelInstance(ModelInstance&& other) noexcept
     , m_ForceRender        { std::move(other.m_ForceRender) }
     , m_IsShadowCaster     { std::move(other.m_IsShadowCaster) }
 {
-    //internal_calculate_radius();
     if (other.isRegistered(EventType::ResourceLoaded)) {
         registerEvent(EventType::ResourceLoaded);
     }
@@ -123,7 +128,7 @@ ModelInstance& ModelInstance::operator=(ModelInstance&& other) noexcept {
         m_Visible             = std::move(other.m_Visible);
         m_ForceRender         = std::move(other.m_ForceRender);
         m_IsShadowCaster      = std::move(other.m_IsShadowCaster);
-        //internal_calculate_radius();
+
         unregisterEvent(EventType::ResourceLoaded);
         if (other.isRegistered(EventType::ResourceLoaded)) {
             registerEvent(EventType::ResourceLoaded);
@@ -143,16 +148,6 @@ float ModelInstance::internal_calculate_radius() {
     m_Radius = mesh->getRadius();
     return m_Radius;
 }
-void ModelInstance::internal_init(Handle mesh, Handle material, Handle shaderProgram) {
-    if (!shaderProgram) {
-        shaderProgram     = ShaderProgram::Deferred;
-    }
-    m_ViewportFlag        = ModelInstance::m_ViewportFlagDefault;
-    m_ShaderProgramHandle = shaderProgram;
-    m_MaterialHandle      = material;
-    m_MeshHandle          = mesh;
-    internal_update_model_matrix();
-}
 void ModelInstance::internal_update_model_matrix(bool recalcRadius) {
     if (recalcRadius) {
         internal_calculate_radius();
@@ -163,9 +158,9 @@ void ModelInstance::internal_update_model_matrix(bool recalcRadius) {
     }
     Math::setFinalModelMatrix(m_ModelMatrix, getPosition(), m_Orientation, m_Scale);
 }
-void ModelInstance::setStage(RenderStage stage, ComponentModel& componentModel) {
-    m_Stage = stage;
-    componentModel.setStage(stage, m_Index);
+void ModelInstance::setStage(RenderStage renderStage, ComponentModel& componentModel) {
+    m_Stage = renderStage;
+    componentModel.setStage(renderStage, m_Index);
 }
 void ModelInstance::setPosition(float x, float y, float z){
     Engine::Math::setMatrixPosition(m_ModelMatrix, x, y, z);
@@ -195,23 +190,23 @@ void ModelInstance::rotate(float x, float y, float z, bool local){
     internal_update_model_matrix(false);
 }
 
-void ModelInstance::setShaderProgram(Handle shaderProgram, ComponentModel& componentModel) {
-    if (!shaderProgram) { 
-        shaderProgram = ShaderProgram::Deferred;
+void ModelInstance::setShaderProgram(Handle shaderProgramHandle, ComponentModel& componentModel) {
+    if (!shaderProgramHandle) {
+        shaderProgramHandle = ShaderProgram::Deferred;
     }
-    componentModel.setModel(m_MeshHandle, m_MaterialHandle, m_Index, shaderProgram, m_Stage);
+    componentModel.setModel(m_MeshHandle, m_MaterialHandle, m_Index, shaderProgramHandle, m_Stage);
 }
-void ModelInstance::setMesh(Handle mesh, ComponentModel& componentModel){
+void ModelInstance::setMesh(Handle meshHandle, ComponentModel& componentModel){
     m_Animations.clear();
-    componentModel.setModel(mesh, m_MaterialHandle, m_Index, m_ShaderProgramHandle, m_Stage);
-    internal_update_model_matrix();
+    m_Animations.setMesh(meshHandle);
+    componentModel.setModel(meshHandle, m_MaterialHandle, m_Index, m_ShaderProgramHandle, m_Stage);
+    internal_update_model_matrix(true);
 }
-void ModelInstance::setMaterial(Handle material, ComponentModel& componentModel){
-    componentModel.setModel(m_MeshHandle, material, m_Index, m_ShaderProgramHandle, m_Stage);
+void ModelInstance::setMaterial(Handle materialHandle, ComponentModel& componentModel){
+    componentModel.setModel(m_MeshHandle, materialHandle, m_Index, m_ShaderProgramHandle, m_Stage);
 }
 void ModelInstance::onEvent(const Event& e) {
     if (e.type == EventType::ResourceLoaded && e.eventResource.resource->type() == ResourceType::Mesh) {
-        //Mesh* mesh           = static_cast<Mesh*>(e.eventResource.resource);
         Mesh* meshFromHandle = m_MeshHandle.get<Mesh>();
         if (meshFromHandle->isLoaded()) {
             internal_update_model_matrix(true);

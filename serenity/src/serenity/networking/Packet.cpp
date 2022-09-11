@@ -1,5 +1,6 @@
 
 #include <serenity/networking/Packet.h>
+#include <serenity/math/Engine_Math.h>
 
 sf::Packet& operator <<(sf::Packet& packet, Entity entity) noexcept {
     return packet << entity.id() << entity.versionID() << entity.sceneID();
@@ -9,6 +10,20 @@ sf::Packet& operator >>(sf::Packet& packet, Entity entity) noexcept {
     auto version = entity.versionID();
     auto scene   = entity.sceneID();
     return packet >> id >> version >> scene;
+}
+
+sf::Packet& operator <<(sf::Packet& packet, const Engine::quat32& q) noexcept {
+    return q.serialize(packet);
+}
+sf::Packet& operator >>(sf::Packet& packet, Engine::quat32& q) noexcept {
+    return q.deserialize(packet);
+}
+
+sf::Packet& operator <<(sf::Packet& packet, const Engine::quat64& q) noexcept {
+    return q.serialize(packet);
+}
+sf::Packet& operator >>(sf::Packet& packet, Engine::quat64& q) noexcept {
+    return q.deserialize(packet);
 }
 
 #define BUILD_GLM_VEC_PACKET_DEFINITIONS(NAME) \

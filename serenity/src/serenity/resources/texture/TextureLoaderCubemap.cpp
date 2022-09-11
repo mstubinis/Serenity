@@ -3,13 +3,14 @@
 #include <serenity/resources/texture/TextureLoaderCubemap.h>
 #include <serenity/resources/texture/DDS.h>
 #include <serenity/math/Engine_Math.h>
-#include <serenity/system/Engine.h>
 #include <serenity/renderer/FramebufferObject.h>
 #include <serenity/events/Event.h>
-#include <serenity/resources/texture/TextureRequest.h>
 
 #include <serenity/renderer/opengl/APIStateOpenGL.h>
 #include <serenity/resources/texture/DDS.h>
+
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/resources/Engine_Resources.h>
 
 #include <fstream>
 #include <filesystem>
@@ -60,7 +61,7 @@ namespace Engine::priv {
             }
         }
         if (!inHandle.null()) {
-            std::scoped_lock lock(*inHandle.getMutex());
+            //std::scoped_lock lock{ inHandle };
             inHandle.get<TextureCubemap>()->m_CPUData = std::move(cpuData);
         }
     }

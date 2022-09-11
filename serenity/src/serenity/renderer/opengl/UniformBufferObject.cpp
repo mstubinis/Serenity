@@ -8,11 +8,17 @@
 
 uint32_t  UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT = 0;
 
+namespace {
+    [[nodiscard]] inline bool internal_is_supported() noexcept {
+        return Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO();
+    }
+}
+
 UniformBufferObject::UniformBufferObject(std::string_view nameInShader, uint32_t sizeofStruct, const int globalBindingPointNumber) 
     : Resource{ ResourceType::UniformBufferObject, nameInShader }
     , m_SizeOfStruct{ sizeofStruct }
 {
-    if (!Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO()) {
+    if (!internal_is_supported()) {
         return;
     }
     if (globalBindingPointNumber == -1) {
@@ -20,7 +26,7 @@ UniformBufferObject::UniformBufferObject(std::string_view nameInShader, uint32_t
         assert(MAX_UBO_BINDINGS != 0);
         m_GlobalBindingPointNumber = (MAX_UBO_BINDINGS - 1) - UniformBufferObject::CUSTOM_UBO_AUTOMATIC_COUNT++;
         if (m_GlobalBindingPointNumber < 0) {
-            ENGINE_PRODUCTION_LOG("Warning: Max UBO Limit reached!")
+            ENGINE_LOG("Warning: Max UBO Limit reached!")
             m_GlobalBindingPointNumber = 0;
         }
     } else {
@@ -28,51 +34,49 @@ UniformBufferObject::UniformBufferObject(std::string_view nameInShader, uint32_t
     }
     internal_load_CPU();
     internal_load_GPU();
-    //registerEvent(EventType::WindowFullscreenChanged);
 }
 UniformBufferObject::~UniformBufferObject() {
-    //unregisterEvent(EventType::WindowFullscreenChanged);
     internal_unload_GPU();
     internal_unload_CPU();
 }
 void UniformBufferObject::internal_load_CPU() {
-    if (!Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO()) {
+    if (!internal_is_supported()) {
         return;
     }
     internal_unload_CPU();
 }
 void UniformBufferObject::internal_unload_CPU() {
-    if (!Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO()) {
+    if (!internal_is_supported()) {
         return;
     }
 }
 void UniformBufferObject::internal_load_GPU() {
-    if (!Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO()) {
+    if (!internal_is_supported()) {
         return;
     }
     internal_unload_GPU();
-    glGenBuffers(1, &m_UBOObject);
-    glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject);                                 // gen and bind buffer
+    glGenBuffers(1, &m_UBO_GLHandle);
+    glBindBuffer(GL_UNIFORM_BUFFER, m_UBO_GLHandle);                                 // gen and bind buffer
     glBufferData(GL_UNIFORM_BUFFER, m_SizeOfStruct, NULL, GL_STREAM_DRAW);       // create buffer data storage
-    glBindBufferBase(GL_UNIFORM_BUFFER, m_GlobalBindingPointNumber, m_UBOObject); // link UBO to it's global numerical index
+    glBindBufferBase(GL_UNIFORM_BUFFER, m_GlobalBindingPointNumber, m_UBO_GLHandle); // link UBO to it's global numerical index
 }
 void UniformBufferObject::internal_unload_GPU() {
-    if (!Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO()) {
+    if (!internal_is_supported()) {
         return;
     }
-    glDeleteBuffers(1, &m_UBOObject);
+    glDeleteBuffers(1, &m_UBO_GLHandle);
 }
 void UniformBufferObject::updateData(void* data) {
-    if (!Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO()) {
+    if (!internal_is_supported()) {
         return;
     } 
-    glBindBuffer(GL_UNIFORM_BUFFER, m_UBOObject);
+    glBindBuffer(GL_UNIFORM_BUFFER, m_UBO_GLHandle);
     //orphaning
     glBufferData(GL_UNIFORM_BUFFER, m_SizeOfStruct, NULL, GL_STREAM_DRAW);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, m_SizeOfStruct, data);
 }
 bool UniformBufferObject::attachToShaderProgram(ShaderProgram& shaderProgram) {
-    if (!Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO() || shaderProgram.m_AttachedUBOs.contains(m_UBOObject)) {
+    if (!internal_is_supported() || shaderProgram.m_AttachedUBOs.contains(m_UBO_GLHandle)) {
         return false;
     }
     const uint32_t programBlockIndex = glGetUniformBlockIndex(shaderProgram.m_ShaderProgram, name().c_str());
@@ -80,23 +84,19 @@ bool UniformBufferObject::attachToShaderProgram(ShaderProgram& shaderProgram) {
         return false; //error: was not found
     }
     glUniformBlockBinding(shaderProgram.m_ShaderProgram, programBlockIndex, m_GlobalBindingPointNumber);
-    shaderProgram.m_AttachedUBOs.emplace(m_UBOObject);
+    shaderProgram.m_AttachedUBOs.emplace(m_UBO_GLHandle);
     return true;
 }
-void UniformBufferObject::onEvent(const Event& e) {
-    //if (e.type == EventType::WindowFullscreenChanged) {
-    //    internal_load_GPU();
-    //}
-}
+
 
 
 
 
 UniformBufferObjectMapper::UniformBufferObjectMapper(UniformBufferObject& ubo) {
-    if (!Engine::priv::APIState<Engine::priv::OpenGL>::supportsUBO()) {
+    if (!internal_is_supported()) {
         return;
     }
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo.m_UBOObject);
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo.m_UBO_GLHandle);
     m_Ptr = glMapBufferRange(GL_UNIFORM_BUFFER, 0, ubo.m_SizeOfStruct, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 }
 UniformBufferObjectMapper::~UniformBufferObjectMapper() {

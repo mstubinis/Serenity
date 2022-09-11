@@ -18,7 +18,11 @@ SystemSyncTransformToRigid::SystemSyncTransformToRigid(Engine::priv::ECS& ecs)
             if (!transform->hasParent()) {
                 transform->m_Position = rigidBody->getPosition();
                 transform->m_Rotation = rigidBody->getRotation();
+#ifdef COMPONENT_TRANSFORM_STORE_RIGHT
                 Engine::Math::recalculateForwardRightUp(*rigidBody->getBtBody(), transform->m_Forward, transform->m_Right, transform->m_Up);
+#else
+                Engine::Math::recalculateForwardUp(*rigidBody->getBtBody(), transform->m_Forward, transform->m_Up);
+#endif
                 SystemComponentTransform::syncLocalVariablesToTransforms(pcsArg, entity, transform);
             }
         }, &systemPC, SystemExecutionPolicy::ParallelWait);

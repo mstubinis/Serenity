@@ -15,3 +15,10 @@ Engine::priv::AnimationChannel::AnimationChannel(const aiNodeAnim& aiAnimNode) {
         ScalingKeys.emplace_back((float)aiAnimNode.mScalingKeys[i].mTime, Engine::Math::toGLM(aiAnimNode.mScalingKeys[i].mValue));
     }
 }
+Engine::priv::AnimationChannel::AnimationChannel(std::vector<Vector3Key>&& positionKeys, std::vector<QuatKey>&& rotationKeys, std::vector<Vector3Key>&& scalingKeys) 
+    : PositionKeys{ std::move(positionKeys) }
+    , RotationKeys{ std::move(rotationKeys) }
+    , ScalingKeys{ std::move(scalingKeys) }
+{
+
+}

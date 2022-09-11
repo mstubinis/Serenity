@@ -1,5 +1,6 @@
 #include <serenity/ecs/components/ComponentScript.h>
-#include <serenity/system/Engine.h>
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/editor/core/EditorCore.h>
 #include <filesystem>
 
 ComponentScript::ComponentScript(Entity entity) 

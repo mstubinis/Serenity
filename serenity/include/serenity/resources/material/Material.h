@@ -68,12 +68,21 @@ class Material final : public Resource<Material> {
             std::string_view metalness  = {},
             std::string_view smoothness = {}
         );
-        Material(std::string_view name, Handle diffuse, Handle normal = {}, Handle glow = {}, Handle specular = {}, Handle ao = {}, Handle metalness = {}, Handle smoothness = {});
+        Material(
+            std::string_view name, 
+            Handle diffuse, 
+            Handle normal     = {}, 
+            Handle glow       = {},
+            Handle specular   = {}, 
+            Handle ao         = {}, 
+            Handle metalness  = {},
+            Handle smoothness = {}
+        );
 
         Material(const Material&)                 = delete;
         Material& operator=(const Material&)      = delete;
-        Material(Material&&) noexcept;
-        Material& operator=(Material&&) noexcept;
+        Material(Material&&) noexcept             = default;
+        Material& operator=(Material&&) noexcept  = default;
         ~Material();
 
         [[nodiscard]] inline const std::vector<MaterialComponent>& getComponents() const noexcept { return m_Components; }

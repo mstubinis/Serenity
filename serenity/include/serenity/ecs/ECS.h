@@ -82,13 +82,22 @@ namespace Engine::priv {
             }
 
             template<class SYSTEM, class ARGS_TUPLE, class ... COMPONENTS>
-            inline SYSTEM* registerSystem(ARGS_TUPLE&& argsTuple = ARGS_TUPLE{}) {
-                return m_SystemPool.registerSystem<SYSTEM, ARGS_TUPLE, COMPONENTS...>(*this, std::forward<ARGS_TUPLE>(argsTuple));
+            inline SYSTEM* registerSystem(ARGS_TUPLE&& argsTuple) {
+                return m_SystemPool.registerSystem<SYSTEM, ARGS_TUPLE, COMPONENTS...>(*this, std::forward<decltype(argsTuple)>(argsTuple));
             }
             template<class SYSTEM, class ARGS_TUPLE, class ... COMPONENTS>
-            inline SYSTEM* registerSystemOrdered(int order, ARGS_TUPLE&& argsTuple = ARGS_TUPLE{}) {
-                return m_SystemPool.registerSystemOrdered<SYSTEM, ARGS_TUPLE, COMPONENTS...>(order, *this, std::forward<ARGS_TUPLE>(argsTuple));
+            inline SYSTEM* registerSystemOrdered(int32_t order, ARGS_TUPLE&& argsTuple) {
+                return m_SystemPool.registerSystemOrdered<SYSTEM, ARGS_TUPLE, COMPONENTS...>(order, *this, std::forward<decltype(argsTuple)>(argsTuple));
             }
+            template<class SYSTEM, class ... COMPONENTS>
+            inline SYSTEM* registerSystem() {
+                return m_SystemPool.registerSystem<SYSTEM, std::tuple<>, COMPONENTS...>(*this, std::tuple<>{});
+            }
+            template<class SYSTEM, class ... COMPONENTS>
+            inline SYSTEM* registerSystemOrdered(int32_t order) {
+                return m_SystemPool.registerSystemOrdered<SYSTEM, std::tuple<>, COMPONENTS...>(order, *this, std::tuple<>{});
+            }
+
 
 
             template<class COMPONENT>

@@ -29,7 +29,7 @@ bool Engine::Networking::ServerThreadCollection::addClient(std::string_view hash
         }
         return result;
     }else{
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() could not get a next thread")
+        ENGINE_LOG(__FUNCTION__ << "() could not get a next thread")
     }
     return false;
 }

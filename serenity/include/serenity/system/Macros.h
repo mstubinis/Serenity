@@ -67,9 +67,9 @@
 #endif
 
 #if defined(ENGINE_PRODUCTION)
-#define ENGINE_PRODUCTION_LOG(x)
+#define ENGINE_LOG(x)
 #else
-#define ENGINE_PRODUCTION_LOG(x) std::cout << x << '\n';
+#define ENGINE_LOG(x) std::cout << x << '\n';
 #endif
 
 

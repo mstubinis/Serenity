@@ -17,6 +17,7 @@ namespace Engine::priv {
 #include <serenity/system/Macros.h>
 #include <serenity/system/TypeDefs.h>
 #include <SFML/Graphics/Image.hpp>
+#include <cassert>
 
 class TextureUsage final {
     public:
@@ -56,7 +57,7 @@ class TextureWrap final {
         } };
     public:
         [[nodiscard]] inline constexpr GLuint toGLType() const noexcept {
-            ASSERT(m_Type < TextureWrap::_TOTAL, "TextureWrap::m_Type is an invalid value!");
+            assert(m_Type < TextureWrap::_TOTAL);
             return GL_VALUES[m_Type];
         }
 };
@@ -75,7 +76,7 @@ class TextureFilter final {
         BUILD_ENUM_CLASS_MEMBERS(TextureFilter, Type)
     public:
         [[nodiscard]] constexpr GLuint toGLType(bool min) const noexcept {
-            ASSERT(m_Type < TextureFilter::_TOTAL, "TextureFilter::m_Type is an invalid value!");
+            assert(m_Type < TextureFilter::_TOTAL);
             if      (m_Type == TextureFilter::Linear)                  return GLuint(min ? GL_LINEAR : GL_LINEAR);
             else if (m_Type == TextureFilter::Nearest)                 return GLuint(min ? GL_NEAREST : GL_NEAREST);
             else if (m_Type == TextureFilter::Linear_Mipmap_Linear)    return GLuint(min ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
@@ -83,6 +84,12 @@ class TextureFilter final {
             else if (m_Type == TextureFilter::Nearest_Mipmap_Linear)   return GLuint(min ? GL_NEAREST_MIPMAP_LINEAR : GL_NEAREST);
             else if (m_Type == TextureFilter::Nearest_Mipmap_Nearest)  return GLuint(min ? GL_NEAREST_MIPMAP_NEAREST : GL_NEAREST);
             return GLuint(0);
+        }
+        [[nodiscard]] constexpr TextureFilter toMipmappedType() const noexcept {
+            assert(m_Type < TextureFilter::_TOTAL);
+            if (m_Type == TextureFilter::Linear)        return TextureFilter::Linear_Mipmap_Linear;
+            else if (m_Type == TextureFilter::Nearest)  return TextureFilter::Nearest_Mipmap_Nearest;
+            return m_Type;
         }
 };
 
@@ -121,7 +128,7 @@ class TextureType final {
         } };
     public:
         [[nodiscard]] inline constexpr GLuint toGLType() const noexcept {
-            ASSERT(m_Type > TextureType::Unknown && m_Type < TextureType::_TOTAL, "TextureType::m_Type is an invalid value!");
+            assert(m_Type > TextureType::Unknown && m_Type < TextureType::_TOTAL);
             return GL_VALUES[m_Type];
         }
 };
@@ -153,7 +160,7 @@ namespace Engine::priv {
         ImagePixelFormat             m_PixelFormat     = ImagePixelFormat::Unknown;
         ImagePixelType               m_PixelType       = ImagePixelType::UNSIGNED_BYTE;
 
-        void setInternalFormat(ImageInternalFormat);
+        void setFormats(ImageInternalFormat);
         void load(int width, int height, ImagePixelType, ImagePixelFormat, ImageInternalFormat);
         void load(const uint8_t* inPixels, int inWidth, int inHeight, const std::string& filename = {});
 
@@ -203,17 +210,18 @@ struct TextureConstructorInfo {
     std::string         name;
     int32_t             width                 = 0;
     int32_t             height                = 0;
-    //TextureUsage        usageType             = TextureUsage::Unspecified;
+    TextureUsage        usageType             = TextureUsage::Unspecified;
     TextureType         type                  = TextureType::Texture2D;
     TextureFilter       minFilter             = TextureFilter::Linear;
     TextureFilter       maxFilter             = TextureFilter::Linear;
-    TextureWrap         xWrapping             = TextureWrap::ClampToEdge;
-    TextureWrap         yWrapping             = TextureWrap::ClampToEdge;
-    TextureWrap         zWrapping             = TextureWrap::ClampToEdge;
+    TextureWrap         xWrapping             = TextureWrap::Repeat;
+    TextureWrap         yWrapping             = TextureWrap::Repeat;
+    TextureWrap         zWrapping             = TextureWrap::Repeat;
     ImageInternalFormat internalFormat        = ImageInternalFormat::RGB8;
     ImagePixelFormat    pixelFormat           = ImagePixelFormat::RGB;
     ImagePixelType      pixelType             = ImagePixelType::UNSIGNED_BYTE;
     bool                mipmapped             = true;
+    bool                loadAsync             = false;
     uint8_t*            pixels                = nullptr;
     uint8_t             numComponentsPerPixel = 4;
 };

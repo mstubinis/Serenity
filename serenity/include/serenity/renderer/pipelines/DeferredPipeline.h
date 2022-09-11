@@ -27,21 +27,22 @@ namespace Engine::priv {
 namespace Engine::priv {
     class DeferredPipeline final : public IRenderingPipeline {
         friend class RenderModule;
-        public: struct UBOCameraDataStruct final {
-            glm::mat4 CameraView;
-            glm::mat4 CameraProj;
-            glm::mat4 CameraViewProj;
-            glm::mat4 CameraInvView;
-            glm::mat4 CameraInvProj;
-            glm::mat4 CameraInvViewProj;
-            glm::vec4 CameraInfo1;      //renderPosX, renderPosY, renderPosZ, near
-            glm::vec4 CameraInfo2;      //viewVecX, viewVecY, viewVecZ, far
-            glm::vec4 CameraInfo3;      //realposX, realposY, realposZ, logarithmDepthBufferFCoefficient
-            glm::vec4 ScreenInfo;       //mainWindowSizeX, mainWindowSizeY, viewportSizeX, viewportSizeY
-            glm::vec4 ScreenInfo1;      //viewportX, viewportY, unused, unused
-            glm::vec4 RendererInfo1;    //GIPacked, gamma, unused, unused
-            glm::vec4 RendererInfo2;    //ambientR, ambientG, ambientB, unused
-        };
+        public: 
+            struct UBOCameraDataStruct final {
+                glm::mat4 CameraView;
+                glm::mat4 CameraProj;
+                glm::mat4 CameraViewProj;
+                glm::mat4 CameraInvView;
+                glm::mat4 CameraInvProj;
+                glm::mat4 CameraInvViewProj;
+                glm::vec4 CameraInfo1;      //renderPosX, renderPosY, renderPosZ, near
+                glm::vec4 CameraInfo2;      //viewVecX, viewVecY, viewVecZ, far
+                glm::vec4 CameraInfo3;      //realposX, realposY, realposZ, logarithmDepthBufferFCoefficient
+                glm::vec4 ScreenInfo;       //mainWindowSizeX, mainWindowSizeY, viewportSizeX, viewportSizeY
+                glm::vec4 ScreenInfo1;      //viewportX, viewportY, unused, unused
+                glm::vec4 RendererInfo1;    //GIPacked, gamma, unused, unused
+                glm::vec4 RendererInfo2;    //ambientR, ambientG, ambientB, unused
+            };
         private:
             Engine::priv::ParticleRendererOpenGL               m_ParticleRendererOpenGL;
             Engine::priv::GLDeferredLightShadowCasters         m_ShadowCasters;

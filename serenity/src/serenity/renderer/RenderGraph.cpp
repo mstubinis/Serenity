@@ -4,6 +4,7 @@
 #include <serenity/model/ModelInstance.h>
 #include <serenity/scene/Camera.h>
 #include <serenity/renderer/Renderer.h>
+#include <serenity/resources/shader/ShaderProgram.h>
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/resources/material/Material.h>
 #include <serenity/renderer/culling/Culling.h>

@@ -1,5 +1,9 @@
 
 #include <serenity/system/EngineOptions.h>
+
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/system/Engine.h>
+
 #include <serenity/renderer/Renderer.h>
 #include <serenity/math/Engine_Math.h>
 #include <serenity/math/MathCompression.h>
@@ -7,7 +11,6 @@
 #include <serenity/resources/material/Material.h>
 #include <serenity/resources/mesh/Mesh.h>
 #include <serenity/resources/shader/ShaderProgram.h>
-#include <serenity/system/Engine.h>
 #include <serenity/model/ModelInstance.h>
 
 #include <serenity/renderer/postprocess/SSAO.h>
@@ -256,22 +259,22 @@ bool RenderModule::unbind(ShaderProgram* program) const {
 }
 
 bool RenderModule::bind(Mesh* mesh) const {
+    if (!mesh->isLoaded()) {
+        mesh = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>();
+    }
     bool res = m_Pipeline->bind(mesh);
     if (res) {
-        if (mesh->isLoaded()) {
-            mesh->m_CustomBindFunctor(mesh, this);
-        } else {
-            Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CPUData.m_VertexData->bind();
-        }
+        mesh->getVertexData().bind();
     }
     return res;
 }
 bool RenderModule::unbind(Mesh* mesh) const {
-    m_Pipeline->unbind(mesh);
-    if (mesh->isLoaded()) {
-        mesh->m_CustomUnbindFunctor(mesh, this);
-    } else {
-        Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>()->m_CPUData.m_VertexData->unbind();
+    if (!mesh->isLoaded()) {
+        mesh = Engine::priv::Core::m_Engine->m_Misc.m_BuiltInMeshes.getCubeMesh().get<Mesh>();
+    }
+    bool res = m_Pipeline->unbind(mesh);
+    if (res) {
+        mesh->getVertexData().unbind();
     }
     return true;
 }
@@ -391,8 +394,8 @@ void Engine::Renderer::Settings::clear(bool color, bool depth, bool stencil){
     return RENDER_MODULE->m_Pipeline->clear(color, depth, stencil);
 }
 void Engine::Renderer::Settings::applyGlobalAnisotropicFiltering(float filtering) {
-    const auto textures = Engine::getResourceManager().GetAllResourcesOfType<Texture>(); // std::list - expensive
-    for (const auto& texture : textures) {
+    const auto textures = Engine::getResourceManager().GetAllResourcesOfType<Texture>();
+    for (auto& texture : textures) {
         texture->setAnisotropicFiltering(filtering);
     }
 }
@@ -961,3 +964,9 @@ void Engine::Renderer::sendUniformMatrix4vSafe(const char* l, const glm::dmat4* 
 }
 
 #pragma endregion
+
+namespace Engine {
+    [[nodiscard]] Engine::priv::RenderModule& getRenderer() noexcept { 
+        return *RENDER_MODULE;
+    }
+}

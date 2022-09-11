@@ -35,7 +35,7 @@ class  SystemSceneChanging;
 #include <serenity/renderer/particles/ParticleEmissionPropertiesContainer.h>
 
 namespace Engine::priv {
-    class ResourceManager final{
+    class ResourceManager final {
         friend class  ::Scene;
         friend class  ::SystemSceneChanging;
         public:
@@ -68,7 +68,7 @@ namespace Engine::priv {
             [[nodiscard]] inline ParticleEmissionPropertiesContainer& getParticleProperties() noexcept { return m_ParticleEmissionProperties; }
 
             template<class TResource>
-            [[nodiscard]] inline std::list<Engine::view_ptr<TResource>> GetAllResourcesOfType() noexcept {
+            [[nodiscard]] inline std::vector<Engine::view_ptr<TResource>> GetAllResourcesOfType() noexcept {
                 return m_ResourceModule.getAllResourcesOfType<TResource>();
             }
 
@@ -77,7 +77,7 @@ namespace Engine::priv {
 };
 namespace Engine::Resources {
     [[nodiscard]] Engine::view_ptr<Scene> getCurrentScene();
-    bool setCurrentScene(Scene* scene);
+    bool setCurrentScene(Scene*);
     bool setCurrentScene(std::string_view sceneName);
 
     template<class T, class ... ARGS>
@@ -115,7 +115,7 @@ namespace Engine::Resources {
         std::string_view fileOrData,
         float threshhold = MESH_DEFAULT_THRESHOLD,
         MeshCollisionLoadingFlag::Flag = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG,
-        MeshRequestCallback callback = [](const std::vector<Handle>&) {}
+        MeshRequestCallback = [](const std::vector<Handle>&) {}
     );
 
     template<class TResource>
@@ -124,7 +124,7 @@ namespace Engine::Resources {
     }
     template<class TResource>
     [[nodiscard]] inline Engine::view_ptr<TResource> getResource(Handle inHandle) noexcept {
-        return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle);
+        return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.get<TResource>(inHandle.index());
     }
     template<class TResource, class INTEGRAL>
     requires (std::is_integral_v<INTEGRAL>)
@@ -133,7 +133,7 @@ namespace Engine::Resources {
     }
 
     template<class TResource>
-    [[nodiscard]] inline std::list<Engine::view_ptr<TResource>> GetAllResourcesOfType() noexcept {
+    [[nodiscard]] inline std::vector<Engine::view_ptr<TResource>> GetAllResourcesOfType() noexcept {
         return Engine::priv::ResourceManager::RESOURCE_MANAGER->m_ResourceModule.getAllResourcesOfType<TResource>();
     }
 
@@ -167,7 +167,7 @@ namespace Engine::Resources {
         std::string_view file,
         ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
         bool mipmaps        = false,
-        Engine::ResourceCallback callback = [](Handle) {}
+        Engine::ResourceCallback = [](Handle) {}
     );
     [[nodiscard]] Handle loadTextureAsync(
         uint8_t* pixels,
@@ -176,7 +176,7 @@ namespace Engine::Resources {
         std::string_view texture_name,
         ImageInternalFormat = ImageInternalFormat::SRGB8_ALPHA8,
         bool mipmaps = false,
-        Engine::ResourceCallback callback = [](Handle) {}
+        Engine::ResourceCallback = [](Handle) {}
     );
     [[nodiscard]] Handle loadMaterial(
         std::string_view name,
@@ -208,7 +208,7 @@ namespace Engine::Resources {
         Handle smoothness = {}
     );
 
-    [[nodiscard]] Handle loadShader(std::string_view shaderFileOrData, ShaderType shaderType);
+    [[nodiscard]] Handle loadShader(std::string_view shaderFileOrData, ShaderType);
 
     [[nodiscard]] Handle addShaderProgram(std::string_view name, Handle vertexShader, Handle fragmentShader);
     [[nodiscard]] Handle addShaderProgram(std::string_view name, std::string_view vertexShaderFileOrData, std::string_view fragmentShaderFileOrData);

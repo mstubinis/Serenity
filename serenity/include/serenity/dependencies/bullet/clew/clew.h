@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CLEW_HPP_INCLUDED
 #define CLEW_HPP_INCLUDED
 

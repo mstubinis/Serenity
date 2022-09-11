@@ -27,21 +27,26 @@ namespace Engine::priv {
             void unregisterEvent(uint32_t eventID);
     };
     class LUAModule final {
-        private:
-            LUABinder m_Binder;
+        friend class LUAScriptInstance;
         public:
-            LUAModule();
+            class impl;
+        private:
+            LUABinder  m_Binder;
+            impl*      m_i = nullptr;
+        public:
+            LUAModule() noexcept;
+            ~LUAModule();
 
             void cleanupScript(uint32_t scriptID);
 
             void update(const float dt);
             void onEvent(const Event&);
 
-            [[nodiscard]] const LUABinder& getBinder() const;
+            [[nodiscard]] const LUABinder& getBinder() const noexcept;
     };
 };
 namespace Engine::priv {
-    [[nodiscard]] const Engine::priv::LUABinder& getLUABinder();
+    [[nodiscard]] const Engine::priv::LUABinder& getLUABinder() noexcept;
 }
 
 namespace Engine::lua {

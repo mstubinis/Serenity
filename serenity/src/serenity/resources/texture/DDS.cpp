@@ -55,8 +55,8 @@ namespace {
             a += 4;
         }
     }
-	bool load_dds_file(auto& cpuData, Engine::priv::ImageData& image_loaded_struct) {
-        std::ifstream stream(image_loaded_struct.m_Filename.c_str(), std::ios::binary);
+	bool load_dds_file(auto& cpuData, Engine::priv::ImageData* inImageData) {
+        std::ifstream stream(inImageData->m_Filename.c_str(), std::ios::binary);
         if (!stream) {
             return false;
         }
@@ -92,42 +92,44 @@ namespace {
             }
             headDX10.fill(header_buffer_DX10);
         }
-        uint32_t factor, blockSize, offset = progress;
+        [[maybe_unused]] uint32_t factor;
+        uint32_t blockSizeInBytes;
+        uint32_t offset = progress;
         //TODO: fill the rest of these out
         switch (head.format.fourCC) {
             case Engine::priv::FourCC_DXT1: { //aka BC1
                 factor = 2;
-                blockSize = 8;
-                image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT;
+                blockSizeInBytes = 8;
+                inImageData->m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_S3TC_DXT1_EXT;
                 break;
             } case Engine::priv::FourCC_DXT2: {
                 factor = 4;
-                blockSize = 16;
+                blockSizeInBytes = 16;
                 break;
             } case Engine::priv::FourCC_DXT3: { //aka BC2
                 factor = 4;
-                blockSize = 16;
-                image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
+                blockSizeInBytes = 16;
+                inImageData->m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
                 break;
             } case Engine::priv::FourCC_DXT4: {
                 factor = 4;
-                blockSize = 16;
+                blockSizeInBytes = 16;
                 break;
             } case Engine::priv::FourCC_DXT5: { //aka BC3
                 factor = 4;
-                blockSize = 16;
-                image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
+                blockSizeInBytes = 16;
+                inImageData->m_InternalFormat = ImageInternalFormat::COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
                 break;
             } case Engine::priv::FourCC_DX10: {
                 break;
             } case Engine::priv::FourCC_ATI1: { //aka BC4 useful for 1 channel textures (greyscales, glow / specular / ao / smoothness / metalness etc)
                 factor = 2;
-                blockSize = 8;
-                image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RED_RGTC1;
+                blockSizeInBytes = 8;
+                inImageData->m_InternalFormat = ImageInternalFormat::COMPRESSED_RED_RGTC1;
                 break;
             } case Engine::priv::FourCC_ATI2: {//aka ATI2n aka 3Dc aka LATC2 aka BC5 - used for normal maps (store x,y recalc z) z = sqrt( 1-x*x-y*y )
-                blockSize = 16;
-                image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;
+                blockSizeInBytes = 16;
+                inImageData->m_InternalFormat = ImageInternalFormat::COMPRESSED_RG_RGTC2;
                 break;
             } case Engine::priv::FourCC_RXGB: { //By its design, it is just a DXT5 image with reading it in the shader differently
                 //As I recall, the most you would have to do in the shader is something like:
@@ -135,8 +137,8 @@ namespace {
                 //normal.xy = texture2D(RXGBnormalmap, texcoord).ag;
                 //normal.z = sqrt(1.0 - normal.x * normal.x - normal.y * normal.y);
                 factor = 4;
-                blockSize = 16;
-                image_loaded_struct.m_InternalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
+                blockSizeInBytes = 16;
+                inImageData->m_InternalFormat = ImageInternalFormat::COMPRESSED_RGBA_S3TC_DXT5_EXT;
                 break;
             } case Engine::priv::FourCC_$: {
                 break;
@@ -167,7 +169,7 @@ namespace {
             } case Engine::priv::FourCC_YUY2: {
                 break;
             } default: {
-                ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): could not evalutate switch statement for head.format.fourCC!");
+                ENGINE_LOG(__FUNCTION__ << "(): could not evalutate switch statement for head.format.fourCC!");
                 return false;
             }
         }
@@ -186,76 +188,82 @@ namespace {
             --numberOfMainImages;
         }
         if (isCubeMap && numberOfMainImages < 6) {
-            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): warning - cubemap has less than 6 textures!");
+            ENGINE_LOG(__FUNCTION__ << "(): warning - cubemap has less than 6 textures!");
         }
         if (numberOfMainImages == 0) {
             return false;
         }
-        image_loaded_struct.m_PixelFormat = ImagePixelFormat::RGBA;
-        image_loaded_struct.m_PixelType = ImagePixelType::UNSIGNED_BYTE;
-        uint32_t width_ = head.w;
+        inImageData->m_PixelFormat = ImagePixelFormat::RGBA;
+        inImageData->m_PixelType   = ImagePixelType::UNSIGNED_BYTE;
+        uint32_t width_  = head.w;
         uint32_t height_ = head.h;
-        for (uint32_t i = 0; i < numberOfMainImages; ++i) {
-            Engine::priv::ImageData* imgPtr = nullptr;
-            if (i == 0) {
-                imgPtr = &image_loaded_struct;
-            } else if (i >= cpuData.m_ImagesDatas.size()) {
-                imgPtr = &cpuData.m_ImagesDatas.emplace_back();
-                imgPtr->m_PixelFormat = image_loaded_struct.m_PixelFormat;
-                imgPtr->m_PixelType = image_loaded_struct.m_PixelType;
-                imgPtr->m_InternalFormat = image_loaded_struct.m_InternalFormat;
+        for (uint32_t imgIdx = 0; imgIdx != numberOfMainImages; ++imgIdx) {
+            if (imgIdx >= cpuData.m_ImagesDatas.size()) {
+                ImagePixelFormat pxl    = inImageData->m_PixelFormat;
+                ImagePixelType pxlType  = inImageData->m_PixelType;
+                ImageInternalFormat fmt = inImageData->m_InternalFormat;
+                //image_loaded_struct is now no longer valid after next line
+                inImageData = &cpuData.m_ImagesDatas.emplace_back();
+                inImageData->m_PixelFormat    = pxl;
+                inImageData->m_PixelType      = pxlType;
+                inImageData->m_InternalFormat = fmt;
             } else {
-                imgPtr = &cpuData.m_ImagesDatas[i];
+                inImageData = &cpuData.m_ImagesDatas[imgIdx];
             }
             width_ = head.w;
             height_ = head.h;
-            for (uint32_t level = 0; level < head.mipMapCount && (width_ || height_); ++level) {
-                if (level > 0 && (width_ < 64 || height_ < 64)) {
+            for (uint32_t mipmapLevel = 0; mipmapLevel < head.mipMapCount && (width_ || height_); ++mipmapLevel) {
+                if (mipmapLevel > 0 && (width_ < 64 || height_ < 64)) {
                     break;
                 }
                 Engine::priv::ImageMipmap* mipmap = nullptr;
-                if (level > 0) {
-                    mipmap = &imgPtr->m_Mipmaps.emplace_back();
+                if (mipmapLevel > 0) {
+                    mipmap = &inImageData->m_Mipmaps.emplace_back();
                 } else {
-                    mipmap = &imgPtr->m_Mipmaps[0];
+                    mipmap = &inImageData->m_Mipmaps[0];
                 }
-                mipmap->level = level;
+                mipmap->level = mipmapLevel;
                 mipmap->width = width_;
                 mipmap->height = height_;
-                const uint32_t compressed_size = ((width_ + 3U) / 4U) * ((height_ + 3U) / 4U) * blockSize;
-                const uint32_t widBytes = ((width_ + 3U) / 4U) * blockSize;
+                const uint32_t compressed_size = ((width_ + 3U) / 4U) * ((height_ + 3U) / 4U) * blockSizeInBytes;
+                const uint32_t widthBytes = ((width_ + 3U) / 4U) * blockSizeInBytes;
                 mipmap->compressedSize = compressed_size;
 
-                auto& pixels = mipmap->pixels;
-                pixels.resize(compressed_size);
+                auto& mipmapPixels = mipmap->pixels;
+                mipmapPixels.resize(compressed_size);
 
-                std::copy(&file_data[offset], &file_data[offset] + compressed_size, pixels.data());
+                std::copy(&file_data[offset], &file_data[offset] + compressed_size, mipmapPixels.data());
+
+                //bool width_pow_2 = (width_ > 0 && ((width_ & (width_ - 1)) == 0));
+                //bool height_pow_2 = (height_ > 0 && ((height_ & (height_ - 1)) == 0));
 
                 //mirror pixels vertically
-                if(!isCubeMap) {
-                    std::vector<uint8_t> temp = pixels;
-                    uint8_t* s = temp.data();
-                    uint8_t* d = &pixels[i] + ((height_ + 3) / 4 - 1) * widBytes;
-                    auto flip_pixels_vertically = [widBytes, blockSize](uint8_t* d, auto func) {
-                        for (uint32_t k = 0; k < widBytes / blockSize; k++) {
-                            func((uint8_t*)d + k * blockSize);
+                if(!isCubeMap && height_ >= 2) {
+                    std::vector<uint8_t> temp = mipmapPixels;
+                    uint8_t* src  = temp.data();
+                    uint8_t* dst  = mipmapPixels.data() + (compressed_size - widthBytes);
+                    auto flip_pixels_vertically = [widthBytes, blockSizeInBytes](uint8_t* d, auto func) {
+                        auto loopEnd = widthBytes / blockSizeInBytes;
+                        for (uint32_t column = 0; column != loopEnd; ++column) {
+                            func(d + column * blockSizeInBytes);
                         }
                     };
-                    for (size_t j = 0; j < (height_ + 3) / 4; j++) {
-                        std::copy(s, s + widBytes, d);
+                    auto loopEnd = ((height_ + 3) / 4);
+                    for (size_t row = 0; row != loopEnd; ++row) {
+                        std::copy(src, src + widthBytes, dst);
                         if (head.format.fourCC == Engine::priv::FourCC_ATI1) {
-                            flip_pixels_vertically(d, flip_blocks_ati1_aka_bc4);
+                            flip_pixels_vertically(dst, flip_blocks_ati1_aka_bc4);
                         } else if (head.format.fourCC == Engine::priv::FourCC_DXT1) {
-                            flip_pixels_vertically(d, flip_block_dxt1_aka_bc1);
+                            flip_pixels_vertically(dst, flip_block_dxt1_aka_bc1);
                         } else if (head.format.fourCC == Engine::priv::FourCC_DXT3) {
-                            flip_pixels_vertically(d, flip_block_dxt3_aka_bc2);
+                            flip_pixels_vertically(dst, flip_block_dxt3_aka_bc2);
                         } else if (head.format.fourCC == Engine::priv::FourCC_ATI2) {
-                            flip_pixels_vertically(d, flip_blocks_ati2_aka_bc5);
+                            flip_pixels_vertically(dst, flip_blocks_ati2_aka_bc5);
                         } else if (head.format.fourCC == Engine::priv::FourCC_DXT5) {
-                            flip_pixels_vertically(d, flip_block_dxt5_aka_bc3);
+                            flip_pixels_vertically(dst, flip_block_dxt5_aka_bc3);
                         }
-                        s += widBytes;
-                        d -= widBytes;
+                        src += widthBytes;
+                        dst -= widthBytes;
                     }
                     //end mirror pixels vertically
                 }
@@ -270,8 +278,8 @@ namespace {
 
 
 bool Engine::priv::LoadDDSFile(TextureCPUData& cpuData, ImageData& imgData) {
-    return load_dds_file(cpuData, imgData);
+    return load_dds_file(cpuData, &imgData);
 }
 bool Engine::priv::LoadDDSFile(TextureCubemapCPUData& cpuData, ImageData& imgData) {
-    return load_dds_file(cpuData, imgData);
+    return load_dds_file(cpuData, &imgData);
 }

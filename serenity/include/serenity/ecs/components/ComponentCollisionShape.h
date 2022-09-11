@@ -97,6 +97,13 @@ namespace Engine::priv {
             }
 
         public:
+            ComponentCollisionShapeDeferredLoading()
+            {
+            }
+            ~ComponentCollisionShapeDeferredLoading()
+            {
+            }
+
             static void internal_load_single_mesh_impl(ComponentCollisionShape&, CollisionType, Handle mesh, float mass);
             static void internal_load_multiple_meshes_impl(ComponentCollisionShape&, std::vector<ModelInstance*>&, float mass, CollisionType);
 

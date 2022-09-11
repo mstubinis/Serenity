@@ -266,3 +266,9 @@ Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, co
 Engine::RayCastResult Engine::Physics::rayCastNearest(const glm::vec3& start, const glm::vec3& end, std::vector<Entity>&& ignored, MaskType group, MaskType mask) {
     return internal_ray_cast_nearest(Engine::Math::toBT(start), Engine::Math::toBT(end), group, mask, std::move(ignored));
 }
+
+namespace Engine {
+    [[nodiscard]] Engine::priv::PhysicsModule& getPhysicsManager() noexcept { 
+        return *PHYSICS_MANAGER;
+    }
+}

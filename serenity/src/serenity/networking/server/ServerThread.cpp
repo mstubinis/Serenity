@@ -13,7 +13,7 @@ bool ServerThread::removeClient(std::string_view hash) {
         return true;
     }
     if (!has_client_hash) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() client removal - hash: " << hash << " is not in m_Clients")
+        ENGINE_LOG(__FUNCTION__ << "() client removal - hash: " << hash << " is not in m_Clients")
     }
     return false;
 }
@@ -28,7 +28,7 @@ bool ServerThread::addClient(std::string_view hash, ServerClient* serverClient) 
         return true;
     }
     if (has_client_hash) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() client addition - hash: " << hash << " is already in m_Clients")
+        ENGINE_LOG(__FUNCTION__ << "() client addition - hash: " << hash << " is already in m_Clients")
     }
     return false;
 }
@@ -66,7 +66,7 @@ bool ServerThreadContainer::addClient(std::string_view hash, ServerClient* clien
         }
         return result;
     }else{
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() could not get a next thread")
+        ENGINE_LOG(__FUNCTION__ << "() could not get a next thread")
     }
     return false;
 }

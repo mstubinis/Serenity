@@ -3,13 +3,31 @@
 #include <serenity/system/window/Window.h>
 #include <serenity/system/Engine.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <processthreadsapi.h>
+#include <codecvt>
+#endif
+
+namespace {
+    void internal_set_os_thread_name(auto thread_native_handle, std::string_view name) {
+#ifdef _WIN32
+        HRESULT r;
+        std::string thread_os_name = std::string{ name };
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        std::wstring wide = converter.from_bytes(thread_os_name);
+        r = SetThreadDescription(thread_native_handle, wide.c_str());
+#endif
+    }
+}
+
 Engine::view_ptr<Engine::priv::ThreadingModule> Engine::priv::ThreadingModule::THREADING_MODULE = nullptr;
 
 Engine::priv::ThreadingModule::ThreadingModule() {
     auto hardware_concurrency = Engine::hardware_concurrency();
     if (hardware_concurrency > 1) {
         m_ThreadPool.startup(hardware_concurrency);
-        ENGINE_PRODUCTION_LOG("Starting thread pool with " << hardware_concurrency << " threads")
+        ENGINE_LOG("Starting thread pool with " << hardware_concurrency << " threads")
     }
     THREADING_MODULE = this;
 }
@@ -30,4 +48,10 @@ bool Engine::priv::threading::isMainThread() noexcept {
 }
 bool Engine::priv::threading::isOpenGLThread() noexcept {
     return std::this_thread::get_id() == Engine::getWindow().getOpenglThreadID();
+}
+void Engine::priv::threading::setThreadName(std::thread& thread, std::string_view name) {
+    internal_set_os_thread_name(thread.native_handle(), name);
+}
+void Engine::priv::threading::setThreadName(std::jthread& jthread, std::string_view name) {
+    internal_set_os_thread_name(jthread.native_handle(), name);
 }

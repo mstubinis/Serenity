@@ -14,6 +14,7 @@ subject to the following restrictions:
 */
 
 ///btDbvtBroadphase implementation by Nathanael Presson
+#pragma once
 #ifndef BT_DBVT_BROADPHASE_H
 #define BT_DBVT_BROADPHASE_H
 

@@ -4,21 +4,22 @@
 
 #include <iostream>
 
-bool needs_collision_impl(btBroadphaseProxy* proxy0, int filterGroup, int filterMask, const std::vector<Entity>& entitiesIgnored) {
-    bool collides = (proxy0->m_collisionFilterGroup & filterMask) != 0;
-    collides      = collides && (filterGroup & proxy0->m_collisionFilterMask);
-    if (entitiesIgnored.size() > 0) {
-        btCollisionObject* b = static_cast<btCollisionObject*>(proxy0->m_clientObject);
-        for (auto entity : entitiesIgnored) {
-            auto colShape = entity.getComponent<ComponentCollisionShape>();
-            if (colShape && colShape->getBtShape() == b->getCollisionShape()) {
-                return false;
+namespace {
+    bool needs_collision_impl(btBroadphaseProxy* proxy0, int filterGroup, int filterMask, const std::vector<Entity>& entitiesIgnored) {
+        bool collides = (proxy0->m_collisionFilterGroup & filterMask) != 0;
+        collides = collides && (filterGroup & proxy0->m_collisionFilterMask);
+        if (entitiesIgnored.size() > 0) {
+            btCollisionObject* b = static_cast<btCollisionObject*>(proxy0->m_clientObject);
+            for (auto entity : entitiesIgnored) {
+                auto colShape = entity.getComponent<ComponentCollisionShape>();
+                if (colShape && colShape->getBtShape() == b->getCollisionShape()) {
+                    return false;
+                }
             }
         }
+        return collides;
     }
-    return collides;
 }
-
 
 RayResultCallback::RayResultCallback(const btVector3& rayFrom, const btVector3& rayTo)
     : btCollisionWorld::ClosestRayResultCallback{ rayFrom, rayTo }

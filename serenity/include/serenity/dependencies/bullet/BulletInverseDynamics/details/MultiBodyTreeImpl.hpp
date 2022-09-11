@@ -8,6 +8,7 @@
 #include "../IDConfig.hpp"
 #include "../MultiBodyTree.hpp"
 
+
 namespace btInverseDynamics
 {
 /// Structure for for rigid body mass properties, connectivity and kinematic state

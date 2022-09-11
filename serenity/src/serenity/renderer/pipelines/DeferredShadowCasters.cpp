@@ -1,6 +1,8 @@
 #include <serenity/renderer/pipelines/DeferredShadowCasters.h>
+
+#include <serenity/system/EngineIncludes.h>
 #include <serenity/renderer/Renderer.h>
-#include <serenity/system/Engine.h>
+#include <serenity/scene/Scene.h>
 
 namespace {
     std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view) {
@@ -136,7 +138,7 @@ bool Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
         glGenTextures(GLsizei(m_DepthTexture.size()), m_DepthTexture.data());
     }
     for (uint32_t i = 0; i < m_DepthTexture.size(); ++i) {
-        ASSERT(m_DepthTexture[i] != 0, "");
+        assert(m_DepthTexture[i] != 0);
         glBindTexture(GL_TEXTURE_2D, m_DepthTexture[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_ShadowWidth, m_ShadowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -151,7 +153,7 @@ bool Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
     if (m_FBO == 0) {
         glGenFramebuffers(1, &m_FBO);
     }
-    ASSERT(m_FBO != 0, "");
+    assert(m_FBO != 0);
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthTexture[0], 0);
     glDrawBuffer(GL_NONE);
@@ -159,7 +161,7 @@ bool Engine::priv::GLDeferredDirectionalLightShadowInfo::initGL() {
     #if defined(_DEBUG)
         GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
-            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): FBO Error is: " << framebufferStatus);
+            ENGINE_LOG(__FUNCTION__ << "(): FBO Error is: " << framebufferStatus);
             return false;
         }
     #endif
@@ -175,7 +177,7 @@ void Engine::priv::GLDeferredDirectionalLightShadowInfo::setShadowInfo(uint32_t 
     m_NearFactor   = nearFactor;
     m_FarFactor    = farFactor;
     if (oldWidth != shadowMapWidth || oldHeight != shadowMapHeight) {
-        initGL();
+        Engine::priv::threading::addJobWithPostCallback([]() {}, [this]() { initGL(); });
     }
 }
 void Engine::priv::GLDeferredDirectionalLightShadowInfo::setShadowInfo(uint32_t shadowMapWidth, uint32_t shadowMapHeight) {
@@ -190,9 +192,9 @@ void Engine::priv::GLDeferredDirectionalLightShadowInfo::bindUniformsReading(int
     Engine::Renderer::sendTexturesSafe("uShadowTexture[0]", m_DepthTexture.data(), textureStartSlot, GL_TEXTURE_2D, int(m_DepthTexture.size()));
 }
 void Engine::priv::GLDeferredDirectionalLightShadowInfo::bindUniformsWriting(int cascadeMapIndex) {
-    ASSERT(m_FBO != 0, "");
+    assert(m_FBO != 0);
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
-    ASSERT(m_DepthTexture[cascadeMapIndex] != 0, "");
+    assert(m_DepthTexture[cascadeMapIndex] != 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthTexture[cascadeMapIndex], 0);
     Engine::Renderer::Settings::clear(false, true, false);
     Engine::Renderer::sendUniformMatrix4Safe("uLightMatrix", m_LightSpaceMatrices[cascadeMapIndex]);
@@ -219,7 +221,7 @@ Engine::priv::GLDeferredSunLightShadowInfo::GLDeferredSunLightShadowInfo(GLDefer
 }
 Engine::priv::GLDeferredSunLightShadowInfo& Engine::priv::GLDeferredSunLightShadowInfo::operator=(GLDeferredSunLightShadowInfo&& other) noexcept {
     if (this != &other) {
-        GLDeferredDirectionalLightShadowInfo(std::move(other));
+        *this = std::move(other);
     }
     return *this;
 }

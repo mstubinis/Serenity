@@ -6,14 +6,11 @@
 #include <fstream>
 
 namespace {
-    std::stringstream BUFFER;
-
     std::string internal_load_text_file(const char* filename) {
         std::ifstream fileStream(filename);
-        BUFFER.str({});
-        BUFFER.clear();
-        BUFFER << fileStream.rdbuf();
-        return BUFFER.str();
+        std::stringstream buffer;
+        buffer << fileStream.rdbuf();
+        return buffer.str();
     }
 }
 
@@ -35,20 +32,19 @@ int LUAState::runFile(const std::string& filename, uint32_t scriptID, void* enti
     std::string fileContent = internal_load_text_file(filenameC);
     return runCodeContent(fileContent, scriptID, entity);
 }
-int LUAState::runCodeContent(std::string& inData, uint32_t scriptID, void* entity) const noexcept {
+int LUAState::runCodeContent(std::string& inCode, uint32_t scriptID, void* entity) const noexcept {
     int ret = -1;
 
-    inData = "local script=registerScript()\n" + inData;
+    inCode = "local script=registerScript()\n" + inCode;
 
-    auto* data = inData.c_str();
     luabridge::setGlobal(L, scriptID, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID);
     luabridge::setGlobal(L, entity ? *static_cast<Entity*>(entity) : Entity{}, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ENTITY);
     std::string scriptName = std::string{ "Script: " } + std::to_string(scriptID);
-    bool failedToLoaded = luaL_loadbuffer(L, data, inData.size(), scriptName.c_str() ) || lua_pcall(L, 0, 0, 0);
+    bool failedToLoaded = luaL_loadbuffer(L, inCode.c_str(), inCode.size(), scriptName.c_str() ) || lua_pcall(L, 0, 0, 0); //actually runs the script content
     luabridge::setGlobal(L, -1, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID);
     luabridge::setGlobal(L, -1, ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ENTITY);
     if (failedToLoaded) {
-        ENGINE_PRODUCTION_LOG("LUA Error: script did not compile correctly (" << scriptName << ")")
+        ENGINE_LOG("LUA Error: script did not compile correctly (" << scriptName << ")")
         return 0;
     }
     ret = lua_getfield(L, LUA_REGISTRYINDEX, scriptName.c_str());
@@ -58,7 +54,7 @@ int LUAState::runCodeContent(std::string& inData, uint32_t scriptID, void* entit
         ret = lua_setmetatable(L, -2);
         ret = lua_getfield(L, LUA_REGISTRYINDEX, scriptName.c_str());
         lua_setupvalue(L, 1, 1);
-        ret = lua_pcall(L, 0, LUA_MULTRET, 0);
+        ret = lua_pcall(L, 0, LUA_MULTRET, 0); //TODO: determine if this is needed
         return 0;
     }
     lua_newtable(L);
@@ -69,6 +65,5 @@ int LUAState::runCodeContent(std::string& inData, uint32_t scriptID, void* entit
     lua_setfield(L, LUA_REGISTRYINDEX, scriptName.c_str());
     ret = lua_getfield(L, LUA_REGISTRYINDEX, scriptName.c_str());
     lua_pop(L, 1);
-    ret = lua_pcall(L, 0, LUA_MULTRET, 0);
     return 1;
 }

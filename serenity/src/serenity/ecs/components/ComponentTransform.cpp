@@ -6,6 +6,18 @@
 #include <serenity/math/Engine_Math.h>
 #include <serenity/resources/Engine_Resources.h>
 
+
+class ComponentTransform::Impl {
+public:
+    static void internal_recalc_direction_vectors(ComponentTransform& transform) noexcept {
+#ifdef COMPONENT_TRANSFORM_STORE_RIGHT
+        Engine::Math::recalculateForwardRightUp(transform.m_Rotation, transform.m_Forward, transform.m_Right, transform.m_Up);
+#else
+        Engine::Math::recalculateForwardUp(transform.m_Rotation, transform.m_Forward, transform.m_Up);
+#endif
+    }
+};
+
 #pragma region Component
 
 ComponentTransform::ComponentTransform(Entity entity, const glm_vec3& pos, const glm::quat& rot, const glm::vec3& scl)
@@ -18,7 +30,7 @@ ComponentTransform::ComponentTransform(Entity entity, const glm_vec3& pos, const
     auto& system     = ecs.getSystem<SystemTransformParentChild>();
     auto entityIndex = entity.id();
     system.acquireMoreMemory(entityIndex);
-    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    Impl::internal_recalc_direction_vectors(*this);
     auto& localMatrix = system.m_LocalTransforms[entityIndex];
     auto& worldMatrix = system.m_WorldTransforms[entityIndex];
     Engine::Math::setFinalModelMatrix(localMatrix, m_Position, m_Rotation, m_Scale);
@@ -30,11 +42,10 @@ ComponentTransform::ComponentTransform(ComponentTransform&& other) noexcept
     , m_Scale            { std::move(other.m_Scale) }
     //, m_LinearVelocity   { std::move(other.m_LinearVelocity) }
     , m_Forward          { std::move(other.m_Forward) }
+#ifdef COMPONENT_TRANSFORM_STORE_RIGHT
     , m_Right            { std::move(other.m_Right) }
+#endif
     , m_Up               { std::move(other.m_Up) }
-    , m_UserPointer      { std::exchange(other.m_UserPointer, nullptr) }
-    , m_UserPointer1     { std::exchange(other.m_UserPointer1, nullptr) }
-    , m_UserPointer2     { std::exchange(other.m_UserPointer2, nullptr) }
     , m_Owner            { std::exchange(other.m_Owner, Entity{}) }
 {}
 ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) noexcept {
@@ -44,11 +55,10 @@ ComponentTransform& ComponentTransform::operator=(ComponentTransform&& other) no
         m_Scale          = std::move(other.m_Scale);
         //m_LinearVelocity = std::move(other.m_LinearVelocity);
         m_Forward        = std::move(other.m_Forward);
+#ifdef COMPONENT_TRANSFORM_STORE_RIGHT
         m_Right          = std::move(other.m_Right);
+#endif
         m_Up             = std::move(other.m_Up);
-        m_UserPointer    = std::exchange(other.m_UserPointer, nullptr);
-        m_UserPointer1   = std::exchange(other.m_UserPointer1, nullptr);
-        m_UserPointer2   = std::exchange(other.m_UserPointer2, nullptr);
         m_Owner          = std::exchange(other.m_Owner, Entity{});
     }
     return *this;
@@ -74,7 +84,7 @@ void ComponentTransform::alignTo(const glm::vec3& direction) {
 }
 void ComponentTransform::alignToDirection(float dirX, float dirY, float dirZ) {
     m_Rotation = Engine::Math::alignTo(dirX, dirY, dirZ);
-    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    Impl::internal_recalc_direction_vectors(*this);
 }
 void ComponentTransform::alignToDirection(const glm::vec3& direction) {
     alignToDirection(direction.x, direction.y, direction.z);
@@ -106,7 +116,7 @@ void ComponentTransform::alignToDirection(float dirX, float dirY, float dirZ, fl
     const auto goal         = Engine::Math::alignTo(dirX, dirY, dirZ);
     assert(percentage >= 0.0f && percentage <= 1.0f);
     m_Rotation              = glm::normalize(glm::slerp(m_Rotation, goal, percentage));
-    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    Impl::internal_recalc_direction_vectors(*this);
 }
 void ComponentTransform::alignToDirection(const glm::vec3& direction, float radPerSec) {
     alignToDirection(direction.x, direction.y, direction.z, radPerSec);
@@ -135,19 +145,19 @@ void ComponentTransform::translate(decimal x, decimal y, decimal z, bool local) 
 }
 void ComponentTransform::rotate(float pitch, float yaw, float roll, bool local) {
     Engine::Math::rotate(m_Rotation, pitch, yaw, roll, local);
-    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    Impl::internal_recalc_direction_vectors(*this);
 }
 void ComponentTransform::rotatePitch(float pitch, bool local) {
     Engine::Math::rotatePitch(m_Rotation, pitch, local);
-    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    Impl::internal_recalc_direction_vectors(*this);
 }
 void ComponentTransform::rotateYaw(float yaw, bool local) {
     Engine::Math::rotateYaw(m_Rotation, yaw, local);
-    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    Impl::internal_recalc_direction_vectors(*this);
 }
 void ComponentTransform::rotateRoll(float roll, bool local) {
     Engine::Math::rotateRoll(m_Rotation, roll, local);
-    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    Impl::internal_recalc_direction_vectors(*this);
 }
 void ComponentTransform::scale(float x, float y, float z) {
     m_Scale.x += x;
@@ -180,7 +190,7 @@ void ComponentTransform::setLocalPosition(decimal x, decimal y, decimal z) {
 }
 void ComponentTransform::setRotation(float x, float y, float z, float w) {
     m_Rotation = glm::normalize(glm::quat{ w, x, y, z });
-    Engine::Math::recalculateForwardRightUp(m_Rotation, m_Forward, m_Right, m_Up);
+    Impl::internal_recalc_direction_vectors(*this);
 }
 void ComponentTransform::setScale(float x, float y, float z) {
     m_Scale.x = x;
@@ -288,6 +298,8 @@ Entity ComponentTransform::getParent() const {
     const auto& system = ecs.getSystem<SystemTransformParentChild>();
     return system.getParentEntity(m_Owner);
 }
+
+
 void ComponentTransform::recalculateAllParentChildMatrices(Scene& scene) {
     auto& ecs    = Engine::priv::PublicScene::GetECS(scene);
     auto& system = ecs.getSystem<SystemTransformParentChild>();

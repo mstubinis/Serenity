@@ -1,7 +1,9 @@
 
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/SceneOptions.h>
-#include <serenity/system/Engine.h>
+
+#include <serenity/system/EngineIncludes.h>
+
 #include <serenity/math/Engine_Math.h>
 #include <serenity/model/ModelInstance.h>
 #include <serenity/scene/Skybox.h>
@@ -87,27 +89,27 @@ void Scene::internal_register_components() {
     Engine::priv::ComponentCollisionShapeDeferredLoading::get().registerEvent(EventType::ResourceLoaded);
 }
 void Scene::internal_register_systems() {
-    registerSystemOrdered<SystemComponentRigidBody, std::tuple<>, ComponentRigidBody>(20'000);
+    registerSystemOrdered<SystemComponentRigidBody, ComponentRigidBody>(20'000);
 
-    registerSystemOrdered<SystemGameUpdate, std::tuple<>>(30'000);
-    registerSystemOrdered<SystemSceneUpdate, std::tuple<>>(40'000);
-    registerSystemOrdered<SystemComponentScript, std::tuple<>, ComponentScript>(45'000);
-    registerSystemOrdered<SystemComponentLogic, std::tuple<>, ComponentLogic>(50'000);
+    registerSystemOrdered<SystemGameUpdate>(30'000);
+    registerSystemOrdered<SystemSceneUpdate>(40'000);
+    registerSystemOrdered<SystemComponentScript, ComponentScript>(45'000);
+    registerSystemOrdered<SystemComponentLogic, ComponentLogic>(50'000);
 
-    registerSystemOrdered<SystemComponentTransform, std::tuple<>, ComponentTransform>(60'000);
-    registerSystemOrdered<SystemTransformParentChild, std::tuple<>, ComponentTransform>(80'000);
-    registerSystemOrdered<SystemSyncRigidToTransform, std::tuple<>, ComponentTransform, ComponentRigidBody>(81'000);
-    registerSystemOrdered<SystemStepPhysics, std::tuple<>, ComponentRigidBody>(85'000);
-    registerSystemOrdered<SystemSyncTransformToRigid, std::tuple<>, ComponentTransform, ComponentRigidBody>(110'000);
-    registerSystemOrdered<SystemCompoundChildTransforms, std::tuple<>, ComponentCollisionShape>(115'000);
+    registerSystemOrdered<SystemComponentTransform, ComponentTransform>(60'000);
+    registerSystemOrdered<SystemTransformParentChild, ComponentTransform>(80'000);
+    registerSystemOrdered<SystemSyncRigidToTransform, ComponentTransform, ComponentRigidBody>(81'000);
+    registerSystemOrdered<SystemStepPhysics, ComponentRigidBody>(85'000);
+    registerSystemOrdered<SystemSyncTransformToRigid, ComponentTransform, ComponentRigidBody>(110'000);
+    registerSystemOrdered<SystemCompoundChildTransforms, ComponentCollisionShape>(115'000);
 
-    registerSystemOrdered<SystemComponentModel, std::tuple<>, ComponentModel>(130'000);
+    registerSystemOrdered<SystemComponentModel, ComponentModel>(130'000);
 
-    registerSystemOrdered<SystemComponentCamera, std::tuple<>, ComponentCamera>(150'000);
+    registerSystemOrdered<SystemComponentCamera, ComponentCamera>(150'000);
 
-    registerSystemOrdered<SystemSceneChanging, std::tuple<>>(170'000);
+    registerSystemOrdered<SystemSceneChanging>(170'000);
 
-    registerSystemOrdered<SystemComponentTransformDebugDraw, std::tuple<>, ComponentTransform, ComponentModel>(1'000'000);
+    registerSystemOrdered<SystemComponentTransformDebugDraw, ComponentTransform, ComponentModel>(1'000'000);
 }
 size_t Scene::getNumLights() const noexcept {
     size_t count = 0;
@@ -158,7 +160,7 @@ void Scene::setActiveCamera(Camera& camera){
 }
 void Scene::centerSceneToObject(Entity centerEntity) {
     auto centerTransform = centerEntity.getComponent<ComponentTransform>();
-    ASSERT(centerTransform, __FUNCTION__ << "(): centerTransform was null!");
+    assert(centerTransform);
     auto centerPos       = centerTransform->getWorldPosition();
     auto centerPosFloat  = glm::vec3{ centerPos };
     for (const Entity e : Engine::priv::PublicScene::GetEntities(*this)) {
@@ -181,7 +183,7 @@ void Scene::centerSceneToObject(Entity centerEntity) {
     }
     centerTransform->setPosition(decimal(0.0));
     Engine::priv::Core::m_Engine->m_SoundModule.updateCameraPosition(*this);
-    ComponentTransform::recalculateAllParentChildMatrices(*this); //hmm is this needed?
+    ComponentTransform::recalculateAllParentChildMatrices(*this); //TODO: is this needed?
 }
 void Scene::update(const float dt) {
     m_ECS.update(dt, *this);

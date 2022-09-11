@@ -78,8 +78,15 @@ void Font::init_simple(const std::string& filename, int height, int width) {
         rawname = filename.substr(0, lastindex);
         rawname += ".png";
     }
+    TextureConstructorInfo ci;
+    ci.filename       = rawname;
+    ci.internalFormat = ImageInternalFormat::SRGB8_ALPHA8;
+    ci.mipmapped      = false;
+    //ci.loadAsync    = true; //TODO: test this
 
-    m_FontTexture = Engine::Resources::addResource<Texture>(rawname, false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D, true);
+    m_FontTexture = Engine::Resources::addResource<Texture>(ci, true);
+
+
     auto& texture = *m_FontTexture.get<Texture>();
 
     float min_y_offset  = std::numeric_limits<float>().max();
@@ -151,12 +158,12 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
     
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
-        ENGINE_PRODUCTION_LOG("ERROR::FREETYPE: Could not init FreeType Library")
+        ENGINE_LOG("ERROR::FREETYPE: Could not init FreeType Library")
         return;
     }
     FT_Face face;
     if (FT_New_Face(ft, filename.c_str(), 0, &face)) {
-        ENGINE_PRODUCTION_LOG("ERROR::FREETYPE: Failed to load font file: " << filename)
+        ENGINE_LOG("ERROR::FREETYPE: Failed to load font file: " << filename)
         return;
     }
     FT_Set_Pixel_Sizes(face, (width < 0) ? 0 : width, height); //Setting the width to 0 lets the face dynamically calculate the width based on the given height.
@@ -170,7 +177,7 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
     m_CharGlyphs.resize(requested_char_count);
     for (GLubyte char_id = 0; char_id < requested_char_count; ++char_id) {
         if (FT_Load_Char(face, char_id, FT_LOAD_RENDER)) {
-            ENGINE_PRODUCTION_LOG("ERROR::FREETYTPE: Failed to load Glyph: " << char_id)
+            ENGINE_LOG("ERROR::FREETYTPE: Failed to load Glyph: " << char_id)
             continue;
         }
         CharGlyph charGlyph = CharGlyph();
@@ -267,7 +274,14 @@ void Font::init_freetype(const std::string& filename, int height, int width) {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    m_FontTexture = Engine::Resources::addResource<Texture>(pixels.data(), final_width, final_height, filename + "_Texture", false, ImageInternalFormat::SRGB8_ALPHA8, TextureType::Texture2D);
+    TextureConstructorInfo ci;
+    ci.pixels         = pixels.data();
+    ci.width          = final_width;
+    ci.height         = final_height;
+    ci.name           = filename + "_Texture";
+    ci.mipmapped      = false;
+    ci.internalFormat = ImageInternalFormat::SRGB8_ALPHA8;
+    m_FontTexture = Engine::Resources::addResource<Texture>(ci);
 
     m_MaxHeight = max_y_offset - min_y_offset;
 }

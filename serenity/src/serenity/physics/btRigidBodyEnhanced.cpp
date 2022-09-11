@@ -11,5 +11,5 @@ btRigidBodyEnhanced::btRigidBodyEnhanced(const btRigidBodyConstructionInfo& ci)
 {
 }
 btRigidBodyEnhanced::~btRigidBodyEnhanced() {
-    ENGINE_PRODUCTION_LOG("Deleteing btRigidBodyEnhanced: " << m_Name)
+    ENGINE_LOG("Deleteing btRigidBodyEnhanced: " << m_Name)
 }

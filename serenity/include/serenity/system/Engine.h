@@ -181,11 +181,11 @@ namespace Engine{
     //void reset_malloc_count() noexcept;
     //void print_malloc_count() noexcept;
 
-    [[nodiscard]] inline Engine::view_ptr<GameCore> getGameCore() noexcept { return Engine::priv::Core::m_Engine->m_GameCore; }
-    [[nodiscard]] inline Engine::priv::ResourceManager& getResourceManager() noexcept { return Engine::priv::Core::m_Engine->m_ResourceManager; }
-    [[nodiscard]] inline Engine::priv::PhysicsModule& getPhysicsManager() noexcept { return Engine::priv::Core::m_Engine->m_Modules->m_PhysicsModule; }
-    [[nodiscard]] inline Engine::priv::EditorCore& getEditor() noexcept { return Engine::priv::Core::m_Engine->m_Modules->m_Editor; }
-    [[nodiscard]] inline Engine::priv::RenderModule& getRenderer() noexcept { return Engine::priv::Core::m_Engine->m_Modules->m_RenderModule; }
+    //[[nodiscard]] inline Engine::view_ptr<GameCore> getGameCore() noexcept { return Engine::priv::Core::m_Engine->m_GameCore; }
+    //[[nodiscard]] inline Engine::priv::ResourceManager& getResourceManager() noexcept { return Engine::priv::Core::m_Engine->m_ResourceManager; }
+    //[[nodiscard]] inline Engine::priv::PhysicsModule& getPhysicsManager() noexcept { return Engine::priv::Core::m_Engine->m_Modules->m_PhysicsModule; }
+    //[[nodiscard]] inline Engine::priv::EditorCore& getEditor() noexcept { return Engine::priv::Core::m_Engine->m_Modules->m_Editor; }
+    //[[nodiscard]] inline Engine::priv::RenderModule& getRenderer() noexcept { return Engine::priv::Core::m_Engine->m_Modules->m_RenderModule; }
 
 
     [[nodiscard]] Window& getWindow();
@@ -200,10 +200,10 @@ namespace Engine{
 
     [[nodiscard]] double getFPS() noexcept;
 
-    inline void setWindowIcon(const Texture& texture) { Engine::getWindow().setIcon(texture); }
-    inline void setWindowIcon(Handle textureHandle) { Engine::getWindow().setIcon(*textureHandle.get<Texture>()); }
-    inline void showMouseCursor() noexcept { Engine::getWindow().setMouseCursorVisible(true); }
-    inline void hideMouseCursor() noexcept { Engine::getWindow().setMouseCursorVisible(false); }
+    void setWindowIcon(const Texture&);
+    void setWindowIcon(Handle textureHandle);
+    void showMouseCursor() noexcept;
+    void hideMouseCursor() noexcept;
 
     void setTimeScale(float timeScale) noexcept;
     void stop() noexcept;

@@ -2,7 +2,6 @@
 #ifndef ENGINE_TEXTURE_H
 #define ENGINE_TEXTURE_H
 
-struct TextureRequest;
 namespace Engine::priv {
     class GBuffer;
     template<typename T> class ResourceVector;
@@ -27,9 +26,16 @@ namespace Engine::priv {
         TextureType                            m_TextureType     = TextureType::Unknown;
         bool                                   m_Mipmapped       = false;
         bool                                   m_IsToBeMipmapped = false; //TODO: move somewhere else or try to get rid of altogether?
+        
+        TextureCPUData() = default;
 
-        void initFromMemory(const uint8_t* pixels, int inWidth, int inHeight);
-        void initFromFile();
+        TextureCPUData(const TextureCPUData&) = default;
+        TextureCPUData& operator=(const TextureCPUData&) = default;
+
+        TextureCPUData(TextureCPUData&&) noexcept = default;
+        TextureCPUData& operator=(TextureCPUData&&) noexcept = default;
+
+        void init(const TextureConstructorInfo&);
     };
 };
 
@@ -40,23 +46,13 @@ class Texture final : public Resource<Texture>, public Engine::priv::TextureBase
     friend class  Engine::priv::GBuffer;
     friend class  Engine::priv::TextureLoader;
     friend class  Engine::priv::detail::opengl::Impl;
-    friend struct TextureRequest;
     friend class  Texture::Impl;
     public:
         static Handle White, Black, Checkers, BRDF; //loaded in renderer. TODO: move these to built in class (separate from client side interface)
     private:
         Engine::priv::TextureCPUData    m_CPUData;
     public:
-        //From detailed constructor
         Texture(const TextureConstructorInfo&, bool dispatchEventLoaded = true);
-        //Empty Texture
-        Texture(std::string_view textureName = {}, TextureType = TextureType::Texture2D, bool mipMap = false, bool dispatchEventLoaded = true);
-        //Framebuffer render target
-        Texture(uint32_t renderTgtWidth, uint32_t renderTgtHeight, ImagePixelType, ImagePixelFormat, ImageInternalFormat, float divisor = 1.0f, bool dispatchEventLoaded = true);
-        //Single File
-        Texture(std::string_view filename, bool generateMipmaps, ImageInternalFormat, TextureType, bool dispatchEventLoaded = true);
-        //Pixels From Memory
-        Texture(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view textureName, bool generateMipmaps, ImageInternalFormat, TextureType, bool dispatchEventLoaded = true);
 
         Texture(const Texture&)                = delete;
         Texture& operator=(const Texture&)     = delete;
@@ -69,37 +65,19 @@ class Texture final : public Resource<Texture>, public Engine::priv::TextureBase
 
         [[nodiscard]] const uint8_t* pixels();
         [[nodiscard]] inline TextureType getTextureType() const noexcept { return m_CPUData.m_TextureType; }
-        [[nodiscard]] inline int width() const noexcept {
-            assert(!m_CPUData.m_ImagesDatas.empty() && !m_CPUData.m_ImagesDatas[0].m_Mipmaps.empty());
-            return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].width; 
-        }
-        [[nodiscard]] inline int height() const noexcept {
-            assert(!m_CPUData.m_ImagesDatas.empty() && !m_CPUData.m_ImagesDatas[0].m_Mipmaps.empty());
-            return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].height; 
-        }
+        [[nodiscard]] int width() const noexcept;
+        [[nodiscard]] int height() const noexcept;
         [[nodiscard]] inline glm::uvec2 size() const noexcept { return glm::uvec2{ width(), height() }; }
         [[nodiscard]] inline glm::vec2 sizeAsRatio() const noexcept { const auto size_ = glm::vec2{ size() }; return glm::vec2(size_ / glm::max(size_.x, size_.y)); }
         [[nodiscard]] inline constexpr bool mipmapped() const noexcept { return m_CPUData.m_Mipmapped; }
 
-        [[nodiscard]] bool compressed() const {
-            assert(!m_CPUData.m_ImagesDatas.empty() && !m_CPUData.m_ImagesDatas[0].m_Mipmaps.empty());
-            return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].compressedSize > 0;
-        }
+        [[nodiscard]] bool compressed() const;
 
         void setAnisotropicFiltering(float anisotropicFiltering);
         
-        [[nodiscard]] inline ImageInternalFormat internalFormat() const noexcept {
-            assert(!m_CPUData.m_ImagesDatas.empty());
-            return m_CPUData.m_ImagesDatas[0].m_InternalFormat; 
-        }
-        [[nodiscard]] inline ImagePixelFormat pixelFormat() const noexcept {
-            assert(!m_CPUData.m_ImagesDatas.empty());
-            return m_CPUData.m_ImagesDatas[0].m_PixelFormat; 
-        }
-        [[nodiscard]] inline ImagePixelType pixelType() const noexcept {
-            assert(!m_CPUData.m_ImagesDatas.empty());
-            return m_CPUData.m_ImagesDatas[0].m_PixelType; 
-        }
+        [[nodiscard]] ImageInternalFormat internalFormat() const noexcept;
+        [[nodiscard]] ImagePixelFormat pixelFormat() const noexcept;
+        [[nodiscard]] ImagePixelType pixelType() const noexcept;
 
         //does not include the base level image
         int getMaxMipmapLevelsPossible() const noexcept {

@@ -19,7 +19,7 @@
 #include <LuaBridge/UnorderedMap.h>
 #include <LuaBridge/Vector.h>
 
-constexpr auto ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID     = "ScrNum";
-constexpr auto ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ENTITY = "ScrEnt";
+inline constexpr auto ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ID     = "ScrNum";
+inline constexpr auto ENGINE_LUA_CURRENT_SCRIPT_TOKEN_ENTITY = "ScrEnt";
 
 #endif

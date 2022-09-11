@@ -7,7 +7,7 @@ class ComponentModel;
 class ComponentCamera;
 class SystemComponentCamera;
 namespace Engine::priv {
-    class  EditorWindowSceneFunctions;
+    class  EditorWindowSceneImpl;
 };
 
 #include <serenity/dependencies/glm.h>
@@ -24,7 +24,7 @@ class ComponentCamera final : public ComponentBaseClass<ComponentCamera> {
     friend class  ComponentModel;
     friend class  SystemComponentCamera;
     friend struct Engine::priv::ComponentCamera_Functions;
-    friend class  Engine::priv::EditorWindowSceneFunctions;
+    friend class  Engine::priv::EditorWindowSceneImpl;
     public:
         enum class CameraType : uint8_t {
             Perspective,

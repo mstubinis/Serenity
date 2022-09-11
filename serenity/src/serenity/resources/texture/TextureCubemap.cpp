@@ -39,20 +39,19 @@ public:
 
 namespace Engine::priv {
     void TextureCubemapCPUData::initFromFile() {
-        auto& image = m_ImagesDatas[0];
-        const std::string extension = std::filesystem::path(image.m_Filename).extension().string();
+        const std::string extension = std::filesystem::path(m_ImagesDatas[0].m_Filename).extension().string();
         if (extension == ".dds") {
-            Engine::priv::LoadDDSFile(*this, image);
+            Engine::priv::LoadDDSFile(*this, m_ImagesDatas[0]);
         }
-        image.setInternalFormat(image.m_InternalFormat);
+        m_ImagesDatas[0].setFormats(m_ImagesDatas[0].m_InternalFormat);
     }
     void TextureCubemapCPUData::initFromCubemap(const std::array<std::string_view, 6>& files, ImageInternalFormat intFmt) {
         for (int i = 0; i < files.size(); ++i) {
-            auto& image = i >= m_ImagesDatas.size() ? m_ImagesDatas.emplace_back() : m_ImagesDatas[i];
+            Engine::priv::ImageData& image = i >= m_ImagesDatas.size() ? m_ImagesDatas.emplace_back() : m_ImagesDatas[i];
             image.m_Filename = files[i];
         }
-        for (auto& sideImage : m_ImagesDatas) {
-            sideImage.setInternalFormat(intFmt);
+        for (Engine::priv::ImageData& sideImage : m_ImagesDatas) {
+            sideImage.setFormats(intFmt);
         }
     }
 }
@@ -68,7 +67,7 @@ TextureCubemap::TextureCubemap(std::string_view textureName, bool mipMap)
 TextureCubemap::TextureCubemap(std::string_view filename, bool genMipMaps, ImageInternalFormat internalFormat)
     : TextureCubemap{ filename, genMipMaps }
 {
-    m_CPUData.m_ImagesDatas[0].setInternalFormat(internalFormat);
+    m_CPUData.m_ImagesDatas[0].setFormats(internalFormat);
     m_CPUData.initFromFile();
 
     Impl::Load(*this);

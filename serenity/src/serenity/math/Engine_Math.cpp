@@ -11,6 +11,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <sfml/Network/Packet.hpp>
 
 #include <btBulletDynamicsCommon.h>
 #include <boost/math/interpolators/cubic_b_spline.hpp>
@@ -18,6 +19,43 @@
 using namespace Engine;
 
 constexpr float ROTATION_THRESHOLD = 0.001f;
+
+namespace Engine {
+#pragma region quat32
+    sf::Packet& quat32::serialize(sf::Packet& packet) const noexcept {
+        packet << x;
+        packet << y;
+        packet << z;
+        packet << w;
+        return packet;
+    }
+    sf::Packet& quat32::deserialize(sf::Packet& packet) noexcept {
+        packet >> x;
+        packet >> y;
+        packet >> z;
+        packet >> w;
+        return packet;
+    }
+#pragma endregion
+
+#pragma region quat64
+    sf::Packet& quat64::serialize(sf::Packet& packet) const noexcept {
+        packet << x;
+        packet << y;
+        packet << z;
+        packet << w;
+        return packet;
+    }
+    sf::Packet& quat64::deserialize(sf::Packet& packet) noexcept {
+        packet >> x;
+        packet >> y;
+        packet >> z;
+        packet >> w;
+        return packet;
+    }
+#pragma endregion
+}
+
 
 //could use some fixing
 glm::vec3 Math::polynomial_interpolate_linear(const std::vector<glm::vec3>& points, float time) {
@@ -203,7 +241,18 @@ void Math::extractViewFrustumPlanesHartmannGribbs(Camera& camera) {
     const auto& frustumPlanes = camera.getComponent<ComponentCamera>()->getFrustrumPlanes();
     Math::extractViewFrustumPlanesHartmannGribbs(camera.getViewProjection(), const_cast<std::array<glm::vec4, 6>&>(frustumPlanes));
 }
-
+void Math::decompose(const glm::mat4& matrix, glm::vec3& pos, glm::quat& rot, glm::vec3& scale) {
+    pos = matrix[3];
+    for (int i = 0; i < 3; i++) {
+        scale[i] = glm::length(glm::vec3(matrix[i]));
+    }
+    const glm::mat3 rotMtx(
+        glm::vec3(matrix[0]) / scale[0],
+        glm::vec3(matrix[1]) / scale[1],
+        glm::vec3(matrix[2]) / scale[2]
+    );
+    rot = glm::quat_cast(rotMtx);
+}
 glm::quat Math::toGLM(const btQuaternion& BTquat) {
     return glm::quat{ (float)BTquat.getW(), (float)BTquat.getX(), (float)BTquat.getY(), (float)BTquat.getZ() };
 }
@@ -235,11 +284,11 @@ btVector3 Math::toBT(const glm::vec3& vector){
 }
 #if defined(ENGINE_HIGH_PRECISION)
 glm_vec3 Math::getMatrixPosition(const glm_mat4& matrix) {
-    return glm_vec3{ matrix[3][0], matrix[3][1], matrix[3][2] };
+    return glm_vec3{ matrix[3] };
 }
 #endif
 glm::vec3 Math::getMatrixPosition(const glm::mat4& matrix) {
-    return glm::vec3{ matrix[3][0], matrix[3][1], matrix[3][2] };
+    return matrix[3];
 }
 bool Math::isPointWithinCone(const glm::vec3& conePos,const glm::vec3& coneVector, const glm::vec3& point, float fovRadians){
     glm::vec3 diff = glm::normalize(point - conePos);

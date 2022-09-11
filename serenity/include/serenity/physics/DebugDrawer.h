@@ -76,7 +76,7 @@ namespace Engine::priv {
             void drawPlane(const btVector3& planeNormal, btScalar planeConst, const btTransform&, const btVector3& color) override;
             void drawCone(btScalar radius, btScalar height, int upAxis, const btTransform&, const btVector3& color) override;
             void reportErrorWarning(const char* errWarning) override {
-                ENGINE_PRODUCTION_LOG("btDebugDraw error: " << errWarning)
+                ENGINE_LOG("btDebugDraw error: " << errWarning)
             }
             void draw3dText(const btVector3& location, const char* text) override {}
     };

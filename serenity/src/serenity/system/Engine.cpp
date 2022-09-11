@@ -5,6 +5,7 @@
 #include <serenity/system/Time.h>
 #include <serenity/ecs/ECS.h>
 #include <serenity/ecs/components/ComponentCamera.h>
+#include <serenity/resources/texture/Texture.h>
 
 #include <serenity/scene/Scene.h>
 #include <serenity/scene/Camera.h>
@@ -23,13 +24,11 @@
 
 namespace {
     void internal_cleanup_os_specific() {
-        /*
-        #ifdef _WIN32
-            if (GetConsoleWindow() != NULL) {
-                FreeConsole(); //erroring out for some reason
-            }
-        #endif
-        */
+#ifdef _WIN32
+        if (GetConsoleWindow() != NULL) {
+            FreeConsole(); //erroring out for some reason
+        }
+#endif
     }
     void internal_init_os_specific(const EngineOptions& options) {
         //get args from shortcut, etc
@@ -44,50 +43,48 @@ namespace {
                 lowerKey += std::tolower(key[j], loc);
             }
             args.insert(std::move(lowerKey));
-    }
+        }
 #ifdef _WIN32
         //show console if applicable
         if (options.show_console) {
             if (GetConsoleWindow() == NULL) {
                 AllocConsole();
             }
-            ShowWindow(GetConsoleWindow(), SW_SHOW); //show console window
+            if (GetConsoleWindow()) {
+                ShowWindow(GetConsoleWindow(), SW_SHOW); //show console window
+            }
         } else if (!args.contains("console")) {
-            ShowWindow(GetConsoleWindow(), SW_HIDE); //hide console window
+            if (GetConsoleWindow()) {
+                ShowWindow(GetConsoleWindow(), SW_HIDE); //hide console window
+            }
         }
 #endif
+    }
 }
-}
-
-#if defined(ENGINE_PRODUCTION)
-    #ifdef _WIN32
-        #pragma comment(linker, "/SUBSYSTEM:WINDOWS" /*+ " /ENTRY:mainCRTStartup"*/) //forcibly hide the console
-    #endif
-#endif
 
 //faux game functions if test suite enabled
 #if defined(ENGINE_TESTS)
-    void Game::initResources(const EngineOptions& options) {}
-    void Game::initLogic(const EngineOptions& options) {}
-    void Game::update(const float dt) {}
-    void Game::render() {}
+    void Game::initResources(const EngineOptions&, GameCore&) {}
+    void Game::initLogic(const EngineOptions&, GameCore&) {}
+    void Game::update(const float dt, GameCore&) {}
+    void Game::render(GameCore&) {}
     void Game::cleanup() {}
 
-    void Game::onResize(Window& window, uint32_t width, uint32_t height) {}
-    void Game::onWindowClosed(Window& window) {}
-    void Game::onLostFocus(Window& window) {}
-    void Game::onGainedFocus(Window& window) {}
-    void Game::onTextEntered(Window& window, uint32_t unicode) {}
-    void Game::onKeyPressed(Window& window, uint32_t key) {}
-    void Game::onKeyReleased(Window& window, uint32_t key) {}
-    void Game::onMouseWheelScrolled(Window& window, float delta, int x, int y) {}
-    void Game::onMouseButtonPressed(Window& window, uint32_t button) {}
-    void Game::onMouseButtonReleased(Window& window, uint32_t button) {}
-    void Game::onMouseMoved(Window& window, float mouseX, float mouseY) {}
-    void Game::onMouseEntered(Window& window) {}
-    void Game::onMouseLeft(Window& window) {}
-    void Game::onPreUpdate(const float dt) {}
-    void Game::onPostUpdate(const float dt) {}
+    void Game::onResize(Window&, uint32_t width, uint32_t height, GameCore&) {}
+    void Game::onWindowClosed(Window&) {}
+    void Game::onLostFocus(Window&, GameCore&) {}
+    void Game::onGainedFocus(Window&, GameCore&) {}
+    void Game::onTextEntered(Window&, uint32_t unicode) {}
+    void Game::onKeyPressed(Window&, uint32_t key) {}
+    void Game::onKeyReleased(Window&, uint32_t key) {}
+    void Game::onMouseWheelScrolled(Window&, float delta, int x, int y) {}
+    void Game::onMouseButtonPressed(Window&, uint32_t button) {}
+    void Game::onMouseButtonReleased(Window&, uint32_t button) {}
+    void Game::onMouseMoved(Window&, float mouseX, float mouseY, GameCore&) {}
+    void Game::onMouseEntered(Window&, GameCore&) {}
+    void Game::onMouseLeft(Window&, GameCore&) {}
+    void Game::onPreUpdate(const float dt, GameCore&) {}
+    void Game::onPostUpdate(const float dt, GameCore&) {}
     void Game::onJoystickButtonPressed() {}
     void Game::onJoystickButtonReleased() {}
     void Game::onJoystickMoved() {}
@@ -179,7 +176,7 @@ void Engine::priv::EngineCore::internal_update_logic(GameCore& gameCore, int fra
     Game::onPostUpdate(dt, gameCore);
     scene.postUpdate(dt);
 #ifndef ENGINE_PRODUCTION
-    m_Modules->m_DebugManager.calculate(DebugTimerTypes::Logic, Engine::time::difference_as_nanoseconds(start));
+    m_Modules->m_DebugManager.calculate(DebugTimerTypes::Logic, Engine::time::difference(start));
 #endif
 }
 void Engine::priv::EngineCore::internal_update_sounds(GameCore& gameCore, Scene& scene, const float dt) {
@@ -188,7 +185,7 @@ void Engine::priv::EngineCore::internal_update_sounds(GameCore& gameCore, Scene&
 #endif
     m_SoundModule.update(scene, dt);
 #ifndef ENGINE_PRODUCTION
-    m_Modules->m_DebugManager.calculate(DebugTimerTypes::Sound, Engine::time::difference_as_nanoseconds(start));
+    m_Modules->m_DebugManager.calculate(DebugTimerTypes::Sound, Engine::time::difference(start));
 #endif
 }
 void Engine::priv::EngineCore::internal_pre_update(GameCore& gameCore, int frameIteration, Scene& scene, const float dt) {
@@ -225,7 +222,7 @@ void Engine::priv::EngineCore::internal_render(GameCore& gameCore, Scene& scene,
     m_Modules->m_RenderModule._clear2DAPICommands();
     m_Misc.m_FPS.incrementFPSCount();
 #ifndef ENGINE_PRODUCTION
-    m_Modules->m_DebugManager.calculate(DebugTimerTypes::Render, Engine::time::difference_as_nanoseconds(start));
+    m_Modules->m_DebugManager.calculate(DebugTimerTypes::Render, Engine::time::difference(start));
 #endif
 }
 void Engine::priv::EngineCore::internal_cleanup() {
@@ -322,6 +319,20 @@ glm::uvec2 Engine::getWindowSize(uint32_t index) {
 size_t Engine::getNumWindows() {
     return Engine::priv::Core::m_Windows->size();
 }
+void Engine::setWindowIcon(const Texture& texture) { 
+    Engine::getWindow().setIcon(texture);
+}
+void Engine::setWindowIcon(Handle textureHandle) { 
+    Engine::getWindow().setIcon(*textureHandle.get<Texture>());
+}
+void Engine::showMouseCursor() noexcept { 
+    Engine::getWindow().setMouseCursorVisible(true); 
+}
+void Engine::hideMouseCursor() noexcept { 
+    Engine::getWindow().setMouseCursorVisible(false); 
+}
+
+
 
 
 bool Engine::paused() noexcept {
@@ -344,4 +355,11 @@ double Engine::getFPS() noexcept {
 void Engine::stop() noexcept {
     Engine::priv::threading::waitForAll();
     Engine::priv::Core::m_Engine->m_Misc.m_Destroyed = true;
+}
+
+
+namespace Engine {
+    [[nodiscard]] Engine::view_ptr<GameCore> getGameCore() noexcept { 
+        return Engine::priv::Core::m_Engine->m_GameCore; 
+    }
 }

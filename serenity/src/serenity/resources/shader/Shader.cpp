@@ -12,7 +12,7 @@
 #include <serenity/renderer/opengl/glsl/Shadows.h>
 #include <serenity/renderer/opengl/glsl/DepthOfFieldCode.h>
 
-#include <serenity/system/Engine.h>
+#include <serenity/system/EngineIncludes.h>
 #include <serenity/editor/core/EditorCore.h>
 
 #include <fstream>
@@ -22,6 +22,11 @@
 namespace {
     uint32_t CREATED_SHADER_COUNT = 0;
 
+    void send_code_to_editor(std::string& shaderCode, Shader& shader) {
+        if (Engine::getEditor().isEnabled()) {
+            Engine::getEditor().addShaderData(shader, shaderCode);
+        }
+    }
     void load_code_from_file(const std::string& filename, std::string& code) {
         assert(std::filesystem::is_regular_file(filename));
         std::ifstream filestream(filename);
@@ -51,7 +56,43 @@ namespace {
         }
         return versionLine;
     }
+    bool prune_code_of_comments(std::string& shaderCode) {
+        std::string copy;
+        copy.reserve(shaderCode.size());
+        bool anythingChanged = false;
+        //TODO: prune all commented code
+        bool isCommentBlock = false;
+        bool isCommentLine = false;
+        auto itr = std::next(std::begin(shaderCode));
+        copy += *std::prev(itr);
+        for (; itr != std::end(shaderCode); ++itr) {
+            const char prevChar = *std::prev(itr);
+            const char currChar = *itr;
+            if (prevChar == '/' && currChar == '/') {
+                isCommentLine = true;
+                copy.back() = ' ';
+                anythingChanged = true;
+            } else if (currChar == '\n') {
+                isCommentLine = false;
+            }
+            if (!isCommentLine && (prevChar == '/' && currChar == '*')) {
+                isCommentBlock = true;
+                copy.back() = ' ';
+                anythingChanged = true;
+            } else if (prevChar == '*' && currChar == '/') {
+                isCommentBlock = false;
+            }
+            if (!isCommentLine && !isCommentBlock) {
+                copy += currChar;
+            }
+        }
+        shaderCode = std::move(copy);
+        return anythingChanged;
+    }
     void convert_code(std::string& shaderCode, Shader& shader) {
+        bool codeWasPruned = prune_code_of_comments(shaderCode);
+
+
         //get / generate a version line
         const std::string versionLine = get_version_line(shaderCode);
 
@@ -69,19 +110,28 @@ namespace {
         //put the version on top as the last step
         shaderCode = versionLine + shaderCode;
     }
-    void internal_unload(bool isLoaded, GLuint& GLShaderID, Shader& shader, bool doDispatchEvent) {
-        if (isLoaded) {
-            if (GLShaderID) {
-                glDeleteShader(GLShaderID);
-                GLShaderID = 0;
+    void internal_load(bool isLoaded, std::string& shaderCode, std::string& filename, Shader& shader, bool dispatchEventLoaded) {
+        if (!isLoaded || shaderCode.empty()) {
+            if (std::filesystem::is_regular_file(filename)) {
+                //load initial code from file
+                load_code_from_file(filename, shaderCode);
             }
-            shader.Resource::unload(doDispatchEvent);
+            else {
+                assert(!filename.empty());
+                shaderCode = std::move(filename);
+                filename.clear();
+            }
+            convert_code(shaderCode, shader);
+            send_code_to_editor(shaderCode, shader);
+            shader.load(dispatchEventLoaded);
         }
     }
-    void send_code_to_editor(std::string& shaderCode, Shader& shader) {
-        if (Engine::getEditor().isEnabled()) {
-            Engine::getEditor().addShaderData(shader, shaderCode);
+    void internal_unload(GLuint& GLShaderID, Shader& shader, bool doDispatchEvent) {
+        if (GLShaderID) {
+            glDeleteShader(GLShaderID);
+            GLShaderID = 0;
         }
+        shader.unload(doDispatchEvent);
     }
 }
 
@@ -95,7 +145,9 @@ Shader::Shader(std::string_view filenameOrCode, ShaderType shaderType)
     } else {
         setName("Shader " + std::to_string(CREATED_SHADER_COUNT++));
     }
-    load();
+
+
+    internal_load(m_IsLoaded, m_Code, m_FileName, *this, true);
 }
 Shader::Shader(Shader&& other) noexcept 
     : Resource{ std::move(other) }
@@ -115,40 +167,21 @@ Shader& Shader::operator=(Shader&& other) noexcept {
     return *this;
 }
 Shader::~Shader() {
-    unload();
+    orphan();
+    internal_unload(m_GLShaderID, *this, true);
 }
 
-void Shader::load(const std::string& code) {
-    unload();
-    if (!m_IsLoaded && !code.empty()) {
-        m_Code = code;
-        Resource::load();
-    }
-}
-void Shader::load(bool dispatchEventLoaded) {
-    if (!m_IsLoaded || m_Code.empty()) {
-        if (std::filesystem::is_regular_file(m_FileName)) {
-            //load initial code from file
-            load_code_from_file(m_FileName, m_Code);
-        } else {
-            assert(!m_FileName.empty());
-            m_Code = std::move(m_FileName);
-            m_FileName.clear();
-        }
-        convert_code(m_Code, *this);
-        send_code_to_editor(m_Code, *this);
-        Resource::load(dispatchEventLoaded);
-    }
-}
-void Shader::unload(bool dispatchEventUnloaded) {
-    Shader::orphan();
-    internal_unload(m_IsLoaded, m_GLShaderID, *this, dispatchEventUnloaded);
+void Shader::loadCode(const std::string& code) {
+    orphan();
+    internal_unload(m_GLShaderID, *this, true);
+    m_Code = code;
+    internal_load(m_IsLoaded, m_Code, m_FileName, *this, true);
 }
 void Shader::orphan(bool force) {
     if (!m_FileName.empty()) {
         m_Code.clear();
     } else if (force) {
         m_Code.clear();
-        internal_unload(true, m_GLShaderID, *this, true);
+        internal_unload(m_GLShaderID, *this, true);
     }
 }

@@ -15,9 +15,10 @@ SystemComponentTransformDebugDraw::SystemComponentTransformDebugDraw(Engine::pri
         auto& system = static_cast<SystemComponentTransformDebugDraw&>(inSystem);
         system.forEach<Scene*>([](Scene* scene, Entity entity, ComponentTransform* transform, ComponentModel* model) {
             //ASSERT(scene && body && model, __FUNCTION__ << "(): parameter(s) was nullptr!");
-            const glm::vec3 world_pos = transform->getPosition();
-            const glm::quat world_rot = transform->getRotation();
-            const glm::vec3 world_scl = transform->getScale();
+            const auto worldMatrix = transform->getWorldMatrixRendering();
+            const auto world_pos = Engine::Math::getMatrixPosition(worldMatrix);
+            const auto world_rot = transform->getRotation();
+            const auto world_scl = transform->getScale();
             for (size_t i = 0; i < model->getNumModels(); ++i) {
                 auto& modelInstance = (*model)[i];
 
@@ -29,6 +30,17 @@ SystemComponentTransformDebugDraw::SystemComponentTransformDebugDraw(Engine::pri
                 Engine::Physics::drawDebugLine(world_pos, world_pos + fwd,   1.0f, 0.0f, 0.0f);
                 Engine::Physics::drawDebugLine(world_pos, world_pos + right, 0.0f, 1.0f, 0.0f);
                 Engine::Physics::drawDebugLine(world_pos, world_pos + up,    0.0f, 0.0f, 1.0f);
+
+                auto& animationContainer = modelInstance.getRunningAnimations();
+
+                for (size_t i = 0; i < animationContainer.getBoneVertexTransforms().size(); ++i) {
+                    //if (animationContainer.getNodeData().m_Nodes[i].IsBone) {
+                        auto bonePos = Engine::Math::getMatrixPosition(worldMatrix * animationContainer.getBoneLocalTransform(i));
+                        Engine::Physics::drawDebugLine(bonePos, bonePos + (fwd * 0.01f), 1.0f, 1.0f, 0.0f);
+                        Engine::Physics::drawDebugLine(bonePos, bonePos + (right * 0.01f), 0.0f, 1.0f, 1.0f);
+                        Engine::Physics::drawDebugLine(bonePos, bonePos + (up * 0.01f), 1.0f, 0.0f, 1.0f);
+                    //}
+                }
             }
             /*
             const auto screenPos = transform->getScreenCoordinates(false);

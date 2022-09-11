@@ -12,7 +12,14 @@ namespace {
         if (!file.empty()) {
             texture = Engine::Resources::getResource<Texture>(file);
             if (!texture.m_Resource) {
-                texture = Engine::Resources::addResource<Texture>(file, mipmapped, format, textureType);
+
+                TextureConstructorInfo ci;
+                ci.filename       = file;
+                ci.internalFormat = format;
+                ci.mipmapped      = mipmapped;
+                ci.type           = textureType;
+
+                texture = Engine::Resources::addResource<Texture>(ci);
             }
         }
         return texture;

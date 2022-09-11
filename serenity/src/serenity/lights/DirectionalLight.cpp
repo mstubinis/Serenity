@@ -2,7 +2,10 @@
 #include <serenity/ecs/components/ComponentTransform.h>
 #include <serenity/utils/Utils.h>
 #include <serenity/scene/Scene.h>
-#include <serenity/system/Engine.h>
+
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/resources/Engine_Resources.h>
+#include <serenity/renderer/Renderer.h>
 
 DirectionalLight::DirectionalLight(Scene* scene, float directionX, float directionY, float directionZ)
     : Entity{ (!scene) ? *Engine::Resources::getCurrentScene() : *scene }
@@ -16,16 +19,12 @@ DirectionalLight::DirectionalLight(Scene* scene, const glm::vec3& direction)
 {}
 
 bool DirectionalLight::setShadowCaster(bool castsShadow, uint32_t shadowMapWidth, uint32_t shadowMapHeight, LightShadowFrustumType frustumType, float nearFactor, float farFactor) noexcept {
-    auto setupRenderingAPIStuff = [=]() -> bool {
-        auto& renderer = Engine::getRenderer();
-        renderer.setShadowCaster(*this, castsShadow, shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
-        if ((m_IsShadowCaster && castsShadow == false) || (!m_IsShadowCaster && castsShadow == true)) {
-            m_IsShadowCaster = castsShadow;
-            return Engine::priv::PublicScene::SetLightShadowCaster<DirectionalLight>(*scene(), *this, castsShadow);
-        }
-        return false;
-    };
-    Engine::priv::threading::addJobWithPostCallback([]() {}, std::move(setupRenderingAPIStuff));
+    auto& renderer = Engine::getRenderer();
+    renderer.setShadowCaster(*this, castsShadow, shadowMapWidth, shadowMapHeight, frustumType, nearFactor, farFactor);
+    if (m_IsShadowCaster != castsShadow) {
+        m_IsShadowCaster = castsShadow;
+        return Engine::priv::PublicScene::SetLightShadowCaster(*scene(), *this, castsShadow);
+    }
     return false;
 }
 

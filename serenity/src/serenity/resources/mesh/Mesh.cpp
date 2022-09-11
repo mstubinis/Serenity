@@ -31,23 +31,12 @@
 #include <iomanip>
 #include <execution>
 
-constexpr auto DefaultMeshBindFunctor = [](Mesh* mesh, const Engine::priv::RenderModule* renderer) {
-    mesh->getVertexData().bind();
-};
-constexpr auto DefaultMeshUnbindFunctor = [](Mesh* mesh, const Engine::priv::RenderModule* renderer) {
-    mesh->getVertexData().unbind();
-};
-
 namespace {
-    void internal_init_blank_mesh(Mesh& mesh) {
-        //mesh.registerEvent(EventType::WindowFullscreenChanged);
-        mesh.setCustomBindFunctor(DefaultMeshBindFunctor);
-        mesh.setCustomUnbindFunctor(DefaultMeshUnbindFunctor);
-    }
+
 }
 
 MeshCPUData::MeshCPUData(const MeshCPUData& other) 
-    : m_NodeData         { other.m_NodeData }
+    : m_NodesData        { other.m_NodesData }
     , m_File             { other.m_File }
     , m_RadiusBox        { other.m_RadiusBox }
     , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
@@ -57,23 +46,28 @@ MeshCPUData::MeshCPUData(const MeshCPUData& other)
     , m_Threshold        { other.m_Threshold }
 {
     internal_transfer_cpu_datas();
-    internal_calculate_radius(); //TODO: do we need this?
+    //internal_calculate_radius(); //TODO: do we need this?
 }
 MeshCPUData& MeshCPUData::operator=(const MeshCPUData& other) {
-    m_NodeData          = other.m_NodeData;
-    m_File              = other.m_File;
-    m_RadiusBox         = other.m_RadiusBox;
-    m_Skeleton          = std::exchange(other.m_Skeleton, nullptr);
-    m_CollisionFactory  = std::exchange(other.m_CollisionFactory, nullptr);
-    m_VertexData        = std::exchange(other.m_VertexData, nullptr);
-    m_Radius            = other.m_Radius;
-    m_Threshold         = other.m_Threshold;
-    internal_transfer_cpu_datas();
-    internal_calculate_radius(); //TODO: do we need this?
+    if (this != &other) {
+        SAFE_DELETE(m_Skeleton);
+        SAFE_DELETE(m_CollisionFactory);
+        SAFE_DELETE(m_VertexData);
+        m_NodesData        = other.m_NodesData;
+        m_File             = other.m_File;
+        m_RadiusBox        = other.m_RadiusBox;
+        m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
+        m_CollisionFactory = std::exchange(other.m_CollisionFactory, nullptr);
+        m_VertexData       = std::exchange(other.m_VertexData, nullptr);
+        m_Radius           = other.m_Radius;
+        m_Threshold        = other.m_Threshold;
+        internal_transfer_cpu_datas();
+        //internal_calculate_radius(); //TODO: do we need this?
+    }
     return *this;
 }
 MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept 
-    : m_NodeData         { std::move(other.m_NodeData) }
+    : m_NodesData        { std::move(other.m_NodesData) }
     , m_File             { std::move(other.m_File) }
     , m_RadiusBox        { std::move(other.m_RadiusBox) }
     , m_Skeleton         { std::exchange(other.m_Skeleton, nullptr) }
@@ -83,19 +77,24 @@ MeshCPUData::MeshCPUData(MeshCPUData&& other) noexcept
     , m_Threshold        { std::move(other.m_Threshold) }
 {
     internal_transfer_cpu_datas();
-    internal_calculate_radius(); //TODO: do we need this?
+    //internal_calculate_radius(); //TODO: do we need this?
 }
 MeshCPUData& MeshCPUData::operator=(MeshCPUData&& other) noexcept {
-    m_NodeData         = std::move(other.m_NodeData);
-    m_File             = std::move(other.m_File);
-    m_RadiusBox        = std::move(other.m_RadiusBox);
-    m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
-    m_CollisionFactory = std::exchange(other.m_CollisionFactory, nullptr);
-    m_VertexData       = std::exchange(other.m_VertexData, nullptr);
-    m_Radius           = std::move(other.m_Radius);
-    m_Threshold        = std::move(other.m_Threshold);
-    internal_transfer_cpu_datas();
-    internal_calculate_radius(); //TODO: do we need this?
+    if (this != &other) {
+        SAFE_DELETE(m_Skeleton);
+        SAFE_DELETE(m_CollisionFactory);
+        SAFE_DELETE(m_VertexData);
+        m_NodesData        = std::move(other.m_NodesData);
+        m_File             = std::move(other.m_File);
+        m_RadiusBox        = std::move(other.m_RadiusBox);
+        m_Skeleton         = std::exchange(other.m_Skeleton, nullptr);
+        m_CollisionFactory = std::exchange(other.m_CollisionFactory, nullptr);
+        m_VertexData       = std::exchange(other.m_VertexData, nullptr);
+        m_Radius           = std::move(other.m_Radius);
+        m_Threshold        = std::move(other.m_Threshold);
+        internal_transfer_cpu_datas();
+        //internal_calculate_radius(); //TODO: do we need this?
+    }
     return *this;
 }
 MeshCPUData::~MeshCPUData() {
@@ -124,10 +123,10 @@ void MeshCPUData::internal_calculate_radius() {
 
 void Engine::priv::PublicMesh::LoadGPU(Mesh& mesh) {
     mesh.m_CPUData.m_VertexData->finalize(); //transfer vertex data to gpu
-    mesh.Resource::load();
+    mesh.load();
 }
 void Engine::priv::PublicMesh::UnloadCPU(Mesh& mesh) {
-    mesh.Resource::unload();
+    mesh.unload();
 }
 void Engine::priv::PublicMesh::UnloadGPU(Mesh& mesh) {
     SAFE_DELETE(mesh.m_CPUData.m_VertexData);
@@ -286,7 +285,6 @@ void Engine::priv::PublicMesh::CalculateRadius(MeshCPUData& cpuData) {
 Mesh::Mesh() 
     : Resource{ ResourceType::Mesh }
 {
-    internal_init_blank_mesh(*this);
 }
 
 //TERRAIN MESH
@@ -454,22 +452,20 @@ Mesh::Mesh(std::string_view name, const Terrain& terrain, float threshold)
     : Resource{ ResourceType::Mesh }
 {
     m_CPUData.m_Threshold = threshold;
-    internal_init_blank_mesh(*this);
     internal_build_from_terrain(terrain);
-    load();
+
+    Engine::priv::PublicMesh::LoadGPU(*this);
 }
 Mesh::Mesh(VertexData& data, std::string_view name, float threshold)
     : Resource{ ResourceType::Mesh, name }
 {
     m_CPUData.m_VertexData = &data;
     m_CPUData.m_Threshold  = threshold;
-    internal_init_blank_mesh(*this);
 }
 Mesh::Mesh(std::string_view name, float width, float height, float threshold, const VertexDataFormat& vertexDataFormat)
     : Resource{ ResourceType::Mesh, name }
 {
     m_CPUData.m_Threshold = threshold;
-    internal_init_blank_mesh(*this);
 
     auto positions = Engine::create_and_reserve<std::vector<glm::vec3>>(4);
     auto uvs       = Engine::create_and_reserve<std::vector<glm::vec2>>(4);
@@ -504,13 +500,12 @@ Mesh::Mesh(std::string_view name, float width, float height, float threshold, co
     m_CPUData.internal_calculate_radius();
     m_CPUData.m_CollisionFactory = NEW Engine::priv::MeshCollisionFactory{ m_CPUData };
 
-    load();
+    Engine::priv::PublicMesh::LoadGPU(*this);
 }
 Mesh::Mesh(std::string_view fileOrData, float threshold)
     : Resource{ ResourceType::Mesh }
 {
     m_CPUData.m_Threshold = threshold;
-    internal_init_blank_mesh(*this);
 
     setName("Custom Mesh");
     uint8_t flags = 
@@ -581,28 +576,25 @@ Mesh::Mesh(std::string_view fileOrData, float threshold)
     }
     Engine::priv::MeshLoader::FinalizeData(this->m_CPUData, data, threshold);
 
-    load();
+    Engine::priv::PublicMesh::LoadGPU(*this);
 }
 Mesh::Mesh(Mesh&& other) noexcept 
     : Resource{ std::move(other) }
-    , m_CPUData             { std::move(other.m_CPUData) }
-    , m_CustomBindFunctor   { std::move(other.m_CustomBindFunctor) }
-    , m_CustomUnbindFunctor { std::move(other.m_CustomUnbindFunctor) }
+    , m_CPUData { std::move(other.m_CPUData) }
 {}
 Mesh& Mesh::operator=(Mesh&& other) noexcept {
     Resource::operator=(std::move(other));
-    m_CPUData             = std::move(other.m_CPUData);
-    m_CustomBindFunctor   = std::move(other.m_CustomBindFunctor);
-    m_CustomUnbindFunctor = std::move(other.m_CustomUnbindFunctor);
+    m_CPUData = std::move(other.m_CPUData);
     return *this;
 }
 Mesh::~Mesh() {
-    //unregisterEvent(EventType::WindowFullscreenChanged);
-    unload();
+    Engine::priv::PublicMesh::UnloadGPU(*this);
+    Engine::priv::PublicMesh::UnloadCPU(*this);
 }
 Engine::priv::MeshSkeleton::AnimationDataMap& Mesh::getAnimationData() {
     return m_CPUData.m_Skeleton->m_AnimationMapping;
 }
+/*
 void Mesh::load(bool dispatchEventLoaded) {
     if(!isLoaded()){
         Engine::priv::PublicMesh::LoadGPU(*this);
@@ -616,11 +608,7 @@ void Mesh::unload(bool dispatchEventUnloaded) {
         //Resource::unload();
     }
 }
-void Mesh::onEvent(const Event& e) {
-    //if (e.type == EventType::WindowFullscreenChanged) {
-    //    m_CPUData.m_VertexData->finalize();
-    //}
-}
+*/
 //TODO: optimize this a bit more
 void Mesh::sortTriangles(const Camera& camera,  const ModelInstance& instance, const glm::mat4& bodyModelMatrix, SortingMode sortMode) {
     #ifndef _DEBUG

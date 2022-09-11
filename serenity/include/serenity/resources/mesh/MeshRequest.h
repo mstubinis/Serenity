@@ -12,7 +12,6 @@ namespace Engine::priv {
     struct AssimpSceneImport final {
         std::shared_ptr<Assimp::Importer>  m_Importer_ptr;
         aiScene*                           m_AIScene        = nullptr;
-        aiNode*                            m_AIRoot         = nullptr;
 
         AssimpSceneImport();
 
@@ -24,9 +23,18 @@ namespace Engine::priv {
 };
 
 struct MeshRequestPart final {
-    MeshCPUData  cpuData;
-    std::string  name;
-    Handle       handle;
+    MeshCPUData              cpuData;
+    MeshNodeData             nodesData;
+    std::vector<std::string> nodesNames;
+    std::vector<aiNode*>     leafNodes;
+    std::string              name;
+    std::string              fileOrData;
+    std::string              fileExtension;
+    aiNode*                  rootNode = nullptr;
+    aiMesh*                  aiMesh   = nullptr;
+    aiNode*                  aiMeshNode = nullptr;
+    Handle                   handle;
+    bool                     fileExists = false;
 
     MeshRequestPart() = default;
 
@@ -39,16 +47,14 @@ struct MeshRequestPart final {
 using MeshRequestCallback = std::function<void(const std::vector<Handle>&)>;
 struct MeshRequest final {
     MeshCollisionLoadingFlag::Flag     m_CollisionLoadingFlags = MESH_COLLISION_FACTORY_DEFAULT_LOAD_FLAG;
-    Engine::priv::AssimpSceneImport    m_Importer;
-    MeshNodeData                       m_NodeData;
-    std::vector<std::string>           m_NodeStrVector;
+    Engine::priv::AssimpSceneImport    m_AssimpImporter;
     MeshRequestCallback                m_Callback;
-    std::vector<MeshRequestPart>       m_Parts;
     std::string                        m_FileOrData;
     std::string                        m_FileExtension;
+    std::vector<MeshRequestPart>       m_Parts;
     float                              m_Threshold             = MESH_DEFAULT_THRESHOLD;
-    bool                               m_FileExists            = false;
     bool                               m_Async                 = false;
+    bool                               m_FileExists            = false;
 
     MeshRequest() = delete;
     MeshRequest(std::string_view filenameOrData, float threshold, MeshCollisionLoadingFlag::Flag, MeshRequestCallback&& callback);

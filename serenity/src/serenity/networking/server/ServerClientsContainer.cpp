@@ -12,7 +12,7 @@ bool Engine::Networking::ServerClientsContainer::addClient(std::string_view hash
         m_HashedClients.emplace(std::piecewise_construct, std::forward_as_tuple(hash), std::forward_as_tuple(serverClient));
         return result;
     }
-    ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): failed to add client!") 
+    ENGINE_LOG(__FUNCTION__ << "(): failed to add client!") 
     return false;
 }
 bool Engine::Networking::ServerClientsContainer::removeClientImmediately(ServerClient& inClient, std::mutex& inMutex) {
@@ -33,7 +33,7 @@ bool Engine::Networking::ServerClientsContainer::removeClientImmediately(ServerC
         }
     }
     if (!removed) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): could not remove client hash: " << foundHash)
+        ENGINE_LOG(__FUNCTION__ << "(): could not remove client hash: " << foundHash)
     }
     return removed;
 }
@@ -45,7 +45,7 @@ bool Engine::Networking::ServerClientsContainer::removeClient(ServerClient& inCl
                 std::scoped_lock lock{ inMutex };
                 m_RemovedClients.emplace_back(std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple(client));
             }
-            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): ip: " << client->ip() << ", port: " << client->port() << " - has been completely removed from the server")
+            ENGINE_LOG(__FUNCTION__ << "(): ip: " << client->ip() << ", port: " << client->port() << " - has been completely removed from the server")
             return true;
         }
     }

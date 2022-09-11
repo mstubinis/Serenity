@@ -41,14 +41,14 @@ bool Server::startup(uint16_t port, std::string ip_restriction) {
         m_TCPListener->setBlocking(false);
         auto status  = m_TCPListener->listen();
         if (status != SocketStatus::Done) {
-            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): could not start up TCP Listener")
+            ENGINE_LOG(__FUNCTION__ << "(): could not start up TCP Listener")
         }
     }
     if (m_UdpSocket) {
         m_UdpSocket->setBlocking(false);
         auto status  = m_UdpSocket->bind();
         if (status != SocketStatus::Done) {
-            ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): could not start up UDP Socket")
+            ENGINE_LOG(__FUNCTION__ << "(): could not start up UDP Socket")
         }
     }
     m_Port           = port;
@@ -134,9 +134,9 @@ bool Server::internal_add_client(const std::string& hash, ServerClient* client) 
     }
     const bool result = m_Clients.addClient(hash, client);
     if (result) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): accepted new client: " << client->ip() << " on port: " << client->port())
+        ENGINE_LOG(__FUNCTION__ << "(): accepted new client: " << client->ip() << " on port: " << client->port())
     } else {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): REJECTED new client: " << client->ip() << " on port: " << client->port() << " due to not finding a next_thread")
+        ENGINE_LOG(__FUNCTION__ << "(): REJECTED new client: " << client->ip() << " on port: " << client->port() << " due to not finding a next_thread")
         SAFE_DELETE(client);
     }
     return result;

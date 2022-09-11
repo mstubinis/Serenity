@@ -39,12 +39,6 @@ namespace Engine::priv {
                 SAFE_DELETE_VECTOR(m_ResourceVectors);
             }
 
-            // Locks the resource module from modifying the underlying resource containers. 
-            // It will also reduce the memory footprint of them by calling shrink_to_fit().
-            //void lock() noexcept { for (auto& itr : m_ResourceVectors) { itr->lock(); } }
-            // Unlocks the resource module so the underlying resource containers can be modified again.
-            //void unlock() noexcept { for (auto& itr : m_ResourceVectors) { itr->unlock(); } }
-
             [[nodiscard]] inline std::mutex& getMutex(const Handle inHandle) noexcept { return m_ResourceVectors[inHandle.type() - 1]->getMutex(); }
 
             template<class RESOURCE>
@@ -63,17 +57,18 @@ namespace Engine::priv {
                 LoadedResource<RESOURCE> ret_data = getResourceVector<RESOURCE>()->get(sv);
                 return ret_data;
             }
-            template<class RESOURCE>
-            [[nodiscard]] Engine::view_ptr<RESOURCE> get(const Handle inHandle) noexcept {
-                return getResourceVector<RESOURCE>()->get(inHandle);
-            }
             template<class RESOURCE, class INTEGRAL>
             requires (std::is_integral_v<INTEGRAL>)
             [[nodiscard]] Engine::view_ptr<RESOURCE> get(const INTEGRAL index) noexcept {
                 return getResourceVector<RESOURCE>()->get(index);
             }
+            template<class INTEGRAL>
+            requires (std::is_integral_v<INTEGRAL>)
+            [[nodiscard]] void* getVoid(const INTEGRAL resourceTypeID, const INTEGRAL index) noexcept {
+                return m_ResourceVectors[resourceTypeID - 1]->getVoid(index);
+            }
             [[nodiscard]] inline void* getVoid(const Handle inHandle) noexcept {
-                return !inHandle.null() ? m_ResourceVectors[inHandle.type() - 1]->getVoid(inHandle) : nullptr;
+                return !inHandle.null() ? m_ResourceVectors[inHandle.type() - 1]->getVoid(inHandle.index()) : nullptr;
             }
 
             template<class RESOURCE, class ... ARGS>
@@ -89,8 +84,8 @@ namespace Engine::priv {
                 return Handle( index, typeIndex + 1 );
             }
             template<class RESOURCE>
-            [[nodiscard]] inline std::list<Engine::view_ptr<RESOURCE>> getAllResourcesOfType() noexcept {
-                return getResourceVector<RESOURCE>()->getAsList();
+            [[nodiscard]] inline std::vector<Engine::view_ptr<RESOURCE>> getAllResourcesOfType() noexcept {
+                return getResourceVector<RESOURCE>()->getAsVector();
             }
     };
 };

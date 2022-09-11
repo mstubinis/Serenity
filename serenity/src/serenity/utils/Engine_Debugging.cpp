@@ -3,22 +3,12 @@
 #include <iomanip>
 #include <serenity/system/Engine.h>
 
-namespace {
-    std::stringstream   STR_STREAM;
-    std::string         OUTPUT_BUFFER;
-
-    //opengl timers
-    GLuint queryID                = 0;
-    GLuint queryObject            = 0;
-    uint32_t m_Output_frame_delay = 4;
-    uint32_t m_Output_frame       = 0;
-}
 
 Engine::priv::DebugManager::DebugManager() {
     //TODO: check if this is still needed
     glGenQueries(1, &queryID);
     glQueryCounter(queryID, GL_TIMESTAMP);// dummy query to prevent OpenGL errors from popping out 
-    OUTPUT_BUFFER.reserve(400);
+    m_OutputBuffer.reserve(128);
 }
 
 void Engine::priv::DebugManager::calculate() {
@@ -47,37 +37,37 @@ void Engine::priv::DebugManager::reset_timers() {
     }
 }
 std::string Engine::priv::DebugManager::getTimeInMs(DebugTimerTypes type) noexcept {
-    STR_STREAM.str({});
-    STR_STREAM.clear();
+    std::stringstream strstrm;
+    strstrm << std::fixed << std::setprecision(m_Decimals);
     std::chrono::duration<double, std::milli> time = m_TimesNanoPrev[type];
-    STR_STREAM << time.count();
-    return STR_STREAM.str();
+    strstrm << time.count();
+    return strstrm.str();
 }
 std::string Engine::priv::DebugManager::deltaTimeInMs() noexcept {
-    STR_STREAM.str({});
-    STR_STREAM.clear();
+    std::stringstream strstrm;
+    strstrm << std::fixed << std::setprecision(m_Decimals);
     const auto dt = Engine::priv::Core::m_Engine->m_Misc.m_Dt * 1000.0;
-    STR_STREAM << dt;
-    return STR_STREAM.str();
+    strstrm << dt;
+    return strstrm.str();
 }
 std::string Engine::priv::DebugManager::fps() const noexcept {
     const auto fps = Engine::priv::Core::m_Engine->m_Misc.m_FPS.fps();
     return std::to_string(fps);
 }
 std::string& Engine::priv::DebugManager::reportTime(uint32_t decimals_) {
+    std::stringstream strstrm;
     m_Decimals = decimals_;
-    STR_STREAM.str({});
-    STR_STREAM.clear();
-    STR_STREAM << std::fixed << std::setprecision(m_Decimals);
+    strstrm << std::fixed << std::setprecision(m_Decimals);
+
     if ((m_Output_frame >= m_Output_frame_delay - 1) || m_Output_frame_delay == 0) {
-        OUTPUT_BUFFER = "Update Time:  " + getTimeInMs(DebugTimerTypes::Logic) + " ms" +
+        m_OutputBuffer = "Update Time:  " + getTimeInMs(DebugTimerTypes::Logic) + " ms" +
                       "\nPhysics Time: " + getTimeInMs(DebugTimerTypes::Physics) + " ms" +
                       "\nSounds Time:  " + getTimeInMs(DebugTimerTypes::Sound) + " ms" +
                       "\nRender Time:  " + getTimeInMs(DebugTimerTypes::Render) + " ms" +
                       "\nDelta Time:   " + deltaTimeInMs() + " ms" +
                       "\nFPS: " + fps();
     }
-    return OUTPUT_BUFFER;
+    return m_OutputBuffer;
 }
 std::string Engine::priv::DebugManager::reportDebug() {
     std::string out = "\n";

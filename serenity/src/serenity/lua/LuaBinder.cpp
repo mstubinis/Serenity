@@ -370,7 +370,7 @@ LUABinder::LUABinder()
             .addFunction("isVisible", &ModelInstance::isVisible)
             .addFunction("getIndex", &ModelInstance::getIndex)
             .addFunction("isForceRendered", &ModelInstance::isForceRendered)
-            .addFunction("playAnimation", static_cast<void(ModelInstance::*)(std::string_view, float, float, uint32_t)>(&ModelInstance::playAnimation))
+            .addFunction("playAnimation", static_cast<bool(ModelInstance::*)(std::string_view, uint32_t, float, float, float)>(&ModelInstance::playAnimation))
             .addFunction("setOrientation", static_cast<void(ModelInstance::*)(const float, const float, const float)>(&ModelInstance::setOrientation))
         .endClass()
 #pragma endregion

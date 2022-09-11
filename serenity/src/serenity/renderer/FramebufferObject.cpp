@@ -186,6 +186,38 @@ void FramebufferObject::resize(const uint32_t width, const uint32_t height) {
         }
     }
 }
+FramebufferTexture* FramebufferObject::attatchTexture(FramebufferAttatchment attatchment, ImageInternalFormat internalFormat, ImagePixelFormat pixelFormat, ImagePixelType pixelType) {
+    if (m_Attatchments.contains(attatchment)) {
+        return nullptr;
+    }
+    TextureConstructorInfo ci;
+    ci.usageType      = TextureUsage::RenderTarget;
+    ci.type           = TextureType::RenderTarget;
+    ci.internalFormat = internalFormat;
+    ci.pixelFormat    = pixelFormat;
+    ci.pixelType      = pixelType;
+    ci.mipmapped      = false;
+    ci.width          = width();
+    ci.height         = height();
+    ci.loadAsync      = false;
+    ci.xWrapping      = TextureWrap::ClampToEdge;
+    ci.yWrapping      = TextureWrap::ClampToEdge;
+    ci.zWrapping      = TextureWrap::ClampToEdge;
+
+    auto textureRenderTargetHandle = Engine::Resources::addResource<Texture>(ci);
+    auto attachmentItr = m_Attatchments.emplace(
+        std::piecewise_construct,
+        std::forward_as_tuple(attatchment),
+        std::forward_as_tuple(NEW FramebufferTexture(*this, attatchment, textureRenderTargetHandle.get<Texture>()))
+    ).first;
+    FramebufferTexture& fbTexture = *static_cast<FramebufferTexture*>(attachmentItr->second);
+    for (const auto fbo : m_FBOs) {
+        Engine::opengl::bindFBO(fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, fbTexture.attatchment(), fbTexture.m_Texture->getTextureType().toGLType(), fbTexture.m_Texture->address(), 0);
+    }
+    Engine::opengl::unbindFBO();
+    return &fbTexture;
+}
 void FramebufferObject::bind(float x, float y, float width, float height) {
     Engine::Renderer::setViewport(x, y, width <= 0.0f ? m_FramebufferWidth : width, height <= 0.0f ? m_FramebufferHeight : height);
     swap_buffers(m_CurrentFBOIndex, m_FBOs.size());
@@ -206,7 +238,7 @@ bool FramebufferObject::checkStatus() {
         #if defined(_DEBUG)
             const GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
-                ENGINE_PRODUCTION_LOG(__FUNCTION__ << "() error - fbo: " << fbo << ": " << debugFramebufferStatusAsStr(framebufferStatus))
+                ENGINE_LOG(__FUNCTION__ << "() error - fbo: " << fbo << ": " << debugFramebufferStatusAsStr(framebufferStatus))
                 return false;
             }
         #endif

@@ -3,8 +3,10 @@
 #include <serenity/system/window/Window.h>
 #include <serenity/system/EngineOptions.h>
 
-#include <serenity/system/Engine.h>
 #include <serenity/events/Event.h>
+
+#include <serenity/system/EngineIncludes.h>
+#include <serenity/system/Engine.h>
 
 namespace {
 
@@ -262,6 +264,7 @@ void Engine::priv::WindowData::internal_thread_startup(Window& super, const std:
 #if defined(ENGINE_THREAD_WINDOW_EVENTS) && !defined(_APPLE_)
     //m_EventThread = std::make_unique<std::jthread>(std::move(thread_event_loop));
     m_EventThread.reset(NEW std::jthread{ std::move(thread_event_loop) });
+    Engine::priv::threading::setThreadName(*m_EventThread, "window_event_thread");
 #else
     thread_event_loop();
 #endif

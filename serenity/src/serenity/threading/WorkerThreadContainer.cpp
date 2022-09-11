@@ -16,7 +16,7 @@ void Engine::priv::WorkerThreadContainer::reserve(size_t newReserveSize) noexcep
 
 Engine::view_ptr<Engine::priv::WorkerThreadContainer::ThreadType> Engine::priv::WorkerThreadContainer::add_thread(ThreadFunction&& func, int index) {
     if (m_WorkerThreads.size() >= m_WorkerThreads.capacity()) {
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): m_WorkerThreads reached its capacity!");
+        ENGINE_LOG(__FUNCTION__ << "(): m_WorkerThreads reached its capacity!");
         return nullptr;
     }
     auto& workerThread = m_WorkerThreads.emplace_back(std::move(func));
@@ -25,7 +25,7 @@ Engine::view_ptr<Engine::priv::WorkerThreadContainer::ThreadType> Engine::priv::
     DWORD_PTR dw = SetThreadAffinityMask(workerThread.native_handle(), DWORD_PTR(1) << index);
     if (dw == 0) {
         DWORD dwErr = GetLastError();
-        ENGINE_PRODUCTION_LOG(__FUNCTION__ << "(): SetThreadAffinityMask failed, error = " << dwErr << '\n');
+        ENGINE_LOG(__FUNCTION__ << "(): SetThreadAffinityMask failed, error = " << dwErr << '\n');
     }
 #endif
     return &workerThread;

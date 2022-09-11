@@ -11,7 +11,7 @@ class  SystemSyncRigidToTransform;
 class  SystemSyncTransformToRigid;
 namespace Engine::priv {
     class  sparse_set_base;
-    class  EditorWindowSceneFunctions;
+    class  EditorWindowSceneImpl;
 };
 
 #include <serenity/dependencies/glm.h>
@@ -20,12 +20,15 @@ namespace Engine::priv {
 #include <serenity/renderer/RendererIncludes.h>
 
 class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
+    private:
+        class Impl;
+    friend class  Impl;
     friend class  ComponentModel;
     friend class  SystemComponentTransform;
     friend class  SystemTransformParentChild;
     friend class  SystemSyncRigidToTransform;
     friend class  SystemSyncTransformToRigid;
-    friend class  Engine::priv::EditorWindowSceneFunctions;
+    friend class  Engine::priv::EditorWindowSceneImpl;
     private:
         glm_vec3    m_Position          = glm_vec3{ 0.0 };
         //glm_vec3    m_LinearVelocity    = glm_vec3{ 0.0 };
@@ -33,13 +36,11 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
         glm::vec3   m_Scale             = glm::vec3{ 1.0f };
 
         glm::vec3   m_Forward           = glm::vec3{ 0.0f, 0.0f, -1.0f };
+#ifdef COMPONENT_TRANSFORM_STORE_RIGHT
         glm::vec3   m_Right             = glm::vec3{ 1.0f, 0.0f, 0.0f };
+#endif
         glm::vec3   m_Up                = glm::vec3{ 0.0f, 1.0f, 0.0f };
 
-
-        void*       m_UserPointer       = nullptr;
-        void*       m_UserPointer1      = nullptr;
-        void*       m_UserPointer2      = nullptr;
         Entity      m_Owner;
     private:
         ComponentTransform() = delete;
@@ -62,13 +63,6 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
 
         void removeChild(Entity child) const;
         inline void removeChild(const ComponentTransform& child) const noexcept { removeChild(child.m_Owner); }
-
-        void setUserPointer(void* userPtr) noexcept { m_UserPointer = userPtr; }
-        void setUserPointer1(void* userPtr) noexcept { m_UserPointer1 = userPtr; }
-        void setUserPointer2(void* userPtr) noexcept { m_UserPointer2 = userPtr; }
-        [[nodiscard]] inline void* getUserPointer() const noexcept { return m_UserPointer; }
-        [[nodiscard]] inline void* getUserPointer1() const noexcept { return m_UserPointer1; }
-        [[nodiscard]] inline void* getUserPointer2() const noexcept { return m_UserPointer2; }
 
         void alignTo(float dirX, float dirY, float dirZ);
         void alignTo(const glm::vec3& direction);
@@ -136,14 +130,18 @@ class ComponentTransform : public ComponentBaseClass<ComponentTransform> {
         [[nodiscard]] inline glm_vec3 getLocalPosition() const noexcept { return m_Position; }
         
         [[nodiscard]] inline const glm::vec3& getForward() const noexcept { return m_Forward; }
+#ifdef COMPONENT_TRANSFORM_STORE_RIGHT
         [[nodiscard]] inline const glm::vec3& getRight() const noexcept { return m_Right; }
+#else
+        [[nodiscard]] inline glm::vec3 getRight() const noexcept { return glm::cross(m_Forward, m_Up); }
+#endif
         [[nodiscard]] inline const glm::vec3& getUp() const noexcept { return m_Up; }
         
-        //[[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_LinearVelocity; }
         [[nodiscard]] inline glm::mat4 getWorldMatrixRendering() const noexcept { return glm::mat4{ getWorldMatrix() }; }
         [[nodiscard]] const glm_mat4& getWorldMatrix() const noexcept;
         [[nodiscard]] const glm_mat4& getLocalMatrix() const noexcept;
 
+        //[[nodiscard]] inline glm_vec3 getLinearVelocity() const noexcept { return m_LinearVelocity; }
         //void setLinearVelocity(decimal x, decimal y, decimal z, bool local = true);
         //inline void setLinearVelocity(const glm_vec3& velocity, bool local = true) noexcept { setLinearVelocity(velocity.x, velocity.y, velocity.z, local); }
 };

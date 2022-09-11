@@ -26,22 +26,19 @@ namespace Engine::priv {
         bool isOpenGLThread() noexcept;
         bool isMainThread() noexcept;
 
+        void setThreadName(std::thread&, std::string_view name);
+        void setThreadName(std::jthread&, std::string_view name);
+
         [[nodiscard]] inline std::optional<std::stop_token> getThreadStopToken() noexcept { return ThreadingModule::THREADING_MODULE->m_ThreadPool.getThreadStopToken(); }
         [[nodiscard]] inline bool isWorkerThreadStopped() noexcept { return ThreadingModule::THREADING_MODULE->m_ThreadPool.isWorkerThreadStopped(); }
 
         void waitForAll() noexcept;
 
-        template<class JOB> inline void finalizeJob(JOB&& task) {
-            ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job( std::forward<JOB>(task) );
-        }
-        template<class JOB, class THEN> inline Engine::view_ptr<FutureType> finalizeJob(JOB&& task, THEN&& then) {
-            return ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job( std::forward<JOB>(task), std::forward<THEN>(then) );
-        }
         template<class JOB> inline void addJob(JOB&& job) {
-            finalizeJob( std::forward<JOB>(job) );
+            ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(job));
         }
         template<class JOB, class THEN> inline Engine::view_ptr<FutureType> addJobWithPostCallback(JOB&& job, THEN&& then){
-            return finalizeJob( std::forward<JOB>(job), std::forward<THEN>(then) );
+            return ThreadingModule::THREADING_MODULE->m_ThreadPool.add_job(std::forward<JOB>(job), std::forward<THEN>(then));
         }
 
         template<class JOB, class ... ARGS> void addJobSplitVectored(JOB&& job, bool waitForAll, bool includeCallingThread, size_t size, int32_t numJobs = 0, ARGS&&... args) {
@@ -57,7 +54,8 @@ namespace Engine::priv {
                     }
                     const size_t jobSize = size / numJobs;
                     for (int32_t jobIndex = 0; jobIndex != numJobs - 1; ++jobIndex) {
-                        Engine::priv::threading::addJob([jobSize, accumulator, jobIndex, job_ = std::forward<JOB>(job), ... args_ = std::forward<ARGS>(args)]() mutable {
+                        //Engine::priv::threading::addJob([jobSize, accumulator, jobIndex, job_ = std::forward<JOB>(job), ... args_ = std::forward<ARGS>(args)]() mutable {
+                        Engine::priv::threading::addJob([jobSize, accumulator, jobIndex, job_ = job, ... args_ = args]() mutable {
                             const auto end = accumulator + jobSize;
                             for (size_t index = accumulator; index != end; ++index) {
                                 job_(index, jobIndex, args_...);

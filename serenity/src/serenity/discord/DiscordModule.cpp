@@ -25,7 +25,7 @@ bool DiscordModule::activate(discord::ClientId clientID) {
     if (result == discord::Result::Ok) {
         auto log_func = [&](discord::LogLevel level, const char* message) {
             if (m_LoggingErrors) {
-                ENGINE_PRODUCTION_LOG("Discord: " << std::to_string(static_cast<unsigned int>(level)) << " - " << message)
+                ENGINE_LOG("Discord: " << std::to_string(static_cast<unsigned int>(level)) << " - " << message)
             }
         };
         //TODO: remove / restrict logging to debug builds
@@ -41,7 +41,7 @@ bool DiscordModule::update_activity(const discord::Activity& activity) {
     }
     m_DiscordCore->ActivityManager().UpdateActivity(activity, [this](discord::Result result) {
         if (m_LoggingErrors) {
-            ENGINE_PRODUCTION_LOG(internal_get_result_string_message(result))
+            ENGINE_LOG(internal_get_result_string_message(result))
         }
     });
     return true;
@@ -52,7 +52,7 @@ bool DiscordModule::clear_activity() {
     }
     m_DiscordCore->ActivityManager().ClearActivity([this](discord::Result result) {
         if (m_LoggingErrors) {
-            ENGINE_PRODUCTION_LOG(internal_get_result_string_message(result))
+            ENGINE_LOG(internal_get_result_string_message(result))
         }
     });
     return true;
@@ -131,7 +131,7 @@ bool DiscordModule::update() {
     }
     auto result = m_DiscordCore->RunCallbacks();
     if (m_LoggingErrors) {
-        ENGINE_PRODUCTION_LOG(internal_get_result_string_message(result))
+        ENGINE_LOG(internal_get_result_string_message(result))
     }
     return true;
 }

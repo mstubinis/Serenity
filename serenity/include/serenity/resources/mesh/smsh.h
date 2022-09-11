@@ -144,12 +144,12 @@ struct SMSH_Fileheader final {
     template<class TSTREAM>
     SMSH_Fileheader(TSTREAM& stream, uint32_t& blockStart) {
         const uint8_t* streamDataBuffer = (uint8_t*)stream.data();
-        readBigEndian(m_InterleavingType,   streamDataBuffer, 1, blockStart);
-        readBigEndian(m_AttributeCount,     streamDataBuffer, 4, blockStart);
-        readBigEndian(m_IndiceCount,        streamDataBuffer, 4, blockStart);
-        readBigEndian(m_IndiceDataTypeSize, streamDataBuffer, 4, blockStart);
-        readBigEndian(m_UserDataCount,      streamDataBuffer, 4, blockStart);
-        readBigEndian(m_NumberOfBones,      streamDataBuffer, 4, blockStart);
+        Engine::readBigEndian(m_InterleavingType,   streamDataBuffer, 1, blockStart);
+        Engine::readBigEndian(m_AttributeCount,     streamDataBuffer, 4, blockStart);
+        Engine::readBigEndian(m_IndiceCount,        streamDataBuffer, 4, blockStart);
+        Engine::readBigEndian(m_IndiceDataTypeSize, streamDataBuffer, 4, blockStart);
+        Engine::readBigEndian(m_UserDataCount,      streamDataBuffer, 4, blockStart);
+        Engine::readBigEndian(m_NumberOfBones,      streamDataBuffer, 4, blockStart);
     }
 };
 
@@ -191,16 +191,16 @@ struct SMSH_Attribute final : public SMSH_AttributeNoBuffer {
         if (m_AttributeBufferSize == 0 || !m_AttributeBuffer) {
             return false;
         }
-        writeBigEndian(stream, m_Normalized,               1U);
-        writeBigEndian(stream, m_Stride,                   4U);
-        writeBigEndian(stream, m_AttributeType,            4U);
-        writeBigEndian(stream, m_SizeOfAttribute,          4U);
-        writeBigEndian(stream, m_AttributeComponentCount,  4U);
-        writeBigEndian(stream, m_AttributeBufferSize,      4U);
-        writeBigEndian(stream, m_Offset,                   4U);
+        Engine::writeBigEndian(stream, m_Normalized,               1);
+        Engine::writeBigEndian(stream, m_Stride,                   4);
+        Engine::writeBigEndian(stream, m_AttributeType,            4);
+        Engine::writeBigEndian(stream, m_SizeOfAttribute,          4);
+        Engine::writeBigEndian(stream, m_AttributeComponentCount,  4);
+        Engine::writeBigEndian(stream, m_AttributeBufferSize,      4);
+        Engine::writeBigEndian(stream, m_Offset,                   4);
 
-        for (uint32_t i = 0; i < m_AttributeBufferSize; ++i) {
-            writeBigEndian(stream, m_AttributeBuffer[i], 1U); //writing as uint8_t's
+        for (uint32_t i = 0; i != m_AttributeBufferSize; ++i) {
+            Engine::writeBigEndian(stream, m_AttributeBuffer[i], 1); //writing as uint8_t's
         }
         return true;
     }

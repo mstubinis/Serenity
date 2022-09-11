@@ -133,3 +133,9 @@ void Engine::priv::EditorCore::renderLightIcons(Scene& scene, Viewport& viewport
         }
     }
 }
+
+namespace Engine {
+    [[nodiscard]] Engine::priv::EditorCore& getEditor() noexcept { 
+        return *Engine::priv::EditorCore::EDITOR;
+    }
+}

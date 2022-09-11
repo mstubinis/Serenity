@@ -102,14 +102,15 @@ namespace Engine::priv {
             IDs.fill(0.0f);
             Weights.fill(0.0f);
         }
-        void AddBoneData(uint32_t BoneID, float Weight) noexcept {
-            for (size_t i = 0; i < IDs.size(); ++i) {
+        bool AddBoneData(uint32_t BoneID, float Weight) noexcept {
+            for (size_t i = 0; i != IDs.size(); ++i) {
                 if (Weights[i] == 0.0f) {
-                    IDs[i]     = (float)BoneID;
+                    IDs[i]     = float(BoneID);
                     Weights[i] = Weight;
-                    return;
+                    return true;
                 }
             }
+            return false;
         }
     };
 };

@@ -6,6 +6,8 @@
 #include <serenity/renderer/opengl/APIStateOpenGL.h>
 #include <serenity/resources/texture/DDS.h>
 
+#include <serenity/threading/ThreadingModule.h>
+
 #include <filesystem>
 
 Handle Texture::White    = {};
@@ -14,18 +16,37 @@ Handle Texture::Checkers = {};
 Handle Texture::BRDF     = {};
 
 namespace Engine::priv {
-    void TextureCPUData::initFromMemory(const uint8_t* pixels, int inWidth, int inHeight) {
-        auto& image = m_ImagesDatas[0];
-        image.setInternalFormat(image.m_InternalFormat);
-        image.load(pixels, inWidth, inHeight, image.m_Filename);
-    }
-    void TextureCPUData::initFromFile() {
-        auto& image = m_ImagesDatas[0];
-        const std::string extension = std::filesystem::path(image.m_Filename).extension().string();
-        if (extension == ".dds") {
-            Engine::priv::LoadDDSFile(*this, image);
+    void TextureCPUData::init(const TextureConstructorInfo& constructorInfo) {
+        auto& image         = m_ImagesDatas[0];
+        image.m_Filename    = constructorInfo.filename;
+        m_IsToBeMipmapped   = constructorInfo.mipmapped;
+        m_Name              = constructorInfo.name.empty() ? constructorInfo.filename : constructorInfo.name;
+        m_TextureType       = constructorInfo.type;
+        image.setFormats(constructorInfo.internalFormat);
+
+
+        //for (auto& imageData : m_ImagesDatas) {
+        //}
+
+        if (std::filesystem::is_regular_file(constructorInfo.filename)) {
+            const std::string extension = std::filesystem::path(constructorInfo.filename).extension().string();
+            if (extension == ".dds") {
+                Engine::priv::LoadDDSFile(*this, image);
+            } else {
+                sfImageLoader sfImage(constructorInfo.filename.c_str());
+                image.load(sfImage.getPixels(), sfImage.getWidth(), sfImage.getHeight(), constructorInfo.filename);
+            }
+        } else if (constructorInfo.pixels != nullptr) {
+            image.setFormats(image.m_InternalFormat);
+            image.load(constructorInfo.pixels, constructorInfo.width, constructorInfo.height, constructorInfo.filename);
+        } else if (constructorInfo.usageType == TextureUsage::RenderTarget) {
+            assert(constructorInfo.width > 0);
+            assert(constructorInfo.height > 0);
+            image.load(constructorInfo.width, constructorInfo.height, constructorInfo.pixelType, constructorInfo.pixelFormat, constructorInfo.internalFormat);
+        } else {
+            assert(false);
         }
-        image.setInternalFormat(image.m_InternalFormat);
+        image.setFormats(image.m_InternalFormat);
     }
 }
 
@@ -44,7 +65,7 @@ public:
     }
     static bool AddToCommandQueue(Texture& texture, auto func, auto&&... args) {
 #ifdef TEXTURE_COMMAND_QUEUE
-        if (texture == false) {
+        if (!texture.isLoaded()) {
             texture.m_CommandQueue.emplace([&func, &texture, ... args = std::forward<decltype(args)>(args)]() {
                 ((std::addressof(texture))->*func)(args...);
             });
@@ -56,52 +77,49 @@ public:
         return false;
 #endif
     }
+    static const Engine::priv::ImageMipmap* GetFirstMipmap(const Texture& texture) {
+        if (!texture.isLoaded() || texture.m_CPUData.m_ImagesDatas.empty() || texture.m_CPUData.m_ImagesDatas[0].m_Mipmaps.empty()) {
+            return nullptr;
+        }
+        auto& imageData = texture.m_CPUData.m_ImagesDatas[0];
+        auto& mipmap    = imageData.m_Mipmaps[0];
+        return std::addressof(mipmap);
+    }
 };
-
 Texture::Texture(const TextureConstructorInfo& constructorInfo, bool dispatchEventLoaded) 
     : Resource{ ResourceType::Texture, constructorInfo.name.empty() ? constructorInfo.filename : constructorInfo.name }
 {
-    m_CPUData.m_ImagesDatas[0].m_Filename = constructorInfo.filename;
-    m_CPUData.m_Name                      = constructorInfo.name.empty() ? constructorInfo.filename : constructorInfo.name;
-    m_CPUData.m_TextureType               = constructorInfo.type;
-    m_CPUData.m_IsToBeMipmapped           = constructorInfo.mipmapped;
+    auto load_cpu_portion = [realCPUData = std::addressof(m_CPUData)](Engine::priv::TextureCPUData& cpuDataCloned, const TextureConstructorInfo& ci) {
+        cpuDataCloned.init(ci);
+        if (std::addressof(cpuDataCloned) != realCPUData) {
+            (*realCPUData) = std::move(cpuDataCloned);
+        }
+    };
+    auto load_gpu_portion = [
+        this, dispatchEventLoaded, 
+        xWrapping = constructorInfo.xWrapping, 
+        yWrapping = constructorInfo.yWrapping, 
+        minFilter = constructorInfo.mipmapped ? constructorInfo.minFilter.toMipmappedType() : constructorInfo.minFilter,
+        maxFilter = constructorInfo.maxFilter
+    ]() {
+        Engine::priv::TextureLoader::LoadGPU(*this, dispatchEventLoaded);
+        setXWrapping(xWrapping);
+        setYWrapping(yWrapping);
+        setMinFilter(minFilter);
+        setMaxFilter(maxFilter);
+    };
 
-    m_CPUData.m_ImagesDatas[0].setInternalFormat(constructorInfo.internalFormat);
-    //m_CPUData.initFromFile(); TODO: figure this out
-    Impl::Load(*this, dispatchEventLoaded);
+    if (constructorInfo.loadAsync && Engine::hardware_concurrency() > 1) {
+        auto load_cpu_async = [load_cpu = std::move(load_cpu_portion), constructorInfo]() {
+            Engine::priv::TextureCPUData cpuDataCopy;
+            load_cpu(cpuDataCopy, constructorInfo);
+        };
+        Engine::priv::threading::addJobWithPostCallback(std::move(load_cpu_async), std::move(load_gpu_portion));
+    } else {
+        load_cpu_portion(m_CPUData, constructorInfo);
+        load_gpu_portion();
+    }
 }
-Texture::Texture(std::string_view textureName, TextureType textureType, bool mipMap, bool dispatchEventLoaded)
-    : Resource{ ResourceType::Texture, textureName }
-{
-    //setName(std::string{ textureName }); //TODO: is this needed?
-    m_CPUData.m_ImagesDatas[0].m_Filename = textureName;
-    m_CPUData.m_Name                      = textureName;
-    m_CPUData.m_TextureType               = textureType;
-    m_CPUData.m_IsToBeMipmapped           = mipMap;
-}
-Texture::Texture(std::string_view filename, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, bool dispatchEventLoaded)
-    : Texture{ filename, textureType, genMipMaps }
-{
-    m_CPUData.m_ImagesDatas[0].setInternalFormat(intFmt);
-    m_CPUData.initFromFile();
-    Impl::Load(*this, dispatchEventLoaded);
-}
-Texture::Texture(uint32_t w, uint32_t h, ImagePixelType pxlType, ImagePixelFormat pxlFmt, ImageInternalFormat intFmt, float divisor, bool dispatchEventLoaded)
-    : Texture{ "RenderTarget", TextureType::RenderTarget, false }
-{
-    int width       = int(float(w) * divisor);
-    int height      = int(float(h) * divisor);
-    m_CPUData.m_ImagesDatas[0].load(width, height, pxlType, pxlFmt, intFmt);
-    Engine::priv::TextureLoader::LoadGPU(*this, dispatchEventLoaded); //nothing to load cpu side for frame buffers
-}
-Texture::Texture(uint8_t* pixels, uint32_t width, uint32_t height, std::string_view name, bool genMipMaps, ImageInternalFormat intFmt, TextureType textureType, bool dispatchEventLoaded)
-    : Texture{ name, textureType, genMipMaps }
-{
-    m_CPUData.m_ImagesDatas[0].setInternalFormat(intFmt);
-    m_CPUData.initFromMemory(pixels, width, height);
-    Impl::Load(*this, dispatchEventLoaded);
-}
-
 
 Texture::Texture(Texture&& other) noexcept 
     : Resource(std::move(other))
@@ -170,8 +188,27 @@ void Texture::setAnisotropicFiltering(float anisotropicFiltering) {
     Engine::opengl::setAnisotropicFiltering(*this, anisotropicFiltering);
 }
 const uint8_t* Texture::pixels() {
-    if (!m_CPUData.m_ImagesDatas.empty() && !m_CPUData.m_ImagesDatas[0].m_Mipmaps.empty()) {
-        return m_CPUData.m_ImagesDatas[0].m_Mipmaps[0].pixels.data();
-    }
-    return Engine::opengl::getPixels(*this);
+    auto mipmap = Impl::GetFirstMipmap(*this);
+    return mipmap ? mipmap->pixels.data() : Engine::opengl::getPixels(*this);
+}
+int Texture::width() const noexcept {
+    auto mipmap = Impl::GetFirstMipmap(*this);
+    return mipmap ? mipmap->width : 0;
+}
+int Texture::height() const noexcept {
+    auto mipmap = Impl::GetFirstMipmap(*this);
+    return mipmap ? mipmap->height : 0;
+}
+bool Texture::compressed() const {
+    auto mipmap = Impl::GetFirstMipmap(*this);
+    return mipmap ? (mipmap->compressedSize > 0) : false;
+}
+ImageInternalFormat Texture::internalFormat() const noexcept {
+    return m_CPUData.m_ImagesDatas.empty() ? ImageInternalFormat::Unknown : m_CPUData.m_ImagesDatas[0].m_InternalFormat;
+}
+ImagePixelFormat Texture::pixelFormat() const noexcept {
+    return m_CPUData.m_ImagesDatas.empty() ? ImagePixelFormat::Unknown : m_CPUData.m_ImagesDatas[0].m_PixelFormat;
+}
+ImagePixelType Texture::pixelType() const noexcept {
+    return m_CPUData.m_ImagesDatas.empty() ? ImagePixelType::Unknown : m_CPUData.m_ImagesDatas[0].m_PixelType;
 }

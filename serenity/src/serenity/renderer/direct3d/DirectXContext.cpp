@@ -46,8 +46,8 @@ struct Engine::priv::DirectXContext::impl {
 
 			// Set up the viewport.
 			D3D11_VIEWPORT vp;
-			vp.Width    = m_Window->getSize().x;
-			vp.Height   = m_Window->getSize().y;
+			vp.Width    = static_cast<decltype(vp.Width)>(m_Window->getSize().x);
+			vp.Height   = static_cast<decltype(vp.Height)>(m_Window->getSize().y);
 			vp.MinDepth = 0.0f;
 			vp.MaxDepth = 1.0f;
 			vp.TopLeftX = 0;
@@ -148,8 +148,8 @@ namespace Engine::priv {
 
 		// Setup the viewport
 		D3D11_VIEWPORT vp;
-		vp.Width    = window.getSize().x;
-		vp.Height   = window.getSize().y;
+		vp.Width    = static_cast<decltype(vp.Width)>(window.getSize().x);
+		vp.Height   = static_cast<decltype(vp.Height)>(window.getSize().y);
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		vp.TopLeftX = 0;

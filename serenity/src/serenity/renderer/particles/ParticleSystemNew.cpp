@@ -1,6 +1,7 @@
 #include <serenity/renderer/particles/ParticleSystemNew.h>
 #include <serenity/resources/material/Material.h>
 
+#include <serenity/system/EngineIncludes.h>
 #include <serenity/resources/Engine_Resources.h>
 
 

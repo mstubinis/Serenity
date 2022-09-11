@@ -20,7 +20,7 @@ namespace Engine::priv {
                 m_Tangents.reserve(capacity);
             }
             void internal_build_vertices(const aiMesh& aimesh) {
-                for (auto j = 0U; j < aimesh.mNumVertices; ++j) {
+                for (unsigned int j = 0; j < aimesh.mNumVertices; ++j) {
                     //pos
                     auto& pos = aimesh.mVertices[j];
                     m_Points.emplace_back(pos.x, pos.y, pos.z);
@@ -31,7 +31,7 @@ namespace Engine::priv {
                         //if(uv.y <= 0.0001f){ uv.y = 0.001f; }
                         //if(uv.y >= 0.9999f){ uv.y = 0.999f; }
                         m_UVs.emplace_back(uv.x, uv.y);
-                    }else{
+                    } else {
                         m_UVs.emplace_back(0.0f, 0.0f);
                     }
                     if (aimesh.mNormals) {
@@ -83,18 +83,23 @@ namespace Engine::priv {
                 internal_build_vertices(aimesh);
                 internal_build_indices(aimesh);
             }
-            void addBone(uint32_t vertexID, uint32_t boneIndex, float boneWeight) {
-                m_Bones[vertexID].AddBoneData(boneIndex, boneWeight);
+            bool addBone(uint32_t vertexID, uint32_t boneIndex, float boneWeight) {
+                return m_Bones[vertexID].AddBoneData(boneIndex, boneWeight);
             }
             void triangulateIndices(const std::vector<std::vector<uint32_t>>& indices, uint8_t flags) {
-                for (size_t i = 0; i < indices[0].size(); ++i) {
-                    if ((flags & MeshLoadingFlags::Points) && m_FilePoints.size() > 0) {
+                const size_t n = indices[0].size();
+                if ((flags & MeshLoadingFlags::Points) && !m_FilePoints.empty()) {
+                    for (size_t i = 0; i != n; ++i) {
                         m_Points.emplace_back(m_FilePoints[indices[0][i] - 1]);
                     }
-                    if ((flags & MeshLoadingFlags::UVs) && m_FileUVs.size() > 0) {
+                }
+                if ((flags & MeshLoadingFlags::UVs) && !m_FileUVs.empty()) {
+                    for (size_t i = 0; i != n; ++i) {
                         m_UVs.emplace_back(m_FileUVs[indices[1][i] - 1]);
                     }
-                    if ((flags & MeshLoadingFlags::Normals) && m_FileNormals.size() > 0) {
+                }
+                if ((flags & MeshLoadingFlags::Normals) && !m_FileNormals.empty()) {
+                    for (size_t i = 0; i != n; ++i) {
                         m_Normals.emplace_back(m_FileNormals[indices[2][i] - 1]);
                     }
                 }

@@ -75,8 +75,8 @@ namespace {
                     if (logLength > 0) {
                         std::vector<char> infoErrors(logLength);
                         glGetShaderInfoLog(GLShaderID, GLsizei(infoErrors.size()), NULL, infoErrors.data());
-                        ENGINE_PRODUCTION_LOG("Shader Log (" + ((shader.isFromFile() && !shader.getFilename().empty()) ? shader.getFilename() : shader.name()) + "): ");
-                        ENGINE_PRODUCTION_LOG(infoErrors.data());
+                        ENGINE_LOG("Shader Log (" + ((shader.isFromFile() && !shader.getFilename().empty()) ? shader.getFilename() : shader.name()) + "): ");
+                        ENGINE_LOG(infoErrors.data());
                     }
                 #endif
                 glDeleteShader(GLShaderID);
@@ -142,8 +142,8 @@ namespace {
                 if (logLength > 0) {
                     std::vector<char> programErrors(logLength);
                     glGetProgramInfoLog(shaderProgramID, GLsizei(programErrors.size()), NULL, programErrors.data());
-                    ENGINE_PRODUCTION_LOG("ShaderProgram Log: ");
-                    ENGINE_PRODUCTION_LOG(programErrors.data());
+                    ENGINE_LOG("ShaderProgram Log: ");
+                    ENGINE_LOG(programErrors.data());
                 }
             #endif
             if (linkStatus == GL_FALSE) {

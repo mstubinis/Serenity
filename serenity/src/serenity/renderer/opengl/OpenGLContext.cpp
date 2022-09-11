@@ -28,8 +28,6 @@ namespace {
 	PFNWGLSWAPINTERVALEXTPROC         wglSwapIntervalEXT = nullptr;
 
 	std::string win32_get_last_error() {
-		LPVOID lpMsgBuf;
-		LPVOID lpDisplayBuf;
 		DWORD errorMessageID = GetLastError();
 		std::string message;
 		if (errorMessageID != 0) {
@@ -44,7 +42,7 @@ namespace {
 	auto get_extension(auto*& ptr, std::string&& extName) {
 		ptr = reinterpret_cast<std::remove_reference_t<decltype(ptr)>>(wglGetProcAddress(extName.c_str()));
 		if (ptr == nullptr) {
-			ENGINE_PRODUCTION_LOG("wglGetProcAddress(" + extName + ") - failed.");
+			ENGINE_LOG("wglGetProcAddress(" + extName + ") - failed.");
 			return false;
 		}
 		return ptr != nullptr;
@@ -68,7 +66,7 @@ namespace {
 		wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wcex.lpszClassName = L"Core";
 		if (!RegisterClassEx(&wcex)) {
-			ENGINE_PRODUCTION_LOG("CreateWindow() - failed.");
+			ENGINE_LOG("CreateWindow() - failed.");
 			return false;
 		}
 		return true;
@@ -76,12 +74,12 @@ namespace {
 	bool create_fake_window_and_device_context(HWND& fakeWindow, HDC& fakeDeviceContext) {
 		fakeWindow = CreateWindowEx(0, L"Core", L"FakeWindow", WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 0, 0, 1, 1, NULL, NULL, GetModuleHandle(nullptr), NULL);
 		if (!fakeWindow) {
-			ENGINE_PRODUCTION_LOG("CreateWindowEx() - failed.");
+			ENGINE_LOG("CreateWindowEx() - failed.");
 			return false;
 		}
 		fakeDeviceContext = GetDC(fakeWindow);
 		if (!fakeDeviceContext) {
-			ENGINE_PRODUCTION_LOG("GetDC(fakeWindow) - failed.");
+			ENGINE_LOG("GetDC(fakeWindow) - failed.");
 			return false;
 		}
 		return true;
@@ -101,11 +99,11 @@ namespace {
 
 		int fakePFDID = ChoosePixelFormat(fakeDeviceContext, &fakePFD);
 		if (fakePFDID == 0) {
-			ENGINE_PRODUCTION_LOG("ChoosePixelFormat(fakeDeviceContext, &fakePFD) - failed.");
+			ENGINE_LOG("ChoosePixelFormat(fakeDeviceContext, &fakePFD) - failed.");
 			return false;
 		}
 		if (SetPixelFormat(fakeDeviceContext, fakePFDID, &fakePFD) == false) {
-			ENGINE_PRODUCTION_LOG("SetPixelFormat(fakeDeviceContext, fakePFDID, &fakePFD) - failed.");
+			ENGINE_LOG("SetPixelFormat(fakeDeviceContext, fakePFDID, &fakePFD) - failed.");
 			return false;
 		}
 		return true;
@@ -113,11 +111,11 @@ namespace {
 	bool create_and_make_current_fake_rendering_context(HDC fakeDeviceContext, HGLRC& fakeRenderingContext) {
 		fakeRenderingContext = wglCreateContext(fakeDeviceContext);
 		if (fakeRenderingContext == 0) {
-			ENGINE_PRODUCTION_LOG("wglCreateContext(fakeDeviceContext) - failed.");
+			ENGINE_LOG("wglCreateContext(fakeDeviceContext) - failed.");
 			return false;
 		}
 		if (wglMakeCurrent(fakeDeviceContext, fakeRenderingContext) == false) {
-			ENGINE_PRODUCTION_LOG("wglMakeCurrent(fakeDeviceContext, fakeRenderingContext) - failed.");
+			ENGINE_LOG("wglMakeCurrent(fakeDeviceContext, fakeRenderingContext) - failed.");
 			return false;
 		}
 		return true;
@@ -149,10 +147,10 @@ namespace {
 		};
 
 		UINT numFormats = 0;
-		bool status = wglChoosePixelFormatARB(deviceContext, pixelAttribs, nullptr, pixelFormatIDs.size(), pixelFormatIDs.data(), &numFormats);
+		bool status = wglChoosePixelFormatARB(deviceContext, pixelAttribs, nullptr, UINT(pixelFormatIDs.size()), pixelFormatIDs.data(), &numFormats);
 
 		if (status == false || numFormats == 0) {
-			ENGINE_PRODUCTION_LOG("wglChoosePixelFormatARB(deviceContext, pixelAttribs, NULL, 1, &pixelFormatID, &numFormats) - failed.");
+			ENGINE_LOG("wglChoosePixelFormatARB(deviceContext, pixelAttribs, NULL, 1, &pixelFormatID, &numFormats) - failed.");
 			return false;
 		}
 		return true;
@@ -207,7 +205,7 @@ namespace {
 			}
 		}
 		if (renderingContext == NULL) {
-			ENGINE_PRODUCTION_LOG("wglCreateContextAttribsARB(deviceContext, 0, contextAttribs.data()) - failed.");
+			ENGINE_LOG("wglCreateContextAttribsARB(deviceContext, 0, contextAttribs.data()) - failed.");
 			return false;
 		}
 		return true;
@@ -236,7 +234,7 @@ namespace Engine::priv {
 			const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
 			output += std::to_string(i) + ": " + extension + '\n';
 		}
-		ENGINE_PRODUCTION_LOG(output)
+		ENGINE_LOG(output)
 	}
 
 
@@ -289,7 +287,7 @@ namespace Engine::priv {
 		delete_fake_window_and_context(fakeRenderingContext, fakeDeviceContext, fakeWindow);
 
 		if (!wglMakeCurrent(m_i->m_DeviceContext, m_i->m_RenderContext)) {
-			ENGINE_PRODUCTION_LOG("wglMakeCurrent() - failed.");
+			ENGINE_LOG("wglMakeCurrent() - failed.");
 			return false;
 		}
 
@@ -323,10 +321,10 @@ namespace Engine::priv {
 #if !defined(ENGINE_PRODUCTION) && defined(ENGINE_PRINT_OPENGL_EXTENSIONS)
 		printAllAvailableExtensions();
 		for (size_t i = 0; i < OPENGL_EXTENSIONS.size(); ++i) {
-			ENGINE_PRODUCTION_LOG(OPENGL_EXTENSIONS[i])
+			ENGINE_LOG(OPENGL_EXTENSIONS[i])
 		}
 #endif
-		ENGINE_PRODUCTION_LOG("OpenGL Context created - " + std::string{ reinterpret_cast<const char*>(glGetString(GL_VERSION)) });
+		ENGINE_LOG("OpenGL Context created - " + std::string{ reinterpret_cast<const char*>(glGetString(GL_VERSION)) });
 		return true;
 	}
 	void OpenGLContext::destroy(Window& window) {
@@ -395,7 +393,7 @@ namespace Engine::priv {
 		int num_fbc = 0;
 		m_i->m_GLXFBConfig = glXChooseFBConfig(m_i->m_Display, DefaultScreen(m_i->m_Display), visual_attribs, &num_fbc);
 		if (!m_i->m_GLXFBConfig) {
-			ENGINE_PRODUCTION_LOG("glXChooseFBConfig() failed");
+			ENGINE_LOG("glXChooseFBConfig() failed");
 			return false;
 		}
 
@@ -408,7 +406,7 @@ namespace Engine::priv {
 		/* Create modern OpenGL context */
 		m_i->m_GLXContext = glXCreateContextAttribsARB(m_i->m_Display, m_i->m_GLXFBConfig[0], NULL, true, context_attribs);
 		if (!m_i->m_GLXContext) {
-			ENGINE_PRODUCTION_LOG("Failed to create OpenGL context");
+			ENGINE_LOG("Failed to create OpenGL context");
 			return false;
 		}
 		XMapWindow(m_i->m_Display, window.getSystemHandle()); //TODO: is this line needed?
@@ -449,11 +447,11 @@ namespace Engine::priv {
 		} else if (glXSwapIntervalSGI) {
 			result = glXSwapIntervalSGI(enabled ? 1 : 0);
 		} else {
-			ENGINE_PRODUCTION_LOG("Setting vertical sync not supported");
+			ENGINE_LOG("Setting vertical sync not supported");
 			return false;
 		}
 		if (result != 0) {
-			ENGINE_PRODUCTION_LOG("Setting vertical sync failed");
+			ENGINE_LOG("Setting vertical sync failed");
 			return false;
 		}
 		return true;

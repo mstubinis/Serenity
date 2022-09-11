@@ -3,11 +3,11 @@
 namespace {
     std::string toStringWithLeadingZeros(uint32_t val, uint8_t numDigits) {
         std::string result(numDigits--, '0');
-        for (uint32_t v = val; numDigits >= 0 && v != 0; --numDigits, v /= 10)
+        for (uint32_t v = val; numDigits >= 0 && v != 0; --numDigits, v /= 10) {
             result[numDigits] = '0' + v % 10;
+        }
         return result;
     }
-    std::string m_ToStringBuffer;
 }
 
 
@@ -64,19 +64,25 @@ std::string Timer::toString() const {
     calculate_time(secondsTemp, static_cast<uint32_t>(SecondsValues::Min), mins);
     //secondsTemp will now be in seconds
 
-    m_ToStringBuffer.clear();
-    if (weeks > 0)
-        m_ToStringBuffer += std::to_string(weeks) + ":";
-    if (days > 0 || weeks > 0)
-        m_ToStringBuffer += std::to_string(days) + ":"; //only post a zero if weeks was > 0
-    if (hours > 0 || days > 0)
-        m_ToStringBuffer += toStringWithLeadingZeros(hours, 2) + ":"; //should always be two digits, use leading zeros
-    if (mins > 0 || hours > 0)
-        m_ToStringBuffer += toStringWithLeadingZeros(mins, 2) + ":"; //should always be two digits, use leading zeros
-    if (secondsTemp > 0 || mins > 0)
-        m_ToStringBuffer += toStringWithLeadingZeros(secondsTemp, 2) + ":"; //should always be two digits, use leading zeros
-    if (m_ToStringBuffer.size() > 0 && m_ToStringBuffer.back() == ':') {
-        m_ToStringBuffer.pop_back();
+    std::string res;
+    res.reserve(8);
+    if (weeks > 0) {
+        res += std::to_string(weeks) + ":";
     }
-    return m_ToStringBuffer;
+    if (days > 0 || weeks > 0) {
+        res += std::to_string(days) + ":"; //only post a zero if weeks was > 0
+    }
+    if (hours > 0 || days > 0) {
+        res += toStringWithLeadingZeros(hours, 2) + ":"; //should always be two digits, use leading zeros
+    }
+    if (mins > 0 || hours > 0) {
+        res += toStringWithLeadingZeros(mins, 2) + ":"; //should always be two digits, use leading zeros
+    }
+    if (secondsTemp > 0 || mins > 0) {
+        res += toStringWithLeadingZeros(secondsTemp, 2) + ":"; //should always be two digits, use leading zeros
+    }
+    if (res.size() > 0 && res.back() == ':') {
+        res.pop_back();
+    }
+    return res;
 }
